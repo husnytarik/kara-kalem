@@ -10,6 +10,7 @@ import {
   krediInfo, hisseDegeri, kabulAhit, socialDay, socialMonth, S0,
 } from './social.js';
 import { stressFor, blocked } from './traits.js';
+import { PLACES, W, WALK, snapRow, route, pathLen, advanceAlong } from './world.js';
 
 export const C = {
   MIN_PER_SEC: 3,          // ×1 hızda: 1 gerçek saniye = 3 oyun dakikası (1 oyun saati = 20 sn)
@@ -40,39 +41,17 @@ const ch = (ad, rol, yas, mods, x = {}) => ({
 });
 
 // ---------- konum: karakter haritada yürür ----------
-// Tek sokak: her bina kapısıyla sokağa açılır. Yol = (dikey) sokağa in, yatay yürü, (dikey) kapıya çık.
-export const ROAD_Y = 205, WALK = 10; // WALK: oyun dakikası başına harita birimi
-export const PLACES = {
-  meyhane: { ad: 'Meyhane', x: 255, y: 170 }, tefeci: { ad: 'Tefeci Şakir', x: 80, y: 170 },
-  ev: { ad: 'Ev', x: 445, y: 170 }, karakol: { ad: 'Karakol', x: 625, y: 170 },
-  camasir: { ad: 'Çamaşırhane', x: 80, y: 240 }, liman: { ad: 'Liman A.Ş.', x: 255, y: 240 },
-  rakip: { ad: "Kâzım'ın Yeri", x: 455, y: 240 }, karaca: { ad: 'Karaca Ailesi', x: 635, y: 240 },
-};
+// Şehir yerleşimi ve yol bulma world.js'te. Burada: durum, hareket ve "orada mısın?" kuralı.
+export { PLACES, ROWS, V, W, H, WALK } from './world.js';
 // Bu işler için orada bulunmak gerekir (s.mesafe açıksa; arayüz açar, bot testleri açmaz).
 export const GATE = { bribe: 'karakol', kredi: 'liman', hisse: 'liman', hisseSat: 'liman', ahitIste: 'karaca', ahitBoz: 'karaca', payDebt: 'tefeci', buildDist: 'meyhane', upgradeHidden: 'meyhane', rest: 'ev' };
 
-function pathTo(from, to) {
-  const p = [];
-  if (Math.abs(from.y - ROAD_Y) > 0.5 && Math.abs(from.x - to.x) > 0.5) p.push({ x: from.x, y: ROAD_Y });
-  if (Math.abs(from.x - to.x) > 0.5) p.push({ x: to.x, y: ROAD_Y });
-  if (Math.abs(to.y - (p.length ? p[p.length - 1].y : from.y)) > 0.5 || !p.length) p.push({ x: to.x, y: to.y });
-  return p.filter((q, i) => Math.hypot(q.x - (i ? p[i - 1].x : from.x), q.y - (i ? p[i - 1].y : from.y)) > 0.01);
-}
-// pos'tan başlayıp yol boyunca dist birim ilerle; yeni konumu ve kalan yolu döndür (durumu değiştirmez)
-function advanceAlong(pos, path, dist) {
-  let x = pos.x, y = pos.y, left = dist, i = 0;
-  while (left > 0 && i < path.length) {
-    const n = path[i], d = Math.hypot(n.x - x, n.y - y);
-    if (d <= left) { x = n.x; y = n.y; left -= d; i++; } else { x += (n.x - x) / d * left; y += (n.y - y) / d * left; left = 0; }
-  }
-  return { x, y, rest: path.slice(i) };
-}
 export function here(s) {
   if (s.walk) return null;
   for (const [id, p] of Object.entries(PLACES)) if (Math.hypot(p.x - s.pos.x, p.y - s.pos.y) < 6) return id;
   return null;
 }
-export const walkMinutes = (s, id) => Math.ceil(pathTo(s.pos, PLACES[id]).reduce((a, q, i, l) => a + Math.hypot(q.x - (i ? l[i - 1].x : s.pos.x), q.y - (i ? l[i - 1].y : s.pos.y)), 0) / WALK);
+export const walkMinutes = (s, id) => Math.ceil(pathLen(s.pos, route(s.pos, PLACES[id])) / WALK);
 // Arayüz için akıcı konum: bir dakikanın kesri kadar ileri
 export function walkerAt(s, frac = 0) {
   if (!s.walk) return { x: s.pos.x, y: s.pos.y, path: [] };
@@ -82,12 +61,27 @@ export function walkerAt(s, frac = 0) {
 function walkStep(s) {
   const r = advanceAlong(s.pos, s.walk.path, WALK);
   s.pos.x = r.x; s.pos.y = r.y; s.walk.path = r.rest;
+  if (r.last) s.walk.prev = { x: r.last.x, y: r.last.y };
   if (!r.rest.length) s.walk = null;
+}
+// Yürüyüşü yeni hedefe çevir: yolun ortasında ise önceki ya da sonraki düğümden dönmek, hangisi kısaysa.
+function startWalk(s, dest, to) {
+  if (!s.walk) {
+    const path = route(s.pos, dest);
+    s.walk = path.length ? { to, path, prev: { x: s.pos.x, y: s.pos.y } } : null;
+    return;
+  }
+  const next = s.walk.path[0], prev = s.walk.prev || null;
+  const via = (n, other) => { const p = [{ x: n.x, y: n.y }, ...route(n, dest)]; return { p, c: pathLen(s.pos, p), prev: other }; };
+  const a = via(next, prev || { x: s.pos.x, y: s.pos.y });
+  const b = prev ? via(prev, next) : null;
+  const best = b && b.c < a.c ? b : a;
+  s.walk = { to, path: best.p, prev: best.prev };
 }
 
 export function newGame(seed = (Date.now() & 0x7fffffff)) {
   const s = {
-    v: 3, seed, t: 6 * 60, speed: 0, mesafe: false, pos: { x: PLACES.meyhane.x, y: PLACES.meyhane.y }, walk: null,
+    v: 4, seed, t: 6 * 60, speed: 0, mesafe: false, pos: { x: PLACES.meyhane.x, y: PLACES.meyhane.y }, walk: null,
     cash: { clean: 1500, dirty: 0 },
     debt: { principal: 6000, installment: 600, missed: 0 },
     patron: { ad: 'Sen', yas: 34, traits: ['Temkinli', 'Cömert', 'Merhametli'], stres: 10 },
@@ -529,11 +523,11 @@ export function act(s, a) {
   if (s.mesafe && GATE[a.type] && here(s) !== GATE[a.type]) return fail(`Bunun için ${PLACES[GATE[a.type]].ad} yerinde olmalısın.`);
   switch (a.type) {
     case 'goto': {
-      const to = a.b ? PLACES[a.b] : { x: Math.max(10, Math.min(710, +a.x)), y: ROAD_Y };
-      if (!to || !Number.isFinite(to.x)) return fail('Gidilemez.');
-      const path = pathTo(s.walk ? walkerAt(s, 0) : s.pos, to);
-      if (s.walk) { s.pos = { x: s.pos.x, y: s.pos.y }; }
-      s.walk = path.length ? { to: a.b || null, path } : null;
+      const pl = a.b ? PLACES[a.b] : null;
+      if (a.b && !pl) return fail('Gidilemez.');
+      const dest = pl ? { x: pl.x, y: pl.y } : { x: Math.max(12, Math.min(W - 12, +a.x)), y: snapRow(Number.isFinite(+a.y) ? +a.y : s.pos.y) };
+      if (!Number.isFinite(dest.x) || !Number.isFinite(dest.y)) return fail('Gidilemez.');
+      startWalk(s, dest, a.b || null);
       return OK;
     }
     case 'choose': return choose(s, a.card, a.opt);

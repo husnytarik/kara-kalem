@@ -30,7 +30,10 @@ small, .dim { color: var(--dim); }
 
 main { flex: 1; display: flex; min-height: 0; }
 #left { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-#mapwrap { flex: 1; min-height: 0; background: #0e0c09; }
+#mapwrap { flex: 1; min-height: 0; background: #0e0c09; position: relative; }
+#maphud { position: absolute; left: 10px; top: 8px; right: 10px; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none; }
+#maphud button { pointer-events: auto; background: #201a14dd; }
+#hudmsg { color: var(--red); font: 16px Georgia, serif; text-shadow: 0 0 4px #000; }
 #map { width: 100%; height: 100%; display: block; }
 #log { height: 130px; flex: none; overflow-y: auto; border-top: 1px solid var(--line); background: var(--panel); padding: 6px 12px; font-size: 13px; }
 .lg { padding: 2px 0; border-bottom: 1px dotted #2e261d; }
@@ -95,7 +98,7 @@ select { font: inherit; color: var(--ink); background: #14100c; border: 1px soli
 
 /* v0.3: karakter */
 .me text { font: bold 13px Georgia, serif; fill: #ffe9a8; text-anchor: middle; paint-order: stroke; stroke: #000c; stroke-width: 3px; }
-#map { cursor: crosshair; } #map .bld { cursor: pointer; }
+#map { cursor: grab; user-select: none; } #map .bld { cursor: pointer; }
 
 /* telefon / dar ekran: harita üstte, panel altta, sayfa kayar */
 @media (max-width: 760px) {
@@ -117,3 +120,5 @@ select { font: inherit; color: var(--ink); background: #14100c; border: 1px soli
   #toast { bottom: 20px; width: 90vw; text-align: center; }
   .card { padding: 16px 18px; }
 }
+.bld.gen text { font-size: 14px; } .bld.gen text.sub { font-size: 11px; }
+.bld.gen rect.body { opacity: .92; }

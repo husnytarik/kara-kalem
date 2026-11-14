@@ -1,7 +1,7 @@
 // Tarayıcı arayüzü. Oyun kuralı içermez: durumu okur, act() ile eylem yollar, advance() ile zamanı ilerletir.
 import {
   C, newGame, advance, act, cardView, canHire, marketShare, attention, attentionLines, secrecy,
-  dailyIz, detectP, stageName, launderInfo, estimateBribe, PLACES, ROAD_Y, GATE, here, walkerAt, walkMinutes,
+  dailyIz, detectP, stageName, launderInfo, estimateBribe, PLACES, ROWS, V, W, H, GATE, here, walkerAt, walkMinutes,
 } from '../core/sim.js';
 import { dateOf, fmtTime, fmtDate, money, opinion, SEASONS, DAY, clamp, staff, informed } from '../core/util.js';
 import {
@@ -9,8 +9,9 @@ import {
   tazminatP, krediInfo, hisseDegeri,
 } from '../core/social.js';
 import { TRAITS, blocked } from '../core/traits.js';
+import { ROAD_HALF } from '../core/world.js';
 
-const SAVE_KEY = 'kara_kalem_v03';
+const SAVE_KEY = 'kara_kalem_v04';
 const $ = (id) => document.getElementById(id);
 const SVGNS = 'http://www.w3.org/2000/svg';
 
@@ -26,7 +27,7 @@ function load() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const st = JSON.parse(raw);
-    if (st.v !== 3) return null;
+    if (st.v !== 4) return null;
     st.speed = 0; st.mesafe = true;
     return st;
   } catch { return null; }
@@ -74,19 +75,7 @@ function renderTop() {
 }
 
 // ---------- harita ----------
-const B = {
-  tefeci: { x: 20, y: 76, w: 120, h: 94, fill: '#4a3d2e', name: 'Tefeci Şakir' },
-  meyhane: { x: 175, y: 70, w: 160, h: 100, fill: '#7a4a2a', name: 'Meyhanen' },
-  ev: { x: 385, y: 76, w: 120, h: 94, fill: '#5a5040', name: 'Evin' },
-  karakol: { x: 565, y: 76, w: 120, h: 94, fill: '#3c4a5c', name: 'Karakol' },
-  camasir: { x: 20, y: 240, w: 120, h: 90, fill: '#4f5a55', name: 'Çamaşırhane' },
-  liman: { x: 175, y: 240, w: 160, h: 90, fill: '#2f4a58', name: 'Liman A.Ş.' },
-  rakip: { x: 395, y: 240, w: 120, h: 90, fill: '#5d4038', name: "Kâzım'ın Yeri" },
-  karaca: { x: 575, y: 240, w: 120, h: 90, fill: '#4a2f3a', name: 'Karaca Ailesi' },
-};
-const MAP_W = 720, MAP_H = 440;
-const PATROL = [[10, ROAD_Y - 8], [MAP_W - 10, ROAD_Y - 8]]; // gidip gelir
-const ROAD_TOP = 172, ROAD_BOT = 238;
+const PATROL = [[20, ROWS[0]], [V[4], ROWS[0]], [V[4], ROWS[1]], [20, ROWS[1]], [20, ROWS[2]], [V[4], ROWS[2]], [V[4], ROWS[1]], [20, ROWS[1]]];
 
 function el(tag, attrs = {}, parent) {
   const e = document.createElementNS(SVGNS, tag);
@@ -94,52 +83,99 @@ function el(tag, attrs = {}, parent) {
   if (parent) parent.appendChild(e);
   return e;
 }
+const setText = (e, t) => { if (e._t !== t) { e._t = t; e.textContent = t; } };
+const setFill = (e, f) => { if (e._f !== f) { e._f = f; e.setAttribute('fill', f); } };
+
+// kamera: dünya koordinatında merkez + görünür genişlik
+const cam = { x: PLACES.meyhane.x, y: PLACES.meyhane.y, vw: 760, follow: true };
+let camKey = '';
+function applyCam() {
+  const svg = $('map');
+  const cw = svg.clientWidth || 880, ch = svg.clientHeight || 600;
+  cam.vw = clamp(cam.vw, 320, 1500);
+  const vh = cam.vw * ch / cw;
+  const lim = (v, half, size) => (2 * half >= size ? size / 2 : clamp(v, half - 60, size - half + 60));
+  cam.x = lim(cam.x, cam.vw / 2, W); cam.y = lim(cam.y, vh / 2, H);
+  const key = `${(cam.x - cam.vw / 2).toFixed(1)} ${(cam.y - vh / 2).toFixed(1)} ${cam.vw.toFixed(1)} ${vh.toFixed(1)}`;
+  if (key !== camKey) { camKey = key; svg.setAttribute('viewBox', key); }
+}
 
 const M = {};
 function buildMap() {
   const svg = $('map');
   svg.innerHTML = '';
-  el('rect', { width: MAP_W, height: MAP_H, fill: '#3b3528' }, svg);
-  el('rect', { y: 372, width: MAP_W, height: MAP_H - 372, fill: '#1f3a4a' }, svg); // liman suyu
-  el('rect', { x: 232, y: 330, width: 46, height: 52, fill: '#5b4a35' }, svg); // iskele
-  el('rect', { y: ROAD_TOP, width: MAP_W, height: ROAD_BOT - ROAD_TOP, fill: '#57503f' }, svg); // tek ana sokak
-  el('line', { x1: 0, y1: ROAD_Y, x2: MAP_W, y2: ROAD_Y, stroke: '#6d6552', 'stroke-width': 2, 'stroke-dasharray': '14 12' }, svg);
-  M.haze = el('circle', { cx: 255, cy: 120, r: 0, fill: '#c9a24b', opacity: 0.12 }, svg);
+  el('rect', { width: W, height: H, fill: '#3b3528' }, svg);
+  el('rect', { y: 868, width: W, height: H - 868, fill: '#1f3a4a' }, svg); // liman suyu
+  for (const r of ROWS) {
+    el('rect', { y: r - ROAD_HALF, width: W, height: ROAD_HALF * 2, fill: '#57503f' }, svg);
+    el('line', { x1: 0, y1: r, x2: W, y2: r, stroke: '#6d6552', 'stroke-width': 2, 'stroke-dasharray': '14 12' }, svg);
+  }
+  for (const v of V) el('rect', { x: v - 10, y: ROWS[0], width: 20, height: ROWS[2] - ROWS[0], fill: '#57503f' }, svg);
+  M.haze = el('circle', { cx: PLACES.meyhane.bx + 70, cy: PLACES.meyhane.by + 45, r: 0, fill: '#c9a24b', opacity: 0.12 }, svg);
   M.b = {};
-  for (const [id, b] of Object.entries(B)) {
-    const g = el('g', { class: 'bld', 'data-b': id }, svg);
-    el('rect', { class: 'body', x: b.x, y: b.y, width: b.w, height: b.h, fill: b.fill, rx: 3 }, g);
-    el('rect', { x: b.x, y: b.y, width: b.w, height: 10, fill: '#0003' }, g);
+  for (const [id, b] of Object.entries(PLACES)) {
+    if (b.row === 2 && b.side === 1) el('rect', { x: b.x - 14, y: b.by + b.bh, width: 28, height: 868 - (b.by + b.bh) + 8, fill: '#5b4a35' }, svg); // iskele
+    const g = el('g', { class: `bld${b.fn ? '' : ' gen'}`, 'data-b': id }, svg);
+    el('rect', { class: 'body', x: b.bx, y: b.by, width: b.bw, height: b.bh, fill: b.fill, rx: 3 }, g);
+    el('rect', { x: b.bx, y: b.by, width: b.bw, height: 10, fill: '#0003' }, g);
     const wins = [];
-    for (let i = 0; i < Math.floor(b.w / 34); i++) wins.push(el('rect', { x: b.x + 14 + i * 34, y: b.y + 22, width: 14, height: 14, fill: '#1c1812' }, g));
-    const dr = PLACES[id], top = dr.y > ROAD_Y ? 0 : 1;
-    el('rect', { x: dr.x - 9, y: top ? b.y + b.h - 7 : b.y, width: 18, height: 7, fill: '#cfa84f', opacity: 0.85 }, g); // kapı
-    const t = el('text', { x: b.x + b.w / 2, y: b.y + b.h / 2 + 8 }, g); t.textContent = b.name;
-    const sub = el('text', { class: 'sub', x: b.x + b.w / 2, y: b.y + b.h / 2 + 27 }, g);
+    for (let i = 0; i < Math.floor(b.bw / 34); i++) wins.push(el('rect', { x: b.bx + 14 + i * 34, y: b.by + 22, width: 14, height: 14, fill: '#1c1812' }, g));
+    el('rect', { x: b.x - 9, y: b.side < 0 ? b.by + b.bh - 7 : b.by, width: 18, height: 7, fill: '#cfa84f', opacity: 0.85 }, g); // kapı
+    const t = el('text', { x: b.x, y: b.by + b.bh / 2 + 8 }, g); t.textContent = b.ad;
+    const sub = el('text', { class: 'sub', x: b.x, y: b.by + b.bh / 2 + 27 }, g);
     M.b[id] = { g, wins, sub };
   }
+  const my = PLACES.meyhane;
   M.cellar = el('g', {}, svg);
-  el('rect', { x: 288, y: 174, width: 30, height: 9, fill: '#1a120b', stroke: '#c9a24b', 'stroke-width': 1 }, M.cellar); // bodrum kapağı
+  el('rect', { x: my.x + 24, y: my.y + 3, width: 30, height: 9, fill: '#1a120b', stroke: '#c9a24b', 'stroke-width': 1 }, M.cellar); // bodrum kapağı
   M.smoke = [0, 1, 2].map(() => el('circle', { r: 4, fill: '#bbb', opacity: 0 }, svg));
-  M.dots = Array.from({ length: 14 }, () => el('circle', { r: 3.5, fill: '#e9dec9', opacity: 0, 'pointer-events': 'none' }, svg));
-  M.route = el('polyline', { fill: 'none', stroke: '#cfa84f', 'stroke-width': 2, 'stroke-dasharray': '5 5', opacity: 0.8, 'pointer-events': 'none' }, svg);
-  M.night = el('rect', { width: MAP_W, height: MAP_H, fill: '#070b20', opacity: 0, 'pointer-events': 'none' }, svg);
-  M.glow = el('g', { 'pointer-events': 'none' }, svg);
+  M.dots = Array.from({ length: 16 }, () => el('circle', { r: 3.5, fill: '#e9dec9', opacity: 0, 'pointer-events': 'none' }, svg));
+  M.route = el('polyline', { fill: 'none', stroke: '#cfa84f', 'stroke-width': 2.5, 'stroke-dasharray': '6 6', opacity: 0.85, 'pointer-events': 'none' }, svg);
+  M.night = el('rect', { width: W, height: H, fill: '#070b20', opacity: 0, 'pointer-events': 'none' }, svg);
   M.patrolLight = el('circle', { r: 16, fill: '#7da0c4', opacity: 0.18, 'pointer-events': 'none' }, svg);
   M.patrol = el('circle', { r: 6, fill: '#7da0c4', stroke: '#0b1220', 'stroke-width': 1.5, 'pointer-events': 'none' }, svg);
   M.me = el('g', { class: 'me', 'pointer-events': 'none' }, svg);
   el('circle', { r: 13, fill: '#cfa84f', opacity: 0.25 }, M.me);
   el('circle', { r: 7.5, fill: '#cfa84f', stroke: '#1a1408', 'stroke-width': 2 }, M.me);
   const lbl = el('text', { y: -14 }, M.me); lbl.textContent = 'Sen';
-  M.raid = el('text', { x: MAP_W / 2, y: 36, 'text-anchor': 'middle', fill: '#cf5c45', 'font-size': 18, 'font-family': 'Georgia, serif', 'pointer-events': 'none' }, svg);
+
+  // tıklama: bina → panel + yürü; sokak → yürü. Sürükleme tıklama sayılmaz.
+  const drag = { on: false, moved: false, x: 0, y: 0 };
   svg.addEventListener('click', (e) => {
+    if (drag.moved) { drag.moved = false; return; }
     const g = e.target.closest && e.target.closest('.bld');
     if (g) { ui.sel = g.dataset.b; ui.tab = 'mekan'; goTo({ b: g.dataset.b }); return; }
-    if (!svg.getScreenCTM) return;
+    if (!svg.getScreenCTM || !svg.createSVGPoint) return;
     const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
     const p = pt.matrixTransform(svg.getScreenCTM().inverse());
-    if (p.y >= ROAD_TOP - 6 && p.y <= ROAD_BOT + 6) goTo({ x: p.x });
+    if (ROWS.some((r) => Math.abs(p.y - r) <= ROAD_HALF + 4) || V.some((v) => Math.abs(p.x - v) <= 14)) goTo({ x: p.x, y: p.y });
   });
+  const pan = (dx, dy) => { const k = cam.vw / (svg.clientWidth || 880); cam.x -= dx * k; cam.y -= dy * k; cam.follow = false; };
+  svg.addEventListener('mousedown', (e) => { drag.on = true; drag.moved = false; drag.x = e.clientX; drag.y = e.clientY; });
+  document.addEventListener('mousemove', (e) => {
+    if (!drag.on) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+    drag.moved = true; drag.x = e.clientX; drag.y = e.clientY; pan(dx, dy);
+  });
+  document.addEventListener('mouseup', () => { drag.on = false; });
+  svg.addEventListener('wheel', (e) => { e.preventDefault(); cam.vw *= e.deltaY > 0 ? 1.12 : 1 / 1.12; }, { passive: false });
+  // dokunmatik: tek parmak sürükle, iki parmak yakınlaştır
+  let tp = null;
+  svg.addEventListener('touchstart', (e) => { tp = [...e.touches].map((t) => [t.clientX, t.clientY]); drag.moved = false; }, { passive: true });
+  svg.addEventListener('touchmove', (e) => {
+    const cur = [...e.touches].map((t) => [t.clientX, t.clientY]);
+    if (tp && cur.length === 1 && tp.length === 1) {
+      const dx = cur[0][0] - tp[0][0], dy = cur[0][1] - tp[0][1];
+      if (drag.moved || Math.hypot(dx, dy) > 8) { drag.moved = true; pan(dx, dy); tp = cur; }
+    } else if (tp && cur.length === 2 && tp.length === 2) {
+      const d0 = Math.hypot(tp[0][0] - tp[1][0], tp[0][1] - tp[1][1]), d1 = Math.hypot(cur[0][0] - cur[1][0], cur[0][1] - cur[1][1]);
+      if (d0 > 0 && d1 > 0) { cam.vw *= d0 / d1; drag.moved = true; }
+      tp = cur;
+    } else tp = cur;
+    e.preventDefault();
+  }, { passive: false });
+  svg.addEventListener('touchend', (e) => { tp = e.touches.length ? [...e.touches].map((t) => [t.clientX, t.clientY]) : null; });
 }
 
 // Karakteri yürüt. Zaman durmuşken yürümez; oyuncuya söyle.
@@ -147,6 +183,7 @@ function goTo(a) {
   const r = act(s, { type: 'goto', ...a });
   if (!r.ok) toast(r.msg);
   else if (s.speed === 0 && s.walk) toast('Yola çıktın — yürümen için zamanı başlat (1 / 2 / 3)');
+  cam.follow = true;
   renderAll();
 }
 
@@ -170,66 +207,75 @@ function pathPoint(pts, u) {
 }
 
 const MEY_OPEN = (h) => h >= 11 || h < 1;
+const openNow = (id, h) => {
+  const p = PLACES[id];
+  if (id === 'camasir') return h >= 8 && h < 18 && !!s.biz.camasir;
+  const [a, b] = p.saat;
+  return (h >= a && h < b) || (b > 24 && h < b - 24);
+};
 function renderMap(tf) {
   const d = dateOf(s.t);
   const hf = (tf % DAY) / 60;
   // gece
   let n = 0;
   if (hf >= 21 || hf < 4.5) n = 0.6; else if (hf >= 18.5) n = 0.6 * (hf - 18.5) / 2.5; else if (hf < 7) n = 0.6 * (7 - hf) / 2.5;
-  M.night.setAttribute('opacity', n.toFixed(3));
+  M.night.setAttribute('opacity', n.toFixed(2));
   const lit = n > 0.25;
-  const open = { meyhane: MEY_OPEN(d.hour), rakip: MEY_OPEN(d.hour), karakol: true, camasir: d.hour >= 8 && d.hour < 18 && !!s.biz.camasir, tefeci: d.hour >= 9 && d.hour < 18, ev: d.hour >= 18 && d.hour < 23, liman: d.hour >= 9 && d.hour < 18, karaca: d.hour >= 17 || d.hour < 4 };
   for (const [id, m] of Object.entries(M.b)) {
     m.g.classList.toggle('sel', ui.sel === id);
-    for (const w of m.wins) w.setAttribute('fill', open[id] && lit ? '#f2c96a' : open[id] ? '#8a7a55' : '#1c1812');
+    const o = openNow(id, d.hour);
+    const f = o && lit ? '#f2c96a' : o ? '#8a7a55' : '#1c1812';
+    for (const w of m.wins) setFill(w, f);
   }
   const sh = marketShare(s);
-  M.b.meyhane.sub.textContent = MEY_OPEN(d.hour) ? `pay ${pct(sh.me)}` : 'kapalı';
-  M.b.rakip.sub.textContent = MEY_OPEN(d.hour) ? `pay ${pct(sh.rival)}` : 'kapalı';
-  M.b.camasir.sub.textContent = s.biz.camasir ? 'senin' : 'başkasının';
-  M.b.karakol.sub.textContent = `dikkat ${Math.round(attention(s))}`;
-  M.b.tefeci.sub.textContent = s.debt.principal > 0 ? money(s.debt.principal) : 'borç yok';
-  M.b.liman.sub.textContent = s.kurum.liman.hisse > 0 ? `payın %${s.kurum.liman.hisse}` : 'ortak değilsin';
-  M.b.karaca.sub.textContent = s.unvan.ahit ? 'Ahit var' : asamaAd[s.kurum.karaca.asama].toLowerCase();
+  setText(M.b.meyhane.sub, MEY_OPEN(d.hour) ? `pay ${pct(sh.me)}` : 'kapalı');
+  setText(M.b.rakip.sub, MEY_OPEN(d.hour) ? `pay ${pct(sh.rival)}` : 'kapalı');
+  setText(M.b.camasir.sub, s.biz.camasir ? 'senin' : 'başkasının');
+  setText(M.b.karakol.sub, `dikkat ${Math.round(attention(s))}`);
+  setText(M.b.tefeci.sub, s.debt.principal > 0 ? money(s.debt.principal) : 'borç yok');
+  setText(M.b.liman.sub, s.kurum.liman.hisse > 0 ? `payın %${s.kurum.liman.hisse}` : 'ortak değilsin');
+  setText(M.b.karaca.sub, s.unvan.ahit ? 'Ahit var' : asamaAd[s.kurum.karaca.asama].toLowerCase());
 
   // bodrum
-  const di = s.dist;
+  const my = PLACES.meyhane, di = s.dist;
   const hidden = s.t < di.hiddenUntil;
   M.cellar.setAttribute('opacity', di.built ? 1 : 0);
   M.haze.setAttribute('r', di.built ? Math.min(110, di.iz * 1.2) : 0);
   const prod = di.built && di.volume > 0 && !hidden && !!staff(s, 'usta');
   M.smoke.forEach((c, i) => {
     const u = ((tf / 50) + i / 3) % 1;
-    c.setAttribute('cx', 303 + Math.sin(u * 6 + i) * 5); c.setAttribute('cy', 172 - u * 34);
+    c.setAttribute('cx', my.x + 39 + Math.sin(u * 6 + i) * 5); c.setAttribute('cy', my.y - u * 34);
     c.setAttribute('opacity', prod ? (0.35 * (1 - u) * (0.3 + di.volume / 60)).toFixed(2) : 0);
   });
 
-  // müşteriler
+  // müşteriler: orta sokaktan iki yönden gelir, karşılıklı iki meyhaneye girer
   const w = MEY_OPEN(d.hour) ? (d.hour >= 18 ? 1 : d.hour === 0 ? 0.8 : 0.45) : 0;
   const count = Math.round(w * M.dots.length);
   const mine = sh.me / (sh.me + sh.rival);
   M.dots.forEach((c, i) => {
     if (i >= count) { c.setAttribute('opacity', 0); return; }
     const u = ((tf / 45) + i * 0.377) % 1;
-    const toMe = (i * 0.618) % 1 < mine;
-    const door = toMe ? PLACES.meyhane : PLACES.rakip;
-    const fromX = i % 2 ? MAP_W : 0, run = Math.abs(door.x - fromX), rise = Math.abs(door.y - ROAD_Y), dist = Math.min(1, u / 0.8) * (run + rise);
-    const x = dist <= run ? fromX + Math.sign(door.x - fromX) * dist : door.x;
-    const y = dist <= run ? ROAD_Y + (i % 2 ? 5 : -5) : (ROAD_Y + (i % 2 ? 5 : -5)) + (door.y - ROAD_Y - (i % 2 ? 5 : -5)) * ((dist - run) / rise);
-    c.setAttribute('cx', x); c.setAttribute('cy', y);
+    const door = (i * 0.618) % 1 < mine ? PLACES.meyhane : PLACES.rakip;
+    const fromX = i % 2 ? W : 0, lane = ROWS[1] + (i % 2 ? 6 : -6);
+    const run = Math.abs(door.x - fromX), rise = Math.abs(door.y - lane), dist = Math.min(1, u / 0.8) * (run + rise);
+    c.setAttribute('cx', dist <= run ? fromX + Math.sign(door.x - fromX) * dist : door.x);
+    c.setAttribute('cy', dist <= run ? lane : lane + (door.y - lane) * ((dist - run) / rise));
     c.setAttribute('opacity', u > 0.8 ? ((1 - u) / 0.2).toFixed(2) : 0.9);
   });
 
-  // devriye
   // karakter
   const frac = s.speed > 0 ? Math.max(0, Math.min(1, tf - s.t)) : 0, me = walkerAt(s, frac);
   M.me.setAttribute('transform', `translate(${me.x.toFixed(1)} ${me.y.toFixed(1)})`);
   if (me.path.length) M.route.setAttribute('points', [[me.x, me.y], ...me.path.map((q) => [q.x, q.y])].map((q) => q.join(',')).join(' ')); else M.route.removeAttribute('points');
-  const p = pathPoint(PATROL, tf / 300);
+  // devriye
+  const p = pathPoint(PATROL, tf / 1350);
   M.patrol.setAttribute('cx', p[0]); M.patrol.setAttribute('cy', p[1]);
   M.patrolLight.setAttribute('cx', p[0]); M.patrolLight.setAttribute('cy', p[1]);
   M.patrolLight.setAttribute('r', 10 + attention(s) * 0.35);
-  M.raid.textContent = hidden ? 'Mal saklı — üretim durdu' : '';
+  setText($('hudmsg'), hidden ? 'Mal saklı — üretim durdu' : '');
+  // kamera
+  if (cam.follow) { cam.x += (me.x - cam.x) * 0.12; cam.y += (me.y - cam.y) * 0.12; }
+  applyCam();
 }
 
 // ---------- paneller ----------
@@ -304,8 +350,14 @@ function panelMekanIc(d) {
       `<p class="note">Bu dünyada herkes ayda bir yaş alır. Leyla şu an ${s.chars.leyla.yas} yaşında.</p>` + personLink('leyla') + personLink('zehra') + personLink('selim');
     case 'liman': return panelLiman();
     case 'karaca': return panelKaraca();
-    default: return '';
+    default: return panelGenel(ui.sel, d);
   }
+}
+
+function panelGenel(id, d) {
+  const p = PLACES[id];
+  if (!p) return '';
+  return `<h3>${p.ad}</h3><p class="note">${p.flavor}</p>` + row('Durum', openNow(id, d.hour) ? '<span class="good">açık</span>' : '<span class="dim">kapalı</span>') + row('Çalışma saatleri', p.saat[0] === 0 && p.saat[1] === 24 ? 'gece gündüz' : `${p.saat[0]}:00 – ${p.saat[1] % 24}:00`) + `<p class="note">Mahalle dokusu: şimdilik yalnızca coğrafya ve hava. İş ve olaylar sonraki sürümde buralara gelecek.</p>`;
 }
 
 function panelLiman() {
@@ -580,6 +632,7 @@ document.addEventListener('click', (e) => {
   if (t.dataset.p) { ui.person = t.dataset.p; ui.tab = 'kisiler'; renderPanel(); $('panel').scrollTop = 0; return; }
   if (t.dataset.card) { ui.modal = +t.dataset.card; setSpeed(0); return renderModal(); }
   if (t.id === 'later') { ui.modal = null; return renderAll(); }
+  if (t.id === 'findme') { cam.follow = true; return; }
   if (t.id === 'restart' || t.id === 'newgame') {
     if (t.id === 'newgame' && !confirm('Kayıt silinip baştan başlanacak. Emin misin?')) return;
     s = fresh(); ui.modal = null; ui.person = null; ui.sel = 'meyhane'; ui.tab = 'mekan'; ui.pauseSeen = s.pauseReq; acc = 0;
