@@ -7,6 +7,7 @@ import {
 import {
   hakimOf, FAK, HARAC, HAKIM_ESIK, GARNIZON_MAX, ADAM_MAAS, HAVUZ, IS_AD, BEKLEME, erisim, hakimAd, oyuncuBolgeleri,
 } from '../core/bolge.js';
+import { EKIP_MAX, EKIP_FIYAT, EKIP_MAAS, BASKIN_MALIYET, ekipGuc, ekipDetay, pusuP, baskinTahmin } from '../core/savas.js';
 import { dateOf, fmtTime, fmtDate, money, opinion, SEASONS, DAY, clamp, staff, informed } from '../core/util.js';
 import {
   BASAMAK, CEVRE, NEDEN, S0, perceived, gucPuani, lakap, listeler, bond, tehdit, asamaAd, memnuniyet,
@@ -15,7 +16,7 @@ import {
 import { TRAITS, blocked } from '../core/traits.js';
 import { ROAD_HALF } from '../core/world.js';
 
-const SAVE_KEY = 'kara_kalem_v05';
+const SAVE_KEY = 'kara_kalem_v06';
 const $ = (id) => document.getElementById(id);
 const SVGNS = 'http://www.w3.org/2000/svg';
 
@@ -31,7 +32,7 @@ function load() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const st = JSON.parse(raw);
-    if (st.v !== 5) return null;
+    if (st.v !== 6) return null;
     st.speed = 0; st.mesafe = true;
     return st;
   } catch { return null; }
@@ -256,7 +257,7 @@ function renderMap(tf) {
       z.r.setAttribute('stroke-width', k.endsWith('S') ? 6 : 3);
     }
     setText(z.t1, `${BOLGELER[id].ad}  ${'★'.repeat(b.servet)}`);
-    setText(z.t2, hk ? (hk === 'oyuncu' ? 'Senin' : FAK[hk].ad) : 'Sahipsiz');
+    setText(z.t2, (hk ? (hk === 'oyuncu' ? 'Senin' : FAK[hk].ad) : 'Sahipsiz') + ` · tanınırlık ${Math.round(s.bolge.list[id].tan)}`);
   }
   const sh = marketShare(s);
   setText(M.b.meyhane.sub, MEY_OPEN(d.hour) ? `pay ${pct(sh.me)}` : 'kapalı');
@@ -303,7 +304,7 @@ function renderMap(tf) {
   M.patrol.setAttribute('cx', p[0]); M.patrol.setAttribute('cy', p[1]);
   M.patrolLight.setAttribute('cx', p[0]); M.patrolLight.setAttribute('cy', p[1]);
   M.patrolLight.setAttribute('r', 10 + attention(s) * 0.35);
-  setText($('hudmsg'), hidden ? 'Mal saklı — üretim durdu' : '');
+  setText($('hudmsg'), s.bolge.yarali > s.t ? 'Yaralısın — yatıyorsun' : s.bolge.kapali > s.t ? 'Mekanların kapalı — baskın yedin' : hidden ? 'Mal saklı — üretim durdu' : '');
   // kamera
   if (cam.follow) { cam.x += (me.x - cam.x) * 0.12; cam.y += (me.y - cam.y) * 0.12; }
   applyCam();
@@ -474,6 +475,15 @@ function panelBolge() {
   let h = `<h3>Bölgeler</h3><div class="note">Bir bölgenin hakimi, nüfuzu <b>%${HAKIM_ESIK}</b>'i geçen ve en yüksek olandır. Hakim haraç toplar; huzurlu bölge büyür (★), huzursuz bölge küçülür. Rakipler komşu bölgelere genişler. Sen de bir komşuna hakim olduktan sonra yanındaki bölgeye el atabilirsin. Reis olmak için 2 bölgeye hakim olman gerekir.</div>` +
     `<div class="box"><div class="row"><span>Hakim olduğun bölge</span><b>${mine.length} / ${ids.length}</b></div>` +
     row('Tahmini aylık haraç', `<span class="gold">${money(haracAy)}</span>`) + `</div>`;
+  const yar = st.yarali > s.t, kap = st.kapali > s.t;
+  h += `<div class="box"><div class="t">Ekibin</div>` +
+    row('Adam', `<b>${st.ekip}</b> / ${EKIP_MAX} <small>· ayda $${st.ekip * EKIP_MAAS}</small>`) +
+    row('Toplam güç', `<b>${ekipGuc(s).toFixed(1)}</b> <small>(${ekipDetay(s).map((x) => `${x.k} +${x.v}`).join(', ')})</small>`) +
+    (yar ? `<div class="note bad">Yaralısın: ${Math.max(1, Math.ceil((st.yarali - s.t) / DAY))} gün yatacaksın; mekanın gelirinin bir kısmı kaybolur.</div>` : '') +
+    (kap ? `<div class="note bad">Mekanların kapalı (baskın): ${Math.max(1, Math.ceil((st.kapali - s.t) / DAY))} gün daha gelir yok.</div>` : '') +
+    `<div class="btns"><button ${A({ type: 'ekipAl', d: 1 })} ${st.ekip >= EKIP_MAX ? 'disabled' : ''}>+ Adam tut <small>$${EKIP_FIYAT} kirli</small></button>` +
+    `<button ${A({ type: 'ekipAl', d: -1 })} ${st.ekip <= 0 ? 'disabled' : ''}>− Adam sal</button></div>` +
+    `<div class="note">Ekip seninle yürür. Düşman bölgede pusuya düşersen kaderini ekibin belirler; baskın için en az 2 adam gerekir. Tanınırlık: bölgede ne kadar tanınırsan o kadar kolay hedef olursun.</div></div>`;
   h += `<div class="bzlist">${ids.map((id) => {
     const hk = hakimOf(st, id), b = st.list[id];
     return `<button data-bz="${id}" class="${ui.bolge === id ? 'on' : ''}" style="border-color:${hk ? FAK[hk].renk : '#666'}">${BOLGELER[id].ad}<small>${'★'.repeat(b.servet)}</small></button>`;
@@ -487,7 +497,9 @@ function panelBolge() {
     `<div class="note">Nüfuz (çizgi: hakimlik eşiği %${HAKIM_ESIK})</div>${infBar(b)}` +
     row('Büyüme', `${Math.round(b.ilerleme)} / 100`) + meter(b.ilerleme, 100, 'green') +
     row('Huzur', `${Math.round(b.huzur)}`) + meter(b.huzur, 100, b.huzur < 30 ? 'red' : '') +
-    row('Garnizon', `${b.garnizon} adam${b.garnizon ? ` · $${b.garnizon * ADAM_MAAS}/ay` : ''}`) + `</div>`;
+    row('Garnizon', `${b.garnizon} adam${b.garnizon ? ` · $${b.garnizon * ADAM_MAAS}/ay` : ''}`) +
+    row('Tanınırlık', `${Math.round(b.tan)} / 100`) + meter(b.tan, 100, b.tan > 60 ? 'red' : '') +
+    (() => { const pp = pusuP(s, id); return pp.p > 0 ? row('Pusu riski', `<span class="${pp.p > 0.1 ? 'bad' : 'gold'}">saatte ~%${(pp.p * 100).toFixed(1)}</span> <small>(${hakimAd(pp.f)})</small>`) : ''; })() + `</div>`;
 
   if (hk === 'oyuncu') {
     h += `<div class="box"><div class="t">Haraç</div><div class="btns">${HARAC.map((t, i) => `<button class="${b.harac === i ? 'primary' : ''}" ${A({ type: 'bolgeHarac', b: id, v: i })}>${t.ad}</button>`).join('')}</div>` +
@@ -503,6 +515,15 @@ function panelBolge() {
       const kalan = (b.sonIs[kind] ?? -99) + BEKLEME[kind] - gun;
       return `<button ${A({ type: 'bolgeIs', b: id, kind })} ${kalan > 0 || extra ? 'disabled' : ''}>${ad}<small>${maliyet}${kalan > 0 ? ` · ${kalan} gün sonra` : ''}${extra ? ` · ${extra}` : ''}</small></button>`;
     };
+    if (hk && hk !== 'oyuncu') {
+      const bt = baskinTahmin(s, id), kalan = (b.sonIs.baskin ?? -99) + 4 - gun;
+      const eksik = st.ekip < 2 ? 'en az 2 adam' : kalan > 0 ? `${kalan} gün sonra` : '';
+      h += `<div class="box"><div class="t">Baskın</div>` +
+        row('Senin gücün / savunma', `<b>${bt.P.toFixed(1)}</b> / ${bt.D.toFixed(1)}`) +
+        row('Kazanma şansı', `<span class="${bt.w > 0.55 ? 'good' : 'bad'}">~%${Math.round(bt.w * 100)}</span>`) +
+        `<div class="btns"><button class="danger" ${A({ type: 'bolgeBaskin', b: id })} ${eksik ? 'disabled' : ''}>${hakimAd(hk)}'e baskın <small>$${BASKIN_MALIYET} kirli${eksik ? ` · ${eksik}` : ''}</small></button></div>` +
+        `<div class="note">Kazanırsan rakibin nüfuzu çöker, sen kazanırsın ve ganimet alırsın; ama kan akar, kayıp verebilir, vurulabilirsin ve rakip öfkelenir. Kaybedersen ekibin erir.</div></div>`;
+    }
     h += `<div class="box"><div class="t">Nüfuz kazan</div><div class="btns col">` +
       btn('himaye', IS_AD.himaye, '$120 kirli · nüfuz ↑↑, hafif suç izi') +
       btn('hediye', IS_AD.hediye, '$200 temiz · nüfuz ↑, huzur ↑') +

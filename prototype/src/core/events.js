@@ -4,6 +4,9 @@
 //   once / cooldown (gün)       system -> yalnızca simülasyon tarafından açılır
 import { DAY, dateOf, rnd, log, addMod, opinion, spend, staff, addStress, hideGoods, money, clamp } from './util.js';
 import { fame, leak, gucPuani, dostlar, addOrtak, kabulAhit } from './social.js';
+import { BOLGELER } from './world.js';
+import { hakimAd } from './bolge.js';
+import { pusuCoz, pusuBedel, ekipGuc } from './savas.js';
 
 const day = (s) => dateOf(s.t).day;
 const has = (s, trait) => s.patron.traits.includes(trait);
@@ -274,6 +277,28 @@ export const EVENTS = {
       { label: 'Dolan\'a $200 ver, baskını ertelet.', hint: 'Baskın 3 gün ertelenir. Sorun çözülmez.', can: (s) => s.cash.dirty + s.cash.clean >= 200 && !!s.raid, run: (s) => { spend(s, 200, 'dirty'); if (s.raid) s.raid.at += 3 * DAY; addMod(s, 'rifat', 'İyi ödedin', 4, 3); } },
       { label: 'Bekle.', hint: 'Bodrumda ne varsa onu bulurlar.', run: () => {} },
     ],
+  },
+
+  pusu: {
+    title: 'Pusu!', system: true, window: 1 / 24, def: 1,
+    text: (s, card) => {
+      const { b, f, n } = card.data, bd = s.bolge.list[b];
+      return `${BOLGELER[b].ad}'da ${hakimAd(f)}'in ${n} adamı yolunu kesti. Seni tanıyorlar${bd.tan >= 30 ? ' (bu bölgede adın duyuldu)' : ''}. Yanında ${s.bolge.ekip} adam var; senin gücün ${ekipGuc(s).toFixed(1)}, onların ~${(n + 0.5).toFixed(1)}. Karar vermek için bir saatin var.`;
+    },
+    options: (s, card) => {
+      const { n } = card.data;
+      return [
+        { label: 'Çatış.', hint: 'Gücün yeterse adamlarını yenersin; yetmezse kayıp verir, vurulabilirsin.', run: (st, c, pc) => pusuCoz(st, c, 0, pc) },
+        { label: 'Kaçmaya çalış.', hint: 'Başarırsan eve dönersin. Ekip büyüdükçe, tanınmadıkça kolaylaşır; başaramazsan zayıf düşersin.', run: (st, c, pc) => pusuCoz(st, c, 1, pc) },
+        { label: `Parayla geç ($${pusuBedel(n)} kirli).`, hint: 'Çoğu zaman işe yarar ama korkak görünürsün; olmazsa yine çatışırsın.', can: (st) => st.cash.dirty >= pusuBedel(n), run: (st, c, pc) => pusuCoz(st, c, 2, pc) },
+      ];
+    },
+  },
+
+  bildirim: {
+    title: 'Haber', system: true, window: 99, def: 0,
+    text: (s, card) => card.data.text,
+    options: () => [{ label: 'Tamam.', hint: '', run: () => {} }],
   },
 
   rapor: {

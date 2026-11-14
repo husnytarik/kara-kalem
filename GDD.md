@@ -138,7 +138,19 @@ Prototipte şehir 6 bölgedir (Hilltop, Downtown, Southside, Eastside, The Flats
 - **Genişleme kapısı:** bir bölgede iş yapmak için orada nüfuzun ≥%15 olmalı ya da komşu bir bölgeye hakim olmalısın.
 - **Rakip aileler** her ay komşu bölgelere genişlemeyi dener (kudretleri hakim oldukları bölgelerin servetiyle artar; O'Brien daha saldırgan, Belediye Makinesi temkinli). Sindirdiğin aile öfkelenir ve seni hedef alır.
 - **Mevki bağı:** hakim olunan bölgeler Güç Puanı'na girer; **Ağa → Reis için en az 2 bölgeye hakim olmak** gerekir.
-- Bölge sistemi kendi tohumlu RNG'sini kullanır; dengeyi ve eski testleri etkilemez. Savaşlar (v0.3) bu nüfuz modelini temel alacak.
+- Bölge sistemi kendi tohumlu RNG'sini kullanır; dengeyi ve eski testleri etkilemez.
+
+#### 5.1.2 Tanınırlık, ekip, pusu ve baskınlar `[UYGULANDI v0.3]`
+
+Kod: `core/savas.js` (+ `bolge.js`, `sim.js` saatlik kancası). Konum yalnızca arayüz oyununda (`mesafe`) anlamlıdır; botlar ve testler pusuyu yaşamaz.
+
+- **Tanınırlık (0–100, bölge başına):** bölgede zaman geçirdikçe ve nüfuz işleri yaptıkça artar, yavaşça söner. Yüksek tanınırlık, düşman bölgede seni kolay hedef yapar ama nüfuz işlerine direnci de artırır.
+- **Ekip (≤8 adam, $100 kirli, ayda $40):** seninle yürür. Güç = ekip + 0,5 (sen) + Gözüpek + yanında koruma + Yeraltı Korkusu/40.
+- **Pusu:** düşman hakim bölgede yürürken saatlik risk (hakimin nüfuzu × tanınırlık × öfke; kendi nüfuzun ve ekibin riski düşürür; evin önü güvenli). Kart çıkar, 1 saat süre: **Çatış** (kazanma ≈ G^1,5/(G^1,5+D^1,5)), **Kaç** (ekibe bağlı), **Parayla geç** ($100+60n kirli). Yenilgide kayıp, yaralanma, ölüm riski (ekipliyken 0,05, ekipsizken 0,2).
+- **Yaralanma:** eve düşersin, birkaç gün yürüyemez, adam toplayamaz, meyhane geliri %75'e düşer; revir bedeli.
+- **Baskın (oyuncu):** düşman hakim bölgede, en az 2 adamla, $200 kirli; bölge başına 4 gün bekleme. Kazanırsan rakip nüfuzu çöker, sen artarsın, ganimet alırsın, rakip öfkelenir ve kanıt izi kalır; kaybedersen ekibin erir, vurulabilirsin. Arayüz kazanma şansını gösterir.
+- **Düşman baskını:** rakipler hakim olduğun bölgeye saldırır (hücum ekip + öfkeye, savunma garnizon + orada bulunan ekibin gücüne bağlı). Yarılırsa nüfuz ve huzur düşer, garnizon erir; baskın Southside'a (meyhane/çamaşırhane bölgesi) denk gelirse mekanlar 1–3 gün **kapanır**, nakit zararı olur. Hakim rakipse Southside'dan himaye bedeli (%4 ciro) kesilir.
+- **Sınır:** mekanlar kalıcı kaybedilmez, yalnızca kapanır/haraca bağlanır; kalıcı mülk el değiştirme sonraki sürüme kalmıştır.
 
 ### 5.2 Parseller ve binalar
 

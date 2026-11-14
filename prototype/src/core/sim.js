@@ -11,7 +11,8 @@ import {
 } from './social.js';
 import { stressFor, blocked } from './traits.js';
 import { PLACES, BOLGELER, W, WALK, snapRow, route, pathLen, advanceAlong, bolgeAt } from './world.js';
-import { newBolge, bolgeMonth, bolgeIs, bolgeAdam, bolgeYatirim, bolgeHarac } from './bolge.js';
+import { brnd as brndSim, newBolge, bolgeMonth, bolgeIs, bolgeAdam, bolgeYatirim, bolgeHarac, yaraliMi } from './bolge.js';
+import { ekipAl, bolgeBaskin, pusuKur, pusuP } from './savas.js';
 
 export const C = {
   MIN_PER_SEC: 3,          // ×1 hızda: 1 gerçek saniye = 3 oyun dakikası (1 oyun saati = 20 sn)
@@ -45,7 +46,7 @@ const ch = (ad, rol, yas, mods, x = {}) => ({
 // Şehir yerleşimi ve yol bulma world.js'te. Burada: durum, hareket ve "orada mısın?" kuralı.
 export { PLACES, BOLGELER, ROWS, V, W, H, WALK, bolgeAt } from './world.js';
 // Bu işler için o bölgede bulunmak gerekir (arayüzde).
-export const BOLGE_ISLERI = new Set(['bolgeIs', 'bolgeAdam', 'bolgeYatirim']);
+export const BOLGE_ISLERI = new Set(['bolgeIs', 'bolgeAdam', 'bolgeYatirim', 'bolgeBaskin']);
 // Bu işler için orada bulunmak gerekir (s.mesafe açıksa; arayüz açar, bot testleri açmaz).
 export const GATE = { bribe: 'karakol', kredi: 'liman', hisse: 'liman', hisseSat: 'liman', ahitIste: 'karaca', ahitBoz: 'karaca', payDebt: 'tefeci', buildDist: 'meyhane', upgradeHidden: 'meyhane', rest: 'ev' };
 
@@ -84,7 +85,7 @@ function startWalk(s, dest, to) {
 
 export function newGame(seed = (Date.now() & 0x7fffffff)) {
   const s = {
-    v: 5, seed, t: 6 * 60, speed: 0, mesafe: false, pos: { x: PLACES.meyhane.x, y: PLACES.meyhane.y }, walk: null,
+    v: 6, seed, t: 6 * 60, speed: 0, mesafe: false, pos: { x: PLACES.meyhane.x, y: PLACES.meyhane.y }, walk: null,
     cash: { clean: 1500, dirty: 0 },
     debt: { principal: 6000, installment: 600, missed: 0 },
     patron: { ad: 'Sen', yas: 34, traits: ['Temkinli', 'Cömert', 'Merhametli'], stres: 10 },
@@ -189,16 +190,16 @@ function pushCard(s, id, data = {}) {
   if (ev.onPush) ev.onPush(s);
   s.cards.push({ id: s.cardSeq++, ev: id, t0: s.t, expires: s.t + ev.window * DAY, data });
   s.pauseReq++;
-  if (id !== 'rapor') log(s, `Karar bekliyor: ${ev.title}`, 'card');
+  if (id !== 'rapor' && id !== 'bildirim') log(s, `Karar bekliyor: ${(data && data.title) || ev.title}`, 'card');
 }
 
 export function cardView(s, card) {
   const ev = EVENTS[card.ev];
   return {
-    id: card.id, ev: card.ev, title: ev.title, text: ev.text(s, card),
+    id: card.id, ev: card.ev, title: (card.data && card.data.title) || ev.title, text: ev.text(s, card),
     hoursLeft: Math.max(0, Math.ceil((card.expires - s.t) / 60)),
     def: ev.def, system: !!ev.system,
-    options: ev.options(s).map((o) => ({ label: o.label, hint: o.hint || '', enabled: !o.can || o.can(s) })),
+    options: ev.options(s, card).map((o) => ({ label: o.label, hint: o.hint || '', enabled: !o.can || o.can(s) })),
   };
 }
 
@@ -207,7 +208,7 @@ function choose(s, cardId, i, byVekil = false) {
   if (idx < 0) return { ok: false, msg: 'Kart yok.' };
   const card = s.cards[idx];
   const ev = EVENTS[card.ev];
-  const opts = ev.options(s);
+  const opts = ev.options(s, card);
   let o = opts[i];
   const vekilVar = !s.chars.nuri.dead;
   if (byVekil && !vekilVar) o = null; // vekil yoksa iş sahipsiz kalır: en pasif seçenek
@@ -216,10 +217,10 @@ function choose(s, cardId, i, byVekil = false) {
     o = [...opts].reverse().find((x) => !x.can || x.can(s));
   }
   s.cards.splice(idx, 1);
-  if (card.ev !== 'rapor') {
+  if (card.ev !== 'rapor' && card.ev !== 'bildirim') {
     log(s, byVekil ? `${ev.title}: sen karar vermedin; ${vekilVar ? 'Walter Doyle halletti' : 'vekilin olmadığı için iş sahipsiz kaldı'} → "${o.label}"` : `${ev.title} → "${o.label}"`, byVekil ? 'warn' : 'info');
   }
-  o.run(s, card);
+  o.run(s, card, pushCard);
   checkDosya(s);
   return { ok: true };
 }
@@ -288,22 +289,23 @@ function hourTick(s) {
   const d = dateOf(s.t);
   const h = d.hour;
 
+  const kapali = s.t < s.bolge.kapali, yaral = yaraliMi(s) ? 0.75 : 1;
   const w = MEY_W[h];
-  if (w) {
+  if (w && !kapali) {
     const m = s.biz.meyhane;
     const sh = marketShare(s).me;
     s.share = sh;
-    const vol = C.MEY_DEMAND * C.SEAS_MEY[d.season] * w * sh * (staff(s, 'garson') ? 1 : 0.7);
+    const vol = C.MEY_DEMAND * C.SEAS_MEY[d.season] * w * sh * (staff(s, 'garson') ? 1 : 0.7) * yaral;
     const rev = vol * m.price, cost = vol * C.VAR_COST * varCostMult(s);
     s.cash.clean += rev - cost; m.mRev += rev; m.mCost += cost; s.today.rev += rev;
   }
-  if (s.biz.camasir && h >= 8 && h < 18) {
+  if (s.biz.camasir && h >= 8 && h < 18 && !kapali) {
     const c = s.biz.camasir;
     s.cash.clean += 2; c.mRev += 6; c.mCost += 4;
   }
   const lw = LIQ_W[h];
   const di = s.dist;
-  if (lw && di.built && s.t >= di.hiddenUntil && di.stock > 0) {
+  if (lw && di.built && s.t >= di.hiddenUntil && di.stock > 0 && !kapali) {
     const demand = C.LIQ_DEMAND * C.SEAS_LIQ[d.season] * (s.t < s.liqBoostUntil ? 2 : 1) * lw;
     const sold = Math.min(di.stock, demand);
     di.stock -= sold;
@@ -313,12 +315,28 @@ function hourTick(s) {
 
   if (s.raid && s.t >= s.raid.at) resolveRaid(s);
   if (s.over) return;
+  bolgeSaat(s);
+  if (s.over) return;
 
   for (const c of [...s.cards]) if (s.t >= c.expires) choose(s, c.id, EVENTS[c.ev].def, true);
 
   if (h === 5) dayTick(s);
   if (h === s.evHour) rollEvents(s);
   if (d.dayInMonth === 10 && h === 20) monthTick(s);
+}
+
+// Saatlik bölge işleri: tanınırlık, yaralı iyileşmesi, düşman bölgede pusu. Konum yalnızca arayüzde (s.mesafe) anlamlıdır.
+function bolgeSaat(s) {
+  if (!s.mesafe) return;
+  const st = s.bolge;
+  if (st.yarali && s.t >= st.yarali) { st.yarali = 0; log(s, 'Yaran iyileşti; yeniden sokaktasın.', 'good'); }
+  if (yaraliMi(s)) return;
+  const id = bolgeAt(s.pos), b = st.list[id];
+  b.tan = clamp(b.tan + 0.05 * (1 - b.tan / 120), 0, 100);
+  if (s.cards.some((c) => c.ev === 'pusu')) return;
+  if (Math.hypot(s.pos.x - PLACES.ev.x, s.pos.y - PLACES.ev.y) < 40) return;
+  const { p } = pusuP(s, id);
+  if (p > 0 && brndSim(s) < p) pusuKur(s, pushCard);
 }
 
 function rollEvents(s) {
@@ -493,7 +511,7 @@ function monthTick(s) {
     c.mods = c.mods.filter((md) => md.v !== 0);
   }
 
-  bolgeMonth(s, R);
+  bolgeMonth(s, R, pushCard);
   socialMonth(s, R, { legalRev, liqRev: s.month.liqRev, legalCost, pushCard });
 
   R.push(`KASA  temiz ${money(s.cash.clean)} · kirli ${money(s.cash.dirty)} · Dosya ${Math.round(s.dosya)} (${stageName(s)})`);
@@ -533,6 +551,7 @@ export function act(s, a) {
   }
   switch (a.type) {
     case 'goto': {
+      if (yaraliMi(s)) return fail('Yaralısın; iyileşene kadar yataktasın.');
       const pl = a.b ? PLACES[a.b] : null;
       if (a.b && !pl) return fail('Gidilemez.');
       const dest = pl ? { x: pl.x, y: pl.y } : { x: Math.max(12, Math.min(W - 12, +a.x)), y: snapRow(Number.isFinite(+a.y) ? +a.y : s.pos.y) };
@@ -540,6 +559,8 @@ export function act(s, a) {
       startWalk(s, dest, a.b || null);
       return OK;
     }
+    case 'bolgeBaskin': return bolgeBaskin(s, a, pushCard);
+    case 'ekipAl': return ekipAl(s, a);
     case 'bolgeIs': return bolgeIs(s, a);
     case 'bolgeAdam': return bolgeAdam(s, a);
     case 'bolgeYatirim': return bolgeYatirim(s, a);

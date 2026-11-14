@@ -3,6 +3,7 @@
 import { clamp, dateOf, DAY, log, spend, staff } from './util.js';
 import { fame, perceived } from './social.js';
 import { BOLGELER } from './world.js';
+import { EKIP_MAAS, MEKAN_BOLGE, dusmanBaskin } from './savas.js';
 
 export const HAKIM_ESIK = 35;       // hakim olmak için en az nüfuz
 export const SERVET_MAX = 5;
@@ -26,23 +27,24 @@ const BEKLEME = { himaye: 3, hediye: 3, gozdagi: 5 }; // aynı bölgede aynı i�
 const IS_AD = { himaye: 'Esnafa himaye sat', hediye: 'Mahalleye ziyafet ver', gozdagi: 'Rakip adamları sindir' };
 
 const B0 = {
-  hilltop: { inf: { tammany: 70, marchetti: 10 }, servet: 4, ilerleme: 40, huzur: 80 },
-  downtown: { inf: { tammany: 55, obrien: 15, marchetti: 10 }, servet: 4, ilerleme: 20, huzur: 70 },
-  southside: { inf: { oyuncu: 25, obrien: 15, marchetti: 15 }, servet: 2, ilerleme: 30, huzur: 60 },
-  eastside: { inf: { obrien: 60, marchetti: 15 }, servet: 3, ilerleme: 50, huzur: 65 },
-  flats: { inf: { marchetti: 65, obrien: 10 }, servet: 3, ilerleme: 10, huzur: 70 },
-  docks: { inf: { marchetti: 45, tammany: 20, obrien: 10 }, servet: 4, ilerleme: 60, huzur: 60 },
+  hilltop: { inf: { tammany: 70, marchetti: 10 }, servet: 4, ilerleme: 40, huzur: 80, tan: 3 },
+  downtown: { inf: { tammany: 55, obrien: 15, marchetti: 10 }, servet: 4, ilerleme: 20, huzur: 70, tan: 8 },
+  southside: { inf: { oyuncu: 25, obrien: 15, marchetti: 15 }, servet: 2, ilerleme: 30, huzur: 60, tan: 55 },
+  eastside: { inf: { obrien: 60, marchetti: 15 }, servet: 3, ilerleme: 50, huzur: 65, tan: 12 },
+  flats: { inf: { marchetti: 65, obrien: 10 }, servet: 3, ilerleme: 10, huzur: 70, tan: 6 },
+  docks: { inf: { marchetti: 45, tammany: 20, obrien: 10 }, servet: 4, ilerleme: 60, huzur: 60, tan: 6 },
 };
 
 export function newBolge(seed) {
   const list = {};
-  for (const [id, b] of Object.entries(B0)) list[id] = { inf: { ...b.inf }, servet: b.servet, ilerleme: b.ilerleme, huzur: b.huzur, garnizon: 0, harac: 1, sonIs: {}, yatirimAy: -99, hakim: null };
-  const st = { seed: (seed * 7919 + 13) | 0, ofke: { marchetti: 0, obrien: 0, tammany: 0 }, list };
+  for (const [id, b] of Object.entries(B0)) list[id] = { inf: { ...b.inf }, servet: b.servet, ilerleme: b.ilerleme, huzur: b.huzur, garnizon: 0, harac: 1, sonIs: {}, yatirimAy: -99, hakim: null, tan: b.tan };
+  const st = { seed: (seed * 7919 + 13) | 0, ofke: { marchetti: 0, obrien: 0, tammany: 0 }, ekip: 0, yarali: 0, kapali: 0, list };
   for (const id of Object.keys(list)) list[id].hakim = hakimOf(st, id);
   return st;
 }
 
-function brnd(st) {
+export const yaraliMi = (s) => s.t < s.bolge.yarali;
+export function brnd(st) {
   st.seed = (st.seed + 0x6d2b79f5) | 0;
   let t = st.seed;
   t = Math.imul(t ^ (t >>> 15), t | 1);
@@ -100,7 +102,7 @@ export function addInf(b, f, d) {
   for (const k of Object.keys(b.inf)) if (b.inf[k] < 0.05) delete b.inf[k];
 }
 
-function hakimDegisti(s, id, onceki) {
+export function hakimDegisti(s, id, onceki) {
   const st = s.bolge, ad = BOLGELER[id].ad, yeni = hakimOf(st, id);
   if (yeni === onceki) return;
   st.list[id].hakim = yeni;
@@ -118,13 +120,14 @@ export function bolgeIs(s, a) {
   const st = s.bolge, b = st.list[a.b];
   if (!b) return hata('Böyle bir bölge yok.');
   if (!IS_AD[a.kind]) return hata('Bilinmeyen iş.');
+  if (yaraliMi(s)) return hata('Yaralısın; iyileşene kadar sokağa çıkamazsın.');
   if (!erisim(s, a.b)) return hata(`${BOLGELER[a.b].ad}'a girmek için önce komşu bir bölgeye hakim olmalısın.`);
   const gun = dateOf(s.t).day;
   if ((b.sonIs[a.kind] ?? -99) + BEKLEME[a.kind] > gun) return hata(`Bu işi bu bölgede ${BEKLEME[a.kind]} günde bir yapabilirsin.`);
   const onceki = hakimOf(st, a.b);
   const kayip = 1 - (b.inf.oyuncu || 0) / 120; // nüfuz yükseldikçe her ek puan pahalılaşır
   const rakip = onceki && onceki !== 'oyuncu' ? onceki : null;
-  const direnc = rakip ? 1 - (b.inf[rakip] || 0) / 150 : 1; // sağlam bir hakimi yerinden etmek zordur
+  const direnc = (rakip ? 1 - (b.inf[rakip] || 0) / 150 : 1) * (0.6 + 0.6 * b.tan / 100); // sağlam bir hakimi yerinden etmek zordur; tanınmayan birine kimse güvenmez
   let kazan;
   if (a.kind === 'himaye') {
     if (!spend(s, 120, 'dirty')) return hata('Para yetmiyor ($120).');
@@ -150,6 +153,7 @@ export function bolgeIs(s, a) {
     if (brnd(st) < 0.25) s.pendingEvidence.push({ v: 4, why: `${BOLGELER[a.b].ad}'da sindirme işini birisi gördü ve karakola anlattı.` });
   }
   addInf(b, 'oyuncu', kazan);
+  b.tan = clamp(b.tan + { himaye: 3, hediye: 4, gozdagi: 6 }[a.kind] * (1 - b.tan / 120), 0, 100);
   b.sonIs[a.kind] = gun;
   hakimDegisti(s, a.b, onceki);
   return TAMAM;
@@ -214,7 +218,7 @@ function ilerlet(s, id, miktar, neden) {
 }
 
 // ---------- aylık işleyiş ----------
-export function bolgeMonth(s, R) {
+export function bolgeMonth(s, R, pushCard) {
   const st = s.bolge, ayNo = dateOf(s.t).month;
   const onceki = {};
   for (const id of Object.keys(st.list)) onceki[id] = hakimOf(st, id);
@@ -237,6 +241,27 @@ export function bolgeMonth(s, R) {
       else if (b.harac === 0) fame(s, 'halk', 'cephe', { i: 1 }, 1);
       if (b.harac >= 2) s.attBoost += 0.5 * b.harac;
     }
+  }
+  // ekip maaşı
+  if (st.ekip > 0) {
+    const gider = st.ekip * EKIP_MAAS;
+    if (spend(s, gider, 'dirty')) maasToplam += gider;
+    else { st.ekip--; log(s, 'Ekibin maaşını ödeyemedin, bir adam çekip gitti.', 'bad'); }
+  }
+  // mekanların bulunduğu bölgeyi rakip yönetiyorsa himaye bedeli keser
+  const mh = hakimOf(st, MEKAN_BOLGE);
+  if (mh && mh !== 'oyuncu') {
+    const bedel = Math.round(0.04 * (s.biz.meyhane.mRev + (s.biz.camasir ? s.biz.camasir.mRev : 0)));
+    if (bedel > 0) {
+      s.cash.clean -= bedel;
+      R.push(`  ! ${BOLGELER[MEKAN_BOLGE].ad}'ı ${hakimAd(mh)} yönetiyor: mekanların himaye bedeli −${money0(bedel)}`);
+    }
+  }
+  // tanınırlık: hakim olduğun yerde artar, uzak kaldığın yerde solar
+  for (const id of Object.keys(st.list)) {
+    const b = st.list[id];
+    if (hakimOf(st, id) === 'oyuncu') b.tan = clamp(b.tan + 1.5, 0, 100);
+    else b.tan = Math.max(id === MEKAN_BOLGE ? 30 : 0, b.tan * 0.94);
   }
   if (haracToplam > 0 || maasToplam > 0) {
     const a = s.unvan.ahit;
@@ -285,10 +310,10 @@ export function bolgeMonth(s, R) {
       const savunma = 1.8 * b.garnizon + perceived(s, 'yeralti').K / 12;
       kazan = Math.max(1.5, kazan - savunma);
     }
+    if (hk === 'oyuncu' || (hedef === MEKAN_BOLGE && !hk && brnd(st) < 0.3)) { dusmanBaskin(s, f, hedef, kazan, hk, pushCard); continue; }
     addInf(b, f, kazan);
     b.huzur = clamp(b.huzur - 5, 0, 100);
-    if (hk === 'oyuncu') log(s, `${hakimAd(f)} ${BOLGELER[hedef].ad}'a adam yolladı: nüfuzun düşüyor.`, 'warn', `Garnizonun ${b.garnizon} adam; her adam rakip baskısını 1,8 puan azaltır.`);
-    else if (hk) log(s, `${hakimAd(f)}, ${hakimAd(hk)}'in ${BOLGELER[hedef].ad}'daki hâkimiyetini zorluyor.`, 'info');
+    if (hk) log(s, `${hakimAd(f)}, ${hakimAd(hk)}'in ${BOLGELER[hedef].ad}'daki hâkimiyetini zorluyor.`, 'info');
     else log(s, `${hakimAd(f)} sahipsiz ${BOLGELER[hedef].ad}'a el attı.`, 'info');
   }
   for (const f of NPC) st.ofke[f] *= 0.8;
