@@ -5,6 +5,11 @@ import {
   addStress, hideGoods, money,
 } from './util.js';
 import { EVENTS, producing } from './events.js';
+import {
+  newSocial, perceived, fame, leak, gucPuani, listede, bond, addOrtak, loseDost, defterAc, defterKapat,
+  krediInfo, hisseDegeri, kabulAhit, socialDay, socialMonth, S0,
+} from './social.js';
+import { stressFor, blocked } from './traits.js';
 
 export const C = {
   MIN_PER_SEC: 3,          // ×1 hızda: 1 gerçek saniye = 3 oyun dakikası (1 oyun saati = 20 sn)
@@ -34,12 +39,59 @@ const ch = (ad, rol, yas, mods, x = {}) => ({
   employed: false, job: null, maas: 0, piyasa: 0, sadakat: 50, dead: false, ...x,
 });
 
+// ---------- konum: karakter haritada yürür ----------
+// Tek sokak: her bina kapısıyla sokağa açılır. Yol = (dikey) sokağa in, yatay yürü, (dikey) kapıya çık.
+export const ROAD_Y = 205, WALK = 10; // WALK: oyun dakikası başına harita birimi
+export const PLACES = {
+  meyhane: { ad: 'Meyhane', x: 255, y: 170 }, tefeci: { ad: 'Tefeci Şakir', x: 80, y: 170 },
+  ev: { ad: 'Ev', x: 445, y: 170 }, karakol: { ad: 'Karakol', x: 625, y: 170 },
+  camasir: { ad: 'Çamaşırhane', x: 80, y: 240 }, liman: { ad: 'Liman A.Ş.', x: 255, y: 240 },
+  rakip: { ad: "Kâzım'ın Yeri", x: 455, y: 240 }, karaca: { ad: 'Karaca Ailesi', x: 635, y: 240 },
+};
+// Bu işler için orada bulunmak gerekir (s.mesafe açıksa; arayüz açar, bot testleri açmaz).
+export const GATE = { bribe: 'karakol', kredi: 'liman', hisse: 'liman', hisseSat: 'liman', ahitIste: 'karaca', ahitBoz: 'karaca', payDebt: 'tefeci', buildDist: 'meyhane', upgradeHidden: 'meyhane', rest: 'ev' };
+
+function pathTo(from, to) {
+  const p = [];
+  if (Math.abs(from.y - ROAD_Y) > 0.5 && Math.abs(from.x - to.x) > 0.5) p.push({ x: from.x, y: ROAD_Y });
+  if (Math.abs(from.x - to.x) > 0.5) p.push({ x: to.x, y: ROAD_Y });
+  if (Math.abs(to.y - (p.length ? p[p.length - 1].y : from.y)) > 0.5 || !p.length) p.push({ x: to.x, y: to.y });
+  return p.filter((q, i) => Math.hypot(q.x - (i ? p[i - 1].x : from.x), q.y - (i ? p[i - 1].y : from.y)) > 0.01);
+}
+// pos'tan başlayıp yol boyunca dist birim ilerle; yeni konumu ve kalan yolu döndür (durumu değiştirmez)
+function advanceAlong(pos, path, dist) {
+  let x = pos.x, y = pos.y, left = dist, i = 0;
+  while (left > 0 && i < path.length) {
+    const n = path[i], d = Math.hypot(n.x - x, n.y - y);
+    if (d <= left) { x = n.x; y = n.y; left -= d; i++; } else { x += (n.x - x) / d * left; y += (n.y - y) / d * left; left = 0; }
+  }
+  return { x, y, rest: path.slice(i) };
+}
+export function here(s) {
+  if (s.walk) return null;
+  for (const [id, p] of Object.entries(PLACES)) if (Math.hypot(p.x - s.pos.x, p.y - s.pos.y) < 6) return id;
+  return null;
+}
+export const walkMinutes = (s, id) => Math.ceil(pathTo(s.pos, PLACES[id]).reduce((a, q, i, l) => a + Math.hypot(q.x - (i ? l[i - 1].x : s.pos.x), q.y - (i ? l[i - 1].y : s.pos.y)), 0) / WALK);
+// Arayüz için akıcı konum: bir dakikanın kesri kadar ileri
+export function walkerAt(s, frac = 0) {
+  if (!s.walk) return { x: s.pos.x, y: s.pos.y, path: [] };
+  const r = advanceAlong(s.pos, s.walk.path, WALK * Math.min(1, frac));
+  return { x: r.x, y: r.y, path: r.rest };
+}
+function walkStep(s) {
+  const r = advanceAlong(s.pos, s.walk.path, WALK);
+  s.pos.x = r.x; s.pos.y = r.y; s.walk.path = r.rest;
+  if (!r.rest.length) s.walk = null;
+}
+
 export function newGame(seed = (Date.now() & 0x7fffffff)) {
   const s = {
-    v: 1, seed, t: 6 * 60, speed: 0,
+    v: 3, seed, t: 6 * 60, speed: 0, mesafe: false, pos: { x: PLACES.meyhane.x, y: PLACES.meyhane.y }, walk: null,
     cash: { clean: 1500, dirty: 0 },
     debt: { principal: 6000, installment: 600, missed: 0 },
-    patron: { ad: 'Sen', yas: 34, traits: ['Temkinli', 'Cömert'], stres: 10 },
+    patron: { ad: 'Sen', yas: 34, traits: ['Temkinli', 'Cömert', 'Merhametli'], stres: 10 },
+    ...newSocial(),
     biz: {
       meyhane: { id: 'meyhane', type: 'meyhane', name: 'Baba Yadigârı Meyhane', price: 1, quality: 50, rep: 50, mRev: 0, mCost: 0 },
       rakip: { id: 'rakip', name: "Kâzım'ın Yeri", price: 1, quality: 50, rep: 55 },
@@ -53,19 +105,21 @@ export function newGame(seed = (Date.now() & 0x7fffffff)) {
     cards: [], cardSeq: 1, pauseReq: 0, evHour: 12,
     flags: {}, cool: {}, stats: { totalSold: 0 }, history: [], log: [], over: null,
     chars: {
-      nuri: ch('Nuri Efendi', 'Vekil (sağ kolun)', 58, [['Babanın eski dostu', 40]], { employed: true, job: 'vekil', maas: 150, piyasa: 140, sadakat: 80, legal: true }),
-      halil: ch('Garson Halil', 'Garson', 26, [['Seni çocukluğundan tanır', 10]], { employed: true, job: 'garson', maas: 90, piyasa: 90, sadakat: 55, legal: true }),
-      fatma: ch('Fatma Hanım', 'Aşçı', 44, [['Baban ona iş vermişti', 15]], { employed: true, job: 'asci', maas: 100, piyasa: 100, sadakat: 60, legal: true }),
-      aziz: ch('Kör Aziz', 'İçki ustası', 61, [['Zanaatına saygı duyuyorsun', 5]], { maas: 120, piyasa: 120, hire: 'usta' }),
-      cemal: ch('İri Cemal', 'Koruma', 29, [['Sokaktan tanışırsınız', 5]], { maas: 100, piyasa: 100, hire: 'koruma' }),
-      ihsan: ch('Kâtip İhsan', 'Muhasebeci', 38, [], { maas: 110, piyasa: 110, hire: 'muhasebeci', legal: true }),
-      rifat: ch('Rıfat', 'Komiser Muavini', 41, [['Mahallenin çocuğusun', 5]], { yoz: 65, resmiMaas: 80, payroll: false, bribeAt: -99999 }),
-      kazim: ch('Meyhaneci Kâzım', 'Rakip', 47, [['Rakibisin', -20]]),
-      sakir: ch('Tefeci Şakir', 'Alacaklın', 52, [['Borçlu iyi müşteridir', 5]]),
-      zehra: ch('Zehra', 'Kız kardeşin', 31, [['Kardeşsiniz', 40]]),
-      selim: ch('Selim', 'Yeğenin', 15, [['Dayısına hayran', 25]], { maas: 40, piyasa: 40 }),
-      leyla: ch('Leyla', 'Kızın', 9, [['Babası', 60]]),
-      hacer: ch('Hacer Hanım', 'Arka sokak komşusu', 67, [['Eski komşu', 10]]),
+      nuri: ch('Nuri Efendi', 'Vekil (sağ kolun)', 58, [['Babanın eski dostu', 40]], { employed: true, job: 'vekil', maas: 150, piyasa: 140, sadakat: 80, legal: true, ortak: 2, traits: ['Temkinli', 'Sözünün Eri'] }),
+      halil: ch('Garson Halil', 'Garson', 26, [['Seni çocukluğundan tanır', 10]], { employed: true, job: 'garson', maas: 90, piyasa: 90, sadakat: 55, legal: true, ortak: 1, traits: ['Cömert', 'Gözüpek'] }),
+      fatma: ch('Fatma Hanım', 'Aşçı', 44, [['Baban ona iş vermişti', 15]], { employed: true, job: 'asci', maas: 100, piyasa: 100, sadakat: 60, legal: true, traits: ['Merhametli', 'Sözünün Eri'] }),
+      aziz: ch('Kör Aziz', 'İçki ustası', 61, [['Zanaatına saygı duyuyorsun', 5]], { maas: 120, piyasa: 120, hire: 'usta', traits: ['Açgözlü', 'Alkolik'] }),
+      cemal: ch('İri Cemal', 'Koruma', 29, [['Sokaktan tanışırsınız', 5]], { maas: 100, piyasa: 100, hire: 'koruma', traits: ['Gözüpek', 'Zalim'] }),
+      ihsan: ch('Kâtip İhsan', 'Muhasebeci', 38, [], { maas: 110, piyasa: 110, hire: 'muhasebeci', legal: true, traits: ['Temkinli', 'Sözünün Eri'] }),
+      rifat: ch('Rıfat', 'Komiser Muavini', 41, [['Mahallenin çocuğusun', 5]], { yoz: 65, resmiMaas: 80, payroll: false, bribeAt: -99999, traits: ['Açgözlü', 'Temkinli'] }),
+      kazim: ch('Meyhaneci Kâzım', 'Rakip', 47, [['Rakibisin', -20]], { traits: ['Gözüpek', 'Kindar'] }),
+      sakir: ch('Tefeci Şakir', 'Alacaklın', 52, [['Borçlu iyi müşteridir', 5]], { traits: ['Açgözlü', 'Zalim'] }),
+      zehra: ch('Zehra', 'Kız kardeşin', 31, [['Kardeşsiniz', 40]], { traits: ['Cömert', 'Merhametli'] }),
+      selim: ch('Selim', 'Yeğenin', 15, [['Dayısına hayran', 25]], { maas: 40, piyasa: 40, traits: ['Gözüpek', 'Dönek'] }),
+      leyla: ch('Leyla', 'Kızın', 9, [['Babası', 60]], { traits: [] }),
+      hacer: ch('Hacer Hanım', 'Arka sokak komşusu', 67, [['Eski komşu', 10]], { traits: ['Merhametli', 'Kindar'] }),
+      orhan: ch('Reis Orhan Karaca', 'Karaca Ailesi\'nin başı', 56, [], { traits: ['Temkinli', 'Zalim'] }),
+      selahattin: ch('Selahattin Bey', 'Liman A.Ş. Müdürü', 49, [], { traits: ['Açgözlü', 'Temkinli'] }),
     },
   };
   log(s, 'Baban öldü. Sana bir meyhane, 6.000 ₺ borç ve boş bir bodrum bıraktı.', 'card');
@@ -77,7 +131,7 @@ export function newGame(seed = (Date.now() & 0x7fffffff)) {
 const attract = (b) => b.quality * Math.sqrt(Math.max(1, b.rep)) * Math.pow(b.price, -1.5);
 
 export function marketShare(s) {
-  const a = attract(s.biz.meyhane), b = attract(s.biz.rakip);
+  const a = attract(s.biz.meyhane) * (1 + 0.2 * perceived(s, 'halk').I / 100), b = attract(s.biz.rakip);
   return { me: a / (a + b + C.OUTSIDE), rival: b / (a + b + C.OUTSIDE) };
 }
 
@@ -86,9 +140,15 @@ export function attentionLines(s) {
   if (s.attBoost >= 0.5) l.push({ k: 'Son olaylar', v: Math.round(s.attBoost) });
   if (s.chars.rifat.payroll) l.push({ k: 'Rıfat aylıkta', v: -15 });
   if (s.dosya >= 50) l.push({ k: 'Soruşturma açık', v: 10 });
+  const tp = 0.25 * perceived(s, 'polis').T;
+  if (tp >= 0.5) l.push({ k: 'Polis seni tanıyor', v: Math.round(tp) });
+  if (s.unvan.ahit && s.unvan.ahit.himaye) l.push({ k: 'Karaca himayesi', v: -8 });
   return l;
 }
 export const attention = (s) => clamp(attentionLines(s).reduce((a, x) => a + x.v, 0), 5, 100);
+
+// Tedarik pahalılaşması: esnaf birliği güvenilmez diyorsa +%15; Karaca tedarik kestiyse +%10
+export const varCostMult = (s) => (listede(s, 'esnaf') ? 1.15 : 1) * (s.t < s.tedarikZamUntil ? 1.1 : 1);
 
 export const secrecy = (s) => (s.dist.hiddenRoom ? 0.75 : 0.5);
 
@@ -115,6 +175,7 @@ export function estimateBribe(s, amount) {
     { k: 'Sana görüşü', x: opinion(s, 'rifat').total / 40 },
     { k: 'Yozlaşabilirliği', x: (r.yoz - 50) / 20 },
     { k: 'Dosyanın kabarıklığı', x: -s.dosya / 50 },
+    { k: 'Aranan listesindesin', x: listede(s, 'aranan') ? -1 : 0 },
     { k: 'Riskin tabanı', x: -1.5 },
   ];
   return { p: sigmoid(factors.reduce((a, f) => a + f.x, 0)), factors, effect: clamp(3 + amount / 50, 0, 10) };
@@ -159,7 +220,7 @@ function choose(s, cardId, i, byVekil = false) {
   if (card.ev !== 'rapor') {
     log(s, byVekil ? `${ev.title}: sen karar vermedin; ${vekilVar ? 'Nuri Efendi halletti' : 'vekilin olmadığı için iş sahipsiz kaldı'} → "${o.label}"` : `${ev.title} → "${o.label}"`, byVekil ? 'warn' : 'info');
   }
-  o.run(s);
+  o.run(s, card);
   checkDosya(s);
   return { ok: true };
 }
@@ -169,6 +230,7 @@ function addEvidence(s, v, why) {
   s.dosya = clamp(s.dosya + v, 0, 100);
   s.evidenceToday = true;
   log(s, `Dosyana kanıt girdi: +${v} (Dosya ${Math.round(s.dosya)})`, 'bad', why);
+  fame(s, 'polis', 'golge', { t: v * 0.6, i: -v * 0.3 }, 1); // kanıt, polisin seni tanımasını da artırır
   checkDosya(s);
 }
 
@@ -210,9 +272,12 @@ function resolveRaid(s) {
   d.built = false; d.hiddenRoom = false; d.volume = 0; d.stock = 0; d.iz = 0;
   log(s, `BASKIN: Polis bodrumu bastı. İmalathane söküldü, ${lost} şişeye el kondu, ${money(fine)} ceza kesildi.`, 'bad',
     informed(s) ? 'Haber almıştın ama malı saklamadın.' : 'Poliste haber uçuracak adamın yoktu; baskın habersiz geldi.');
+  leak(s, 'halk', 0.1); // baskın mahallenin gözü önünde oldu: gölge yüzün sızar
+  fame(s, 'halk', 'golge', { t: 10, i: -6 }, 1);
   const usta = staff(s, 'usta');
   if (usta && rnd(s) < 0.5) {
     usta.employed = false; usta.jailed = true; usta.hire = null;
+    if (!usta.traits.includes('Hapis Yatmış')) usta.traits.push('Hapis Yatmış');
     log(s, `${usta.ad} kazan başında yakalandı, içeri alındı.`, 'bad');
   }
   addStress(s, 15, 'Baskın yedin.');
@@ -230,7 +295,7 @@ function hourTick(s) {
     const sh = marketShare(s).me;
     s.share = sh;
     const vol = C.MEY_DEMAND * C.SEAS_MEY[d.season] * w * sh * (staff(s, 'garson') ? 1 : 0.7);
-    const rev = vol * m.price, cost = vol * C.VAR_COST;
+    const rev = vol * m.price, cost = vol * C.VAR_COST * varCostMult(s);
     s.cash.clean += rev - cost; m.mRev += rev; m.mCost += cost; s.today.rev += rev;
   }
   if (s.biz.camasir && h >= 8 && h < 18) {
@@ -302,6 +367,7 @@ function dayTick(s) {
   if (!s.evidenceToday && s.dosya > 0) { s.dosya = Math.max(0, s.dosya - C.DOSYA_DECAY); s.stage = stageIdx(s); }
   s.attBoost *= 0.9;
   if (s.over) return;
+  socialDay(s);
 
   // sadakat
   for (const [id, c] of Object.entries(s.chars)) {
@@ -413,6 +479,7 @@ function monthTick(s) {
     c.yas++;
     if (c.yas >= 50 && rnd(s) < 0.002 * Math.pow(2, (c.yas - 30) / 8)) {
       c.dead = true; c.employed = false; died.push(c.ad);
+      loseDost(s, Object.keys(s.chars).find((k) => s.chars[k] === c), 'kaybettin');
       log(s, `${c.ad} öldü (${c.yas} yaşında).`, 'bad', 'Eceliyle. Ölüm ihtimali yaşla katlanarak artar.');
     }
   }
@@ -427,6 +494,8 @@ function monthTick(s) {
     c.mods = c.mods.filter((md) => md.v !== 0);
   }
 
+  socialMonth(s, R, { legalRev, liqRev: s.month.liqRev, legalCost, pushCard });
+
   R.push(`KASA  temiz ${money(s.cash.clean)} · kirli ${money(s.cash.dirty)} · Dosya ${Math.round(s.dosya)} (${stageName(s)})`);
   s.history.push({ month: d.month, clean: s.cash.clean, dirty: s.cash.dirty, debt: db.principal, dosya: s.dosya, legalRev, liqRev: s.month.liqRev });
   m.mRev = 0; m.mCost = 0; if (cm) { cm.mRev = 0; cm.mCost = 0; }
@@ -439,6 +508,7 @@ function monthTick(s) {
 export function advance(s, minutes) {
   for (let i = 0; i < minutes && !s.over; i++) {
     s.t++;
+    if (s.walk) walkStep(s);
     if (s.t % 60 === 0) hourTick(s);
   }
 }
@@ -456,7 +526,16 @@ const OK = { ok: true };
 export function act(s, a) {
   if (s.over) return fail('Oyun bitti.');
   const di = s.dist;
+  if (s.mesafe && GATE[a.type] && here(s) !== GATE[a.type]) return fail(`Bunun için ${PLACES[GATE[a.type]].ad} yerinde olmalısın.`);
   switch (a.type) {
+    case 'goto': {
+      const to = a.b ? PLACES[a.b] : { x: Math.max(10, Math.min(710, +a.x)), y: ROAD_Y };
+      if (!to || !Number.isFinite(to.x)) return fail('Gidilemez.');
+      const path = pathTo(s.walk ? walkerAt(s, 0) : s.pos, to);
+      if (s.walk) { s.pos = { x: s.pos.x, y: s.pos.y }; }
+      s.walk = path.length ? { to: a.b || null, path } : null;
+      return OK;
+    }
     case 'choose': return choose(s, a.card, a.opt);
     case 'setPrice': s.biz.meyhane.price = clamp(+a.v, 0.7, 1.3); return OK;
     case 'setLaunder': s.launderPct = clamp(+a.v, 0, 150); return OK;
@@ -493,6 +572,7 @@ export function act(s, a) {
       c.employed = false;
       addMod(s, a.id, 'Onu kovdun', -30, 1);
       log(s, `${c.ad} işten çıkarıldı.`, 'warn');
+      loseDost(s, a.id, 'işten çıkardın');
       if (a.id === 'selim') addMod(s, 'zehra', 'Oğlunu kovdun', -20, 1);
       if (c.job === 'usta' && rnd(s) < 0.3) s.pendingEvidence.push({ v: 8, why: `${c.ad} kovulunca bildiklerini anlattı.` });
       return OK;
@@ -507,9 +587,97 @@ export function act(s, a) {
       if (!c || c.dead) return fail('Yapılamaz.');
       const day = dateOf(s.t).day;
       if ((c.giftDay ?? -99) + 10 > day) return fail('Daha yeni hediye verdin; şimdi tekrarı rüşvet gibi durur.');
-      if (!spend(s, 50, 'dirty')) return fail('Para yetmiyor.');
+      const cost = bond(s, a.id) === 'dost' ? 25 : 50; // dostluk iyilik maliyetini yarıya indirir
+      if (!spend(s, cost, 'dirty')) return fail('Para yetmiyor.');
       c.giftDay = day;
       addMod(s, a.id, 'Hediye gönderdin', 8, 2);
+      addOrtak(s, a.id);
+      return OK;
+    }
+    case 'feast': {
+      const c = s.chars[a.id];
+      if (!c || c.dead || c.jailed) return fail('Yapılamaz.');
+      const day = dateOf(s.t).day;
+      if ((c.feastDay ?? -99) + 8 > day) return fail('Bu kişiyle daha yeni yemek yedin.');
+      if (!spend(s, 150, 'dirty')) return fail('Para yetmiyor (150 ₺).');
+      c.feastDay = day;
+      addMod(s, a.id, 'Sofranda ağırladın', 6, 2);
+      addOrtak(s, a.id);
+      fame(s, 'yeralti', 'golge', { t: 1 }, 1);
+      log(s, `${c.ad} ile yemek yedin.`, 'good', 'Birlikte yaşanan her olay dostluğa sayılır (3 ortak olay + görüş ≥ 40 = dost).');
+      return OK;
+    }
+    case 'donate': {
+      const amt = clamp(Math.round(+a.amount), 100, 600);
+      const day = dateOf(s.t).day;
+      if ((s.flags.donateDay ?? -99) + 5 > day) return fail('Daha yeni bağış yaptın.');
+      if (!spend(s, amt, 'dirty')) return fail('Para yetmiyor.');
+      s.flags.donateDay = day;
+      fame(s, 'halk', 'cephe', { t: 3, i: 8 * amt / 300 }, 0.8);
+      log(s, `Mahalleye ${money(amt)} bağış yaptın.`, 'good', 'Semt halkında iyiliğin yükseldi (yerleşik ün zor değişir: yükseldikçe etkisi azalır).');
+      return OK;
+    }
+    case 'defterAc': return defterAc(s, a.hedef, a.neden, a.agirlik);
+    case 'defterKapat': return defterKapat(s, a.id, a.yol);
+    case 'kredi': {
+      const amt = clamp(Math.round(+a.amount), 1000, 4000);
+      const day = dateOf(s.t).day;
+      if ((s.flags.krediDay ?? -99) + 10 > day) return fail('Başvurunun üzerinden 10 gün geçmeli.');
+      if (listede(s, 'banka')) return fail('Banka kara listesindesin.');
+      if (s.kredi.principal > 0) return fail('Önceki krediyi kapat.');
+      const e = krediInfo(s, amt);
+      s.flags.krediDay = day;
+      if (rnd(s) < e.p) {
+        s.cash.clean += amt; s.kredi.principal = amt; s.kredi.installment = e.installment; s.kredi.missed = 0;
+        addMod(s, 'selahattin', 'Kredi aldın', 3, 2);
+        log(s, `Liman A.Ş. ${money(amt)} kredi verdi (6 taksit, aylık faiz %${(S0.KREDI_FAIZ * 100).toFixed(1)}).`, 'good', `Onay ihtimali %${Math.round(e.p * 100)} idi.`);
+      } else {
+        addMod(s, 'selahattin', 'Kredi talebin reddedildi', -3, 2);
+        log(s, 'Liman A.Ş. kredi talebini reddetti.', 'bad', `Onay ihtimali %${Math.round(e.p * 100)} idi.`);
+      }
+      return OK;
+    }
+    case 'hisse': {
+      const pct = clamp(Math.round(+a.pct), 5, 20);
+      const L = s.kurum.liman;
+      if (L.hisse + pct > S0.HISSE_MAX) return fail(`En çok %${S0.HISSE_MAX} pay alabilirsin.`);
+      const cost = pct * S0.HISSE_FIYAT * (a.kirli ? 1.3 : 1);
+      if (a.kirli) {
+        if (!spend(s, cost, 'dirty')) return fail('Para yetmiyor.');
+        s.maliSuphe += cost / 200;
+      } else if (!spend(s, cost, 'clean')) return fail('Temiz paran yetmiyor.');
+      L.hisse += pct;
+      addMod(s, 'selahattin', 'Ortak oldun', 6, 2);
+      log(s, `Liman A.Ş.'den %${pct} pay aldın (toplam %${L.hisse}, ${money(cost)}${a.kirli ? ', kirli para %30 komisyonla' : ''}).`, 'good',
+        L.hisse >= 25 ? 'Yönetim kurulunda koltuğun var: kredi onayı +1,0.' : 'Her ay payın kadar temettü gelir (temiz para).');
+      return OK;
+    }
+    case 'hisseSat': {
+      const L = s.kurum.liman;
+      const pct = Math.min(L.hisse, clamp(Math.round(+a.pct), 5, 20));
+      if (pct <= 0) return fail('Hissen yok.');
+      const got = pct * S0.HISSE_FIYAT * 0.8;
+      L.hisse -= pct; s.cash.clean += got;
+      log(s, `Liman A.Ş. payından %${pct} sattın (${money(got)}; %20 iskonto).`, 'warn');
+      return OK;
+    }
+    case 'ahitIste': {
+      if (s.unvan.ahit) return fail('Zaten Ahdin var.');
+      if (s.kurum.karaca.redd && opinion(s, 'orhan').total < 0) return fail('Orhan seninle konuşmaz: önce gönlünü almalısın (görüşü 0\'ın üstüne çıkmalı).');
+      kabulAhit(s, S0.HARAC, 'Karaca Ailesi\'ne kendin gidip Ahit istedin.');
+      s.kurum.karaca.redd = false;
+      return OK;
+    }
+    case 'ahitBoz': {
+      const u = s.unvan;
+      if (!u.ahit) return fail('Ahdin yok.');
+      const st = stressFor(s.patron, 'ahitBoz');
+      u.ahit = null; u.tanindi = false;
+      s.kurum.karaca.redd = true;
+      addMod(s, 'orhan', 'Ahdi bozdun', -40, 1);
+      fame(s, 'yeralti', 'golge', { t: 2, k: 2 }, 1);
+      if (st.total) addStress(s, st.total, st.why.join(', '));
+      log(s, 'Karaca Ailesi ile Ahdi bozdun. Artık himaye yok, ama haraç da yok.', 'bad', 'Orhan bunu düşmanlık sayar: baskı artacak.');
       return OK;
     }
     case 'bribe': {

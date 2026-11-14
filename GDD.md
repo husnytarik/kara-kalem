@@ -1,6 +1,7 @@
-# GÖLGE ŞEHİR (çalışma adı) — Oyun Tasarım Dokümanı
+# KARA KALEM — Oyun Tasarım Dokümanı
 
-**Sürüm:** 0.1 (ilk taslak) · **Tarih:** 14.11.2026
+**Sürüm:** 0.2 (Bölüm 24–25 eklendi; prototip v0.2 ile eşleşir) · **Tarih:** 15.11.2026
+**Not:** Önceki çalışma adı "Gölge Şehir" idi; ad "Kara Kalem" olarak kesinleşti (Kara Defter ve imza/kalem teması).
 **Durum:** Konsept derinleştirme. `[VARSAYIM]` etiketli her şey senin onayını bekleyen bir tercihtir; liste Bölüm 19'da.
 
 ---
@@ -492,6 +493,8 @@ Senin anlattığın kesitin kendisi:
 | Oyun yönü | Karakter odaklı hanedan stratejisi (Bölüm 22) |
 | Hız kontrolü | Duraklat + ×1, ×2, ×3 (Bölüm 3.3) |
 | Yaşam ölçeği | Karakterler her oyun ayında 1 yaş alır (Bölüm 22.8) |
+| Oyunun tavanı | Esnaftan ulusal sendikaya uzanan güç merdiveni; ün, çevre, şirket ve mafya hiyerarşisi (Bölüm 24) |
+| Savaş | Mafya savaşları oyunun parçasıdır; sunum soyuttur, cephe + komutan + olay kartı (Bölüm 25) |
 
 **Hâlâ açık:**
 
@@ -504,6 +507,8 @@ Senin anlattığın kesitin kendisi:
 | 5 | Zaman ölçeği | 1 gün = 8 dk, 1 ay = 80 dk (normal hız) | Oyunun bütün temposu |
 | 6 | Olay yoğunluğu | Bölüm 23.3'teki sıklıklar | Şehir ölçeğinin "her gün bir şey olur" hissi; prototipte ayarlanacak |
 | 7 | Kayıt düzeni | Tek kayıt, geri yükleme yok | Kararların ağırlığı; istenirse serbest kayıt açılabilir |
+| 8 | Güç merdiveni ve ün | Bölüm 24.10'daki 24-1…24-7 | Oyunun hedefi ve uzun vadeli yapısı |
+| 9 | Savaş kapsamı | Bölüm 25.8'deki 25-1…25-5 | Ton, kapsam, prototip sırası |
 
 ## 20. Riskler
 
@@ -729,6 +734,7 @@ Patron
 ```
 
 - **Doğrudan yönetim sınırı:** Patron bizzat `3 + Ticaret/20` varlık yönetebilir (tipik 4–8). Sınırı aşan her varlık hepsinin verimini düşürür ve İz üretimini artırır. Senin anlattığın kesit (4 işyeri + imalathane) tam bu sınırdadır: **oyunun ilk perdesi** orada biter.
+- **Üst basamaklarda:** Kaptan–patron bağı, Bölüm 24.4'teki **Ahit** sözleşmesinin en küçük hâlidir; Reis, Baba ve üstü basamaklarda aynı mekanik bağımsız ailelere de uygulanır.
 - **Kaptan:** Bir bölgeyi ve içindeki varlıkları kendi adına yönetir; kazancın belirlenen **payını** yukarı gönderir. Patron kaptanın işine karışmaz; yalnızca özet rapor görür (ve raporun doğruluğunu sorgulayabilir).
 - **Kaptanın ayarları:** pay oranı, özerklik (kendi başına genişleyebilir mi, şiddet kullanabilir mi), bölge sınırı.
 - **Tampon:** Kaptan, patron ile suç arasındaki mesafedir. Kaptanın ekibindeki bir baskın patronun Dosyasına ancak kaptan konuşursa ulaşır. Sadık kaptan = kalkan; küskün kaptan = itirafçı adayı.
@@ -932,3 +938,487 @@ Oyuncu istediği an duraklatabildiği için pencereler gerçek zaman baskısı d
 - Çıkışta oyun kaydedilir; dünya o anda donar.
 - Açılışta **"Kaldığın Yer"** özeti gösterilir, çünkü oyuncu günler sonra dönmüş ve bağlamı unutmuş olabilir: tarih ve saat, açık kararlar ve kalan süreleri, patronun ve adamların kuyruktaki işleri, son 3 oyun gününün öne çıkan olayları, yürüyen entrikalar.
 - Oyun duraklatılmış açılır.
+
+---
+
+## 24. Toplum, ün ve güç merdiveni
+
+**Yön kararı (14.11.2026, ikinci):** Oyun bir mahalle esnafıyla başlar ama tavanı bir mahalle değildir. Oyuncu, bir **güç merdiveninin** basamaklarını çıkar: esnaf → sokak ağası → semt reisi → şehrin babası → kıyı birliğinin başı → ulusal sendika. Her basamakta çevre (dostlar, akranlar, iş dünyası, siyaset, polis), ün ve düşman kendi ölçeğinde yeniden kurulur. Hiyerarşi fikri hanedan stratejisi türünden alınmıştır (mekanik fikir; dünya, unvanlar ve içerik özgündür).
+
+Bu bölüm 9 (İnsanlar), 10 (İlişkiler), 12 (Rakipler) ve 22 (Karakter odağı) üzerine **ekleme** yapar; çelişen yerde bu bölüm geçerlidir.
+
+> **[VARSAYIM]** Bu bölümdeki ve Bölüm 25'teki bütün sayılar (eşikler, katsayılar, olasılıklar) başlangıç tahminidir; prototipte ölçülüp ayarlanacaktır.
+
+### 24.1 Karakterin yapısı
+
+Bir karakter "bir dizi sayı" değil, katmanlı bir yapıdır. Yapısal katmanlar neyin **kim olduğunu** söyler; durum katmanı o günkü hâlini.
+
+| Katman | İçerik | Değişir mi? | Adet |
+|---|---|---|---|
+| Nitelikler (9.1) | Zekâ, Güç, İkna, Ticaret, Zanaat, Ketumluk, Hırs, Açgözlülük, Cesaret, Dürüstlük, Yozlaşabilirlik | Yaşla, eğitimle, olaylarla yavaşça | 11 |
+| **Doğuştan özellikler** | Zeki, Güçlü, Cüsseli, Gösterişli, Sıhhatli, Çelimsiz, Uzun Ömürlü | Hayır; çocuğa geçer | 0–3 |
+| **Mizaç** | Temkinli, Gözüpek, Cömert, Açgözlü, Merhametli, Zalim, Sözünün Eri, Dönek, Sabırlı, Öfkeli, Kindar, Bağışlayıcı | Nadiren (büyük travma, stres kırılması) | 3–4 |
+| **Edinilmiş özellikler** | Gazi, Hapis Yatmış, Yaralı, Alkolik, Kumarbaz, Borçlu, Dul, Dindar, Hayırsever | Evet; olayla kazanılır, bazıları kaybolur | ≤5 |
+| **Yetiştirilme** | Çocukluk/gençlikte mentorun yolu: Tüccar, Entrikacı, Siyasetçi, Sokak Adamı | Bir kez | 1 |
+| **Köken** | Doğduğu semt, babasının mesleği, cemaati | Hayır | 3 etiket |
+| Sır ve zaaflar (22.5) | | | |
+| Durum | Stres, sağlık, ruh hâli | Sürekli | |
+
+Her özellik veri olarak tanımlıdır; kodda ayrıca bir "if" yazılmaz:
+
+```
+Özellik = { ad, tür, nitelikEtkisi{Cesaret:+10}, görüşEtkisi{aynı:+10, karşıt:−10},
+            stresKuralı{eylem → +stres}, açar[eylem], kapatır[eylem], karşıt, kalıtım }
+```
+
+**Örnekler**
+
+| Özellik | Niteliklere | Görüşe | Karar ve stres |
+|---|---|---|---|
+| Temkinli | Cesaret −10, Ketumluk +10 | Gözüpeklere −10 | Riskli seçeneklerde stres +5; baskın ihbarında ilk saatte kaçışı seçer |
+| Gözüpek | Cesaret +15 | Temkinlilere −10 | Gözdağı ve saldırı seçenekleri açılır; Dosya'yı umursamaz |
+| Cömert | Açgözlülük −15 | Cömertlere +10 | Aileyi/arkadaşı geri çevirmek stres +10 (21.8) |
+| Açgözlü | Açgözlülük +15 | Cömertlere −10 | Rüşvet kabul ihtimali +x; ortak sattığında sır bozar |
+| Merhametli | Dürüstlük +5 | Zalimlere −10 | İnfaz emri stres +20; af seçeneği açılır |
+| Kindar | — | Kara Defter kayıtları sönmez | Af seçeneği kapanır; intikam alınca stres −10 |
+| Sözünün Eri | Dürüstlük +10 | Dönekler −10 | Söz bozmak stres +25, Saygı kaybı ×2 |
+| Alkolik (edinilmiş) | Zekâ −5, Ketumluk −15 | Dostlara +5 | Sarhoşken sır verir; sağlık −0,5/ay |
+| Gazi (edinilmiş) | Güç +5, Cesaret +10 | Ekibine Saygı +10 | Savaş stresine dayanıklı |
+
+**Kişilik uyumu** (22.2'deki dökümde tek satır): `10 × ortak özellik sayısı − 10 × karşıt çift sayısı`, −20…+20 arasında kırpılır. Aynı mizaç yakınlaştırır, karşıtı uzaklaştırır; ama kıt değer: üç özellik taşıyan birinin uyumu da sınırlıdır.
+
+**Kalıtım.** Çocuk, her ebeveynin her doğuştan özelliğini %25 olasılıkla alır; %3 olasılıkla ebeveynlerde olmayan yeni biri çıkar. Mizaç genetik değildir: yetiştiren yetişkinin mizacı çocuğa %40 olasılıkla geçer, kalanı çocukluk olaylarından (korkutulmak → Temkinli, kayırılmak → Açgözlü) çıkar. Yani oğlunu kimin yetiştireceği oyuncu kararıdır.
+
+**Karar ağırlığı.** YZ karakterler (ve vekil, 23.5) bir eylemi şöyle puanlar:
+
+```
+Puan(eylem) = Σ özellikAğırlığı(özellik, eylem) + 0,3 × Çıkar(eylem) + 0,2 × Görüş(hedef)
+```
+
+En yüksek puanlı eylem yapılır (küçük bir rastgelelikle). Oyuncu bir kişiyi tanıdıkça "Bu adam muhtemelen şunu yapar" ipucu görür; güvenilirliği tanıdığı süreye bağlıdır (Bölüm 11). Böylece özellik hem hikâye süsü hem öngörülebilir bir mekaniktir.
+
+### 24.2 Çevre: kim kimdir, ne verir, ne ister
+
+Şehirdeki her karakter bir **çevreye** aittir. Oyuncunun ilişki ağı çevre çevre kurulur ve her çevre farklı oynanır.
+
+| Çevre | Kimler | Sana verdiği | Senden istediği | Tehlikesi |
+|---|---|---|---|---|
+| **Aile** | Eş, çocuklar, kardeşler, yeğenler | Sadakat, vâris, ittifak (evlilik) | Himaye, iş, hoşgörü | Beceriksiz akraba; aile içi hizip |
+| **Dostlar** | Çocukluk arkadaşı, savaş arkadaşı, sırdaş | İyilik ucuza gelir, gerçek bilgi, kriz anında yardım | Aynı karşılık; ihanete tahammülsüz | Dostun yanması seni yakar; dost ihaneti en çok stres yapar |
+| **Akranlar** | Aynı basamaktaki patronlar (semt reisleri, esnaf başkanları) | Ortak iş, bölge anlaşması, Komisyon oyu | Saygı, sınıra riayet | Terfin onları tehdit eder |
+| **Ekip** | Adamlar, kaptanlar, ustalar | Güç, üretim, tampon | Maaş, himaye, terfi | Hizip, sızıntı |
+| **İş dünyası** | Esnaf, tüccar, armatör, bankacı, sanayici | Kredi, ihale, aklama kapısı, meşru cephe | Koruma, tekel, kolaylık | Seni araç görürler; Dosya'dan sonra seni yüzüstü bırakırlar |
+| **Siyaset** | Meclis üyesi, başkan, parti il yöneticisi, vali, milletvekili | Ruhsat, polis bütçesi, af, ihale | Bağış, oy, susma | Yeni yönetim eskisinin adamını yakar |
+| **Hukuk ve polis** | Devriye, komiser, savcı, hâkim, gümrük | Ön bilgi, dosya "kayıpları", gözün kapalı olması | Rüşvet, iyilik, koz | Dürüst olanın dosyası seni bitirir |
+| **Basın ve kanaat** | Gazete sahibi, köşe yazarı, imam/papaz, sendika lideri | Ün, kamu imajı | Reklam, haber, bağış | Skandal haberi Dikkat'i patlatır |
+| **Yeraltı** | Rakip aileler, tefeciler, kaçakçılar, kiralık tetikçiler | Mal, para, adam, bilgi | Pay, saygı, ödünç | Ayakları kaygan zemin |
+| **Halk** | Semt sakinleri, müşteriler, komşular | Müşteri, tanıklık yapmama, oy | Düzen, onur | Tanık, ihbarcı |
+
+**Bağ türleri.** Aynı iki kişi arasında birden fazla bağ olabilir ve bağlar **karşılıklı olmak zorunda değildir** (sen onu dost sanırsın, o seni basamak).
+
+| Bağ | Koşul | Etki |
+|---|---|---|
+| **Dost** | Görüş ≥ +40 ve en az 3 ortak olay (yemek, iyilik, kriz) | İyilik borcu maliyeti −50%; dost sır paylaşır; ayrılık stres +10 |
+| **Sırdaş** | Dost + karşılıklı sır paylaşımı | Güçlü koz karşılıklı; ihanet stres +30, Dürüstlük kaybı |
+| **Akraba / Yeminli** | 22.8 | Görüşte kalıcı bonus, ihanet eşiği yüksek |
+| **Hami ↔ Himaye edilen** | Biri öbürünü korumayı üstlenir (Ahit, 24.4) | Haraç ve çağrı karşılığı koruma |
+| **Mentor ↔ Çırak** | Gençlikte öğretme | Çıraktaki odak yolu mentordan; sadakat bonusu |
+| **Müttefik** | Yazılı/sözlü ortaklık, evlilik | Savaşta çağrı; ihanet "Söz" itibarını yakar |
+| **Rakip** | Aynı pazar/bölge | Ticari rekabet; kişisel olması gerekmez |
+| **Düşman** | Kara Defter'de kayıt veya savaş | Entrika ve saldırı hedefi; Görüş tavanı −60 |
+| **Kan davası** | Yakını öldürülmüş | Aile içinde nesillere geçer; barışmak çok zor |
+
+**Dostluk bir mekanik.** Dost olmak ücretsiz değildir: zaman ve ilgi ister (ayda −2 sönme, 10.1) ama karşılığında iyilik ekonomisinde en ucuz kaynaktır. Yalnızca çıkar kaynaklı "dost"lar (iş dünyası, siyasetçi) pahalıya geri istenir.
+
+#### Kara Defter (senin listen)
+
+Oyuncu bir kişiye ya da kuruma karşı **kayıt açabilir**; adamlar ve müttefikler bunu bilir.
+
+```
+Kayıt = { hedef, neden (borç, hakaret, ihanet, kan, ihbar), ağırlık 1–3, açıldığı yaş-yılı }
+```
+
+- **Kayıt açmak bedavadır; kapatmak değildir.** Açık kayıt, hedefin Görüşünü düşürmez; ama **sendeki Kin'i** besler: Kindar özellikliyse sönmez, diğerleri için yıllık %10 söner.
+- **Kapatma yolları:** *Hesaplaşma* (misilleme: Saygı/Korku +, Ün'e göre bedel), *Af* (Merhametli +stres azalır, hedefin Görüşü +25, Korku −), *Tazminat* (hedef öder, kayıt kapanır), *Zamanaşımı* (ağırlık 1 kayıt 5 yaş-yılında silinir).
+- **Boş tehdit bedeli:** 1 yaş-yılından uzun açık duran ağırlık 3 kayıt Korku'yu ayda −1 düşürür. İnsanlar "söylediğini yapmayan"dan korkmaz.
+- **Savaş gerekçesi (25.2):** Ağırlık ≥2 kayıt, o kişiye karşı meşru savaş sebebidir.
+- Adamlar Kara Defter'i görür: defteri şişirmek ekibe "bu adam kin tutar" mesajıdır (Korku ↑, Sevgi ↓).
+
+#### Kara Listeler (sana karşı tutulanlar)
+
+Başkaları da senin için liste tutar. Her liste farklı çevreden gelir ve kapıları kapatır:
+
+| Liste | Kim tutar | Giriş koşulu | Etkisi | Çıkış |
+|---|---|---|---|---|
+| **Aranan listesi** | Polis | Dosya ≥ 50 | Arama olasılığı ×2, rüşvet x −1,0 | Dosya düşürmek, davayı kapatmak |
+| **Banka kara listesi** | Bankalar | Protesto, temiz borç batışı | Kredi kapalı; hesap dondurma riski | Borcu kapat + 12 ay bekle |
+| **Esnaf birliği "güvenilmez"** | Birlik | Haraç şikâyeti, kalitesiz mal | Tedarikçi fiyatı +15%, birlik ihaleleri kapalı | Tazminat + bir iyilik |
+| **Açık av** | Komisyon | Yazısız kural çiğnemek (22.9) | Her aile sana saldırabilir, müttefik yok | Komisyon oylaması + tazminat |
+| **Gazete boykotu** | Basın | Skandal, bastırılmış haber | Ün'e günlük aşınma; reklam gelmez | Bağış + temiz bir yıl |
+| **Gümrük işareti** | Gümrük | Kaçak yakalandı | Her sevkiyat iz ×2 | Müdürle anlaşma |
+
+Her listenin ne olduğu ve nasıl girildiği oyuncuya **görünür**; ama bir listeye girdiğini ancak kaynağı olan biri bildirirse anlarsın (Bölüm 11).
+
+### 24.3 Tanınırlık ve ün
+
+İki ayrı şey: **kaç kişi seni tanıyor** ve **seni tanıyanlar ne düşünüyor**. Küçük bir esnaf az tanınır ama sevilir olabilir; büyük bir gangster çok tanınır ve nefret edilir olabilir. Bu iki sayı her **çevre için** ayrı tutulur.
+
+| Sayı | Aralık | Anlamı |
+|---|---|---|
+| **Tanınırlık (T)** | 0–100 | O çevrenin kaçı seni ve adını biliyor |
+| **İyilik (İ)** | −100…+100 | Bilenler seni iyi mi kötü mü görüyor (sevilen ↔ nefret edilen) |
+| **Korku (K)** | 0–100 | Bilenler senden ne kadar çekiniyor |
+
+Çevreler: **Semt halkı** (her semt ayrı), **Esnaf**, **Yeraltı**, **Polis ve adliye**, **Siyaset**, **Basın ve salon** (varsıl sınıf). Oyuncu "ünlü" değil, "Eski Mahalle'de sevilen, yeraltında tanınan, polisçe bilinen" biridir.
+
+| | İ ≥ +30 | İ −30…+30 | İ ≤ −30 |
+|---|---|---|---|
+| **T < 20** | Mahalle çocuğu | Bilinmeyen | Tekin değil |
+| **T 20–60** | Sevilen | Tanıdık yüz | Kötü ağızlı |
+| **T > 60, K < 40** | Hayırsever | Şehir adamı | Nefret edilen |
+| **T > 60, K ≥ 40** | Saygın Baba | Korkulan | Kötü şöhretli |
+
+**Nasıl değişir.** Her kamuya açık olay (görünürlük V: tanık sayısı, basın, mekân; 0–1):
+
+```
+ΔT_çevre = V × İlgi_çevre(olay)         × (1 − T/100)      # doyar: ilk tanınma hızlı, sonu ağır
+Δİ_çevre = V × Değer_çevre(olay)       × (1 − |İ|/120)    # yerleşik ün zor değişir
+ΔK_çevre = V × Korkutuculuk(olay)      × (1 − K/100)
+Aylık sönüm: T −0,3 · İ ve K ‒%3 oranında 0'a (Korku %5)
+```
+
+Örnekler: *Mahalleye çeşme yaptırmak* → semt halkında İ +8, esnafta İ +2; *Meyhanede gözdağı verirken görülmek* → semt K +6, İ −4, polis T +3; *Rakibin adamını sokakta dövmek* → yeraltı K +10, polis T +8; *Gazete skandalı* → V=1, birçok çevrede T bir anda yükselir.
+
+**Cephe ve Gölge.** Her çevrede iki profil vardır: **Cephe** (yasal kimliğin: meyhaneci, hayırsever) ve **Gölge** (gerçek yüzün). Çevrenin gördüğü:
+
+```
+Algılanan = Cephe × (1 − S) + Gölge × S
+S (sızıntı, 0–1): Yeraltı 0,9 · Polis 0,3 + Dosya/200 · Basın 0,1 · Halk 0,1 · Siyaset 0,2
+Skandal, ihbar, iddianame: ilgili çevrelerde S'yi kalıcı yükseltir (sönmez, ancak yeni hikâyeyle geri çekilir)
+```
+
+Bu **Gizlilik sütununun** ün cephesidir: büyüdükçe T artar ama S küçük kalırsa hem tanınan hem temiz görünürsün. İlk başarı hissi budur.
+
+**Ne işe yarar.**
+
+| Etki | Formül / kural |
+|---|---|
+| Tanışmamış birinin sana başlangıç Görüşü | `G0 = 0,4 × İ_çevre − 0,1 × K_çevre`; tanıma olasılığı `T/100`, tanımıyorsa "?" |
+| Polis Dikkati tabanı | `+0,25 × T_polis` (Bölüm 8'deki Dikkat dökümüne "Tanınmışlık" satırı olarak eklenir) |
+| Meyhane çekiciliği | `Çekicilik × (1 + 0,2 × İ_semt/100)` |
+| Haraç, tahsilat, gözdağı | Başarı x'ine `+ K_çevre/40` |
+| Seçimde oy getirme | `Nüfus × T_semt/100 × (0,5 + İ_semt/200)` |
+| Komisyon tanınması (24.4) | `T_yeraltı ≥ 60` ve `K_yeraltı ≥ 30` |
+| Kredi ve ihale | Banka/şirket Görüşüne `G0` üzerinden girer |
+| Bilgi fırsatları | T yükselince "Kulağına Gelenler" (21.7) sayısı artar; daha iyi ve daha tehlikeli |
+
+**Lakap.** T_yeraltı ≥ 40 olduğunda patrona, ününe göre bir lakap takılır ("Hayırsever Murat", "Kasap Hasan"). Lakap kozmetik değil: sonraki olayların tonunu ve bazı NPC'lerin ilk tepkisini etkiler; değişmesi yıllar sürer.
+
+### 24.4 Güç merdiveni
+
+```
+ 5  Sendika Başkanı ── Ulusal sendika, denizaşırı bağlantılar
+ 4  Kıyı Başı ──────── Liman şehirleri birliği (3–6 şehir)
+ 3  Baba ───────────── Bir şehrin tamamı, Komisyon koltuğu
+ 2  Reis ───────────── Bir semt ya da birkaç semt, kaptanlar
+ 1  Ağa ────────────── Bir sokak/mahalle parçası, adamlar
+ 0  Esnaf ──────────── Kendi işi (oyunun başlangıcı)
+```
+
+Merdiven çevreyi, rakibi, devleti ve oyunun **türünü** birlikte değiştirir:
+
+| Basamak | Kapsam | Mafya karşılığı | Şirket karşılığı | Siyaset | Polis | Günün işi |
+|---|---|---|---|---|---|---|
+| **0 Esnaf** | Bir iş yeri | — | Tek esnaf | Muhtar | Devriye | Defter, borç, kendi işini ayakta tutmak |
+| **1 Ağa** | 1–4 iş, 1 sokak | Sokak çeteleri | Esnaf birliği | Meclis üyesi | Karakol amiri | Adamlarını ve kasayı yönetmek |
+| **2 Reis** | 1–3 semt | Semt aileleri | Armatör, orta fabrika | Belediye başkanı | Komiser | Kaptanlara devir, sınır anlaşmaları |
+| **3 Baba** | Şehir | Şehir aileleri, **Komisyon** | Liman A.Ş., Banka, Gazete grubu | Vali, milletvekili | Başsavcı, özel birim | Diplomasi, Komisyon oylaması, siyaset |
+| **4 Kıyı Başı** | 3–6 liman şehri | Bölge birliği | Ulusal tröst, demiryolu, denizcilik | Bakan, parti merkezi | Bakanlık istihbaratı | İttifak ağı, ticaret yolları |
+| **5 Sendika Başkanı** | Ülke + denizaşırı | Ulusal sendika, uluslararası kaçakçılık ağları | Çok uluslu kartel | Hükümet, dış ilişkiler | Ulusal güvenlik, ortak operasyonlar | Meta oyun: sendika politikası, savaş ve barış |
+
+Her basamakta çevre **yukarı kayar**: Reis'in karşısında komiser durur, Baba'nın karşısında savcı. Eski dostlar (yeraltından, esnaftan) kalır ama artık "küçük adamlar"dır; yeni akranlar farklı yaşar. Basamak atlamak stres de üretir (eski çevre küser).
+
+**Güç Puanı (GP).** Basamağı belirleyen tek sayı:
+
+```
+GP = 6 × ln(1 + AylıkGelir/1000)  +  0,5 × Adam  +  4 × Semt  +  0,25 × Σ(Bağlıların GP)  +  0,1 × T_yeraltı
+```
+
+| Basamak | GP eşiği (başlangıç değeri, ayara tabi) |
+|---|---|
+| Ağa | 15 |
+| Reis | 35 |
+| Baba | 60 |
+| Kıyı Başı | 85 |
+| Sendika Başkanı | 110 |
+
+Başlangıç meyhanecisi: gelir 3.000 → 8,3; 3 adam → 1,5; yarım semt → 2; GP ≈ 12. Yani oyun **Esnaf**'tan başlar, ilk perdeyi kapatan eşik Ağa'dır.
+
+**Terfi otomatik değildir.** Dört şart:
+1. GP ≥ eşik **3 ay üst üste** (bir günlük zıplama sayılmaz);
+2. Çevre tanınması: ilgili çevrelerde T eşiği (Ağa: semt 30, Reis: yeraltı 45, Baba: yeraltı 60 + polis 40);
+3. **Tanınma oylaması:** bir üst basamağın akranlarının (veya Komisyon'un) çoğunluğu seni "oturdu" kabul eder. Reddedilirsen unvanı kendin üstlenirsin ama **Tanınmamış** sayılırsın (Komisyon himayesi yok, açık av riski, ama bağımsızlık);
+4. Üst makama bağlıysan (Ahit), üstün **izni** (ya da ondan ayrılman).
+
+Düşüş de vardır: GP eşiğin 10 altına 3 ay inerse **unvan kaybı**; bağlıların Ahdini sorgular.
+
+**Ahit (üst–alt bağı).** Hiyerarşi bir sözleşmedir:
+
+```
+Ahit = { üst, alt, haraç% (5–30), çağrıLimiti (ay/adam), özerklik (0–2), ayrılmaŞartı }
+
+Altın memnuniyeti = 50 + 0,5 × Görüş(alt→üst) − 1,5 × (haraç% − 10) + 10 × özerklik
+                     − 0,3 × ÇağrıYükü + HimayeDeğeri (0–20)
+```
+
+- **Haraç:** Alt, gelirinin belirlenen payını üste gönderir (22.4'teki kaptan payı, aynı mekanik).
+- **Çağrı:** Üst savaşta adam ister (25.5); limit aşılırsa memnuniyet düşer.
+- **Himaye değeri:** Üst, alta somut koruma sağladıysa (polis, rakip baskısı, haksız dava) +; sağlamıyorsa 0.
+- **Memnuniyet < 30:** talep (haraç indirimi, özerklik); **< 15:** günlük %2 isyan riski (ayrılık ya da darbe). Üst, **hizip** (22.4) kurulmadan sorunu çözmeli.
+
+Oyuncu **hem alt hem üst** olabilir: Reis iken bir Baba'ya Ahit verip korunur (ama haraç öder); Baba iken kendi Reis'lerin vardır. Üst makamlar YZ ailelerdir ve onlara bağlanmak, onları devirmek, onlarla evlenmek aynı sistemin parçasıdır.
+
+**Basamağa göre oyun değişir.** Esnaf: ekonomi ve gizlilik simülasyonu. Ağa: ekip ve sokak taktiği. Reis: yönetim ve devir. Baba: siyaset, diplomasi, Komisyon. Kıyı Başı: ağ ve ticaret yolları. Sendika: uzun vadeli strateji. Oyun, "kendi işini ayakta tutmak"tan "bir düzeni ayakta tutmak"a kayar.
+
+### 24.5 Büyük şirketler ve kurumlar
+
+Şirketler ve kurumlar da **karakter gibi** modellenir: sahipleri ve yönetim kurulu birer karakterdir, kendilerine ait bir kişilikleri, çıkarları ve ilişkileri vardır.
+
+```
+Kurum = { ad, tür, basamak, sahip/yönetim[karakter], sermaye, aylıkCiro, pazarPayları,
+          kişilik (Agresif/Tutucu/Rüşvetçi/Dürüst), siyasiBağlar, listeler }
+```
+
+| Kurum | Basamak | Etkileşim | Sana ne sunar | Sana ne yapar |
+|---|---|---|---|---|
+| **Esnaf birliği** | 1 | Üyelik, tedarik, ihale | Toplu alım, esnaf koruması | Fiyat bağı, güvenilmez listesi |
+| **Banka** | 3 | Kredi, hesap, aklama | Kredi, temiz hesap | Protesto, hesap dondurma, kara liste |
+| **Liman Şirketi** | 3 | Gümrük, depo, nakliye | Sevkiyat, depo | Fiyat, kuyruk, ihbar |
+| **Gazete grubu** | 3 | Haber, reklam, ün | Kamu imajı | Skandal, Dikkat artışı |
+| **İçki ve gıda tröstü** (yasal) | 3–4 | Rekabet, ortaklık | Ölçek ekonomisi, tedarik | Fiyat kırma, tedarik kesme |
+| **İnşaat ve emlak** | 3 | İhale, arsa | Kamu ihalesi, yeni bina | Rüşvet bağımlılığı |
+| **Sigorta** | 3 | Yangın, zarar | Bodrum yangınında tazminat | Sebebi araştırır (iz) |
+| **Demiryolu ve nakliye** | 4 | Sevkiyat | Şehirler arası dağıtım | Fiyat, kontrol |
+| **Sendika (işçi)** | 2–4 | Grev, oy | İşçi yığını | Grev, oy kaybı |
+
+**Büyük şirket baskısı.** Basamak ≥ 2'de bir tröst, senin pazarına girebilir: `değişken maliyet çarpanı 0,55 → 0,45` (ölçek ekonomisi) ve fiyat kırma gücü; küçük işletme onlarla yarışamaz. Çözümler: ortaklık, satın alınma, siyasi koruma (ruhsat, ihale), niş (kalite), ya da onu **boykot/ihbarla** yıpratmak (entrika, 22.6).
+
+**Kredi ve satın alma** aynı sigmoid düzenindedir (Bölüm 14):
+
+```
+Kredi onayı:  x = 1,2 × ln(1 + Teminat/İstenen) + Görüş_banka/40 + İ_esnaf/80 − 2 × (kara listedeyse 1) − 0,5
+Satın alma:   x = 2 × ln(Teklif/Değerleme) + Görüş_sahip/40 + (sahibin zorda olması) − (Cephe'nin sahibe sevimsizliği)
+```
+
+**Meşrulaşma yolu.** Kirli para → aklama → **şirket hissesi**. Hisse %25'i geçince yönetim kurulu koltuğu, bu da ihale/kredi avantajı ve Cephe'nin ünü (İ_salon +) demektir. Ama bağımlılık da doğar: şirket yakalanırsa hisse el konur; yönetim kurulundaki başka birinin Dosya'sı sana bulaşır; Mali Şüphe (7.1) şirket ölçeğinde işler. Bu, mafyanın "temiz iş adamı"na dönüşme yolculuğudur ve Baba basamağının ana temasıdır.
+
+### 24.6 Büyük mafyalar ve oluşumlar
+
+Suç örgütleri de **kurum** olarak aynı modele girer; tek fark, tüzüklerinin ve savaş kurallarının olmasıdır.
+
+| Oluşum | Basamak | Kim yönetir | Nasıl işler |
+|---|---|---|---|
+| **Çete** | 1 | Ağa | Gevşek; tek lider, sadakat kişiseldir |
+| **Aile** | 2 | Reis | Kaptanlar, yeminli üyeler, kan bağları (22.8) |
+| **Şehir ailesi** | 3 | Baba | Komisyon'da oy; bağlı aileler, şirket hisseleri |
+| **Kıyı Birliği** | 4 | Kıyı Başı | Birkaç şehrin Baba'sı bağlıdır; ticaret yolları, ortak mahkeme |
+| **Ulusal Sendika** | 5 | Başkan | Genel Kurul; uluslararası ağlar |
+
+**Oluşumlar** (üyelerin oluşturduğu meclisler): **Komisyon** (şehir, 22.9), **Kıyı Konseyi** (bölge), **Genel Kurul** (ülke). Aynı yapıdadır: yazısız/yazılı kurallar, oylama (ağırlık: GP ve Saygı), gündem, yaptırım. Üst oluşumun kuralları alt oluşumu bağlar.
+
+**Büyük balığın davranışı.** Üst basamaktaki YZ aileler seni üç aşamada fark eder:
+
+```
+Tehdit = GP_sen / GP_onlar × Yakınlık(bölge, pazar) × (1 + K_yeraltı/100)
+```
+
+1. **Görmezden gelir** (Tehdit < 0,3): sen onlar için yoksun.
+2. **Teklif eder** (0,3–0,6): himaye, ortaklık veya Ahit (haraç karşılığı koruma). Reddedersen ilişki soğur.
+3. **Baskı kurar** (> 0,6): kredi kesme, ihbar, adamını ayartma, entrika, en sonunda savaş (25).
+
+Aynı hesabı sen de yaparsın: bir **fırsat** (zayıf rakip) mi, **tehdit** mi (güçlü komşu)? Büyümenin klasik yolları: *fetih* (25), *Ahit toplamak* (bağımsızları bağlı yapmak), *evlilik/ittifak*, *miras*, *satın alma*, *tanınma* (siyasi ve Komisyon).
+
+**Kişilik.** Her büyük ailenin başındaki karakter (24.1) stratejisini belirler: Tüccar (ticaret yolları, ihale), Kasap (savaş, korku), Siyasetçi (bağış, polis bütçesi), Hayalet (gizlilik, ağ). Aynı yapı alt basamaklarda da geçerli.
+
+### 24.7 Ölçekleme: herkesi tam simüle etmek gerekmez
+
+Çok sayıda kişi ve kurum ancak **kademeli simülasyon** ile taşınır (Bölüm 17, 14.1):
+
+| Kademe | Kim | Ayrıntı | Tik |
+|---|---|---|---|
+| **Çekirdek** (≈40) | Aile, dostlar, kaptanlar, yakın rakip patronlar, tanıdık memurlar | Tam karakter: özellik, görüş dökümü, sırlar | Saatlik/günlük |
+| **Çevre** (≈200) | Adamlar, esnaf, orta memurlar, şirket yöneticileri | Özet: nitelikler, görüş (tek sayı), rolü | Günlük özet, aylık olay |
+| **Arka plan** (binler) | Halk, müşteriler, rakip aile mensupları, devriye polisi | İstatistik: semt başına dağılım | Aylık |
+
+Oyuncu bir arka plan kişisine **temas edince** o kişi somutlaşır: `tohum(semt, rol, kişiNo)` ile belirlenmiş bir karakter üretilir (aynı kişi aynı kişidir, determinizm bozulmaz) ve çevre kademesine alınır. Kurumlar özet halde yaşar; yalnızca yöneticileri çekirdek ya da çevre kademesine çıkar.
+
+### 24.8 Veri modeli (prototipe giden iskelet)
+
+Mevcut prototipteki `chars` tablosu genelleşir; kurum, bağ, unvan ve ün ayrı tablolar olur:
+
+```js
+chars:   { id: { ad, yas, nitelik{}, ozellik[], mizac[], koken[], cevre, kademe, mods[], sirlar[] } }
+baglar:  [ { a, b, tur, deger } ]               // Dost, Hami, Mentor, Müttefik, Düşman…
+kurumlar:{ id: { ad, tur, basamak, yonetim[], sermaye, ciro, kisilik, pay{}, listeler[] } }
+unvan:   { basamak, gp, tanindi: bool, ahit: {üst, haraç…} | null }
+un:      { cevre: { cephe:{T,I,K}, golge:{T,I,K}, S } }     // çevre başına
+kara:    { defter:[{hedef, neden, agirlik, t0}], listeler:{ banka:bool, aranan:bool, … } }
+```
+
+Kurallar yine `sim.js` ve ayrı modüllerde kalır (DOM'a dokunmaz); özellikler ve kurum türleri **veri** olarak tanımlanır, böylece içerik eklemek kod yazmayı gerektirmez.
+
+### 24.9 İlk uygulanacak dilim (prototip v0.2) ve kirli paranın harcama yerleri
+
+Bölüm 18'deki MVP üzerine, sırasıyla:
+
+1. **Özellikler:** Mizaç ve edinilmiş özellikler, karşıt çiftler, "Kişilik uyumu" satırı, 8–10 özellik, stres bağı.
+2. **Ün:** Semt halkı, yeraltı, polis için T/İ/K ve Cephe/Gölge; Dikkat dökümüne Tanınmışlık satırı; lakap.
+3. **Bağlar ve Kara Defter:** Dost bağı, Kara Defter kayıtları ve kapatma yolları.
+4. **Basamak 0 → 1:** GP hesabı, "Ağa" terfisi ve tanınma kararı.
+5. **Bir büyük kurum:** *Liman Şirketi* (ya da banka); kredi ve ortaklık.
+6. **Bir büyük aile:** Eski Mahalle'nin üstünde bir Reis; teklif / Ahit / baskı üç aşaması.
+
+**Kirli para hâlâ yatıyordu** (denge testinde birikiyor). Yeni sistemler onu harcamanın yollarını getirir: siyasi bağış, hisse, villa ve korumalar, kaptan maaşları, Ahit haracı, tazminat, rüşvet zinciri, savaş fonu. Prototipin en büyük boşluğu bu sistemlerle kapanır.
+
+**Uygulanan durum (prototip v0.2, `prototype/`):** altı maddenin altısı da çalışıyor; yalnızca Esnaf→Ağa terfisi vardır (Reis ve üstü yok). Fark edilen tasarım ayarları:
+
+| Konu | Uygulanan sayı |
+|---|---|
+| Çevreler | Yalnızca halk, yeraltı, polis (Esnaf, siyaset ve basın yok). Polis için sızıntı S = 0,3 + Dosya/200 |
+| Başlangıç gücü | GP ≈ 12; Ağa eşiği 15; terfi kartı: 3 ay üst üste GP ≥ 15 **ve** halk Tanınırlığı ≥ 30 |
+| Karaca Ailesi | GP 48; Tehdit = GP_sen/48 × (1 + K_yeraltı/100) × (reddettiysen 1,6); 0,3 fark eder (teklif kartı), 0,6 baskı (ihbar / adam ayartma / tedarik zammı) |
+| Ahit | Haraç gelirin %10'u (pazarlıkla %5), kirli paradan ödenir; himaye = Polis Dikkati −8; memnuniyet formülü Bölüm 24.5'teki gibi |
+| Liman A.Ş. | Pay 600 ₺/%1, en çok %40, aylık kâr 3.600 ₺ (payın oranında temettü, temiz); %25 = yönetim kurulu (+1,0 kredi çarpanı); kirli parayla %30 komisyon ve Mali Şüphe += bedel/200 |
+| Kredi | 1.000–4.000 ₺, 6 taksit, aylık %1,5; onay = sigmoid(teminat, müdürün görüşü, halk İyiliği, kurul koltuğu, kara liste); 3 taksit kaçarsa meyhane haczedilir |
+| Kirli para harcama yolları | Bağış (halk İyiliği), ziyafet (dost bağı), Ahit haracı, Kara Defter tazminat/hesaplaşma, hisse (komisyonlu), rüşvet, Karaca "hediyesi" |
+| Karakter ve konum | Patron haritada bir figürdür (`s.pos`); bir bina ya da sokaktaki bir noktaya tıklanınca yürür (tek ana sokak; sokağa in, yatay yürü, kapıya çık). Hız 10 harita birimi / oyun dakikası: meyhane→Karaca ≈ 45 oyun dakikası. Zaman durmuşken yürümez. Orada olmayı gerektiren işler: rüşvet→Karakol, kredi/hisse→Liman A.Ş., Ahit isteme/bozma→Karaca, borç ödeme→Tefeci, bodrum yatırımı→Meyhane, dinlenme→Ev. Sürgit işler (fiyat, hacim, işe alma, mal saklama) her yerden yapılır. Kural yalnızca arayüzde açıktır (`s.mesafe`); bot testleri kapalı oynar |
+| Denge | İçki fiyatı 10 ₺'ye indi (kirli para artık hızla birikmiyor). 30 tohumlu bot testi: yasal 30/30, temkinli 29/30, hırslı 25/30, pervasız 3/30 ayakta |
+
+Henüz yok (v0.3): savaş (Bölüm 25), kişilerin haritada gezmesi (şimdilik yalnızca patron yürür; konuşmak için yanında olmak gerekmez), Reis basamağı, şehir dışı, siyaset ve basın çevreleri, Kara Defter'in "açık av" listesi.
+
+### 24.10 Bu bölümün açık kararları
+
+| # | Karar | Varsayım | Neden önemli |
+|---|---|---|---|
+| 24-1 | Basamak adları | Esnaf, Ağa, Reis, Baba, Kıyı Başı, Sendika Başkanı | Ton, yerelleştirme |
+| 24-2 | Tavan | Tasarımda 5 basamak; ilk sürümlerde 0–3 uygulanır | Kapsam |
+| 24-3 | Terfi | Eşik + tanınma oylaması | "Oyunun bir hedefi var mı?" hissi |
+| 24-4 | Ün | Üç sayı × çevre başına (T, İ, K) + Cephe/Gölge | Arayüz karmaşıklığı |
+| 24-5 | "Kara liste" | İki anlam: senin Kara Defterin ve sana karşı tutulan listeler | Kullanıcı niyetini doğrulamak |
+| 24-6 | Şehir dışı | Basamak 4+ seyahat ve şehirler arası harita gerektirir | Büyük kapsam, ilk sürümde yok |
+| 24-7 | Şirket sayısı | İlk dilimde 1–2 büyük kurum | İçerik ve denge yükü |
+
+---
+
+## 25. Savaş
+
+**Mafya savaşları oyunun parçasıdır.** Ama sunum soyuttur (12.3): taktik ekran yok, kararlar ve bedeller var. Savaş, Bölüm 12.2'deki araç listesinin (fiyat savaşı → … → açık savaş) en ağır basamağıdır ve **güç merdiveninin** (24.4) her basamağında farklı bir ölçekte yaşanır.
+
+### 25.1 Savaş nedir?
+
+Savaş, iki **taraf** arasında ilan edilmiş (ya da açık hâle gelmiş) çatışmadır. Taraf: bir patron + bağlıları (Ahit, 24.4) + çağrılan müttefikler.
+
+| Ölçek | Basamak | Kimler | Cephe | Süre | Sonuç |
+|---|---|---|---|---|---|
+| **Sokak kavgası** | Ağa | Çeteler | 1–2 sokak | günler | İş yeri, haraç hakkı |
+| **Semt savaşı** | Reis | Aileler | 1–3 semt | haftalar (aylar) | Semt el değiştirir |
+| **Şehir savaşı** | Baba | Şehir aileleri, Komisyon | Şehrin tümü | aylar | Komisyon dengesi, başkanlık |
+| **Bölge savaşı** | Kıyı Başı | Birlikler | Birkaç şehir | yıllar | Ticaret yolları, birlik hâkimiyeti |
+| **Sendika savaşı** | Sendika | Ulusal sendikalar | Ülke | çok yıl | Sendika politikası, bölünme |
+
+Şirketler arası savaş ayrı çözülür (fiyat savaşı, boykot, satın alma); polis ve devlet taraf değil, **ortam**dır (25.4).
+
+### 25.2 Gerekçe
+
+Savaş başlatmak için bir **gerekçe** gerekir; gerekçe, Komisyon ve çevrenin tepkisini belirler.
+
+| Gerekçe | Kaynak | Meşruiyet |
+|---|---|---|
+| **Kara Defter kaydı** (ağırlık ≥ 2) | 24.2 | Orta: ünde Kin etkisi; Komisyon bakışı tarafsız |
+| **Bölge ihlali** | Rakip, sınırı geçti (Ahit/anlaşma) | Yüksek: müttefik çağırma hakkı |
+| **Söz bozma** | Ateşkes/ortaklık ihlali | Yüksek: ihlal edenin "Söz" itibarı düşer |
+| **Aile dokunulmazlığı ihlali** (22.9) | Suçsuz akraba öldürüldü | **Tam meşruiyet:** Komisyon saldırgan aleyhine, herkes çağrılır |
+| **Kan davası** | Nesiller boyu | Orta; sönmez, barış çok pahalı |
+| **Fetih** | Gerekçesiz saldırı | **Düşük:** "Haydut" damgası, Komisyon yaptırımı, müttefik bulmak zor |
+
+Meşruiyet `M ∈ [0,1]` olarak tutulur ve üç şeyi belirler: müttefiklerin çağrıya uyma olasılığı, Komisyon yaptırımı ve savaş sonrası Ün (İ).
+
+### 25.3 Cepheler ve skor
+
+Savaş **cepheler** üzerinde yürür: bir cephe bir semttir (ya da bir şirket/limandır). Her cephenin skoru −100…+100.
+
+```
+F_taraf = Σ_adam ( Güç/50 × Sadakat/100 × SilahÇarpanı ) × Hazırlık × (savunanda MekânGüvenliği)
+ΔSkor (günlük) = 5 × (F_a − F_b) / (F_a + F_b) + ε            # ε: küçük rastgelelik, ±1,5
+Skor = +100 → saldıran semti alır (işletmeler, haraç, adamlar el değiştirir)
+Skor = −100 → saldıran çekilir, savunan karşı saldırı hakkı kazanır
+```
+
+- **Hazırlık:** Silah, adam sayısı, sığınak. Hazırlık `ay × yatırım` ile artar; savaştan önce yapılır.
+- **Mekân güvenliği:** Savunanda: çift duvar, korumalar, karakola yakınlık.
+- **Kayıp (günlük):** `%1,5 × (1 + ΔSkorMutlak/5) × karşıGüçPayı` oranında adam. Kayıp, sadakati ve moralı düşürür (sadakat −10, o adamın dostlarında Kin).
+- **Tetikçi kiralamak, silah almak, müttefik çağırmak, kaptan atamak:** her biri bir eylemdir (21.2) ve kuyruğa girer.
+
+Oyuncu bir **komutan** atar (kaptan veya kendisi); komutanın Zekâsı ve Cesareti `Hazırlık` ve `ε` aralığını etkiler. Her cephe için talimat verilir: *Saldır / Savun / Taciz / Çekil*, ve kurallar: *Sivillere dokunma* (Ün ↑, etkinlik ↓), *Polise karışma* (Dikkat ↓).
+
+### 25.4 Savaşın bedeli: Dikkat ve "Kampanya"
+
+Şiddet bedeli hesaplatır (12.2); savaş bunu günlük bir yüke çevirir:
+
+```
+Savaş günü başına: Semt Dikkati += 2 (günlük, 100'e kadar) · basın T_basın += 1 · her cinayet: Dosya +10…25 (8.4)
+Ekonomi: Savaşan semtte yasal ciro × 0,6 (müşteri korkar), kirli mal akışı × 0,8
+```
+
+**Kampanya.** Semt Dikkati ≥ 80 3 gün üst üste tutarsa polis **kampanya** başlatır:
+
+- İki tarafın Dosya'sı günde +5; baskın olasılığı ×3;
+- Rüşvetin etkisi yarıya düşer (görünürde bir "temizlik" vardır);
+- Basın ve siyaset baskı kurar; Komisyon "bu iş kontrolden çıktı" gündemi açar;
+- Kampanya, iki tarafı da yener: kazananın zaferini yer. Kampanyayı önceden sezen (Rıfat gibi içerideki adam) taraflara haber verir (11).
+
+Bu, savaşın **ucuz** ve **uzun** olmasını engelleyen temel sınırdır: "kazan ama sessizce" tasarım hedefidir.
+
+### 25.5 Taraf çağırmak: Ahit ve ittifak
+
+- **Bağlıların çağrısı:** Üst, Ahit'teki **çağrı limiti** kadar adam isteyebilir; reddetmek memnuniyeti düşürür (24.4) ve unvanı sorgulatır.
+- **Müttefik çağrısı:** `P(katılır) = sigmoid(0,05 × Görüş + 3 × M − 1 − 0,02 × Güçlüdür_karşı)`; yani meşruiyet (M) ve Görüş, hasmın gücünü aşmalı.
+- **Çağrıyı reddetmek** ittifakı bitirir (Söz itibarı).
+- **Taraf değiştirmek:** Savaşta bir kaptan (sadakat < 30 ve Hırs yüksek) ya da müttefik taraf değiştirebilir (ihanet entrikası, 22.6).
+
+### 25.6 Savaşın sonu
+
+| Son | Koşul | Sonuç |
+|---|---|---|
+| **Barış masası** (sit-down) | Her iki taraf yorgun (60+ gün) ya da Komisyon oturumu | Koşullar pazarlıkla: bölge, tazminat, evlilik bağı, Ahit |
+| **Zafer / teslim** | Tüm cepheler ±100 | Kaybeden Ahit verir, öldürülür ya da kaçar |
+| **Kampanya** | Polis ezmesi | İki taraf da zayıflar, Dosya yüksek |
+| **Komisyon dayatması** | Meşruiyetsiz savaş | Savaş durdurulur, saldırgan tazminat/bölge öder |
+| **Üstün müdahalesi** | Bir üst Ahit sahibi | Üst savaşı durdurur; yoksa üste de saldırılmış sayılır |
+| **Yorgunluk** | Skor ±20 içinde 90 gün | Ateşkes zorunlu |
+
+Savaş sonrası **Ün** (24.3): kazanan K (+), kaybedenin İ'si düşer ve Cephe'ye gölge sızar; meşruiyeti yüksek zafer İ'yi de artırır. Kayıplar **Kara Defter** kaydına dönüşür (savaşın bitişi kayıtları kapatmak zorunda değildir: kan davası kalabilir).
+
+### 25.7 Oyuncunun savaştaki rolü
+
+Oyuncu şunları yapar: **komutan atar**, cepheye **talimat verir**, **kural koyar** (sivil dokunma, polis), **fon** ayırır (kirli para), **adam ve silah** satın alır, **müttefik/üst çağırır**, **polisi** rüşvetle bir süre oyalar, **barış önerir**. Taktik ekran yoktur: sonuçlar rapor olarak gelir, ama araya **olay kartları** girer:
+
+> **Adamın pusuya düştü.** Güvenilir kaptanın Cemal, Liman Caddesi'nde pusuya düşürülmüş. Yaralı ama ayakta; üç adamı yok.
+> - *Misilleme yap.* — Sadakat +8 · Savaş skoru +5 · Dikkat +10 · Kara Defter: Cemal'in saldırganı (ağırlık 2)
+> - *Sessizce topla.* — Cemal Görüş −10 · Dikkat −5 · **Stres +5** (Gözüpek'sin)
+> - *Barış teklif et.* — Savaş skoru −5 · **Stres −10** (Merhametli'sin) · Komisyon Görüş +5
+
+> **Kızın okul yolunda.** Düşmanın adamı okulun önünde dolaşıyor. Henüz bir şey yapmadılar; ama mesajı aldın.
+> - *Kızı şehir dışına gönder.* — Aile güvende; Leyla'nın görüşü −10; bir ay yokluk
+> - *Misillemeye giriş (aile dokunulmazlığı ihlali sayılır).* — Komisyon aleyhine karar; Ün K +15, İ −20
+> - *Koruma ver, savaşı büyüt.* — Koruma maliyeti 300 ₺/ay; Dikkat +5
+
+### 25.8 Bu bölümün açık kararları ve uygulama sırası
+
+| # | Konu | Varsayım |
+|---|---|---|
+| 25-1 | Savaşın ilk uygulanacak ölçeği | Sokak kavgası (Ağa) ve semt savaşı (Reis); şehir ve ötesi sonra |
+| 25-2 | Taktik katman | Yok; cephe + komutan + olay kartları |
+| 25-3 | Sivil kayıp ve sunum | Soyut/rapor düzeyi (Bölüm 19, #2) |
+| 25-4 | Savaş başlatma | Gerekçe + Kara Defter + hazırlık süresi (ani savaş yok) |
+| 25-5 | Prototip | v0.2 dilimine (24.9) girmez; v0.3'te sokak ölçeği: Kâzım'la savaş |

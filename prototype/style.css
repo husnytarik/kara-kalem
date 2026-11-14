@@ -32,7 +32,7 @@ main { flex: 1; display: flex; min-height: 0; }
 #left { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 #mapwrap { flex: 1; min-height: 0; background: #0e0c09; }
 #map { width: 100%; height: 100%; display: block; }
-#log { height: 190px; flex: none; overflow-y: auto; border-top: 1px solid var(--line); background: var(--panel); padding: 6px 12px; font-size: 13px; }
+#log { height: 130px; flex: none; overflow-y: auto; border-top: 1px solid var(--line); background: var(--panel); padding: 6px 12px; font-size: 13px; }
 .lg { padding: 2px 0; border-bottom: 1px dotted #2e261d; }
 .lg time { color: var(--dim); font-variant-numeric: tabular-nums; margin-right: 8px; font-size: 12px; }
 .lg.k-card { color: var(--gold); } .lg.k-warn { color: #d9b36a; } .lg.k-good { color: var(--green); } .lg.k-bad { color: var(--red); }
@@ -40,7 +40,7 @@ main { flex: 1; display: flex; min-height: 0; }
 
 #side { width: 420px; flex: none; display: flex; flex-direction: column; border-left: 1px solid var(--line); background: var(--panel); }
 #tabs { display: flex; flex: none; }
-#tabs button { flex: 1; border: 0; border-bottom: 2px solid var(--line); border-radius: 0; background: none; padding: 9px 4px; color: var(--dim); }
+#tabs button { flex: 1; border: 0; border-bottom: 2px solid var(--line); border-radius: 0; background: none; padding: 9px 2px; color: var(--dim); font-size: 12.5px; white-space: nowrap; }
 #tabs button.on { color: var(--gold); border-bottom-color: var(--gold); }
 #tabs .badge { background: var(--red); color: #fff; border-radius: 8px; padding: 0 6px; font-size: 11px; margin-left: 4px; }
 #panel { flex: 1; overflow-y: auto; padding: 14px; }
@@ -75,13 +75,45 @@ th { color: var(--dim); font-weight: normal; } th:first-child, td:first-child { 
 .card .opt small { display: block; color: #6b5c45; margin-top: 2px; }
 .card .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 12.5px; color: #7a6a52; gap: 12px; }
 .card .foot button { background: none; color: #5a4a30; border-color: #b89b5e; white-space: nowrap; }
-#toast { position: fixed; bottom: 210px; left: 50%; transform: translateX(-50%); background: #3a1d16; border: 1px solid var(--red); padding: 8px 16px; border-radius: 5px; z-index: 20; }
+#toast { position: fixed; bottom: 150px; left: 50%; transform: translateX(-50%); background: #3a1d16; border: 1px solid var(--red); padding: 8px 16px; border-radius: 5px; z-index: 20; }
 
 /* harita */
 .bld { cursor: pointer; }
 .bld rect.body { stroke: #0006; stroke-width: 1.5; }
 .bld:hover rect.body { stroke: var(--gold); }
 .bld.sel rect.body { stroke: var(--gold); stroke-width: 3; }
-.bld text { font: 12px Georgia, serif; fill: #efe4cd; pointer-events: none; text-anchor: middle; paint-order: stroke; stroke: #000a; stroke-width: 3px; }
-.bld text.sub { font: 10.5px "Segoe UI", sans-serif; fill: #d5c7a8; }
+.bld text { font: 16px Georgia, serif; fill: #efe4cd; pointer-events: none; text-anchor: middle; paint-order: stroke; stroke: #000a; stroke-width: 3px; }
+.bld text.sub { font: 13px "Segoe UI", sans-serif; fill: #d5c7a8; }
 @media (max-width: 980px) { #side { width: 340px; } .brand small, #newgame { display: none; } }
+
+/* v0.2: özellikler, ün tablosu, formlar */
+.chip { display: inline-block; padding: 1px 8px; margin: 0 4px 3px 0; border-radius: 10px; font-size: 12px; background: #3a2f20; border: 1px solid var(--line); color: var(--ink); }
+.chip.edinilmis { background: #2c3a2a; }
+tr.sub td { color: var(--dim); font-size: 11.5px; border-bottom-color: var(--line); }
+select { font: inherit; color: var(--ink); background: #14100c; border: 1px solid var(--line); border-radius: 4px; padding: 3px 6px; max-width: 60%; }
+.box.on { border-color: var(--red); }
+
+/* v0.3: karakter */
+.me text { font: bold 13px Georgia, serif; fill: #ffe9a8; text-anchor: middle; paint-order: stroke; stroke: #000c; stroke-width: 3px; }
+#map { cursor: crosshair; } #map .bld { cursor: pointer; }
+
+/* telefon / dar ekran: harita üstte, panel altta, sayfa kayar */
+@media (max-width: 760px) {
+  html, body { height: auto; }
+  body { overflow-y: auto; }
+  #top { flex-wrap: wrap; gap: 8px 12px; padding: 6px 10px; position: sticky; top: 0; z-index: 5; }
+  #clock { min-width: 0; flex: 1 1 100%; }
+  #stats { gap: 10px 14px; flex: 1 1 100%; }
+  #stats .st b { font-size: 14px; }
+  main { flex-direction: column; flex: none; }
+  #left { flex: none; }
+  #mapwrap { flex: none; height: 52vh; touch-action: none; }
+  #log { height: 96px; }
+  #side { width: 100%; border-left: 0; border-top: 1px solid var(--line); flex: none; }
+  #panel { overflow: visible; padding: 12px; }
+  #tabs { overflow-x: auto; }
+  #tabs button { padding: 10px 8px; flex: none; }
+  button { padding: 8px 12px; }
+  #toast { bottom: 20px; width: 90vw; text-align: center; }
+  .card { padding: 16px 18px; }
+}

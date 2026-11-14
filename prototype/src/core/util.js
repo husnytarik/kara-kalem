@@ -1,4 +1,5 @@
 // Ortak yardımcılar. Arayüzden bağımsızdır; yalnızca durum (state) nesnesi üzerinde çalışır.
+import { compat } from './traits.js';
 
 export const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 export const sigmoid = (x) => 1 / (1 + Math.exp(-x));
@@ -53,6 +54,11 @@ export function opinion(s, id) {
   if (c.employed && c.piyasa) {
     const v = Math.round(25 * clamp(c.maas / c.piyasa - 1, -1, 1));
     lines.push({ k: v > 0 ? 'Maaşı piyasanın üstünde' : v < 0 ? 'Maaşı piyasanın altında' : 'Maaşı piyasa düzeyinde', v });
+  }
+  const cp = compat(s.patron, c);
+  if (cp.v !== 0) {
+    const why = [...cp.shared.map((t) => `ikiniz de ${t}`), ...cp.clash.map(([a, b]) => `${a} ↔ ${b}`)].join(', ');
+    lines.push({ k: `Kişilik uyumu (${why})`, v: cp.v });
   }
   const total = clamp(lines.reduce((a, l) => a + l.v, 0), -100, 100);
   return { total, lines };

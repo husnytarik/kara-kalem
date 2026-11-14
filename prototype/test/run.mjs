@@ -2,6 +2,7 @@
 // Üç bot politikası bir oyun yılı oynar; aylık özet basılır.
 import { newGame, advance, act, cardView, canHire, C } from '../src/core/sim.js';
 import { dateOf, DAY } from '../src/core/util.js';
+import { gucPuani, perceived } from '../src/core/social.js';
 
 const MONTHS = +(process.argv[2] || 12);
 const SEED = +(process.argv[3] || 1923);
@@ -11,6 +12,9 @@ const POLICIES = {
   hirsli: { crime: true, volume: 50, hidden: false, payroll: true, hide: true },
   temkinli: { crime: true, volume: 25, hidden: true, payroll: true, hide: true, accountant: true },
   pervasiz: { crime: true, volume: 60, hidden: false, payroll: false, hide: false, launder: 150 },
+  // v0.2: toplumsal oyun — Ahit kabul, bağış, ziyafet, hisse
+  sosyal: { crime: true, volume: 30, hidden: true, payroll: true, hide: true, ahit: true, donate: true, hisse: true },
+  bagimsiz: { crime: true, volume: 30, hidden: true, payroll: true, hide: true, ahit: false, donate: true },
 };
 
 function pick(s, v, pol) {
@@ -19,6 +23,10 @@ function pick(s, v, pol) {
     devriye: pol.payroll ? 0 : 1,
     baskin_ihbari: pol.hide ? 0 : 2,
     komsu: 0, yangin: 0, garson_zam: 0, usta_zam: 0, yegen: 1, camasirhane: 0, tefeci: 1, kavga: 1, rakip_fiyat: 2,
+    terfi: pol.ahit ? 0 : 1,
+    karaca_teklif: pol.ahit ? 0 : 2,
+    karaca_baski: pol.ahit ? 0 : 2,
+    dost_haber: 0, liman_sorusturma: 0,
   }[v.ev] ?? v.def;
   if (v.options[want]?.enabled) return want;
   if (v.options[v.def]?.enabled) return v.def;
@@ -40,9 +48,12 @@ function run(name, pol, seed) {
       if (pol.hidden && s.dist.built && !s.dist.hiddenRoom && s.cash.dirty > 700) act(s, { type: 'upgradeHidden' });
       if (pol.accountant && canHire(s, 'ihsan') && s.cash.dirty > 1500) act(s, { type: 'hire', id: 'ihsan' });
     }
+    if (pol.donate && s.t % DAY === 0) act(s, { type: 'donate', amount: 150 });
+    if (pol.hisse && s.t % DAY === 0 && s.cash.clean > 3500 && s.kurum.liman.hisse < 25) act(s, { type: 'hisse', pct: 5, kirli: false });
+    if (pol.donate && s.t % DAY === 0) for (const id of ['halil', 'nuri']) act(s, { type: 'feast', id });
     if (rows.length < s.history.length) {
       const h = s.history[s.history.length - 1];
-      rows.push(`  ay ${String(h.month + 1).padStart(2)} | temiz ${String(Math.round(h.clean)).padStart(6)} | kirli ${String(Math.round(h.dirty)).padStart(6)} | borç ${String(Math.round(h.debt)).padStart(5)} | dosya ${String(Math.round(h.dosya)).padStart(3)} | yasal ciro ${Math.round(h.legalRev)} | içki ${Math.round(h.liqRev)} | iz ${Math.round(s.dist.iz)} | pay %${Math.round(s.share * 100)}`);
+      rows.push(`  ay ${String(h.month + 1).padStart(2)} | temiz ${String(Math.round(h.clean)).padStart(6)} | kirli ${String(Math.round(h.dirty)).padStart(6)} | borç ${String(Math.round(h.debt)).padStart(5)} | dosya ${String(Math.round(h.dosya)).padStart(3)} | yasal ciro ${Math.round(h.legalRev)} | içki ${Math.round(h.liqRev)} | iz ${Math.round(s.dist.iz)} | pay %${Math.round(s.share * 100)} | GP ${gucPuani(s).gp.toFixed(1)} bas ${s.unvan.basamak} T_halk ${Math.round(perceived(s, 'halk').T)} ahit ${s.unvan.ahit ? s.unvan.ahit.harac : '-'}`);
     }
   }
   console.log(`\n=== ${name} (tohum ${seed}) ===`);

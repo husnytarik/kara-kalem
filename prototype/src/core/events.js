@@ -3,6 +3,7 @@
 //   window   -> karar penceresi (oyun günü)     def -> süre dolunca vekilin seçtiği seçenek
 //   once / cooldown (gün)       system -> yalnızca simülasyon tarafından açılır
 import { DAY, dateOf, rnd, log, addMod, opinion, spend, staff, addStress, hideGoods, money, clamp } from './util.js';
+import { fame, leak, gucPuani, dostlar, addOrtak, kabulAhit } from './social.js';
 
 const day = (s) => dateOf(s.t).day;
 const has = (s, trait) => s.patron.traits.includes(trait);
@@ -95,9 +96,9 @@ export const EVENTS = {
     cond: (s) => day(s) > 5,
     text: () => 'Gece yarısına doğru iki liman işçisi birbirine girdi. Bir masa devrildi, biri bıçak çekti.',
     options: (s) => [
-      { label: 'Polis çağır.', hint: 'Güvenli. Ama polis mekânı görür: Dikkat artar.', run: (s) => { s.attBoost += (s.dist.stock > 0 ? 8 : 3); } },
-      { label: 'Araya kendin gir.', hint: 'İtibar +3 · Stres +5.', run: (s) => { s.biz.meyhane.rep = clamp(s.biz.meyhane.rep + 3, 0, 100); addStress(s, 5, 'Kavgayı kendin ayırdın.'); } },
-      { label: 'İri Cemal halletsin.', hint: 'İtibar +4. Kimse polis çağırmaz.', can: (s) => !!staff(s, 'koruma'), run: (s) => { s.biz.meyhane.rep = clamp(s.biz.meyhane.rep + 4, 0, 100); } },
+      { label: 'Polis çağır.', hint: 'Güvenli. Ama polis mekânı görür: Dikkat artar.', run: (s) => { s.attBoost += (s.dist.stock > 0 ? 8 : 3); fame(s, 'polis', 'cephe', { t: 2 }, 1); } },
+      { label: 'Araya kendin gir.', hint: 'İtibar +3 · Stres +5 · Mahallede adın anılır.', run: (s) => { s.biz.meyhane.rep = clamp(s.biz.meyhane.rep + 3, 0, 100); addStress(s, 5, 'Kavgayı kendin ayırdın.'); fame(s, 'halk', 'cephe', { t: 2, i: 3 }, 1); } },
+      { label: 'İri Cemal halletsin.', hint: 'İtibar +4. Kimse polis çağırmaz. Cemal\'in sert yöntemi duyulur (Korku +).', can: (s) => !!staff(s, 'koruma'), run: (s) => { s.biz.meyhane.rep = clamp(s.biz.meyhane.rep + 4, 0, 100); fame(s, 'halk', 'golge', { k: 3 }, 1); } },
     ],
   },
 
@@ -118,10 +119,10 @@ export const EVENTS = {
     cond: (s) => s.dist.iz > 35,
     text: () => 'Arka sokaktaki Hacer Hanım seni yolda çevirdi. "Geceleri o koku nedir evladım? Bir de at arabaları gidip geliyor. Ben uyuyamıyorum."',
     options: () => [
-      { label: 'Gönlünü al (50 ₺ ve bir sepet erzak).', hint: 'Hacer +15. Susar.', can: (s) => s.cash.clean + s.cash.dirty >= 50, run: (s) => { spend(s, 50, 'dirty'); addMod(s, 'hacer', 'Gönlünü aldın', 15, 2); } },
+      { label: 'Gönlünü al (50 ₺ ve bir sepet erzak).', hint: 'Hacer +15. Susar.', can: (s) => s.cash.clean + s.cash.dirty >= 50, run: (s) => { spend(s, 50, 'dirty'); addMod(s, 'hacer', 'Gönlünü aldın', 15, 2); fame(s, 'halk', 'cephe', { i: 2 }, 1); } },
       {
         label: 'Gözdağı ver.', hint: 'Hacer −30. Yarı ihtimalle susar; susmazsa tanık olur (Dosya +8). Cömert isen Stres +10.',
-        run: (s) => { addMod(s, 'hacer', 'Onu tehdit ettin', -30, 1); if (has(s, 'Cömert')) addStress(s, 10, 'Yaşlı bir kadını korkuttun.'); if (rnd(s) < 0.5) s.pendingEvidence.push({ v: 8, why: 'Hacer Hanım karakola gidip ifade verdi (onu tehdit etmiştin).' }); },
+        run: (s) => { addMod(s, 'hacer', 'Onu tehdit ettin', -30, 1); fame(s, 'halk', 'golge', { k: 6, i: -6 }, 1); leak(s, 'halk', 0.05); if (has(s, 'Cömert')) addStress(s, 10, 'Yaşlı bir kadını korkuttun.'); if (rnd(s) < 0.5) s.pendingEvidence.push({ v: 8, why: 'Hacer Hanım karakola gidip ifade verdi (onu tehdit etmiştin).' }); },
       },
       { label: 'Görmezden gel.', hint: '%40 ihtimalle ihbar eder (Dosya +5).', run: (s) => { addMod(s, 'hacer', 'Derdini dinlemedin', -8, 2); if (rnd(s) < 0.4) s.pendingEvidence.push({ v: 5, why: 'Hacer Hanım kokudan şikâyetçi olup ihbarda bulundu (derdini dinlememiştin).' }); } },
     ],
@@ -170,7 +171,92 @@ export const EVENTS = {
     ],
   },
 
+  dost_haber: {
+    title: 'Dostundan haber',
+    p: 0.05, cooldown: 25, window: 3, def: 1,
+    cond: (s) => dostlar(s).length > 0,
+    text: (s) => {
+      const c = s.chars[dostlar(s)[0]];
+      return `${c.ad}, kapanışta tezgâhın yanına geldi. "Sana yük olmak istemem ama..." diyor. Yıllardır tanıdığın bir adam bu; boş yere gelmez.`;
+    },
+    options: (s) => [
+      { label: 'Yanında olduğunu söyle (100 ₺).', hint: 'Dostluk pekişir: görüşü +10. Mahallede de duyulur (halk İyilik +).', can: (st) => st.cash.dirty + st.cash.clean >= 100, run: (st) => { const id = dostlar(st)[0]; spend(st, 100, 'dirty'); addMod(st, id, 'Zor gününde yanındaydın', 10, 3); addOrtak(st, id); fame(st, 'halk', 'cephe', { i: 2 }, 0.8); } },
+      { label: 'Dinle, sözle yetin.', hint: 'Görüşü +3.', run: (st) => { const id = dostlar(st)[0]; addMod(st, id, 'Dinledin', 3, 3); addOrtak(st, id); } },
+      { label: 'Şimdi vaktim yok.', hint: 'Görüşü −8. Dostluk böyle aşınır.', run: (st) => { const id = dostlar(st)[0]; addMod(st, id, 'Yüzüne bakmadın', -8, 3); if (has(st, 'Cömert')) addStress(st, 4, 'Cömert birisin; dostunu geri çevirmek içine oturdu.'); } },
+    ],
+  },
+
+  liman_sorusturma: {
+    title: 'Liman A.Ş.\'de denetim',
+    p: 0.06, cooldown: 40, window: 2, def: 1,
+    cond: (s) => s.kurum.liman.hisse >= 25 && s.maliSuphe > 10,
+    text: () => 'Maliyeden iki müfettiş Liman A.Ş. defterlerini karıştırıyor. Yönetim kurulu üyesi olarak senin pay alım kaydın da inceleniyor. Selahattin Bey terli bir yüzle yanına geldi: "Paranın kaynağını soracaklar."',
+    options: () => [
+      { label: 'Avukat tut (250 ₺ temiz).', hint: 'Mali Şüphe −10. Kayıt temiz çıkar.', can: (s) => s.cash.clean >= 250, run: (s) => { spend(s, 250, 'clean'); s.maliSuphe = Math.max(0, s.maliSuphe - 10); addMod(s, 'selahattin', 'Sorunu birlikte çözdünüz', 4, 3); } },
+      { label: 'Sessiz kal.', hint: 'Mali Şüphe aynı. %40 ihtimalle Dosya +6.', run: (s) => { if (rnd(s) < 0.4) s.pendingEvidence.push({ v: 6, why: 'Liman A.Ş. denetiminde pay alımının kaynağı sorgulandı.' }); } },
+      { label: 'Payının bir kısmını sat (%10).', hint: 'Ortaklıktan uzaklaşırsın; Mali Şüphe −5.', can: (s) => s.kurum.liman.hisse >= 10, run: (s) => { s.kurum.liman.hisse -= 10; s.cash.clean += 10 * 600 * 0.8; s.maliSuphe = Math.max(0, s.maliSuphe - 5); } },
+    ],
+  },
+
   // --- Sistem kartları ---
+  terfi: {
+    title: 'Mahalle seni "Ağa" diyor', system: true, window: 99, def: 2,
+    text: (s) => `Üç aydır sokaklar senden söz ediyor. Esnaf selam verirken şapka kaldırıyor, kahvehanede adın geçiyor. Artık "Meyhaneci" olmanın ötesine geçtin: Güç Puanın ${gucPuani(s).gp.toFixed(1)}. Bu unvanı almak, birilerinin gözüne girmek demek.`,
+    options: (s) => [
+      {
+        label: s.unvan.ahit ? 'Ağa unvanını kabul et.' : 'Ağa ol ve Karaca Ailesi\'nden Ahit iste (haraç %10).',
+        hint: s.unvan.ahit ? 'Zaten Karaca\'ya bağlısın. İtibarın yükselir.' : 'Karaca himayesi: Polis Dikkati −8. Ama gelirinin %10\'u her ay onlara gider.',
+        run: (st) => { st.unvan.basamak = 1; st.unvan.ay = 0; if (!st.unvan.ahit) kabulAhit(st, 10, 'Ağa olurken Karaca\'dan istedin.'); fame(st, 'yeralti', 'cephe', { t: 12, i: 4 }, 1); fame(st, 'halk', 'cephe', { t: 6, i: 3 }, 1); log(st, 'Artık bir Ağa\'sın.', 'good'); },
+      },
+      {
+        label: 'Ağa ol, kimseye bağlanma.',
+        hint: 'Haraç yok, himaye de yok. Ama yeraltı seni fark eder: Karaca Ailesi önünde ilk engel olursun.',
+        run: (st) => { st.unvan.basamak = 1; st.unvan.ay = 0; st.unvan.tanindi = true; fame(st, 'yeralti', 'cephe', { t: 14, i: 0, k: 8 }, 1); fame(st, 'halk', 'cephe', { t: 6, i: 3 }, 1); log(st, 'Artık bir Ağa\'sın; kimseye bağlı değilsin.', 'good', 'Bu cesaret yeraltında not edildi (Korku +).'); },
+      },
+      { label: 'Henüz erken.', hint: 'Üç ay sonra yeniden önüne gelir.', run: (st) => { st.unvan.ay = 0; } },
+    ],
+  },
+
+  karaca_teklif: {
+    title: 'Karaca Ailesi seni çağırdı', system: true, window: 5, def: 2,
+    text: () => 'Reis Orhan Karaca\'nın adamı sabah dükkâna uğradı, bir zarf bıraktı: "Reis, mahallede gürültü yapan genç meyhaneciyle tanışmak istiyor." Karaca Ailesi limanın yarısını elinde tutuyor. Teklif ortada: Ahit.',
+    options: (s) => [
+      { label: 'Ahit ver (haraç %10).', hint: 'Himaye: Polis Dikkati −8. Gelirinin %10\'u haraç.', run: (st) => kabulAhit(st, 10, 'Karaca\'nın teklifini kabul ettin.') },
+      {
+        label: 'Pazarlık et (%5\'ten başla).', hint: 'Orhan\'a görüşün ve gücün belirler. Olmazsa Orhan küçük görülmüş hisseder.',
+        run: (st) => {
+          const p = clamp(0.35 + opinion(st, 'orhan').total / 150 + (gucPuani(st).gp / 60), 0.1, 0.7);
+          if (rnd(st) < p) { kabulAhit(st, 5, 'Orhan\'la pazarlıkta %5\'te anlaştınız.'); }
+          else { addMod(st, 'orhan', 'Pazarlıkta kafa tuttun', -12, 2); st.kurum.karaca.redd = true; log(st, 'Orhan pazarlığı reddetti. Teklif masadan kalktı.', 'bad', `Başarı ihtimali %${Math.round(p * 100)} idi.`); }
+        },
+      },
+      { label: 'Reddet.', hint: 'Orhan −15. Karaca seni artık "başına buyruk" sayar: tehdit ×1,6.', run: (st) => { st.kurum.karaca.redd = true; addMod(st, 'orhan', 'Teklifini reddettin', -15, 2); fame(st, 'yeralti', 'cephe', { t: 4, k: 4 }, 1); } },
+    ],
+  },
+
+  karaca_baski: {
+    title: 'Karaca Ailesi baskı yapıyor', system: true, window: 4, def: 1,
+    text: (s, card) => [
+      'Karaca\'nın adamları karakolda adını anıyor. Rıfat arka kapıdan haber yolladı: "Biri dosyana ince ince bir şeyler ekletiyor."',
+      'Karaca\'ya yakın bir adam, İri Cemal\'e ve Aziz\'e "daha iyi bir iş" teklif etmiş. Adamlarının gözü kayıyor.',
+      'Tedarikçilerin birden fiyat yükseltti. "Karaca Ailesi\'ne sormak lazım," diyorlar, başka bir şey demiyorlar.',
+    ][(card.data && card.data.flavor) || 0],
+    options: (s) => [
+      { label: 'Ahit ver (haraç %10).', hint: 'Baskı durur; himaye gelir.', run: (st) => { kabulAhit(st, 10, 'Baskıya dayanamayıp Ahit verdin.'); addMod(st, 'orhan', 'Baskı işe yaradı', 0, 0); } },
+      { label: 'Kapıyı kapat: 400 ₺ ver, aylarca rahat et.', hint: 'Orhan\'a "hediye": baskı üç ay seyrelir.', can: (st) => st.cash.dirty + st.cash.clean >= 400, run: (st) => { spend(st, 400, 'dirty'); addMod(st, 'orhan', 'Hediyeyle gönlünü aldın', 8, 3); st.kurum.karaca.baskiAy = dateOf(st.t).month + 2; } },
+      {
+        label: 'Dik dur.', hint: 'Baskı sürer. Dosya, adam kaybı ya da tedarik zammı riski.',
+        run: (st, card) => {
+          const f = (card && card.data && card.data.flavor) || 0;
+          if (f === 0) st.pendingEvidence.push({ v: 8, why: 'Karaca\'nın adamları dosyana ihbar ekledi.' });
+          else if (f === 1) { for (const id of ['cemal', 'aziz']) if (st.chars[id] && st.chars[id].employed) addMod(st, id, 'Karaca\'dan cazip teklif aldı', -15, 2); }
+          else st.tedarikZamUntil = st.t + 20 * DAY;
+          fame(st, 'yeralti', 'cephe', { k: 2 }, 1);
+        },
+      },
+    ],
+  },
+
   baskin_ihbari: {
     title: 'Arama emri çıktı', system: true, window: 1, def: 0,
     text: (s) => `Rıfat arka kapıdan haber yolladı: "Savcılık emri imzaladı. ${Math.max(1, Math.ceil((s.raid ? s.raid.at - s.t : DAY) / DAY))} gün içinde geliyorlar. Ben seni görmedim."`,
