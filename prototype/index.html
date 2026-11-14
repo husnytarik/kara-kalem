@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eski Mahalle — prototip v0.1</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="top">
+  <div class="brand">ESKİ MAHALLE <small>v0.1</small></div>
+  <div id="clock"></div>
+  <div id="speed">
+    <button data-speed="0" title="Boşluk">❚❚</button>
+    <button data-speed="1" title="1">×1</button>
+    <button data-speed="2" title="2">×2</button>
+    <button data-speed="3" title="3">×3</button>
+  </div>
+  <div id="stats"></div>
+  <button id="newgame" title="Kaydı sil, baştan başla">Yeni oyun</button>
+</header>
+<main>
+  <section id="left">
+    <div id="mapwrap"><svg id="map" viewBox="0 0 800 520" preserveAspectRatio="xMidYMid meet"></svg></div>
+    <div id="log"></div>
+  </section>
+  <aside id="side">
+    <nav id="tabs"></nav>
+    <div id="panel"></div>
+  </aside>
+</main>
+<div id="modal" hidden></div>
+<div id="toast" hidden></div>
+<script type="module" src="src/ui/main.js"></script>
+<noscript>Bu oyun JavaScript ister.</noscript>
+</body>
+</html>

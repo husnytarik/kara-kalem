@@ -1,0 +1,6 @@
+# isletim sistemi / editor
+Thumbs.db
+.DS_Store
+.vscode/
+*.bak.md
+node_modules/
