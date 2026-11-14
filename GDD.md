@@ -123,7 +123,7 @@ Kurgusal bir liman kenti, **Roaring Twenties** atmosferi: içki yasağı, caz, g
 | Nüfuz (aile başına) | 0–100 | O semtte kimin sözü geçer; haraç, tanık sessizliği, işe alım |
 | Halk Memnuniyeti | 0–100 | Düşükse ihbar artar, yüksekse halk seni korur |
 
-Semtlerin karakteri farklıdır: Liman (kaçakçılık, işçi), Çarşı (ticaret), Eski Mahalle (sadık halk, dar sokaklar), Tepeler (villalar, siyasetçiler), Sanayi (depolar), Belediye çevresi (bürokrasi).
+Semtlerin karakteri farklıdır: Liman (kaçakçılık, işçi), Çarşı (ticaret), Southside (sadık halk, dar sokaklar), Tepeler (villalar, siyasetçiler), Sanayi (depolar), Belediye çevresi (bürokrasi).
 
 ### 5.2 Parseller ve binalar
 
@@ -531,7 +531,7 @@ Oyuncu hazır bir imparatorlukla değil, **miras kalan tek bir meyhaneyle** baş
 
 | Başlangıç varlığı | Değer |
 |---|---|
-| Meyhane (Eski Mahalle, bodrumlu, ara sokakta) | Cirosu yasak yüzünden yarıya düşmüş |
+| Meyhane (Southside, bodrumlu, ara sokakta) | Cirosu yasak yüzünden yarıya düşmüş |
 | Sadık bir adam (amcanın eski ortağı) | İlk danışman/vekil; öğreticinin sesi |
 | Nakit | 1 aylık gideri karşılar |
 | Borç | Amcadan kalan, her Hesap Günü taksitli |
@@ -618,13 +618,13 @@ Her karar bir bedel içermeli. Oyunun tekrar eden gerilimleri:
 
 Oyuncu kaydı açıyor; oyun duraklatılmış, saat 14:00, ayın 7. günü.
 
-1. **Kaldığın Yer özeti:** *"Dün gece sevkiyat sorunsuz. Bakkalın cirosu beklenenden %12 düşük — müdür 'yağmurdan' diyor. Vekilin kararı: karakol amirinin doğum günü hediyesi gönderildi (40 ₺)."*
-2. **Tarama:** Polis Dikkati katmanında Eski Mahalle sarıya dönmüş. Olay akışına bakıyor: iki gece önce sokakta bir kavga çıkmış, kendisiyle ilgisi yok ama devriye artmış.
-3. **Karar 1:** Bu gece üretimi %50 kıs (İz düşsün). Kayıp: ≈240 ₺.
+1. **Kaldığın Yer özeti:** *"Dün gece sevkiyat sorunsuz. Bakkalın cirosu beklenenden %12 düşük — müdür 'yağmurdan' diyor. Vekilin kararı: karakol amirinin doğum günü hediyesi gönderildi ($40)."*
+2. **Tarama:** Polis Dikkati katmanında Southside sarıya dönmüş. Olay akışına bakıyor: iki gece önce sokakta bir kavga çıkmış, kendisiyle ilgisi yok ama devriye artmış.
+3. **Karar 1:** Bu gece üretimi %50 kıs (İz düşsün). Kayıp: ≈$240.
 4. **Karar 2:** Bakkal müdürüne muhasebeciyi gönder, defteri denetlesin (1 oyun günü sürer).
 5. **Fırsat:** *"Çarşı'da bir çamaşırhane satılık, 2 gün geçerli."* Aklama kapasitesi lazım ama Hesap Günü'ne 3 gün var ve nakit sınırda. Banka müdürüyle yarın sabah 10:00'a görüşme koyuyor.
 6. **Ajanda:** Patron bu akşam meclis üyesinin davetine gidecek (3 oyun saati, ilişki bakımı).
-7. **Talimat güncelle:** *"Eski Mahalle Dikkati 60'ı geçerse üretimi tamamen durdur."*
+7. **Talimat güncelle:** *"Southside Dikkati 60'ı geçerse üretimi tamamen durdur."*
 8. Duraklatmayı kaldırıp ×2 hızda akşamı izliyor. Davet bitince oyun olay kartıyla kendiliğinden duruyor.
 
 ### 21.10 Örnek kriz zinciri (senaryo değil, sistemden doğan)
@@ -780,9 +780,9 @@ Entrikalar oyun günleri ve ayları içinde olgunlaşır; arka planda yürür, o
 
 Dünya olaylarına (Bölüm 13) ek olarak, **kişisel** ve seçenekli olaylar:
 
-> **Yeğenin kapında.** Kız kardeşinin oğlu Selim iş istiyor. Hevesli ama eli ağır, dili gevşek.
-> - *Yanıma alırım.* — Kız kardeşin +20 · Selim ekibe girer (Ketumluk 25) · Kemal −5 ("torpil")
-> - *Meyhanede garsonluk versin.* — Kız kardeşin +5 · Selim −10 (Hırslı)
+> **Yeğenin kapında.** Kız kardeşinin oğlu Danny iş istiyor. Hevesli ama eli ağır, dili gevşek.
+> - *Yanıma alırım.* — Kız kardeşin +20 · Danny ekibe girer (Ketumluk 25) · Kemal −5 ("torpil")
+> - *Meyhanede garsonluk versin.* — Kız kardeşin +5 · Danny −10 (Hırslı)
 > - *Bu işler ona göre değil.* — Kız kardeşin −15 · **Stres +10** (Cömert'sin)
 
 - Olaylar senaryo değildir: ön koşulları (bir yeğenin var, 16 yaşını geçti, işsiz) ve olasılıkları durumdan gelir.
@@ -863,7 +863,7 @@ Hesap Günü oyunu kendiliğinden duraklatır ve sırayla şunları işler:
 4. **Çocuklar:** 6, 12 ve 16 yaşlarında kişilik özelliği/yetenek kazanımı; 16'da işe alınabilir olur.
 5. **Doğumlar ve gebelikler.**
 6. **Yıllık sönümler:** eski iyilikler, eski kırgınlıklar, eski kanıtlar.
-7. **Yıl Dönümü raporu:** *"41 yaşındasın. Kızın Leyla 12 oldu: 'Zeki' özelliğini kazandı. Amcan Hasan hastalandı."*
+7. **Yıl Dönümü raporu:** *"41 yaşındasın. Kızın Lily 12 oldu: 'Zeki' özelliğini kazandı. Amcan Hasan hastalandı."*
 
 Doğal ölüm olasılığı (yaş-yılı başına):
 
@@ -1069,7 +1069,7 @@ Her listenin ne olduğu ve nasıl girildiği oyuncuya **görünür**; ama bir li
 | **İyilik (İ)** | −100…+100 | Bilenler seni iyi mi kötü mü görüyor (sevilen ↔ nefret edilen) |
 | **Korku (K)** | 0–100 | Bilenler senden ne kadar çekiniyor |
 
-Çevreler: **Semt halkı** (her semt ayrı), **Esnaf**, **Yeraltı**, **Polis ve adliye**, **Siyaset**, **Basın ve salon** (varsıl sınıf). Oyuncu "ünlü" değil, "Eski Mahalle'de sevilen, yeraltında tanınan, polisçe bilinen" biridir.
+Çevreler: **Semt halkı** (her semt ayrı), **Esnaf**, **Yeraltı**, **Polis ve adliye**, **Siyaset**, **Basın ve salon** (varsıl sınıf). Oyuncu "ünlü" değil, "Southside'de sevilen, yeraltında tanınan, polisçe bilinen" biridir.
 
 | | İ ≥ +30 | İ −30…+30 | İ ≤ −30 |
 |---|---|---|---|
@@ -1132,7 +1132,7 @@ Merdiven çevreyi, rakibi, devleti ve oyunun **türünü** birlikte değiştirir
 | **0 Esnaf** | Bir iş yeri | — | Tek esnaf | Muhtar | Devriye | Defter, borç, kendi işini ayakta tutmak |
 | **1 Ağa** | 1–4 iş, 1 sokak | Sokak çeteleri | Esnaf birliği | Meclis üyesi | Karakol amiri | Adamlarını ve kasayı yönetmek |
 | **2 Reis** | 1–3 semt | Semt aileleri | Armatör, orta fabrika | Belediye başkanı | Komiser | Kaptanlara devir, sınır anlaşmaları |
-| **3 Baba** | Şehir | Şehir aileleri, **Komisyon** | Liman A.Ş., Banka, Gazete grubu | Vali, milletvekili | Başsavcı, özel birim | Diplomasi, Komisyon oylaması, siyaset |
+| **3 Baba** | Şehir | Şehir aileleri, **Komisyon** | Harbor Trust, Banka, Gazete grubu | Vali, milletvekili | Başsavcı, özel birim | Diplomasi, Komisyon oylaması, siyaset |
 | **4 Kıyı Başı** | 3–6 liman şehri | Bölge birliği | Ulusal tröst, demiryolu, denizcilik | Bakan, parti merkezi | Bakanlık istihbaratı | İttifak ağı, ticaret yolları |
 | **5 Sendika Başkanı** | Ülke + denizaşırı | Ulusal sendika, uluslararası kaçakçılık ağları | Çok uluslu kartel | Hükümet, dış ilişkiler | Ulusal güvenlik, ortak operasyonlar | Meta oyun: sendika politikası, savaş ve barış |
 
@@ -1276,7 +1276,7 @@ Bölüm 18'deki MVP üzerine, sırasıyla:
 3. **Bağlar ve Kara Defter:** Dost bağı, Kara Defter kayıtları ve kapatma yolları.
 4. **Basamak 0 → 1:** GP hesabı, "Ağa" terfisi ve tanınma kararı.
 5. **Bir büyük kurum:** *Liman Şirketi* (ya da banka); kredi ve ortaklık.
-6. **Bir büyük aile:** Eski Mahalle'nin üstünde bir Reis; teklif / Ahit / baskı üç aşaması.
+6. **Bir büyük aile:** Southside'in üstünde bir Reis; teklif / Ahit / baskı üç aşaması.
 
 **Kirli para hâlâ yatıyordu** (denge testinde birikiyor). Yeni sistemler onu harcamanın yollarını getirir: siyasi bağış, hisse, villa ve korumalar, kaptan maaşları, Ahit haracı, tazminat, rüşvet zinciri, savaş fonu. Prototipin en büyük boşluğu bu sistemlerle kapanır.
 
@@ -1286,13 +1286,14 @@ Bölüm 18'deki MVP üzerine, sırasıyla:
 |---|---|
 | Çevreler | Yalnızca halk, yeraltı, polis (Esnaf, siyaset ve basın yok). Polis için sızıntı S = 0,3 + Dosya/200 |
 | Başlangıç gücü | GP ≈ 12; Ağa eşiği 15; terfi kartı: 3 ay üst üste GP ≥ 15 **ve** halk Tanınırlığı ≥ 30 |
-| Karaca Ailesi | GP 48; Tehdit = GP_sen/48 × (1 + K_yeraltı/100) × (reddettiysen 1,6); 0,3 fark eder (teklif kartı), 0,6 baskı (ihbar / adam ayartma / tedarik zammı) |
+| Marchetti Ailesi | GP 48; Tehdit = GP_sen/48 × (1 + K_yeraltı/100) × (reddettiysen 1,6); 0,3 fark eder (teklif kartı), 0,6 baskı (ihbar / adam ayartma / tedarik zammı) |
 | Ahit | Haraç gelirin %10'u (pazarlıkla %5), kirli paradan ödenir; himaye = Polis Dikkati −8; memnuniyet formülü Bölüm 24.5'teki gibi |
-| Liman A.Ş. | Pay 600 ₺/%1, en çok %40, aylık kâr 3.600 ₺ (payın oranında temettü, temiz); %25 = yönetim kurulu (+1,0 kredi çarpanı); kirli parayla %30 komisyon ve Mali Şüphe += bedel/200 |
-| Kredi | 1.000–4.000 ₺, 6 taksit, aylık %1,5; onay = sigmoid(teminat, müdürün görüşü, halk İyiliği, kurul koltuğu, kara liste); 3 taksit kaçarsa meyhane haczedilir |
-| Kirli para harcama yolları | Bağış (halk İyiliği), ziyafet (dost bağı), Ahit haracı, Kara Defter tazminat/hesaplaşma, hisse (komisyonlu), rüşvet, Karaca "hediyesi" |
-| Karakter ve konum | Patron haritada bir figürdür (`s.pos`); bir bina ya da sokaktaki bir noktaya tıklanınca yürür (tek ana sokak; sokağa in, yatay yürü, kapıya çık). Hız 10 harita birimi / oyun dakikası: meyhane→Karaca ≈ 45 oyun dakikası. Zaman durmuşken yürümez. Orada olmayı gerektiren işler: rüşvet→Karakol, kredi/hisse→Liman A.Ş., Ahit isteme/bozma→Karaca, borç ödeme→Tefeci, bodrum yatırımı→Meyhane, dinlenme→Ev. Sürgit işler (fiyat, hacim, işe alma, mal saklama) her yerden yapılır. Kural yalnızca arayüzde açıktır (`s.mesafe`); bot testleri kapalı oynar |
-| Denge | İçki fiyatı 10 ₺'ye indi (kirli para artık hızla birikmiyor). 30 tohumlu bot testi: yasal 30/30, temkinli 29/30, hırslı 25/30, pervasız 3/30 ayakta |
+| Harbor Trust | Pay $600/%1, en çok %40, aylık kâr $3,600 (payın oranında temettü, temiz); %25 = yönetim kurulu (+1,0 kredi çarpanı); kirli parayla %30 komisyon ve Mali Şüphe += bedel/200 |
+| Kredi | 1.000–$4,000, 6 taksit, aylık %1,5; onay = sigmoid(teminat, müdürün görüşü, halk İyiliği, kurul koltuğu, kara liste); 3 taksit kaçarsa meyhane haczedilir |
+| Kirli para harcama yolları | Bağış (halk İyiliği), ziyafet (dost bağı), Ahit haracı, Kara Defter tazminat/hesaplaşma, hisse (komisyonlu), rüşvet, Marchetti "hediyesi" |
+| Karakter ve konum | Patron haritada bir figürdür (`s.pos`); bir bina ya da sokaktaki bir noktaya tıklanınca yürür (tek ana sokak; sokağa in, yatay yürü, kapıya çık). Hız 10 harita birimi / oyun dakikası: meyhane→Marchetti ≈ 45 oyun dakikası. Zaman durmuşken yürümez. Orada olmayı gerektiren işler: rüşvet→Karakol, kredi/hisse→Harbor Trust, Ahit isteme/bozma→Marchetti, borç ödeme→Tefeci, bodrum yatırımı→Meyhane, dinlenme→Ev. Sürgit işler (fiyat, hacim, işe alma, mal saklama) her yerden yapılır. Kural yalnızca arayüzde açıktır (`s.mesafe`); bot testleri kapalı oynar |
+| Şehir ve isimler | Oyun 1920'lerin yasak dönemi **Amerika'sında**, kurgusal bir liman şehrinde geçer (semt: Southside). Harita 50 binalı (8 oyunla bağlı + 42 süs bina), 3 sokak, kamera (sürükle/tekerlek/pinch). Para birimi dolar. Başlıca isimler: Murphy's Tavern (senin işin), Duffy's Bar (rakip), Marchetti Family (Reis Vincent Marchetti), Harbor Trust (Bay Harrington), Sal the Shark (tefeci), Dedektif Dolan (polis). Kodda kimlikler (`karaca`, `rifat` …) eski adlarıyla kaldı; yalnızca görünen metinler değişti. |
+| Denge | İçki fiyatı $10'ye indi (kirli para artık hızla birikmiyor). 30 tohumlu bot testi: yasal 30/30, temkinli 29/30, hırslı 25/30, pervasız 3/30 ayakta |
 
 Henüz yok (v0.3): savaş (Bölüm 25), kişilerin haritada gezmesi (şimdilik yalnızca patron yürür; konuşmak için yanında olmak gerekmez), Reis basamağı, şehir dışı, siyaset ve basın çevreleri, Kara Defter'in "açık av" listesi.
 
@@ -1375,7 +1376,7 @@ Ekonomi: Savaşan semtte yasal ciro × 0,6 (müşteri korkar), kirli mal akış�
 - İki tarafın Dosya'sı günde +5; baskın olasılığı ×3;
 - Rüşvetin etkisi yarıya düşer (görünürde bir "temizlik" vardır);
 - Basın ve siyaset baskı kurar; Komisyon "bu iş kontrolden çıktı" gündemi açar;
-- Kampanya, iki tarafı da yener: kazananın zaferini yer. Kampanyayı önceden sezen (Rıfat gibi içerideki adam) taraflara haber verir (11).
+- Kampanya, iki tarafı da yener: kazananın zaferini yer. Kampanyayı önceden sezen (Dolan gibi içerideki adam) taraflara haber verir (11).
 
 Bu, savaşın **ucuz** ve **uzun** olmasını engelleyen temel sınırdır: "kazan ama sessizce" tasarım hedefidir.
 
@@ -1403,15 +1404,15 @@ Savaş sonrası **Ün** (24.3): kazanan K (+), kaybedenin İ'si düşer ve Cephe
 
 Oyuncu şunları yapar: **komutan atar**, cepheye **talimat verir**, **kural koyar** (sivil dokunma, polis), **fon** ayırır (kirli para), **adam ve silah** satın alır, **müttefik/üst çağırır**, **polisi** rüşvetle bir süre oyalar, **barış önerir**. Taktik ekran yoktur: sonuçlar rapor olarak gelir, ama araya **olay kartları** girer:
 
-> **Adamın pusuya düştü.** Güvenilir kaptanın Cemal, Liman Caddesi'nde pusuya düşürülmüş. Yaralı ama ayakta; üç adamı yok.
-> - *Misilleme yap.* — Sadakat +8 · Savaş skoru +5 · Dikkat +10 · Kara Defter: Cemal'in saldırganı (ağırlık 2)
-> - *Sessizce topla.* — Cemal Görüş −10 · Dikkat −5 · **Stres +5** (Gözüpek'sin)
+> **Adamın pusuya düştü.** Güvenilir kaptanın Tony, Liman Caddesi'nde pusuya düşürülmüş. Yaralı ama ayakta; üç adamı yok.
+> - *Misilleme yap.* — Sadakat +8 · Savaş skoru +5 · Dikkat +10 · Kara Defter: Tony'nin saldırganı (ağırlık 2)
+> - *Sessizce topla.* — Tony Görüş −10 · Dikkat −5 · **Stres +5** (Gözüpek'sin)
 > - *Barış teklif et.* — Savaş skoru −5 · **Stres −10** (Merhametli'sin) · Komisyon Görüş +5
 
 > **Kızın okul yolunda.** Düşmanın adamı okulun önünde dolaşıyor. Henüz bir şey yapmadılar; ama mesajı aldın.
-> - *Kızı şehir dışına gönder.* — Aile güvende; Leyla'nın görüşü −10; bir ay yokluk
+> - *Kızı şehir dışına gönder.* — Aile güvende; Lily'nin görüşü −10; bir ay yokluk
 > - *Misillemeye giriş (aile dokunulmazlığı ihlali sayılır).* — Komisyon aleyhine karar; Ün K +15, İ −20
-> - *Koruma ver, savaşı büyüt.* — Koruma maliyeti 300 ₺/ay; Dikkat +5
+> - *Koruma ver, savaşı büyüt.* — Koruma maliyeti $300/ay; Dikkat +5
 
 ### 25.8 Bu bölümün açık kararları ve uygulama sırası
 
@@ -1421,4 +1422,4 @@ Oyuncu şunları yapar: **komutan atar**, cepheye **talimat verir**, **kural koy
 | 25-2 | Taktik katman | Yok; cephe + komutan + olay kartları |
 | 25-3 | Sivil kayıp ve sunum | Soyut/rapor düzeyi (Bölüm 19, #2) |
 | 25-4 | Savaş başlatma | Gerekçe + Kara Defter + hazırlık süresi (ani savaş yok) |
-| 25-5 | Prototip | v0.2 dilimine (24.9) girmez; v0.3'te sokak ölçeği: Kâzım'la savaş |
+| 25-5 | Prototip | v0.2 dilimine (24.9) girmez; v0.3'te sokak ölçeği: Duffy'yle savaş |

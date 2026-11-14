@@ -281,7 +281,7 @@ function renderMap(tf) {
 // ---------- paneller ----------
 const LIVE = {
   price: () => `×${s.biz.meyhane.price.toFixed(2)}`,
-  share: () => { const sh = marketShare(s); return `Pazar payın ${pct(sh.me)} · Kâzım ${pct(sh.rival)} · evde oturan ${pct(1 - sh.me - sh.rival)}`; },
+  share: () => { const sh = marketShare(s); return `Pazar payın ${pct(sh.me)} · Duffy ${pct(sh.rival)} · evde oturan ${pct(1 - sh.me - sh.rival)}`; },
   volume: () => `${s.dist.volume} şişe/gün`,
   izcalc: () => {
     const dz = dailyIz(s), eq = dz / C.IZ_DECAY, p = detectP(s, eq);
@@ -296,7 +296,7 @@ const LIVE = {
     return `Bu ayın şimdiye kadarki kapasitesi <b>${money(li.cap)}</b>. Hesap Günü'nde <b>${money(li.amt)}</b> kirli → <b>${money(li.amt * (1 - li.fee))}</b> temiz (kesinti ${pct(li.fee)}).` +
       (over ? `<br><span class="bad">Kapasitenin %${s.launderPct - 100} üstü: Mali Şüphe +${Math.round(0.02 * (s.launderPct - 100) ** 2 * (staff(s, 'muhasebeci') ? 0.5 : 1))} / ay. 50'ye varınca maliye defterleri açar.</span>` : '');
   },
-  bribe: () => `${ui.bribe} ₺`,
+  bribe: () => `$${ui.bribe}`,
   bribecalc: () => {
     const e = estimateBribe(s, ui.bribe);
     return `<div class="t">Tahmin kartı</div>` +
@@ -305,7 +305,7 @@ const LIVE = {
       `<div class="note">Kabul ederse Dosya −${Math.round(e.effect)}. Reddederse görüşü −8, Polis Dikkati +5. Ayda bir kez denenebilir.</div>`;
   },
 };
-for (const id of ['halil', 'fatma', 'nuri', 'aziz', 'cemal', 'ihsan', 'selim']) LIVE['sal_' + id] = () => `${s.chars[id].maas} ₺ <small>(piyasa ${s.chars[id].piyasa})</small>`;
+for (const id of ['halil', 'fatma', 'nuri', 'aziz', 'cemal', 'ihsan', 'selim']) LIVE['sal_' + id] = () => `$${s.chars[id].maas} <small>(piyasa ${s.chars[id].piyasa})</small>`;
 const live = (k) => `<span data-live="${k}">${LIVE[k]()}</span>`;
 const range = (act_, min, max, step, val, extra = {}) => `<input type="range" min="${min}" max="${max}" step="${step}" value="${val}" data-r='${JSON.stringify({ type: act_, ...extra })}'>`;
 
@@ -328,7 +328,7 @@ function panelMekanIc(d) {
     case 'meyhane': return panelMeyhane();
     case 'rakip': {
       const r = s.biz.rakip;
-      return `<h3>Kâzım'ın Yeri</h3><p class="note">Aynı sokağın öbür meyhanesi. Müşteri aynı, pasta aynı.</p>` +
+      return `<h3>Duffy'nin Yeri</h3><p class="note">Aynı sokağın öbür meyhanesi. Müşteri aynı, pasta aynı.</p>` +
         row('Fiyat', `×${r.price.toFixed(2)}${s.rivalCutUntil ? ' <span class="bad">(indirimde)</span>' : ''}`) + row('Kalite', r.quality) + row('İtibar', Math.round(r.rep)) +
         `<div class="box">${LIVE.share()}</div>${personLink('kazim')}`;
     }
@@ -340,14 +340,14 @@ function panelMekanIc(d) {
     case 'camasir': return `<h3>Köşe Çamaşırhanesi</h3>` + (s.biz.camasir
       ? row('Bu ay ciro', money(s.biz.camasir.mRev)) + row('Bu ay gider', money(s.biz.camasir.mCost)) + `<p class="note">Senin. Nakit işi: cironun %50'si kadar kirli parayı aklayabilir (meyhanede bu oran %30).</p>`
       : `<p class="note">Başkasının. Sahibi bir gün satmak isteyebilir; kulağın açık olsun.</p>`);
-    case 'tefeci': return `<h3>Tefeci Şakir</h3>` +
+    case 'tefeci': return `<h3>Tefeci Sal</h3>` +
       row('Kalan borç', money(s.debt.principal)) + row('Aylık taksit', money(s.debt.installment)) + row('Aylık faiz', pct(C.INTEREST)) + row('Kaçan taksit', `<span class="${s.debt.missed ? 'bad' : ''}">${s.debt.missed} / 3</span>`) +
       `<p class="note">Taksit yalnızca temiz parayla ödenir. Sonraki Hesap Günü: ${11 - d.dayInMonth > 10 ? 0 : 10 - d.dayInMonth} gün sonra.</p>` +
-      (s.debt.principal > 0 ? `<div class="btns">${[200, 500, 1000].map((a) => `<button ${A({ type: 'payDebt', amount: a })} ${s.cash.clean < a ? 'disabled' : ''}>Erken öde: ${a} ₺</button>`).join('')}</div>` : '') + personLink('sakir');
+      (s.debt.principal > 0 ? `<div class="btns">${[200, 500, 1000].map((a) => `<button ${A({ type: 'payDebt', amount: a })} ${s.cash.clean < a ? 'disabled' : ''}>Erken öde: $${a}</button>`).join('')}</div>` : '') + personLink('sakir');
     case 'ev': return `<h3>Evin</h3>` + row('Yaşın', s.patron.yas) + row('Özelliklerin', s.patron.traits.join(', ')) +
       `<div class="box"><div class="t">Stres: ${Math.round(s.patron.stres)}</div>${meter(s.patron.stres, 100, 'red', [80])}<div class="note">Özelliklerine ters düşen kararlar stres yapar. 80'in üstünde sağlığın bozulur.</div>` +
-      `<button ${A({ type: 'rest' })}>Leyla'yla sahile in (100 ₺ · Stres −20)</button></div>` +
-      `<p class="note">Bu dünyada herkes ayda bir yaş alır. Leyla şu an ${s.chars.leyla.yas} yaşında.</p>` + personLink('leyla') + personLink('zehra') + personLink('selim');
+      `<button ${A({ type: 'rest' })}>Lily'yle sahile in ($100 · Stres −20)</button></div>` +
+      `<p class="note">Bu dünyada herkes ayda bir yaş alır. Lily şu an ${s.chars.leyla.yas} yaşında.</p>` + personLink('leyla') + personLink('zehra') + personLink('selim');
     case 'liman': return panelLiman();
     case 'karaca': return panelKaraca();
     default: return panelGenel(ui.sel, d);
@@ -362,7 +362,7 @@ function panelGenel(id, d) {
 
 function panelLiman() {
   const L = s.kurum.liman, kr = s.kredi, banka = listeler(s).find((l) => l.id === 'banka').on;
-  let h = `<h3>Liman A.Ş.</h3><p class="note">Limanın yük ve depo şirketi. Müdürü Selahattin Bey. Hissesi alınabilir, kredi verir; ama kayıtlı bir kurumdur: kirli parayı sevmez.</p>` +
+  let h = `<h3>Harbor Trust</h3><p class="note">Limanın yük ve depo şirketi. Müdürü Bay Harrington. Hissesi alınabilir, kredi verir; ama kayıtlı bir kurumdur: kirli parayı sevmez.</p>` +
     row('Senin payın', `%${L.hisse} <small>(${money(hisseDegeri(s))})</small>`) + row('Pay fiyatı', `${money(S0.HISSE_FIYAT)} / %1`) +
     row('Aylık temettün', money(Math.round(L.hisse / 100 * S0.LIMAN_KAR))) +
     `<div class="note">%25 pay yönetim kurulunda koltuk verir: kredi onayı kolaylaşır, Güç Puanı artar. Kirli parayla pay alırsan %30 komisyon ödersin ve Mali Şüphe artar. En çok %${S0.HISSE_MAX}.</div>` +
@@ -374,19 +374,19 @@ function panelLiman() {
     h += row('Kalan borç', money(kr.principal)) + row('Aylık taksit', money(kr.installment)) + row('Aylık faiz', pct(S0.KREDI_FAIZ)) +
       `<div class="note">Taksit temiz parayla ödenir. 3 taksit üst üste kaçarsa meyhane haczedilir.</div>`;
   } else if (banka) {
-    h += `<div class="note bad">Banka kara listesindesin: Liman A.Ş. kredi vermez.</div>`;
+    h += `<div class="note bad">Banka kara listesindesin: Harbor Trust kredi vermez.</div>`;
   } else {
     h += `<p class="note">6 taksit, aylık faiz %${(S0.KREDI_FAIZ * 100).toFixed(1)}. Onay ihtimali; teminatına, müdürün görüşüne ve semtteki iyiliğine bağlı. Reddedilirsen 10 gün beklemelisin.</p><div class="btns">` +
       [1000, 2000, 4000].map((a) => `<button ${A({ type: 'kredi', amount: a })}>${money(a)} iste (%${Math.round(krediInfo(s, a).p * 100)})</button>`).join('') + `</div>`;
     const e = krediInfo(s, 2000);
-    h += `<div class="box"><div class="t">2.000 ₺ için tahmin kartı</div>${e.factors.map((f) => `<div class="row"><span class="dim">${f.k}</span><span class="${cls(f.x)}">${f.x >= 0 ? '+' : ''}${f.x.toFixed(2)}</span></div>`).join('')}</div>`;
+    h += `<div class="box"><div class="t">$2,000 için tahmin kartı</div>${e.factors.map((f) => `<div class="row"><span class="dim">${f.k}</span><span class="${cls(f.x)}">${f.x >= 0 ? '+' : ''}${f.x.toFixed(2)}</span></div>`).join('')}</div>`;
   }
   return h + personLink('selahattin');
 }
 
 function panelKaraca() {
   const u = s.unvan, K = s.kurum.karaca, a = u.ahit, t = tehdit(s);
-  let h = `<h3>Karaca Ailesi</h3><p class="note">Limanın yarısını elinde tutan eski aile. Başı Reis Orhan Karaca. Bu semtin üstünde bir basamak.</p>` +
+  let h = `<h3>Marchetti Ailesi</h3><p class="note">Limanın yarısını elinde tutan eski aile. Başı Reis Vincent Marchetti. Bu semtin üstünde bir basamak.</p>` +
     row('Güçleri', `${S0.KARACA_GP} GP`) + row('Senin gücün', `${gucPuani(s).gp.toFixed(1)} GP`) +
     row('Seni nasıl görüyorlar', `<b class="${K.asama === 2 ? 'bad' : K.asama === 1 ? 'gold' : ''}">${asamaAd[K.asama]}</b>`) +
     row('Tehdit', `${t.toFixed(2)} <small>(0,3 fark eder · 0,6 baskı)</small>`) + meter(t, 1, t >= 0.6 ? 'red' : '', [0.3, 0.6]) +
@@ -395,12 +395,12 @@ function panelKaraca() {
     const m = memnuniyet(s);
     h += `<h3>Ahit</h3>` + row('Haraç', `gelirinin %${a.harac} <small>(~${money(Math.round(a.harac / 100 * s.gelirAy))}/ay, kirli)</small>`) +
       row('Himaye', a.himaye ? '<span class="good">var (Polis Dikkati −8)</span>' : '<span class="bad">yok</span>') +
-      `<div class="box"><div class="t">Orhan'ın memnuniyeti: ${Math.round(m.v)}</div>${m.lines.map((l) => `<div class="row"><span class="dim">${l.k}</span><span class="${cls(l.v)}">${sign(l.v)}</span></div>`).join('')}</div>` +
-      `<div class="note">Haracı ödemezsen ya da Orhan'ın görüşü −10'un altına düşerse himaye biter.</div>` +
+      `<div class="box"><div class="t">Vincent'in memnuniyeti: ${Math.round(m.v)}</div>${m.lines.map((l) => `<div class="row"><span class="dim">${l.k}</span><span class="${cls(l.v)}">${sign(l.v)}</span></div>`).join('')}</div>` +
+      `<div class="note">Haracı ödemezsen ya da Vincent'in görüşü −10'un altına düşerse himaye biter.</div>` +
       `<button class="danger" ${A({ type: 'ahitBoz' })}>Ahdi boz</button>`;
   } else {
     h += `<h3>Ahit</h3><p class="note">Ahit: onlara bağlanırsın; aylık gelirinin %${S0.HARAC}'ı haraç gider, karşılığında himaye gelir.</p>` +
-      `<button class="primary" ${A({ type: 'ahitIste' })}>Orhan'a git, Ahit iste</button>`;
+      `<button class="primary" ${A({ type: 'ahitIste' })}>Vincent'e git, Ahit iste</button>`;
   }
   return h + personLink('orhan');
 }
@@ -419,7 +419,7 @@ function panelGuc() {
     Object.keys(CEVRE).map((c) => { const p = perceived(s, c), un = s.un[c]; return `<tr><td>${CEVRE[c]}</td><td>${Math.round(p.T)}</td><td class="${cls(p.I)}">${Math.round(p.I)}</td><td>${Math.round(p.K)}</td><td>${pct(p.S)}</td></tr>` +
       `<tr class="sub"><td>↳ cephe / gölge</td><td>${Math.round(un.cephe.T)} / ${Math.round(un.golge.T)}</td><td>${Math.round(un.cephe.I)} / ${Math.round(un.golge.I)}</td><td>${Math.round(un.cephe.K)} / ${Math.round(un.golge.K)}</td><td></td></tr>`; }).join('') + `</table>` +
     `<h3>Mahalleye bağış</h3><div class="note">Kirli parayı iyiliğe çevirir: semt halkında İyilik artar. Yükseldikçe etkisi azalır (kolay alınan ün, kolay gider). 5 günde bir.</div>` +
-    `<div class="btns">${[150, 300, 600].map((a_) => `<button ${A({ type: 'donate', amount: a_ })}>${a_} ₺ bağış</button>`).join('')}</div>`;
+    `<div class="btns">${[150, 300, 600].map((a_) => `<button ${A({ type: 'donate', amount: a_ })}>$${a_} bağış</button>`).join('')}</div>`;
   const ls = listeler(s);
   h += `<h3>Sana karşı tutulan listeler</h3>` + ls.map((l) => `<div class="box ${l.on ? 'on' : ''}"><div class="row"><span><b>${l.ad}</b></span><span class="${l.on ? 'bad' : 'good'}">${l.on ? 'listedesin' : 'temiz'}</span></div>` +
     (l.on ? `<div class="note">${l.etki}<br>Çıkış: ${l.cikis}</div>` : `<div class="note">${l.etki}</div>`) + `</div>`).join('');
@@ -432,14 +432,14 @@ function panelKara() {
   const d = s.kara.defter;
   const adaylar = Object.keys(s.chars).filter((id) => !s.chars[id].dead && id !== 'leyla' && !d.some((k) => k.hedef === id));
   if (!adaylar.includes(ui.dHedef)) ui.dHedef = adaylar[0];
-  let h = `<h3>Kara Defter</h3><p class="note">Sana yapılan haksızlığı kayda geçirirsin; kayıt bedava, ama kin seni yorar. Kapatmanın üç yolu var: <b>af</b> (görüşü artar), <b>tazminat</b> (Yeraltı Korkun yeterliyse öder), <b>hesaplaşma</b> (adamın ve 200 ₺ gerekir; riskli).</p>`;
+  let h = `<h3>Kara Defter</h3><p class="note">Sana yapılan haksızlığı kayda geçirirsin; kayıt bedava, ama kin seni yorar. Kapatmanın üç yolu var: <b>af</b> (görüşü artar), <b>tazminat</b> (Yeraltı Korkun yeterliyse öder), <b>hesaplaşma</b> (adamın ve $200 gerekir; riskli).</p>`;
   if (!d.length) h += `<p class="note">Defter boş.</p>`;
   for (const k of d) {
     const c = s.chars[k.hedef], p = tazminatP(s, k.agirlik);
     h += `<div class="box"><div class="row"><span><b>${c.ad}</b> <small>${k.neden} · ağırlık ${k.agirlik}</small></span><span class="${k.kin >= 20 ? 'bad' : 'dim'}">kin ${Math.round(k.kin)}</span></div>` +
       `<div class="btns"><button ${A({ type: 'defterKapat', id: k.id, yol: 'af' })} ${blocked(s.patron, 'af') ? 'disabled title="Kindarsın"' : ''}>Affet</button>` +
       `<button ${A({ type: 'defterKapat', id: k.id, yol: 'tazminat' })}>Tazminat iste (%${Math.round(p * 100)})</button>` +
-      `<button class="danger" ${A({ type: 'defterKapat', id: k.id, yol: 'hesap' })} ${staff(s, 'koruma') ? '' : 'disabled'}>Hesaplaş (200 ₺)</button></div></div>`;
+      `<button class="danger" ${A({ type: 'defterKapat', id: k.id, yol: 'hesap' })} ${staff(s, 'koruma') ? '' : 'disabled'}>Hesaplaş ($200)</button></div></div>`;
   }
   h += `<h3>Deftere yaz</h3><div class="box"><div class="row"><span>Kim</span><select data-ui="dHedef">${adaylar.map((id) => `<option value="${id}" ${ui.dHedef === id ? 'selected' : ''}>${s.chars[id].ad}</option>`).join('')}</select></div>` +
     `<div class="row"><span>Neden</span><select data-ui="dNeden">${NEDEN.map((n) => `<option ${ui.dNeden === n ? 'selected' : ''}>${n}</option>`).join('')}</select></div>` +
@@ -459,11 +459,11 @@ function panelMeyhane() {
 
   h += `<h3>Bodrum</h3>`;
   if (!s.flags.ustaKnown) h += `<p class="note">Boş, rutubetli bir bodrum. Fıçı kokusu hâlâ duvarlarda.</p>`;
-  else if (!di.built) h += `<p class="note">Aziz Usta "bana bir kazan, bir de kapalı kapı yeter" diyor.</p><button class="primary" ${A({ type: 'buildDist' })}>İmalathane kur (${money(C.BUILD)})</button>`;
+  else if (!di.built) h += `<p class="note">Gus Usta "bana bir kazan, bir de kapalı kapı yeter" diyor.</p><button class="primary" ${A({ type: 'buildDist' })}>İmalathane kur (${money(C.BUILD)})</button>`;
   else {
     const usta = staff(s, 'usta');
     const hidden = s.t < di.hiddenUntil;
-    h += (usta ? row('Usta', `${usta.ad} · sadakat ${Math.round(usta.sadakat)}`) : `<div class="note bad">Usta yok: kazan kaynamıyor. ${canHire(s, 'aziz') ? `<button ${A({ type: 'hire', id: 'aziz' })}>Kör Aziz'i işe al (ayda 120 ₺)</button>` : ''}</div>`) +
+    h += (usta ? row('Usta', `${usta.ad} · sadakat ${Math.round(usta.sadakat)}`) : `<div class="note bad">Usta yok: kazan kaynamıyor. ${canHire(s, 'aziz') ? `<button ${A({ type: 'hire', id: 'aziz' })}>Kör Gus'ı işe al (ayda $120)</button>` : ''}</div>`) +
       row('Stok', `${Math.round(di.stock)} / ${C.STOCK_MAX} şişe`) + row('Bu gece satış', money(s.today.liq)) + row('Gizlilik', secrecy(s).toFixed(2)) +
       (hidden ? `<div class="note bad">Mal saklı. ${Math.ceil((di.hiddenUntil - s.t) / 60)} saat sonra yeniden kurulur.</div>` : '') +
       `<div class="box"><div class="row"><span>Üretim hacmi</span>${live('volume')}</div>${range('setVolume', 0, C.VOL_MAX, 5, di.volume)}<div class="note">${live('izcalc')}</div></div>` +
@@ -472,14 +472,14 @@ function panelMeyhane() {
       (di.hiddenRoom ? '' : `<button ${A({ type: 'upgradeHidden' })}>Çift duvar ör (${money(C.HIDDEN_ROOM)}) — gizlilik 0,75</button>`) +
       `<button class="danger" ${A({ type: 'hideGoods' })} ${hidden ? 'disabled' : ''}>Malı sakla (3 gün üretim yok)</button></div>`;
   }
-  return h + `<h3>Komşu</h3><p class="note">Bodrumun penceresi Hacer Hanım'ın mutfağına bakar.</p>` + personLink('hacer');
+  return h + `<h3>Komşu</h3><p class="note">Bodrumun penceresi Bayan Kowalski'nin mutfağına bakar.</p>` + personLink('hacer');
 }
 
 function panelBribe() {
   const r = s.chars.rifat;
   if (r.dead) return '';
   const wait = Math.ceil((r.bribeAt + 10 * DAY - s.t) / DAY);
-  return `<div class="box"><div class="row"><span>Rıfat'a zarf uzat</span>${live('bribe')}</div>` +
+  return `<div class="box"><div class="row"><span>Dolan'a zarf uzat</span>${live('bribe')}</div>` +
     `<input type="range" min="20" max="600" step="10" value="${ui.bribe}" data-ui="bribe">` +
     `<div data-live="bribecalc">${LIVE.bribecalc()}</div>` +
     `<button class="primary" ${A({ type: 'bribe', amount: ui.bribe })} id="bribeBtn" ${wait > 0 ? 'disabled' : ''}>${wait > 0 ? `${wait} gün sonra` : 'Teklif et'}</button></div>`;
@@ -518,15 +518,15 @@ function personDetail(id) {
       `<div class="row"><span>Maaş</span>${live('sal_' + id)}</div>${range('setSalary', Math.round(c.piyasa * 0.5), c.piyasa * 2, 5, c.maas, { id })}`;
   }
   h += `<div class="btns">`;
-  if (canHire(s, id)) h += `<button class="primary" ${A({ type: 'hire', id })}>İşe al (ayda ${c.maas} ₺)</button>`;
+  if (canHire(s, id)) h += `<button class="primary" ${A({ type: 'hire', id })}>İşe al (ayda $${c.maas})</button>`;
   if (c.employed && id !== 'nuri') h += `<button class="danger" ${A({ type: 'fire', id })}>İşten çıkar</button>`;
-  h += `<button ${A({ type: 'gift', id })}>Hediye gönder (${b === 'dost' ? 25 : 50} ₺ · görüş +8)</button>` +
-    `<button ${A({ type: 'feast', id })}>Sofrana çağır (150 ₺ · görüş +6)</button>` +
+  h += `<button ${A({ type: 'gift', id })}>Hediye gönder ($${b === 'dost' ? 25 : 50} · görüş +8)</button>` +
+    `<button ${A({ type: 'feast', id })}>Sofrana çağır ($150 · görüş +6)</button>` +
     (inDefter || id === 'leyla' ? '' : `<button data-go='${JSON.stringify({ tab: 'kara', dHedef: id })}'>Deftere yaz</button>`) + `</div>`;
   if (id === 'aziz' && !s.flags.ustaKnown) h += `<div class="note">Henüz tanışmadınız.</div>`;
   if (c.hire === 'muhasebeci') h += `<div class="note">Muhasebeci: aklama kesintisi %20 → %12, Mali Şüphe yarı hızla birikir.</div>`;
   if (c.hire === 'koruma') h += `<div class="note">Koruma: meyhanedeki kavgaları polis çağırmadan bitirir.</div>`;
-  if (id === 'rifat') h += `<div class="note">${c.payroll ? 'Aylıkta: ayda 60 ₺. Baskından önce haber uçurur.' : 'Aylıkta değil. Görüşü +30\'u geçerse yine haber uçurur.'}</div>`;
+  if (id === 'rifat') h += `<div class="note">${c.payroll ? 'Aylıkta: ayda $60. Baskından önce haber uçurur.' : 'Aylıkta değil. Görüşü +30\'u geçerse yine haber uçurur.'}</div>`;
   return h + '</div>';
 }
 
@@ -552,7 +552,7 @@ function panelDefter() {
 }
 
 function panelKararlar() {
-  if (!s.cards.length) return `<p class="note">Bekleyen karar yok. Sen karar vermezsen, süre dolunca Nuri Efendi senin yerine en temkinli yolu seçer.</p>`;
+  if (!s.cards.length) return `<p class="note">Bekleyen karar yok. Sen karar vermezsen, süre dolunca Walter Doyle senin yerine en temkinli yolu seçer.</p>`;
   return s.cards.map((c) => { const v = cardView(s, c); return `<div class="box"><div class="t">${v.title}</div><div class="note">Kalan süre: ${v.hoursLeft >= 24 ? `${Math.floor(v.hoursLeft / 24)} gün ${v.hoursLeft % 24} saat` : `${v.hoursLeft} saat`}</div><button data-card="${c.id}">Aç</button></div>`; }).join('');
 }
 
@@ -600,7 +600,7 @@ function renderModal() {
   mo.innerHTML = `<div class="card"><h2>${v.title}</h2><div class="when">${fmtDate(s.t)} · ${fmtTime(s.t)}</div>` +
     `<p class="${v.ev === 'rapor' ? 'mono' : ''}">${v.text}</p>` +
     v.options.map((o, i) => `<button class="opt" ${A({ type: 'choose', card: v.id, opt: i })} ${o.enabled ? '' : 'disabled'}>${o.label}${o.hint ? `<small>${o.hint}</small>` : ''}</button>`).join('') +
-    (v.ev === 'rapor' ? '' : `<div class="foot"><span>${v.hoursLeft} saat içinde karar vermezsen ${s.chars.nuri.dead ? 'iş sahipsiz kalır' : `Nuri Efendi seçer: "${v.options[v.def].label}"`}</span><button id="later">Kenara al</button></div>`) +
+    (v.ev === 'rapor' ? '' : `<div class="foot"><span>${v.hoursLeft} saat içinde karar vermezsen ${s.chars.nuri.dead ? 'iş sahipsiz kalır' : `Walter Doyle seçer: "${v.options[v.def].label}"`}</span><button id="later">Kenara al</button></div>`) +
     `</div>`;
 }
 

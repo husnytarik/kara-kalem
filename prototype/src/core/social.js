@@ -68,12 +68,12 @@ export function lakap(s) {
 export function gucPuani(s) {
   const adam = Object.values(s.chars).filter((c) => c.employed && !c.dead).length;
   const parts = [
-    { k: `Aylık gelir (${Math.round(s.gelirAy)} ₺)`, v: 6 * Math.log(1 + s.gelirAy / 1000) },
+    { k: `Aylık gelir ($${Math.round(s.gelirAy)})`, v: 6 * Math.log(1 + s.gelirAy / 1000) },
     { k: `Adamların (${adam})`, v: 0.5 * adam },
     { k: 'Semt (yarım semt)', v: 4 * 0.5 },
     { k: 'Yeraltında tanınırlık', v: 0.1 * perceived(s, 'yeralti').T },
   ];
-  if (s.kurum.liman.hisse > 0) parts.push({ k: `Liman A.Ş. payı (%${s.kurum.liman.hisse})`, v: 0.1 * s.kurum.liman.hisse });
+  if (s.kurum.liman.hisse > 0) parts.push({ k: `Harbor Trust payı (%${s.kurum.liman.hisse})`, v: 0.1 * s.kurum.liman.hisse });
   return { gp: parts.reduce((a, p) => a + p.v, 0), parts };
 }
 
@@ -81,7 +81,7 @@ export function gucPuani(s) {
 export function listeler(s) {
   return [
     { id: 'aranan', ad: 'Aranan listesi', on: s.dosya >= 50, etki: 'Rüşvet kabul ihtimali −1,0 (kabul eden azdır).', cikis: 'Dosyayı 50\'nin altına indir.' },
-    { id: 'banka', ad: 'Banka kara listesi', on: s.debt.missed >= 2 || s.kredi.missed > 0, etki: 'Liman A.Ş. kredi vermez.', cikis: 'Geciken taksitleri kapat.' },
+    { id: 'banka', ad: 'Banka kara listesi', on: s.debt.missed >= 2 || s.kredi.missed > 0, etki: 'Harbor Trust kredi vermez.', cikis: 'Geciken taksitleri kapat.' },
     { id: 'esnaf', ad: 'Esnaf birliği: güvenilmez', on: perceived(s, 'halk').I <= -25, etki: 'Tedarikçi fiyatı +%15 (mal gideri).', cikis: 'Semt halkındaki iyiliğini −25\'in üstüne çıkar (bağış, iyi iş).' },
   ];
 }
@@ -150,7 +150,7 @@ export function defterKapat(s, id, yol) {
       const amt = 200 * k.agirlik;
       s.cash.dirty += amt; close();
       addMod(s, k.hedef, 'Tazminat ödedi', -5, 2);
-      log(s, `${c.ad} tazminat ödedi: ${amt} ₺ kirli para. Kayıt kapandı.`, 'good', `Yeraltında korkunla kabul ihtimali %${Math.round(p * 100)} idi.`);
+      log(s, `${c.ad} tazminat ödedi: $${amt} kirli para. Kayıt kapandı.`, 'good', `Yeraltında korkunla kabul ihtimali %${Math.round(p * 100)} idi.`);
     } else {
       addMod(s, k.hedef, 'Ondan tazminat istedin', -10, 2);
       fame(s, 'yeralti', 'golge', { k: -2 }, 1);
@@ -161,7 +161,7 @@ export function defterKapat(s, id, yol) {
   }
   if (yol === 'hesap') {
     if (!staff(s, 'koruma')) return { ok: false, msg: 'Hesaplaşmak için adamın (koruma) olmalı.' };
-    if (!spend(s, 200, 'dirty')) return { ok: false, msg: 'Para yetmiyor (200 ₺).' };
+    if (!spend(s, 200, 'dirty')) return { ok: false, msg: 'Para yetmiyor ($200).' };
     close();
     addMod(s, k.hedef, 'Onunla hesaplaştın', -30, 1);
     fame(s, 'yeralti', 'golge', { k: 6 }, 1);
@@ -169,7 +169,7 @@ export function defterKapat(s, id, yol) {
     const st = stressFor(s.patron, 'hesap'); if (st.total) addStress(s, st.total, st.why.join(', '));
     if (st.total < 0) s.patron.stres = clamp(s.patron.stres + st.total, 0, 100);
     if (k.hedef === 'kazim') { s.biz.rakip.rep = Math.max(5, s.biz.rakip.rep - 8); }
-    if (k.hedef === 'sakir') { s.debt.principal += 400; log(s, 'Şakir sert karşılık verdi: borcuna 400 ₺ işlendi.', 'bad'); }
+    if (k.hedef === 'sakir') { s.debt.principal += 400; log(s, 'Sal sert karşılık verdi: borcuna $400 işlendi.', 'bad'); }
     if (k.hedef === 'hacer') { fame(s, 'halk', 'golge', { i: -8 }, 1); leak(s, 'halk', 0.05); }
     log(s, `${c.ad} ile hesaplaştın. Kayıt kapandı.`, 'warn', 'Yeraltında Korku +6, polis seni bir kez daha duydu.');
     if (rnd(s) < 0.35) s.pendingEvidence.push({ v: 8, why: `Hesaplaşmayı gören biri karakolda ifade verdi (${c.ad}).` });
@@ -196,7 +196,7 @@ function defterMonth(s) {
   void ay;
 }
 
-// ---------- Karaca Ailesi ve Ahit ----------
+// ---------- Marchetti Ailesi ve Ahit ----------
 export function tehdit(s) {
   const k = s.kurum.karaca;
   return (gucPuani(s).gp / S0.KARACA_GP) * (1 + perceived(s, 'yeralti').K / 100) * (k.redd ? 1.6 : 1);
@@ -210,7 +210,7 @@ export function memnuniyet(s) {
   const himaye = a.himaye ? 10 : 0;
   const lines = [
     { k: 'Taban', v: 50 },
-    { k: 'Orhan\'ın sana görüşü (×0,5)', v: Math.round(0.5 * o) },
+    { k: 'Vincent\'in sana görüşü (×0,5)', v: Math.round(0.5 * o) },
     { k: `Haraç %${a.harac} (her %1 fazlası −1,5)`, v: Math.round(-1.5 * (a.harac - 10)) },
     { k: `Özerklik ${a.ozerklik}`, v: 10 * a.ozerklik },
     { k: 'Himaye gördün mü', v: himaye },
@@ -222,17 +222,17 @@ export function kabulAhit(s, harac, kaynak) {
   s.unvan.ahit = { ust: 'karaca', harac, ozerklik: 1, t0: s.t, geciken: 0, himaye: false };
   s.unvan.tanindi = true;
   addMod(s, 'orhan', 'Ahit verdin', 20, 2);
-  log(s, `Karaca Ailesi'ne Ahit verdin: aylık gelirinin %${harac}'ı haraç; karşılığında himaye.`, 'good', kaynak);
+  log(s, `Marchetti Ailesi'ne Ahit verdin: aylık gelirinin %${harac}'ı haraç; karşılığında himaye.`, 'good', kaynak);
 }
 
-// ---------- Liman A.Ş.: hisse ve kredi ----------
+// ---------- Harbor Trust: hisse ve kredi ----------
 export const hisseDegeri = (s) => s.kurum.liman.hisse * S0.HISSE_FIYAT;
 
 export function krediInfo(s, amt) {
   const teminat = s.cash.clean + 3 * s.gelirAy + hisseDegeri(s);
   const sel = opinion(s, 'selahattin').total;
   const fx = [
-    { k: `Teminat (${Math.round(teminat)} ₺) / istenen`, x: 1.2 * Math.log(1 + teminat / amt) },
+    { k: `Teminat ($${Math.round(teminat)}) / istenen`, x: 1.2 * Math.log(1 + teminat / amt) },
     { k: 'Müdürün sana görüşü', x: sel / 40 },
     { k: 'Semt halkında iyiliğin', x: perceived(s, 'halk').I / 80 },
     { k: 'Yönetim kurulunda koltuğun', x: s.kurum.liman.hisse >= 25 ? 1 : 0 },
@@ -273,22 +273,22 @@ export function socialMonth(s, R, ctx) {
   if (a) {
     const due = Math.round(a.harac / 100 * s.gelirAy);
     if (due > 0 && spend(s, due, 'dirty')) {
-      R.push(`AHİT  Karaca Ailesi'ne haraç ${due} ₺ (%${a.harac})`);
+      R.push(`AHİT  Marchetti Ailesi'ne haraç $${due} (%${a.harac})`);
       addMod(s, 'orhan', 'Haracını ödedin', 3, 2); a.geciken = 0;
     } else if (due > 0) {
       a.geciken++; addMod(s, 'orhan', 'Haracı geciktirdin', -15, 2);
       R.push(`AHİT  ! Haraç ödenemedi (${a.geciken})`);
-      log(s, 'Karaca\'ya haraç ödenemedi. Orhan bunu unutmaz.', 'bad');
+      log(s, 'Marchetti\'ye haraç ödenemedi. Vincent bunu unutmaz.', 'bad');
     }
     a.himaye = opinion(s, 'orhan').total >= -10 && a.geciken === 0; // koruma yalnızca ilişki ve haraç düzgünse sürer
   }
 
-  // Liman A.Ş.: temettü ve kredi
+  // Harbor Trust: temettü ve kredi
   const L = s.kurum.liman;
   if (L.hisse > 0) {
     const tem = Math.round(L.hisse / 100 * S0.LIMAN_KAR);
     s.cash.clean += tem;
-    R.push(`LİMAN A.Ş.  %${L.hisse} payından temettü ${tem} ₺ (temiz)`);
+    R.push(`LİMAN A.Ş.  %${L.hisse} payından temettü $${tem} (temiz)`);
   }
   const kr = s.kredi;
   if (kr.principal > 0) {
@@ -296,14 +296,14 @@ export function socialMonth(s, R, ctx) {
     const pay = Math.min(kr.installment, kr.principal);
     if (s.cash.clean >= pay) {
       s.cash.clean -= pay; kr.principal -= pay; kr.missed = 0;
-      R.push(`LİMAN KREDİSİ  taksit ${Math.round(pay)} ₺ · kalan ${Math.round(kr.principal)} ₺`);
-      if (kr.principal < 1) { kr.principal = 0; log(s, 'Liman A.Ş. kredisini kapattın.', 'good'); }
+      R.push(`LİMAN KREDİSİ  taksit $${Math.round(pay)} · kalan $${Math.round(kr.principal)}`);
+      if (kr.principal < 1) { kr.principal = 0; log(s, 'Harbor Trust kredisini kapattın.', 'good'); }
     } else {
       kr.missed++;
       R.push(`LİMAN KREDİSİ  ! Taksit ödenemedi (${kr.missed}/3)`);
       log(s, `Liman kredisi taksiti ödenemedi (${kr.missed}/3). Banka kara listesindesin.`, 'bad');
       addMod(s, 'selahattin', 'Taksitini ödemedin', -12, 2);
-      if (kr.missed >= 3 && !s.over) s.over = { kind: 'borc', text: 'Liman A.Ş. kredi teminatını, meyhaneni haczetti. Üç taksit üst üste ödenmedi.' };
+      if (kr.missed >= 3 && !s.over) s.over = { kind: 'borc', text: 'Harbor Trust kredi teminatını, meyhaneni haczetti. Üç taksit üst üste ödenmedi.' };
     }
   }
 
@@ -317,12 +317,12 @@ export function socialMonth(s, R, ctx) {
   }
   R.push(`GÜÇ  ${BASAMAK[u.basamak].ad} · Güç Puanı ${g.gp.toFixed(1)}${nxt ? ` / ${nxt.gp} (${nxt.ad}${u.basamak === 0 ? `, ${u.ay}/3 ay` : ''})` : ''}`);
 
-  // Karaca Ailesi seni fark ediyor mu?
+  // Marchetti Ailesi seni fark ediyor mu?
   const K = s.kurum.karaca;
   if (!u.ahit) {
     const t = tehdit(s);
     const st = t < 0.3 ? 0 : t < 0.6 ? 1 : 2;
-    if (st !== K.asama) log(s, `Karaca Ailesi: ${asamaAd[st]}. (Tehdit ${t.toFixed(2)})`, st > K.asama ? 'warn' : 'info');
+    if (st !== K.asama) log(s, `Marchetti Ailesi: ${asamaAd[st]}. (Tehdit ${t.toFixed(2)})`, st > K.asama ? 'warn' : 'info');
     K.asama = st;
     if (st === 1 && ayNo - K.teklifAy >= 3 && !s.cards.some((c) => c.ev === 'karaca_teklif')) { K.teklifAy = ayNo; pushCard(s, 'karaca_teklif'); }
     if (st === 2 && ayNo - K.baskiAy >= 2 && !s.cards.some((c) => c.ev === 'karaca_baski')) { K.baskiAy = ayNo; pushCard(s, 'karaca_baski', { flavor: Math.floor(rnd(s) * 3) }); }

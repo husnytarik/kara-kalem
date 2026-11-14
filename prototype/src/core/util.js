@@ -35,7 +35,7 @@ export function dateOf(t) {
 const pad = (n) => String(n).padStart(2, '0');
 export const fmtTime = (t) => { const d = dateOf(t); return `${pad(d.hour)}:${pad(d.minute)}`; };
 export const fmtDate = (t) => { const d = dateOf(t); return `${d.year}. yıl · ${d.monthInYear}. ay · ${d.dayInMonth}. gün`; };
-export const money = (x) => `${Math.round(x).toLocaleString('tr-TR')} ₺`;
+export const money = (x) => `$${Math.round(x).toLocaleString('en-US')}`;
 
 // Olay akışı. "why" alanı nedensellik kaydıdır: bu neden oldu?
 export function log(s, text, kind = 'info', why = '') {
@@ -80,7 +80,7 @@ export function spend(s, amount, mode = 'clean') {
 
 export const staff = (s, job) => Object.values(s.chars).find((c) => c.job === job && c.employed && !c.dead) || null;
 
-// Polisin haber uçurduğu durum: Rıfat aylıkta ya da görüşü yeterince iyi.
+// Polisin haber uçurduğu durum: Dolan aylıkta ya da görüşü yeterince iyi.
 export const informed = (s) => s.chars.rifat.payroll || opinion(s, 'rifat').total >= 30;
 
 export function addStress(s, v, why) {
