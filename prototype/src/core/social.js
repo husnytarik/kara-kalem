@@ -2,6 +2,7 @@
 // DOM'a dokunmaz; durum düz JSON'dur. Aylık/günlük kancalar sim.js'ten çağrılır.
 import { clamp, sigmoid, dateOf, DAY, log, addMod, opinion, spend, rnd, addStress, staff } from './util.js';
 import { stressFor, blocked } from './traits.js';
+import { bolgeGP, oyuncuBolgeleri } from './bolge.js';
 
 export const BASAMAK = [
   { ad: 'Esnaf', gp: 0 }, { ad: 'Ağa', gp: 15 }, { ad: 'Reis', gp: 35 },
@@ -67,10 +68,11 @@ export function lakap(s) {
 // ---------- güç puanı ve basamak ----------
 export function gucPuani(s) {
   const adam = Object.values(s.chars).filter((c) => c.employed && !c.dead).length;
+  const bg = bolgeGP(s);
   const parts = [
     { k: `Aylık gelir ($${Math.round(s.gelirAy)})`, v: 6 * Math.log(1 + s.gelirAy / 1000) },
     { k: `Adamların (${adam})`, v: 0.5 * adam },
-    { k: 'Semt (yarım semt)', v: 4 * 0.5 },
+    { k: `Bölgeler (${bg.n} hakim)`, v: bg.v },
     { k: 'Yeraltında tanınırlık', v: 0.1 * perceived(s, 'yeralti').T },
   ];
   if (s.kurum.liman.hisse > 0) parts.push({ k: `Harbor Trust payı (%${s.kurum.liman.hisse})`, v: 0.1 * s.kurum.liman.hisse });
@@ -315,7 +317,11 @@ export function socialMonth(s, R, ctx) {
     if (g.gp >= nxt.gp) u.ay++; else u.ay = 0;
     if (u.ay >= 3 && perceived(s, 'halk').T >= 30 && !s.cards.some((c) => c.ev === 'terfi')) pushCard(s, 'terfi');
   }
-  R.push(`GÜÇ  ${BASAMAK[u.basamak].ad} · Güç Puanı ${g.gp.toFixed(1)}${nxt ? ` / ${nxt.gp} (${nxt.ad}${u.basamak === 0 ? `, ${u.ay}/3 ay` : ''})` : ''}`);
+  if (u.basamak === 1 && nxt) {
+    if (g.gp >= nxt.gp && oyuncuBolgeleri(s).length >= 2) u.ay++; else u.ay = 0;
+    if (u.ay >= 3 && !s.cards.some((c) => c.ev === 'terfi_reis')) pushCard(s, 'terfi_reis');
+  }
+  R.push(`GÜÇ  ${BASAMAK[u.basamak].ad} · Güç Puanı ${g.gp.toFixed(1)}${nxt ? ` / ${nxt.gp} (${nxt.ad}${u.basamak <= 1 ? `, ${u.ay}/3 ay` : ''}${u.basamak === 1 ? ', 2 bölgeye hakim olmalısın' : ''})` : ''}`);
 
   // Marchetti Ailesi seni fark ediyor mu?
   const K = s.kurum.karaca;

@@ -217,6 +217,15 @@ export const EVENTS = {
     ],
   },
 
+  terfi_reis: {
+    title: 'Şehir seni "Reis" diyor', system: true, window: 99, def: 1,
+    text: (s) => `Birden fazla bölgede sözün geçiyor. Esnaf, polis, hatta rakipler adını fısıltıyla değil, açıkça söylüyor. Güç Puanın ${gucPuani(s).gp.toFixed(1)}. "Reis" olursan artık bir mahallenin değil, bir şehrin sorunusun: Marchetti ve O'Brien seni hesaba katmak zorunda kalacak.`,
+    options: () => [
+      { label: 'Reis ol.', hint: 'Yeraltında ve halkta ün artar. Rakip aileler seni daha ciddiye alır.', run: (st) => { st.unvan.basamak = 2; st.unvan.ay = 0; st.unvan.tanindi = true; fame(st, 'yeralti', 'cephe', { t: 14, i: 3, k: 6 }, 1); fame(st, 'halk', 'cephe', { t: 6, i: 2 }, 1); log(st, 'Artık bir Reis\'sin.', 'good', 'Birden fazla bölgenin hakimi olmak seni şehrin güçlerinden biri yaptı.'); } },
+      { label: 'Henüz erken.', hint: 'Üç ay sonra yeniden önüne gelir.', run: (st) => { st.unvan.ay = 0; } },
+    ],
+  },
+
   karaca_teklif: {
     title: 'Marchetti Ailesi seni çağırdı', system: true, window: 5, def: 2,
     text: () => 'Reis Vincent Marchetti\'nin adamı sabah dükkâna uğradı, bir zarf bıraktı: "Reis, mahallede gürültü yapan genç meyhaneciyle tanışmak istiyor." Marchetti Ailesi limanın yarısını elinde tutuyor. Teklif ortada: Ahit.',

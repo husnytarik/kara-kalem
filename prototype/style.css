@@ -122,3 +122,21 @@ select { font: inherit; color: var(--ink); background: #14100c; border: 1px soli
 }
 .bld.gen text { font-size: 14px; } .bld.gen text.sub { font-size: 11px; }
 .bld.gen rect.body { opacity: .92; }
+
+/* bölgeler */
+.bz { cursor: pointer; }
+.bz text { pointer-events: none; }
+.bz text.bz1 { font: 700 14px Georgia, serif; fill: #efe4cd; }
+.bz text.bz2 { font: 11px "Segoe UI", sans-serif; fill: #cdbf9f; }
+.bzlist { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.bzlist button { flex: 1 1 30%; border-width: 2px; border-style: solid; padding: 6px 4px; font-size: 12.5px; }
+.bzlist button.on { background: var(--panel2); color: var(--gold); }
+.bzlist button small { display: block; color: var(--dim); }
+.infbar { display: flex; height: 12px; background: #14100c; border-radius: 4px; overflow: hidden; position: relative; margin: 3px 0; }
+.infbar i { display: block; height: 100%; }
+.infbar i.bos { background: #2a241a; }
+.infbar u { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff9; }
+.infleg { font-size: 11.5px; color: var(--dim); display: flex; flex-wrap: wrap; gap: 4px 10px; margin-bottom: 6px; }
+.btns.col { flex-direction: column; }
+.btns.col button { text-align: left; }
+.btns button small { display: block; color: var(--dim); font-size: 11px; }

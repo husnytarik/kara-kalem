@@ -2,7 +2,11 @@
 import {
   C, newGame, advance, act, cardView, canHire, marketShare, attention, attentionLines, secrecy,
   dailyIz, detectP, stageName, launderInfo, estimateBribe, PLACES, ROWS, V, W, H, GATE, here, walkerAt, walkMinutes,
+  BOLGELER, bolgeAt,
 } from '../core/sim.js';
+import {
+  hakimOf, FAK, HARAC, HAKIM_ESIK, GARNIZON_MAX, ADAM_MAAS, HAVUZ, IS_AD, BEKLEME, erisim, hakimAd, oyuncuBolgeleri,
+} from '../core/bolge.js';
 import { dateOf, fmtTime, fmtDate, money, opinion, SEASONS, DAY, clamp, staff, informed } from '../core/util.js';
 import {
   BASAMAK, CEVRE, NEDEN, S0, perceived, gucPuani, lakap, listeler, bond, tehdit, asamaAd, memnuniyet,
@@ -11,7 +15,7 @@ import {
 import { TRAITS, blocked } from '../core/traits.js';
 import { ROAD_HALF } from '../core/world.js';
 
-const SAVE_KEY = 'kara_kalem_v04';
+const SAVE_KEY = 'kara_kalem_v05';
 const $ = (id) => document.getElementById(id);
 const SVGNS = 'http://www.w3.org/2000/svg';
 
@@ -20,14 +24,14 @@ let s = load() || fresh();
 // Hata ayıklama: ?skip=25 → sabit tohumla yeni oyun açıp 25 gün ileri sarar (kayda dokunmaz).
 const DEBUG_SKIP = +new URLSearchParams(location.search).get('skip') || 0;
 if (DEBUG_SKIP) { s = fresh(1923); advance(s, DEBUG_SKIP * DAY); }
-const ui = { tab: 'mekan', sel: 'meyhane', person: null, modal: null, bribe: 150, pauseSeen: s.pauseReq, lastHour: -1, overShown: false, dHedef: 'kazim', dNeden: 'Hakaret', dAg: 2 };
+const ui = { tab: 'mekan', sel: 'meyhane', bolge: 'southside', person: null, modal: null, bribe: 150, pauseSeen: s.pauseReq, lastHour: -1, overShown: false, dHedef: 'kazim', dNeden: 'Hakaret', dAg: 2 };
 
 function load() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const st = JSON.parse(raw);
-    if (st.v !== 4) return null;
+    if (st.v !== 5) return null;
     st.speed = 0; st.mesafe = true;
     return st;
   } catch { return null; }
@@ -111,6 +115,12 @@ function buildMap() {
     el('line', { x1: 0, y1: r, x2: W, y2: r, stroke: '#6d6552', 'stroke-width': 2, 'stroke-dasharray': '14 12' }, svg);
   }
   for (const v of V) el('rect', { x: v - 10, y: ROWS[0], width: 20, height: ROWS[2] - ROWS[0], fill: '#57503f' }, svg);
+  // bölge zeminleri: hakimin rengiyle yarı saydam; tıklamayı engellemez
+  M.z = {};
+  for (const [id, B] of Object.entries(BOLGELER)) {
+    const r = el('rect', { x: B.kutu.x, y: B.kutu.y, width: B.kutu.w, height: B.kutu.h, rx: 14, fill: '#888', 'fill-opacity': 0.12, stroke: '#888', 'stroke-opacity': 0.55, 'stroke-width': 3, 'stroke-dasharray': '16 10', 'pointer-events': 'none' }, svg);
+    M.z[id] = { r };
+  }
   M.haze = el('circle', { cx: PLACES.meyhane.bx + 70, cy: PLACES.meyhane.by + 45, r: 0, fill: '#c9a24b', opacity: 0.12 }, svg);
   M.b = {};
   for (const [id, b] of Object.entries(PLACES)) {
@@ -124,6 +134,14 @@ function buildMap() {
     const t = el('text', { x: b.x, y: b.by + b.bh / 2 + 8 }, g); t.textContent = b.ad;
     const sub = el('text', { class: 'sub', x: b.x, y: b.by + b.bh / 2 + 27 }, g);
     M.b[id] = { g, wins, sub };
+  }
+  // bölge etiketleri (tıklanırsa Bölgeler sekmesi açılır)
+  for (const [id, B] of Object.entries(BOLGELER)) {
+    const g = el('g', { class: 'bz', 'data-bz': id }, svg);
+    const bw = 190;
+    M.z[id].plate = el('rect', { x: B.kutu.x + 8, y: B.kutu.y - 14, width: bw, height: 34, rx: 6, fill: '#1a1408', 'fill-opacity': 0.88, stroke: '#888', 'stroke-width': 2 }, g);
+    M.z[id].t1 = el('text', { class: 'bz1', x: B.kutu.x + 16, y: B.kutu.y + 4 }, g);
+    M.z[id].t2 = el('text', { class: 'bz2', x: B.kutu.x + 16, y: B.kutu.y + 17 }, g);
   }
   const my = PLACES.meyhane;
   M.cellar = el('g', {}, svg);
@@ -143,6 +161,8 @@ function buildMap() {
   const drag = { on: false, moved: false, x: 0, y: 0 };
   svg.addEventListener('click', (e) => {
     if (drag.moved) { drag.moved = false; return; }
+    const bz = e.target.closest && e.target.closest('.bz');
+    if (bz) { ui.bolge = bz.dataset.bz; ui.tab = 'bolge'; renderPanel(); return; }
     const g = e.target.closest && e.target.closest('.bld');
     if (g) { ui.sel = g.dataset.b; ui.tab = 'mekan'; goTo({ b: g.dataset.b }); return; }
     if (!svg.getScreenCTM || !svg.createSVGPoint) return;
@@ -226,6 +246,17 @@ function renderMap(tf) {
     const o = openNow(id, d.hour);
     const f = o && lit ? '#f2c96a' : o ? '#8a7a55' : '#1c1812';
     for (const w of m.wins) setFill(w, f);
+  }
+  for (const [id, z] of Object.entries(M.z)) {
+    const b = s.bolge.list[id], hk = hakimOf(s.bolge, id), renk = hk ? FAK[hk].renk : '#8a8a8a';
+    const k = renk + (ui.tab === 'bolge' && ui.bolge === id ? 'S' : '');
+    if (z.k !== k) {
+      z.k = k;
+      z.r.setAttribute('fill', renk); z.r.setAttribute('stroke', renk); z.plate.setAttribute('stroke', renk);
+      z.r.setAttribute('stroke-width', k.endsWith('S') ? 6 : 3);
+    }
+    setText(z.t1, `${BOLGELER[id].ad}  ${'★'.repeat(b.servet)}`);
+    setText(z.t2, hk ? (hk === 'oyuncu' ? 'Senin' : FAK[hk].ad) : 'Sahipsiz');
   }
   const sh = marketShare(s);
   setText(M.b.meyhane.sub, MEY_OPEN(d.hour) ? `pay ${pct(sh.me)}` : 'kapalı');
@@ -428,6 +459,68 @@ function panelGuc() {
   return h;
 }
 
+// ---------- bölgeler ----------
+function infBar(b) {
+  const parts = Object.keys(FAK).filter((f) => (b.inf[f] || 0) > 0.4).sort((x, y) => b.inf[y] - b.inf[x]);
+  const bos = 100 - parts.reduce((a, f) => a + b.inf[f], 0);
+  return `<div class="infbar">${parts.map((f) => `<i style="width:${b.inf[f]}%;background:${FAK[f].renk}" title="${FAK[f].ad} %${Math.round(b.inf[f])}"></i>`).join('')}${bos > 0.5 ? `<i class="bos" style="width:${bos}%"></i>` : ''}<u style="left:${HAKIM_ESIK}%"></u></div>` +
+    `<div class="infleg">${parts.map((f) => `<span><b style="color:${FAK[f].renk}">■</b> ${FAK[f].ad} %${Math.round(b.inf[f])}</span>`).join(' ')}</div>`;
+}
+
+function panelBolge() {
+  const st = s.bolge, ids = Object.keys(BOLGELER);
+  const mine = oyuncuBolgeleri(s);
+  const haracAy = mine.reduce((a, id) => a + Math.round(HAVUZ * st.list[id].servet * HARAC[st.list[id].harac].oran * (0.6 + 0.4 * st.list[id].huzur / 100)), 0);
+  let h = `<h3>Bölgeler</h3><div class="note">Bir bölgenin hakimi, nüfuzu <b>%${HAKIM_ESIK}</b>'i geçen ve en yüksek olandır. Hakim haraç toplar; huzurlu bölge büyür (★), huzursuz bölge küçülür. Rakipler komşu bölgelere genişler. Sen de bir komşuna hakim olduktan sonra yanındaki bölgeye el atabilirsin. Reis olmak için 2 bölgeye hakim olman gerekir.</div>` +
+    `<div class="box"><div class="row"><span>Hakim olduğun bölge</span><b>${mine.length} / ${ids.length}</b></div>` +
+    row('Tahmini aylık haraç', `<span class="gold">${money(haracAy)}</span>`) + `</div>`;
+  h += `<div class="bzlist">${ids.map((id) => {
+    const hk = hakimOf(st, id), b = st.list[id];
+    return `<button data-bz="${id}" class="${ui.bolge === id ? 'on' : ''}" style="border-color:${hk ? FAK[hk].renk : '#666'}">${BOLGELER[id].ad}<small>${'★'.repeat(b.servet)}</small></button>`;
+  }).join('')}</div>`;
+  const id = BOLGELER[ui.bolge] ? ui.bolge : 'southside', B = BOLGELER[id], b = st.list[id], hk = hakimOf(st, id);
+  const yol = `<button class="primary" data-walk="${B.merkez}">Yürü → ${B.ad} <small>(~${walkMinutes(s, B.merkez)} dk)</small></button>`;
+  const orada = !s.mesafe || (!s.walk && bolgeAt(s.pos) === id);
+  const yolda = !!(s.walk && s.walk.to === B.merkez);
+  h += `<div class="box"><div class="t">${B.ad} ${'★'.repeat(b.servet)}${'☆'.repeat(5 - b.servet)}</div><div class="note">${B.ac}</div>` +
+    row('Hakim', hk ? `<b style="color:${FAK[hk].renk}">${hakimAd(hk)}</b>` : '<span class="dim">Sahipsiz</span>') +
+    `<div class="note">Nüfuz (çizgi: hakimlik eşiği %${HAKIM_ESIK})</div>${infBar(b)}` +
+    row('Büyüme', `${Math.round(b.ilerleme)} / 100`) + meter(b.ilerleme, 100, 'green') +
+    row('Huzur', `${Math.round(b.huzur)}`) + meter(b.huzur, 100, b.huzur < 30 ? 'red' : '') +
+    row('Garnizon', `${b.garnizon} adam${b.garnizon ? ` · $${b.garnizon * ADAM_MAAS}/ay` : ''}`) + `</div>`;
+
+  if (hk === 'oyuncu') {
+    h += `<div class="box"><div class="t">Haraç</div><div class="btns">${HARAC.map((t, i) => `<button class="${b.harac === i ? 'primary' : ''}" ${A({ type: 'bolgeHarac', b: id, v: i })}>${t.ad}</button>`).join('')}</div>` +
+      `<div class="note">Ağır haraç çok kazandırır; ama halk iyilikten düşer, huzur azalır, bölge küçülür ve polis dikkati artar. Hiç haraç almazsan halk seni sever.</div></div>`;
+  }
+  if (!erisim(s, id)) {
+    h += `<div class="box"><div class="note">Burada henüz ayağın yok. Önce komşu bir bölgeye hakim ol: ${B.komsu.map((k) => BOLGELER[k].ad).join(', ')}.</div></div>`;
+  } else if (!orada) {
+    h += `<div class="box">${yolda ? '<span class="gold">Yoldasın…</span>' : yol}<div class="note">Bu bölgede iş yapmak için burada bulunman gerekir.</div></div>`;
+  } else {
+    const gun = dateOf(s.t).day;
+    const btn = (kind, ad, maliyet, extra = '') => {
+      const kalan = (b.sonIs[kind] ?? -99) + BEKLEME[kind] - gun;
+      return `<button ${A({ type: 'bolgeIs', b: id, kind })} ${kalan > 0 || extra ? 'disabled' : ''}>${ad}<small>${maliyet}${kalan > 0 ? ` · ${kalan} gün sonra` : ''}${extra ? ` · ${extra}` : ''}</small></button>`;
+    };
+    h += `<div class="box"><div class="t">Nüfuz kazan</div><div class="btns col">` +
+      btn('himaye', IS_AD.himaye, '$120 kirli · nüfuz ↑↑, hafif suç izi') +
+      btn('hediye', IS_AD.hediye, '$200 temiz · nüfuz ↑, huzur ↑') +
+      btn('gozdagi', IS_AD.gozdagi, '$150 kirli · nüfuz ↑↑↑, huzur ↓, rakip öfkelenir', staff(s, 'koruma') ? '' : 'koruma gerekir') +
+      `</div><div class="note">Aynı iş aynı bölgede arka arkaya yapılamaz. Nüfuz yükseldikçe her puan pahalılaşır; sağlam bir hakimi yerinden etmek de zordur.</div></div>`;
+    h += `<div class="box"><div class="t">Garnizon</div><div class="btns">` +
+      `<button ${A({ type: 'bolgeAdam', b: id, d: 1 })} ${b.garnizon >= GARNIZON_MAX ? 'disabled' : ''}>+ Adam yerleştir <small>$100 · ayda $${ADAM_MAAS}</small></button>` +
+      `<button ${A({ type: 'bolgeAdam', b: id, d: -1 })} ${b.garnizon <= 0 ? 'disabled' : ''}>− Adam çek</button></div>` +
+      `<div class="note">Her adam rakip baskısını azaltır ve huzuru yükseltir (en çok ${GARNIZON_MAX}).</div></div>`;
+    if (hk === 'oyuncu') {
+      const buAy = b.yatirimAy === dateOf(s.t).month;
+      h += `<div class="box"><div class="t">Yatırım</div><div class="btns"><button ${A({ type: 'bolgeYatirim', b: id })} ${buAy || (b.servet >= 5 && b.ilerleme >= 99) ? 'disabled' : ''}>Bölgeyi geliştir <small>$400 temiz · büyüme +35${buAy ? ' · bu ay yapıldı' : ''}</small></button></div>` +
+        `<div class="note">Dükkân açılır, sokak aydınlanır, haraç havuzu büyür (her ★ $${HAVUZ}).</div></div>`;
+    }
+  }
+  return h;
+}
+
 function panelKara() {
   const d = s.kara.defter;
   const adaylar = Object.keys(s.chars).filter((id) => !s.chars[id].dead && id !== 'leyla' && !d.some((k) => k.hedef === id));
@@ -556,12 +649,12 @@ function panelKararlar() {
   return s.cards.map((c) => { const v = cardView(s, c); return `<div class="box"><div class="t">${v.title}</div><div class="note">Kalan süre: ${v.hoursLeft >= 24 ? `${Math.floor(v.hoursLeft / 24)} gün ${v.hoursLeft % 24} saat` : `${v.hoursLeft} saat`}</div><button data-card="${c.id}">Aç</button></div>`; }).join('');
 }
 
-const TABS = [['mekan', 'Mekân'], ['defter', 'Hesap'], ['kisiler', 'Kişiler'], ['guc', 'Güç'], ['kara', 'Kara Defter'], ['kararlar', 'Kararlar']];
+const TABS = [['mekan', 'Mekân'], ['defter', 'Hesap'], ['bolge', 'Bölgeler'], ['kisiler', 'Kişiler'], ['guc', 'Güç'], ['kara', 'Kara Defter'], ['kararlar', 'Kararlar']];
 function renderPanel() {
   $('tabs').innerHTML = TABS.map(([id, n]) => `<button data-tab="${id}" class="${ui.tab === id ? 'on' : ''}">${n}${id === 'kararlar' && s.cards.length ? `<span class="badge">${s.cards.length}</span>` : ''}</button>`).join('');
   const p = $('panel');
   const top = p.scrollTop;
-  p.innerHTML = { mekan: panelMekan, defter: panelDefter, kisiler: panelKisiler, guc: panelGuc, kara: panelKara, kararlar: panelKararlar }[ui.tab]();
+  p.innerHTML = { mekan: panelMekan, defter: panelDefter, bolge: panelBolge, kisiler: panelKisiler, guc: panelGuc, kara: panelKara, kararlar: panelKararlar }[ui.tab]();
   p.scrollTop = top;
 }
 
@@ -625,6 +718,7 @@ document.addEventListener('click', (e) => {
   if (!t) return;
   if (t.dataset.speed !== undefined) return setSpeed(+t.dataset.speed);
   if (t.dataset.tab) { ui.tab = t.dataset.tab; return renderPanel(); }
+  if (t.dataset.bz) { ui.bolge = t.dataset.bz; return renderPanel(); }
   if (t.dataset.walk) return goTo({ b: t.dataset.walk });
   if (t.dataset.a) return doAct(JSON.parse(t.dataset.a));
   if (t.dataset.go) { const g = JSON.parse(t.dataset.go); ui.tab = g.tab; if (g.dHedef) ui.dHedef = g.dHedef; return renderPanel(); }
@@ -635,7 +729,7 @@ document.addEventListener('click', (e) => {
   if (t.id === 'findme') { cam.follow = true; return; }
   if (t.id === 'restart' || t.id === 'newgame') {
     if (t.id === 'newgame' && !confirm('Kayıt silinip baştan başlanacak. Emin misin?')) return;
-    s = fresh(); ui.modal = null; ui.person = null; ui.sel = 'meyhane'; ui.tab = 'mekan'; ui.pauseSeen = s.pauseReq; acc = 0;
+    s = fresh(); ui.modal = null; ui.person = null; ui.sel = 'meyhane'; ui.bolge = 'southside'; ui.tab = 'mekan'; ui.pauseSeen = s.pauseReq; acc = 0;
     setSpeed(0); save(); renderAll();
   }
 });

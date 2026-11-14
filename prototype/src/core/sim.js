@@ -10,7 +10,8 @@ import {
   krediInfo, hisseDegeri, kabulAhit, socialDay, socialMonth, S0,
 } from './social.js';
 import { stressFor, blocked } from './traits.js';
-import { PLACES, W, WALK, snapRow, route, pathLen, advanceAlong } from './world.js';
+import { PLACES, BOLGELER, W, WALK, snapRow, route, pathLen, advanceAlong, bolgeAt } from './world.js';
+import { newBolge, bolgeMonth, bolgeIs, bolgeAdam, bolgeYatirim, bolgeHarac } from './bolge.js';
 
 export const C = {
   MIN_PER_SEC: 3,          // ×1 hızda: 1 gerçek saniye = 3 oyun dakikası (1 oyun saati = 20 sn)
@@ -42,7 +43,9 @@ const ch = (ad, rol, yas, mods, x = {}) => ({
 
 // ---------- konum: karakter haritada yürür ----------
 // Şehir yerleşimi ve yol bulma world.js'te. Burada: durum, hareket ve "orada mısın?" kuralı.
-export { PLACES, ROWS, V, W, H, WALK } from './world.js';
+export { PLACES, BOLGELER, ROWS, V, W, H, WALK, bolgeAt } from './world.js';
+// Bu işler için o bölgede bulunmak gerekir (arayüzde).
+export const BOLGE_ISLERI = new Set(['bolgeIs', 'bolgeAdam', 'bolgeYatirim']);
 // Bu işler için orada bulunmak gerekir (s.mesafe açıksa; arayüz açar, bot testleri açmaz).
 export const GATE = { bribe: 'karakol', kredi: 'liman', hisse: 'liman', hisseSat: 'liman', ahitIste: 'karaca', ahitBoz: 'karaca', payDebt: 'tefeci', buildDist: 'meyhane', upgradeHidden: 'meyhane', rest: 'ev' };
 
@@ -81,11 +84,12 @@ function startWalk(s, dest, to) {
 
 export function newGame(seed = (Date.now() & 0x7fffffff)) {
   const s = {
-    v: 4, seed, t: 6 * 60, speed: 0, mesafe: false, pos: { x: PLACES.meyhane.x, y: PLACES.meyhane.y }, walk: null,
+    v: 5, seed, t: 6 * 60, speed: 0, mesafe: false, pos: { x: PLACES.meyhane.x, y: PLACES.meyhane.y }, walk: null,
     cash: { clean: 1500, dirty: 0 },
     debt: { principal: 6000, installment: 600, missed: 0 },
     patron: { ad: 'Sen', yas: 34, traits: ['Temkinli', 'Cömert', 'Merhametli'], stres: 10 },
     ...newSocial(),
+    bolge: newBolge(seed),
     biz: {
       meyhane: { id: 'meyhane', type: 'meyhane', name: "Murphy's Tavern", price: 1, quality: 50, rep: 50, mRev: 0, mCost: 0 },
       rakip: { id: 'rakip', name: "Duffy'nin Yeri", price: 1, quality: 50, rep: 55 },
@@ -117,6 +121,7 @@ export function newGame(seed = (Date.now() & 0x7fffffff)) {
     },
   };
   log(s, 'Baban öldü. Sana bir meyhane, $6,000 borç ve boş bir bodrum bıraktı.', 'card');
+  log(s, 'Southside\'in hakimi yok. Nüfuzun %25; %35\'e çıkarırsan bölge senin olur. Bölgeler sekmesine bak.', 'warn');
   log(s, 'Tefeci Sal her Hesap Günü (ayın 10\'u) $600 taksit bekliyor. Üç taksit kaçırırsan konuşmaya gelmeyecek.', 'warn');
   return s;
 }
@@ -488,6 +493,7 @@ function monthTick(s) {
     c.mods = c.mods.filter((md) => md.v !== 0);
   }
 
+  bolgeMonth(s, R);
   socialMonth(s, R, { legalRev, liqRev: s.month.liqRev, legalCost, pushCard });
 
   R.push(`KASA  temiz ${money(s.cash.clean)} · kirli ${money(s.cash.dirty)} · Dosya ${Math.round(s.dosya)} (${stageName(s)})`);
@@ -521,6 +527,10 @@ export function act(s, a) {
   if (s.over) return fail('Oyun bitti.');
   const di = s.dist;
   if (s.mesafe && GATE[a.type] && here(s) !== GATE[a.type]) return fail(`Bunun için ${PLACES[GATE[a.type]].ad} yerinde olmalısın.`);
+  if (s.mesafe && BOLGE_ISLERI.has(a.type)) {
+    if (!BOLGELER[a.b]) return fail('Böyle bir bölge yok.');
+    if (s.walk || bolgeAt(s.pos) !== a.b) return fail(`Bunun için ${BOLGELER[a.b].ad} bölgesinde olmalısın.`);
+  }
   switch (a.type) {
     case 'goto': {
       const pl = a.b ? PLACES[a.b] : null;
@@ -530,6 +540,10 @@ export function act(s, a) {
       startWalk(s, dest, a.b || null);
       return OK;
     }
+    case 'bolgeIs': return bolgeIs(s, a);
+    case 'bolgeAdam': return bolgeAdam(s, a);
+    case 'bolgeYatirim': return bolgeYatirim(s, a);
+    case 'bolgeHarac': return bolgeHarac(s, a);
     case 'choose': return choose(s, a.card, a.opt);
     case 'setPrice': s.biz.meyhane.price = clamp(+a.v, 0.7, 1.3); return OK;
     case 'setLaunder': s.launderPct = clamp(+a.v, 0, 150); return OK;

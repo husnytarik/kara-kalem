@@ -125,6 +125,21 @@ Kurgusal bir liman kenti, **Roaring Twenties** atmosferi: içki yasağı, caz, g
 
 Semtlerin karakteri farklıdır: Liman (kaçakçılık, işçi), Çarşı (ticaret), Southside (sadık halk, dar sokaklar), Tepeler (villalar, siyasetçiler), Sanayi (depolar), Belediye çevresi (bürokrasi).
 
+#### 5.1.1 Bölgeler: hakimlik, büyüme, genişleme `[UYGULANDI v0.2]`
+
+Prototipte şehir 6 bölgedir (Hilltop, Downtown, Southside, Eastside, The Flats, Docks); 50 bina bölgelere dağılır, bölgeler birbirine komşudur (genişleme komşuluk üzerinden olur). Kod: `core/bolge.js`; coğrafya `core/world.js` `BOLGELER`.
+
+- **Nüfuz:** her bölgede her aile (Sen, Marchetti Family, O'Brien Çetesi, Belediye Makinesi) için 0–100; toplam 100'ü geçmez (biri artınca diğerleri orantılı küçülür).
+- **Hakim:** nüfuzu **%35'i geçen ve en yüksek** olan aile. Eşiğin altında bölge sahipsizdir. Hakim değişince olay akışına yazılır.
+- **Büyüme (★1–5):** huzurlu bölgede ilerleme birikir (aylık ≈ 4,5 + (huzur−50)/10), 100'de ★ artar; huzur 30'un altındaysa bölge küçülür. Huzuru garnizon artırır, ağır haraç ve rakip baskısı düşürür. Hakim yatırım yaparak büyümeyi hızlandırır ($400 temiz, +35).
+- **Haraç:** hakim olduğun bölgeden her Hesap Günü kirli para: servet × $600 × kademe (Yok / %8 / %15 / %25) × huzur etkisi. Ağır haraç halkta İyilik'i düşürür, polis dikkatini artırır; haraç almamak halkın sevgisini artırır. Marchetti Ahidi varsa haraçtan pay gider.
+- **Nüfuz kazanma (Bölgeler sekmesi, o bölgede bulunmak gerekir):** esnafa himaye sat ($120 kirli), ziyafet ($200 temiz, huzur↑), rakip adamları sindir ($150 kirli, koruma gerekir; huzur↓, rakip öfkelenir, tanık riski). Sağlam bir hakimi yerinden etmek zordur; nüfuz yükseldikçe her puan pahalılaşır.
+- **Garnizon:** bölge başına ≤6 adam ($100 + ayda $40); rakip baskısını azaltır, huzuru yükseltir.
+- **Genişleme kapısı:** bir bölgede iş yapmak için orada nüfuzun ≥%15 olmalı ya da komşu bir bölgeye hakim olmalısın.
+- **Rakip aileler** her ay komşu bölgelere genişlemeyi dener (kudretleri hakim oldukları bölgelerin servetiyle artar; O'Brien daha saldırgan, Belediye Makinesi temkinli). Sindirdiğin aile öfkelenir ve seni hedef alır.
+- **Mevki bağı:** hakim olunan bölgeler Güç Puanı'na girer; **Ağa → Reis için en az 2 bölgeye hakim olmak** gerekir.
+- Bölge sistemi kendi tohumlu RNG'sini kullanır; dengeyi ve eski testleri etkilemez. Savaşlar (v0.3) bu nüfuz modelini temel alacak.
+
 ### 5.2 Parseller ve binalar
 
 Semtler parsellerden oluşur. Her bina: tür, sahip, kiracı, durum, değer, **görünen işlev** ve varsa **gizli işlev**. Bina özellikleri: Kapasite, Görünürlük (ana cadde / ara sokak), Bodrum var/yok, Arka çıkış, Güvenlik.
