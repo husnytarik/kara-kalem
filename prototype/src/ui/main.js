@@ -512,7 +512,7 @@ function panelIsyeri(id) {
   if (k === 'haraci') h += btn('topla', 'Haracı topla') + btn('koru', 'Nöbet koy');
   if (k === 'sahip') h += btn('koru', 'Nöbet koy');
   if (k !== 'sahip') h += `<button ${A({ type: 'isyeriAl', hedef: id })}>Satın al <small>${money(fiyatOf(s, id))} temiz · haftalık ~${money(w * 1.5)} temiz gelir</small></button>`;
-  h += `</div><div class="note">Adamın yumruğu, bıçağı ve zekâsı sonucu belirler; zayıf adam sert yerde kaybeder, bıçak ustası ise esnafı yaralayabilir. Adamların için <b>Adamlar</b> sekmesi.</div>`;
+  h += `</div><div class="note">Adamın yumruğu, bıçağı ve zekâsı sonucu belirler; zayıf adam sert yerde kaybeder, bıçak ustası ise esnafı yaralayabilir. Haraç bağladığın ya da satın aldığın her yer bölgede <b>nüfuz</b> kazandırır; %35'e böyle çıkarsın.</div>`;
   return h;
 }
 

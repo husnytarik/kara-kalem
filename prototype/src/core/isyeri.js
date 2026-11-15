@@ -2,7 +2,14 @@
 // Haraç bağlamak, tahsil etmek, korumak, satın almak. Çekirdek durum s.isy altında düz JSON; DOM'a dokunmaz.
 import { clamp, sigmoid, DAY, log, spend, money, dateOf } from './util.js';
 import { PLACES, BOLGELER, route, pathLen, WALK } from './world.js';
-import { hakimOf, hakimAd, erisim, brnd, etki, aileDeg, yaraliMi, FAK } from './bolge.js';
+import { hakimOf, hakimAd, erisim, brnd, etki, aileDeg, yaraliMi, addInf, hakimDegisti } from './bolge.js';
+
+// Bir binayı elinde tutmak bölgede nüfuz demektir: sokak kimin parasını ödediğini bilir.
+function nufuz(s, bolgeId, miktar) {
+  const b = s.bolge.list[bolgeId], onceki = hakimOf(s.bolge, bolgeId);
+  addInf(b, 'oyuncu', miktar * (1 - (b.inf.oyuncu || 0) / 120));
+  hakimDegisti(s, bolgeId, onceki);
+}
 
 // Bina türleri. gelir: haftalık haraç tabanı ($, servet 2 bölge için); direnc: sahibin boyun eğdirilme zorluğu (0-10).
 export const TURLER = {
@@ -120,6 +127,7 @@ export function satinAl(s, a) {
   const f = fiyatOf(s, id);
   if (!spend(s, f, 'clean')) return hata(`Temiz para yetmiyor (${money(f)}).`);
   r.sahip = 'oyuncu'; r.haracli = false; r.birikim = 0;
+  nufuz(s, p.bolge, 4);
   log(s, `${p.ad}'ı satın aldın (${money(f)}). Haftalık meşru gelir akacak.`, 'good', 'Sahibi olduğun yerden haraç değil, temiz kâr alırsın; polis de seni bu yüzden daha az sorgular.');
   return TAMAM;
 }
@@ -138,6 +146,7 @@ function coz(s, g) {
       r.haracli = true; r.birikim = 0;
       b.kor = clamp(b.kor + 1.5, 0, 100); b.sev = clamp(b.sev - 1.5, 0, 100);
       b.tan = clamp(b.tan + 1.5, 0, 100);
+      nufuz(s, p.bolge, 3);
       let extra = '';
       if (adam.bicak - adam.yumruk > 25 && brnd(I) < 0.3) {
         extra = ` ${adam.ad} bıçağı fazla kullandı; sahibi yaralandı.`;
