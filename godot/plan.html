@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8"><title>Kara Kalem 3D — Plan</title>
+<style>
+html,body{margin:0;height:100%;background:#0d1117;color:#e6e1d6;font-family:Segoe UI,system-ui,sans-serif}
+svg{width:100vw;height:100vh;display:block}
+.node rect{fill:#0f1a26;stroke:#2c3a4a;stroke-width:1.2;rx:6}
+.node.proto rect{stroke:#7a97b5}
+.node.done rect{stroke:#c9a85c}
+.node text.t{fill:#fff;font-weight:700;font-size:13px;text-anchor:middle;letter-spacing:.5px}
+.node text.f{fill:#7d8b9a;font:10px Consolas,monospace;text-anchor:middle}
+.node .ok{fill:#c9a85c;font-size:13px}
+.hub rect{fill:#141a22;stroke:#c9a85c;stroke-width:1.6;rx:8}
+.hub text{fill:#d9a057;font:700 16px Consolas,monospace;text-anchor:middle}
+.line{stroke:#2a3340;stroke-width:1}
+.leg{font-size:12px;fill:#8f8b82}
+</style></head><body>
+<svg id="s" viewBox="-640 -400 1280 800"></svg>
+<script>
+// Durum: 'done' bitti, 'proto' JS prototipte var, '' yapılmadı. Kaynak: PLAN.md
+const DATA = [
+  ['SOKAK','sokak.gd',''],['YÜRÜME','oyuncu.gd',''],['KAMERA','kamera.gd',''],['KARAKTER','karakter.gd',''],
+  ['ANİMASYON','animasyon.gd',''],['GÜN DÖNGÜSÜ','gun_dongusu.gd',''],['HAVA','hava.gd',''],
+  ['SİLAH','silah.gd',''],['SİPER','siper.gd',''],['YAPAY ZEKÂ','yapay_zeka.gd',''],['EMİRLER','emirler.gd',''],
+  ['SAVAŞ','savas.gd',''],['OTOMATİK ÇÖZ','savas_sim.gd',''],['ARABA SÜRÜŞÜ','arac_surus.gd',''],
+  ['SİM ÇEKİRDEĞİ','sim.gd','proto'],['BÖLGELER','bolge.gd','proto'],['İŞYERLERİ','isyeri.gd','proto'],
+  ['MESLEKLER','meslek.gd','proto'],['OLAYLAR','sehir.gd','proto'],['ZAFER YOLLARI','zafer.gd','proto'],
+  ['HARİTA GEÇİŞİ','harita_gecisi.gd',''],['ARAYÜZ','arayuz.gd',''],['SES','ses.gd',''],['KAYIT','kayit.gd',''],['DOĞRULAMA','dogrula.gd','']
+];
+const svg = document.getElementById('s'), NS = 'http://www.w3.org/2000/svg';
+const mk = (n, a = {}, p = svg) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
+const rings = [[0, 12, 250, 190], [12, DATA.length, 460, 330]];
+rings.forEach(([a, b, rx, ry]) => {
+  const n = b - a;
+  for (let i = 0; i < n; i++) {
+    const ang = (i / n) * Math.PI * 2 - Math.PI / 2 + (rx > 300 ? Math.PI / n : 0);
+    const x = Math.cos(ang) * rx, y = Math.sin(ang) * ry, [ad, f, st] = DATA[a + i];
+    mk('line', { class: 'line', x1: 0, y1: 0, x2: x, y2: y });
+    const g = mk('g', { class: 'node ' + st, transform: `translate(${x} ${y})` });
+    mk('rect', { x: -62, y: -20, width: 124, height: 40 }, g);
+    mk('text', { class: 't', y: -2 }, g).textContent = ad;
+    mk('text', { class: 'f', y: 12 }, g).textContent = f;
+    if (st === 'done') mk('text', { class: 'ok', x: 52, y: -8 }, g).textContent = '✓';
+  }
+});
+const h = mk('g', { class: 'hub' });
+mk('rect', { x: -70, y: -22, width: 140, height: 44 }, h);
+mk('text', { y: 6 }, h).textContent = 'PLAN.md';
+mk('text', { class: 'leg', x: -620, y: 385 }).textContent = 'Altın çerçeve + ✓: bitti · Mavi çerçeve: JS prototipte var, taşınacak · Gri: yapılmadı';
+</script></body></html>
