@@ -6,6 +6,7 @@ import { DAY, dateOf, rnd, log, addMod, opinion, spend, staff, addStress, hideGo
 import { fame, leak, gucPuani, dostlar, addOrtak, kabulAhit } from './social.js';
 import { BOLGELER } from './world.js';
 import { hakimAd } from './bolge.js';
+import { SOKAK_KARTLARI } from './sehir.js';
 import { pusuCoz, pusuBedel, ekipGuc } from './savas.js';
 
 const day = (s) => dateOf(s.t).day;
@@ -294,6 +295,8 @@ export const EVENTS = {
       ];
     },
   },
+
+  ...SOKAK_KARTLARI,
 
   bildirim: {
     title: 'Haber', system: true, window: 99, def: 0,

@@ -161,6 +161,12 @@ Kod: `core/savas.js` (+ `bolge.js`, `sim.js` saatlik kancası). Konum yalnızca 
 - **Meslek öğrenme:** Her iş günü beceri artar (0–100; Çaylak/Tecrübeli/Usta/Üstat), işsiz kalınca çok yavaş körelir.
 - **İşletme:** Beceri ≥20 ise sahibi olunabilir (taksi filosu, nakliye, berber salonu, muhasebe bürosu). Aylık temiz gelir tecrübeye bağlıdır; mesleğin avantajı işletmeyle 4 kat güçlenir: taksi → yürüyüş hızı (+%40), hamal → pusu riski (−%25), berber → halk sevgisi, katip → aklama ücreti (−%30) ve kapasite (+%40, işletme cirosu aklamaya ek).
 
+#### 5.1.4 Yaşayan şehir `[UYGULANDI v0.5]`
+- **Sokak olayları:** Günde ~%70 ihtimalle bir bölgede kendiliğinden olay (12 tür: düğün, cenaze, pazar, festival, yangın, polis taraması, seçim, grip, yeni dükkân, kavga, hırsızlık, kaçak gemi). Bölge ağırlıkları farklıdır (liman → gemi/kavga, Eastside → pazar/festival). Etki: huzur, halk sevgisi/korkusu, büyüme, nüfuz. Haritada ikonla görünür, "Şehirde neler oluyor" kutusunda ve günlükte akar.
+- **Karar kartları** (3 günde en çok bir): grev, hırsızlık dalgası, esnaf yardım isteği, gazeteci, kayıp çocuk, sokak kumarı, kaçak gemi. Seçimler sevgi/korku, aile görüşü, para ve dosyayı etkiler.
+- **Hava:** mevsime göre açık/yağmur/kar/sis/sıcak; haritada efekt ve kalabalık yoğunluğu.
+- **Harita hayatı:** Saate, havaya ve bölge huzuruna göre değişen yayalar, arabalar ve limanda tekneler (yalnız görsel).
+
 ### 5.2 Parseller ve binalar
 
 Semtler parsellerden oluşur. Her bina: tür, sahip, kiracı, durum, değer, **görünen işlev** ve varsa **gizli işlev**. Bina özellikleri: Kapasite, Görünürlük (ana cadde / ara sokak), Bodrum var/yok, Arka çıkış, Güvenlik.

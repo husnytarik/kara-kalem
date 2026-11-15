@@ -140,3 +140,12 @@ select { font: inherit; color: var(--ink); background: #14100c; border: 1px soli
 .btns.col { flex-direction: column; }
 .btns.col button { text-align: left; }
 .btns button small { display: block; color: var(--dim); font-size: 11px; }
+
+#fx { position: absolute; inset: 0; pointer-events: none; transition: opacity 1s; }
+#fx.acik { opacity: 0; }
+#fx.yagmur { background: repeating-linear-gradient(105deg, transparent 0 7px, #9fb8d055 7px 8px); background-size: 40px 40px; animation: yag .35s linear infinite; }
+#fx.kar { background-image: radial-gradient(#fff 1.6px, transparent 2px), radial-gradient(#fff 1.2px, transparent 1.6px); background-size: 60px 60px, 90px 90px; opacity: .7; animation: kar 4s linear infinite; }
+#fx.sis { background: #cfd6dc; opacity: .22; }
+#fx.sicak { background: radial-gradient(ellipse at 50% 0, #ffb84a40, transparent 70%); }
+@keyframes yag { to { background-position: -16px 40px; } }
+@keyframes kar { to { background-position: -30px 60px, 40px 90px; } }

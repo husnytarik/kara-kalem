@@ -7,6 +7,7 @@ import {
 import {
   hakimOf, FAK, HARAC, HAKIM_ESIK, GARNIZON_MAX, ADAM_MAAS, HAVUZ, IS_AD, BEKLEME, erisim, hakimAd, oyuncuBolgeleri, KARAKTER, etki,
 } from '../core/bolge.js';
+import { HAVA_AD } from '../core/sehir.js';
 import { MESLEKLER, BECERI_AD, seviye, kabul, maasGun, isletmeGelir, etkiGuc } from '../core/meslek.js';
 import { EKIP_MAX, EKIP_FIYAT, EKIP_MAAS, BASKIN_MALIYET, ekipGuc, ekipDetay, pusuP, baskinTahmin } from '../core/savas.js';
 import { dateOf, fmtTime, fmtDate, money, opinion, SEASONS, DAY, clamp, staff, informed } from '../core/util.js';
@@ -17,7 +18,7 @@ import {
 import { TRAITS, blocked } from '../core/traits.js';
 import { ROAD_HALF } from '../core/world.js';
 
-const SAVE_KEY = 'kara_kalem_v08';
+const SAVE_KEY = 'kara_kalem_v09';
 const $ = (id) => document.getElementById(id);
 const SVGNS = 'http://www.w3.org/2000/svg';
 
@@ -33,7 +34,7 @@ function load() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const st = JSON.parse(raw);
-    if (st.v !== 8) return null;
+    if (st.v !== 9) return null;
     st.speed = 0; st.mesafe = true;
     return st;
   } catch { return null; }
@@ -152,6 +153,20 @@ function buildMap() {
   M.smoke = [0, 1, 2].map(() => el('circle', { r: 4, fill: '#bbb', opacity: 0 }, svg));
   M.dots = Array.from({ length: 16 }, () => el('circle', { r: 3.5, fill: '#e9dec9', opacity: 0, 'pointer-events': 'none' }, svg));
   M.route = el('polyline', { fill: 'none', stroke: '#cfa84f', 'stroke-width': 2.5, 'stroke-dasharray': '6 6', opacity: 0.85, 'pointer-events': 'none' }, svg);
+  // yaşayan sokak: yayalar, arabalar, tekneler (yalnızca görsel; saat, hava ve bölge huzuruna göre kalabalıklaşır)
+  M.grid = ROWS.map((r) => Array.from({ length: Math.ceil(W / 40) }, (_, i) => bolgeAt({ x: i * 40 + 20, y: r })));
+  const PR = ['#e9dec9', '#c9a24b', '#9fb4c9', '#c2806b', '#a9c99a'];
+  M.ped = Array.from({ length: 150 }, (_, i) => ({ e: el('circle', { r: 2.8, fill: PR[i % 5], opacity: 0, 'pointer-events': 'none' }, svg), row: i % ROWS.length, off: ((i * 37) % 30) - 15, v: (7 + ((i * 53) % 10)) * (i % 2 ? 1 : -1), ph: (i * 0.618034) % 1, th: (i * 0.754877) % 1 }));
+  const CR = ['#7a2f2f', '#2f4f7a', '#3d3d3d', '#6b5d2a', '#2f6b4f'];
+  M.car = Array.from({ length: 16 }, (_, i) => ({ e: el('rect', { width: 18, height: 9, rx: 3, fill: CR[i % 5], opacity: 0, 'pointer-events': 'none' }, svg), row: i % ROWS.length, off: i % 2 ? 11 : -13, v: (38 + ((i * 29) % 30)) * (i % 2 ? 1 : -1), ph: (i * 0.381966) % 1, th: (i * 0.683) % 1 }));
+  const su = ROWS[ROWS.length - 1] + 138;
+  M.boat = Array.from({ length: 4 }, (_, i) => el('path', { d: 'M-18 0 L18 0 L12 8 L-12 8 Z', fill: ['#6b5d2a', '#7a2f2f', '#4a5560', '#3d5a4a'][i], opacity: 0.9, 'pointer-events': 'none', 'data-y': su + 40 + i * 28 }, svg));
+  M.isaret = Array.from({ length: 14 }, () => {
+    const g = el('g', { 'pointer-events': 'none', opacity: 0 }, svg);
+    el('circle', { r: 17, fill: '#120d06', 'fill-opacity': 0.8, stroke: '#cfa84f', 'stroke-width': 2 }, g);
+    const t = el('text', { y: 8, 'text-anchor': 'middle', 'font-size': 22 }, g);
+    return { g, t };
+  });
   M.night = el('rect', { width: W, height: H, fill: '#070b20', opacity: 0, 'pointer-events': 'none' }, svg);
   M.patrolLight = el('circle', { r: 16, fill: '#7da0c4', opacity: 0.18, 'pointer-events': 'none' }, svg);
   M.patrol = el('circle', { r: 6, fill: '#7da0c4', stroke: '#0b1220', 'stroke-width': 1.5, 'pointer-events': 'none' }, svg);
@@ -301,12 +316,33 @@ function renderMap(tf) {
   const frac = s.speed > 0 ? Math.max(0, Math.min(1, tf - s.t)) : 0, me = walkerAt(s, frac);
   M.me.setAttribute('transform', `translate(${me.x.toFixed(1)} ${me.y.toFixed(1)})`);
   if (me.path.length) M.route.setAttribute('points', [[me.x, me.y], ...me.path.map((q) => [q.x, q.y])].map((q) => q.join(',')).join(' ')); else M.route.removeAttribute('points');
+  // yaşayan sokak
+  const hv = s.sehir.hava.tip, hf2 = (tf % DAY) / 60;
+  const gun = hf2 >= 7 && hf2 < 19 ? 1 : hf2 >= 19 && hf2 < 23 ? 0.6 : hf2 >= 5 && hf2 < 7 ? 0.35 : 0.12;
+  const havaK = { yagmur: 0.55, kar: 0.5, sis: 0.8, sicak: 0.75, acik: 1 }[hv];
+  const bk = { hilltop: 0.6, downtown: 1, southside: 1, eastside: 1.35, flats: 0.8, docks: 0.9 };
+  const place = (o, hiz, w) => {
+    const x = (((o.ph * W + ambT * hiz) % W) + W) % W, r = ROWS[o.row];
+    const bid = M.grid[o.row][Math.min(M.grid[o.row].length - 1, Math.floor(x / 40))];
+    const dens = gun * havaK * (bk[bid] || 1) * (0.55 + 0.45 * s.bolge.list[bid].huzur / 100) * w;
+    return { x, y: r + o.off, vis: o.th < dens };
+  };
+  for (const o of M.ped) { const q = place(o, o.v, 1); o.e.setAttribute('cx', q.x.toFixed(1)); o.e.setAttribute('cy', (q.y + Math.sin(ambT * 5 + o.ph * 40) * 1.2).toFixed(1)); o.e.setAttribute('opacity', q.vis ? 0.85 : 0); }
+  for (const o of M.car) { const q = place(o, o.v, 0.45); o.e.setAttribute('x', (q.x - 9).toFixed(1)); o.e.setAttribute('y', (q.y - 4).toFixed(1)); o.e.setAttribute('opacity', q.vis ? 0.95 : 0); }
+  M.boat.forEach((b, i) => b.setAttribute('transform', `translate(${(((i * 700 + ambT * (4 + i)) % (W + 200)) - 100).toFixed(1)} ${(+b.dataset.y + Math.sin(ambT * 0.8 + i) * 3).toFixed(1)})`));
+  M.isaret.forEach((m, i) => {
+    const o = s.sehir.isaret[i];
+    if (!o) { m.g.setAttribute('opacity', 0); return; }
+    m.g.setAttribute('transform', `translate(${o.x} ${o.y - 6 + Math.sin(ambT * 2 + i) * 3})`);
+    setText(m.t, o.ikon); m.g.setAttribute('opacity', 1);
+  });
+  $('fx').className = hv;
   // devriye
   const p = pathPoint(PATROL, tf / 3000);
   M.patrol.setAttribute('cx', p[0]); M.patrol.setAttribute('cy', p[1]);
   M.patrolLight.setAttribute('cx', p[0]); M.patrolLight.setAttribute('cy', p[1]);
   M.patrolLight.setAttribute('r', 10 + attention(s) * 0.35);
-  setText($('hudmsg'), s.bolge.yarali > s.t ? 'Yaralısın — yatıyorsun' : s.bolge.kapali > s.t ? 'Mekanların kapalı — baskın yedin' : hidden ? 'Mal saklı — üretim durdu' : '');
+  setText($('hudmsg'), (s.bolge.yarali > s.t ? 'Yaralısın — yatıyorsun' : s.bolge.kapali > s.t ? 'Mekanların kapalı — baskın yedin' : hidden ? 'Mal saklı — üretim durdu' : '') + (hv !== 'acik' ? `  ·  ${HAVA_AD[hv]}` : ''));
   // kamera
   if (cam.follow) { cam.x += (me.x - cam.x) * 0.12; cam.y += (me.y - cam.y) * 0.12; }
   applyCam();
@@ -518,6 +554,7 @@ function panelBolge() {
     `<div class="btns"><button ${A({ type: 'ekipAl', d: 1 })} ${st.ekip >= EKIP_MAX ? 'disabled' : ''}>+ Adam tut <small>$${EKIP_FIYAT} kirli</small></button>` +
     `<button ${A({ type: 'ekipAl', d: -1 })} ${st.ekip <= 0 ? 'disabled' : ''}>− Adam sal</button></div>` +
     `<div class="note">Ekip seninle yürür. Düşman bölgede pusuya düşersen kaderini ekibin belirler; baskın için en az 2 adam gerekir. Tanınırlık: bölgede ne kadar tanınırsan o kadar kolay hedef olursun.</div></div>`;
+  h += `<div class="box"><div class="t">Şehirde neler oluyor</div>` + (s.sehir.haber.length ? s.sehir.haber.slice(-7).reverse().map((n) => { const d = dateOf(n.t); return `<div class="row"><span>${n.ikon || '📰'} ${n.text}</span><small class="dim">${d.monthInYear}/${d.dayInMonth}</small></div>`; }).join('') : '<div class="note">Henüz bir şey yok.</div>') + `</div>`;
   h += aileKutu;
   h += `<div class="bzlist">${ids.map((id) => {
     const hk = hakimOf(st, id), b = st.list[id];
@@ -808,10 +845,10 @@ document.addEventListener('keydown', (e) => {
 window.addEventListener('beforeunload', save);
 
 // ---------- ana döngü ----------
-let prev = performance.now(), acc = 0, lastTop = 0;
+let prev = performance.now(), acc = 0, lastTop = 0, ambT = 0;
 function frame(now) {
   const dt = Math.min(0.25, (now - prev) / 1000); // sekme arka plandayken zaman akmaz
-  prev = now;
+  prev = now; ambT += dt;
   if (s.speed > 0 && !s.over && $('modal').hidden) {
     ui.prevSpeed = s.speed;
     acc += dt * s.speed * C.MIN_PER_SEC;

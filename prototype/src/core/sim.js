@@ -12,6 +12,7 @@ import {
 import { stressFor, blocked } from './traits.js';
 import { PLACES, BOLGELER, W, WALK, snapRow, route, pathLen, advanceAlong, bolgeAt } from './world.js';
 import { brnd as brndSim, newBolge, bolgeMonth, bolgeIs, bolgeAdam, bolgeYatirim, bolgeHarac, aileHediye, yaraliMi } from './bolge.js';
+import { newSehir, sehirGun } from './sehir.js';
 import { newMeslek, isGir, isBirak, isletmeAl, meslekGun, meslekAy, yurumeCarpan, akalamaUcret, akalamaKapasite, aklamaEk, mesaiCarpan } from './meslek.js';
 import { ekipAl, bolgeBaskin, pusuKur, pusuP } from './savas.js';
 
@@ -86,13 +87,14 @@ function startWalk(s, dest, to) {
 
 export function newGame(seed = (Date.now() & 0x7fffffff)) {
   const s = {
-    v: 8, seed, t: 6 * 60, speed: 0, mesafe: false, pos: { x: PLACES.meyhane.x, y: PLACES.meyhane.y }, walk: null,
+    v: 9, seed, t: 6 * 60, speed: 0, mesafe: false, pos: { x: PLACES.meyhane.x, y: PLACES.meyhane.y }, walk: null,
     cash: { clean: 1500, dirty: 0 },
     debt: { principal: 6000, installment: 600, missed: 0 },
     patron: { ad: 'Sen', yas: 34, traits: ['Temkinli', 'Cömert', 'Merhametli'], stres: 10 },
     ...newSocial(),
     bolge: newBolge(seed),
     meslek: newMeslek(),
+    sehir: newSehir(seed),
     biz: {
       meyhane: { id: 'meyhane', type: 'meyhane', name: "Murphy's Tavern", price: 1, quality: 50, rep: 50, mRev: 0, mCost: 0 },
       rakip: { id: 'rakip', name: "Duffy'nin Yeri", price: 1, quality: 50, rep: 55 },
@@ -357,6 +359,7 @@ function rollEvents(s) {
 function dayTick(s) {
   const di = s.dist;
   meslekGun(s);
+  sehirGun(s, pushCard);
   s.today = { rev: 0, liq: 0 };
   s.evHour = 9 + Math.floor(rnd(s) * 13);
 
