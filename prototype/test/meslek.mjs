@@ -29,7 +29,7 @@ const check = (c, m) => { if (!c) { bad++; console.log('  HATA:', m); } };
 {
   const s = newGame(7); s.mesafe = false;
   act(s, { type: 'isGir', j: 'taksi', b: 'eastside' });
-  s.bolge.list.eastside.tan = 100; s.bolge.list.eastside.sev = 0;
+  s.bolge.list.eastside.tan = 100; s.bolge.list.eastside.sev = 0; s.bolge.list.eastside.kor = 90;
   advance(s, DAY * 2);
   check(!s.meslek.is, 'kovulmadı');
 }

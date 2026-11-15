@@ -118,7 +118,7 @@ function shade(hex, f) {
   return '#' + [n >> 16, (n >> 8) & 255, n & 255].map((c) => m(c).toString(16).padStart(2, '0')).join('');
 }
 const hashS = (str) => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967296; };
-const AWN = ['#9b2f2f', '#2f5f8f', '#2f7a4f', '#b88a2a', '#7a3f7a'];
+const AWN = ['#6a5f4e', '#6a5f4e', '#6a5f4e', '#6a5f4e', '#6a5f4e'];
 
 function buildMap() {
   const svg = $('map');
@@ -130,10 +130,10 @@ function buildMap() {
   pat('grass', 30, 30, (p) => { for (const [x, y] of [[4, 6], [20, 12], [11, 24], [26, 26]]) el('path', { d: `M${x} ${y}l1.5-4 1.5 4`, stroke: '#7d9a52', 'stroke-opacity': 0.35, fill: 'none' }, p); });
   pat('wave', 60, 20, (p) => { el('path', { d: 'M0 10Q15 4 30 10T60 10', stroke: '#6fa0b8', 'stroke-opacity': 0.28, fill: 'none', 'stroke-width': 1.5 }, p); });
   el('rect', { width: W, height: H, fill: '#3b3528' }, svg);
-  el('rect', { width: W, height: H, fill: 'url(#grass)', opacity: 0.8, 'pointer-events': 'none' }, svg);
+  el('rect', { width: W, height: H, fill: 'url(#grass)', opacity: 0.15, 'pointer-events': 'none' }, svg);
   const SU = ROWS[ROWS.length - 1] + 138;
   el('rect', { y: SU, width: W, height: H - SU, fill: '#1f3a4a' }, svg); // liman suyu
-  M.su = el('rect', { y: SU, width: W + 120, x: -60, height: H - SU, fill: 'url(#wave)', 'pointer-events': 'none' }, svg);
+  M.su = el('rect', { y: SU, width: W + 120, x: -60, height: H - SU, fill: 'url(#wave)', opacity: 0.4, 'pointer-events': 'none' }, svg);
   el('rect', { y: SU - 6, width: W, height: 8, fill: '#6a5a40' }, svg); // rıhtım
   for (const r of ROWS) {
     el('rect', { y: r - ROAD_HALF, width: W, height: ROAD_HALF * 2, fill: '#57503f' }, svg);
@@ -154,7 +154,7 @@ function buildMap() {
   // bölge zeminleri: hakimin rengiyle yarı saydam; tıklamayı engellemez
   M.z = {};
   for (const [id, B] of Object.entries(BOLGELER)) {
-    const r = el('rect', { x: B.kutu.x, y: B.kutu.y, width: B.kutu.w, height: B.kutu.h, rx: 14, fill: '#888', 'fill-opacity': 0.12, stroke: '#888', 'stroke-opacity': 0.55, 'stroke-width': 3, 'stroke-dasharray': '16 10', 'pointer-events': 'none' }, svg);
+    const r = el('rect', { x: B.kutu.x, y: B.kutu.y, width: B.kutu.w, height: B.kutu.h, rx: 14, fill: '#888', 'fill-opacity': 0.06, stroke: '#888', 'stroke-opacity': 0.35, 'stroke-width': 2, 'stroke-dasharray': '16 10', 'pointer-events': 'none' }, svg);
     M.z[id] = { r };
   }
   M.haze = el('circle', { cx: PLACES.meyhane.bx + 70, cy: PLACES.meyhane.by + 45, r: 0, fill: '#c9a24b', opacity: 0.12 }, svg);
@@ -172,7 +172,7 @@ function buildMap() {
     if (hh < 0.45) { const cx = b.bx + 14 + Math.floor(hh * 100) % Math.max(10, Math.floor(b.bw - 40)); el('rect', { x: cx, y: b.by - 9, width: 8, height: 9, fill: shade(b.fill, -0.45), 'pointer-events': 'none' }, g); } // baca
     // kapı üstü tente: çizgili
     const ay = b.side < 0 ? b.by + b.bh - 3 : b.by - 5, ac = AWN[Math.floor(hh * 50) % 5];
-    for (let i = 0; i < 4; i++) el('rect', { x: b.x - 16 + i * 8, y: ay, width: 8, height: 8, fill: i % 2 ? '#e8dfc6' : ac, opacity: 0.92, 'pointer-events': 'none' }, g);
+    for (let i = 0; i < 4; i++) el('rect', { x: b.x - 16 + i * 8, y: ay, width: 8, height: 8, fill: i % 2 ? '#b9b09a' : ac, opacity: 0.6, 'pointer-events': 'none' }, g);
     const wins = [];
     for (let i = 0; i < Math.floor(b.bw / 34); i++) wins.push(el('rect', { x: b.bx + 14 + i * 34, y: b.by + 22, width: 14, height: 14, fill: '#1c1812' }, g));
     el('rect', { x: b.x - 9, y: b.side < 0 ? b.by + b.bh - 7 : b.by, width: 18, height: 7, fill: '#cfa84f', opacity: 0.85 }, g); // kapı
@@ -582,7 +582,7 @@ function panelGaraj() {
 function panelIs() {
   const M = s.meslek, ids = Object.keys(BOLGELER), bid = ui.bolge;
   const ac = { taksi: 'yürüyüş hızı', hamal: 'pusu riski azalır', berber: 'halk sevgisi', katip: 'aklama ücreti ve kapasitesi' };
-  let h = `<h3>Düz İş</h3><div class="note">Mafya dışında dürüst bir işte de çalışabilirsin: temiz maaş, öğrenilen meslek ve meşru bir yüz. Tanınırlığın ve korkunçluğun işe kabulü etkiler: yüzü bilinen adama kimse taksi emanet etmez; ama liman, korkulan adamı sever. Çalışırken meyhaneye az bakarsın (satış −%10). Tecrübeni kazandığın işin işletmesini alırsan avantajı katlanır.</div>`;
+  let h = `<h3>Düz İş</h3><div class="note">Mafya dışında dürüst bir işte de çalışabilirsin: temiz maaş, öğrenilen meslek ve meşru bir yüz. Tanınırlığın ve korkunçluğun işe kabulü etkiler: sevilen ve tanınan biri kayırılır, korkulan ve tanınan (ya da dosyası kabarık) biri işveren için dert olur; liman ise korkulan adamı sever. Çalışırken meyhaneye az bakarsın (satış −%10). Tecrübeni kazandığın işin işletmesini alırsan avantajı katlanır.</div>`;
   if (M.is) {
     const m = MESLEKLER[M.is.j];
     h += `<div class="box"><div class="t">Şu an: ${m.ad} <small>(${BOLGELER[M.is.b].ad})</small></div>` + row('Günlük maaş', `${money(maasGun(s, M.is.j, M.is.b))} temiz`) +

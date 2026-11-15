@@ -157,7 +157,7 @@ Kod: `core/savas.js` (+ `bolge.js`, `sim.js` saatlik kancası). Konum yalnızca 
 #### 5.1.3 Düz işler, meslek öğrenme ve işletmeler `[UYGULANDI v0.4]`
 - **Harita:** 2760×1830, 6 sokak şeridi, ~196 bina; altı bölge (Hilltop, Downtown, Southside, Eastside, The Flats, Docks).
 - **Düz iş:** Dört meslek (taksi şoförü, liman hamalı, berber çırağı, defter katibi). Bölge seçilip işe girilir; günlük temiz maaş, tecrübe ve bölgeye göre ödeme. Çalışırken meyhane satışı −%10.
-- **Kabul puanı** (≥50): meslek tabanı + 0,3×tecrübe + halk sevgisi × sevgi ağırlığı + korku × korku ağırlığı − tanınırlık × ceza. Taksi/katip tanınmış yüzü istemez; hamal korkulan adamı sever; berber sevileni. Puan 35'in altına düşerse kovulursun.
+- **Kabul puanı** (≥50): meslek tabanı + 0,3×tecrübe + halk sevgisi × sevgi ağırlığı + korku × korku ağırlığı − ceza + küçük sevgi bonusu. Tanınmak iki yönlüdür: ceza, korkulan ve tanınan biri (ya da polis dosyası kabarık biri) için büyür; sevilen ve tanınan biri kayırılır; hiç tanınmayan biri ise referanssız sayılır (küçük ceza). Hamal korkulan adamı sever; berber sevileni. Puan 35'in altına düşerse kovulursun.
 - **Meslek öğrenme:** Her iş günü beceri artar (0–100; Çaylak/Tecrübeli/Usta/Üstat), işsiz kalınca çok yavaş körelir.
 - **İşletme:** Beceri ≥20 ise sahibi olunabilir (taksi filosu, nakliye, berber salonu, muhasebe bürosu). Aylık temiz gelir tecrübeye bağlıdır; mesleğin avantajı işletmeyle 4 kat güçlenir: taksi → yürüyüş hızı (+%40), hamal → pusu riski (−%25), berber → halk sevgisi, katip → aklama ücreti (−%30) ve kapasite (+%40, işletme cirosu aklamaya ek).
 

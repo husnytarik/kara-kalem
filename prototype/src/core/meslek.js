@@ -8,7 +8,7 @@ export const MESLEKLER = {
   taksi: {
     ad: 'Taksi şoförü', isletme: 'Taksi filosu', maas: 9, fiyat: 1800, ciro: 0.07,
     sevW: 0.6, korW: 0.0, tanC: 0.55, taban: 60,
-    ac: 'Şehrin sokaklarını ezbere öğrenirsin. Tecrübeyle yürüyüş hızın artar. Yüzü tanınan şoförü kimse çağırmaz.',
+    ac: 'Şehrin sokaklarını ezbere öğrenirsin. Tecrübeyle yürüyüş hızın artar. Korkulan ve adı kötüye çıkmış şoförü kimse çağırmaz; sevilen biri ise iş bulur.',
     perk: 'Yürüyüş hızı', max: '+%40 hız',
   },
   hamal: {
@@ -43,7 +43,9 @@ export function newMeslek() {
 // İşe kabul puanı (≥ eşik ise alınırsın): bölgenin sana bakışı ve tecrüben.
 export function kabul(s, j, bid) {
   const m = MESLEKLER[j], b = s.bolge.list[bid], e = etki(b, bid);
-  const puan = m.taban + 0.3 * s.meslek.beceri[j] + 35 * e.s * m.sevW + 30 * e.k * m.korW - m.tanC * b.tan;
+  // tanınmak iki yönlüdür: sevilen biri kayırılır; korkulan ve tanınan biri (ya da dosyası kabarık biri) işverene dert olur
+  const kotu = b.tan * (0.2 + 0.8 * b.kor / 100) + 0.3 * s.dosya, iyi = 12 * (b.tan / 100) * (b.sev / 100), referans = b.tan < 10 ? 4 : 0;
+  const puan = m.taban + 0.3 * s.meslek.beceri[j] + 35 * e.s * m.sevW + 30 * e.k * m.korW - m.tanC * kotu + iyi - referans;
   return { puan: Math.round(puan), esik: 50, ok: puan >= 50 };
 }
 export const tecrube = (s, j) => s.meslek.beceri[j] / 100;
@@ -76,7 +78,7 @@ export function isGir(s, a) {
   if (M.is) return hata('Zaten bir işte çalışıyorsun. Önce ayrıl.');
   if (yaraliMi(s)) return hata('Yaralıyken işe alınmazsın.');
   const k = kabul(s, j, bid);
-  if (!k.ok) return hata(`${MESLEKLER[j].ad} olarak seni almadılar (puan ${k.puan}/${k.esik}). ${s.bolge.list[bid].tan > 50 ? 'Yüzün fazla tanınıyor.' : 'Bölge sana güvenmiyor.'}`);
+  if (!k.ok) return hata(`${MESLEKLER[j].ad} olarak seni almadılar (puan ${k.puan}/${k.esik}). ${s.bolge.list[bid].tan > 30 && s.bolge.list[bid].kor > 35 ? 'Mahalle senden korkuyor; kimse başına iş açmak istemiyor.' : 'Bölge sana güvenmiyor.'}`);
   M.is = { j, b: bid, since: Math.floor(s.t / DAY), gun: 0 };
   log(s, `${MESLEKLER[j].ad} olarak işe girdin (${bid}). Günlük ~${maasGun(s, j, bid)}$ temiz.`, 'good', 'Düz iş: temiz gelir, tecrübe ve meşru bir yüz. Ama meyhaneye daha az vakit kalır.');
   return TAMAM;
@@ -106,7 +108,7 @@ export function meslekGun(s) {
   const m = MESLEKLER[is.j], b = s.bolge.list[is.b];
   const k = kabul(s, is.j, is.b);
   if (k.puan < 35) { // bölge artık sana iş vermiyor
-    log(s, `${m.ad} işinden kovuldun: ${b.tan > 50 ? 'herkes yüzünü tanıyor' : 'bölge sana sırt çevirdi'} (puan ${k.puan}).`, 'bad');
+    log(s, `${m.ad} işinden kovuldun: ${b.tan > 30 && b.kor > 35 ? 'mahalle senden korkuyor' : 'bölge sana sırt çevirdi'} (puan ${k.puan}).`, 'bad');
     M.is = null; return;
   }
   const w = maasGun(s, is.j, is.b);
