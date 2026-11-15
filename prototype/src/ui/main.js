@@ -585,8 +585,8 @@ function panelIs() {
   let h = `<h3>Düz İş</h3><div class="note">Mafya dışında dürüst bir işte de çalışabilirsin: temiz maaş, öğrenilen meslek ve meşru bir yüz. Tanınırlığın ve korkunçluğun işe kabulü etkiler: sevilen ve tanınan biri kayırılır, korkulan ve tanınan (ya da dosyası kabarık) biri işveren için dert olur; liman ise korkulan adamı sever. Çalışırken meyhaneye az bakarsın (satış −%10). Tecrübeni kazandığın işin işletmesini alırsan avantajı katlanır.</div>`;
   if (M.is) {
     const m = MESLEKLER[M.is.j];
-    h += `<div class="box"><div class="t">Şu an: ${m.ad} <small>(${BOLGELER[M.is.b].ad})</small></div>` + row('Günlük maaş', `${money(maasGun(s, M.is.j, M.is.b))} temiz`) +
-      row('Çalıştığın gün', M.is.gun) + `<div class="btns"><button ${A({ type: 'isBirak' })}>İşten ayrıl</button></div></div>`;
+    h += `<div class="box on"><div class="t">Şu an çalışıyorsun: ${m.ad} <small>(${BOLGELER[M.is.b].ad})</small></div>` + row('Günlük maaş', `${money(maasGun(s, M.is.j, M.is.b))} temiz`) +
+      row('Çalıştığın gün', M.is.gun) + `<div class="note">Maaş ve tecrübe iş günü geçtikçe işler; zaman durmuşken ilerlemez.</div>` + `<div class="btns"><button ${A({ type: 'isBirak' })}>İşten ayrıl</button></div></div>`;
   }
   h += `<div class="bzlist">${ids.map((id) => `<button data-bz="${id}" class="${bid === id ? 'on' : ''}">${BOLGELER[id].ad}</button>`).join('')}</div>` +
     `<div class="note">Çalışmak istediğin bölgeyi seç: <b>${BOLGELER[bid].ad}</b> · tanınırlık ${Math.round(s.bolge.list[bid].tan)} · sevgi ${Math.round(s.bolge.list[bid].sev)} · korku ${Math.round(s.bolge.list[bid].kor)}</div>`;
@@ -871,6 +871,7 @@ function renderAll() { renderTop(); renderPanel(); renderLog(); renderModal(); }
 function doAct(a) {
   const r = act(s, a);
   if (!r.ok) toast(r.msg);
+  else if (a.type === 'isGir') toast(s.speed === 0 ? 'İşe girdin. Maaş ve tecrübe için zamanı başlat (1 / 2 / 3).' : 'İşe girdin.');
   if (a.type === 'choose' && r.ok) {
     ui.modal = null;
     const next = s.cards[0];
