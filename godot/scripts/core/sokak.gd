@@ -1,19 +1,41 @@
 extends Node3D
-# Faz 1 test sahnesi: zemin, ışık, kutu binalar, oyuncu ve kamera. Hepsi kodla kurulur.
+# Ana sahne: şehir haritası, ışık, oyuncu, kamera ve bölge adı göstergesi.
+
+var harita: Node3D
+var oyuncu: CharacterBody3D
+var _etiket: Label
 
 func _ready() -> void:
 	_cevre()
-	_zemin()
-	_binalar()
-	var oyuncu := CharacterBody3D.new()
+	harita = load("res://scripts/core/harita.gd").new()
+	add_child(harita)
+	harita.kur()
+	oyuncu = CharacterBody3D.new()
 	oyuncu.set_script(load("res://scripts/characters/oyuncu.gd"))
-	oyuncu.position = Vector3(0, 1.0, 8)
+	oyuncu.position = harita.merkez("southside") + Vector3(0, 1.0, 0)   # senin semtin
 	add_child(oyuncu)
 	var kamera := Node3D.new()
 	kamera.set_script(load("res://scripts/characters/kamera.gd"))
 	add_child(kamera)
 	kamera.hedef = oyuncu
 	oyuncu.kamera = kamera
+	var hud := CanvasLayer.new()
+	_etiket = Label.new()
+	_etiket.position = Vector2(20, 14)
+	_etiket.add_theme_font_size_override("font_size", 26)
+	hud.add_child(_etiket)
+	add_child(hud)
+	if "--ust" in OS.get_cmdline_user_args():   # doğrulama için kuş bakışı kamera
+		kamera.queue_free()
+		var k := Camera3D.new()
+		add_child(k)
+		k.position = Vector3(0, 520, 330)
+		k.look_at(Vector3(0, 0, 20))
+		k.current = true
+
+func _process(_d: float) -> void:
+	var id: String = harita.bolge_at(oyuncu.global_position)
+	_etiket.text = harita.bolgeler[id]["ad"] if id != "" else "Yollar"
 
 func _cevre() -> void:
 	var sky := ProceduralSkyMaterial.new()
@@ -31,37 +53,5 @@ func _cevre() -> void:
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-50, -30, 0)
 	sun.shadow_enabled = true
+	sun.directional_shadow_max_distance = 300.0
 	add_child(sun)
-
-func _kutu(pos: Vector3, boyut: Vector3, renk: Color) -> StaticBody3D:
-	var b := StaticBody3D.new()
-	var m := MeshInstance3D.new()
-	var bm := BoxMesh.new()
-	bm.size = boyut
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = renk
-	mat.roughness = 0.9
-	bm.material = mat
-	m.mesh = bm
-	b.add_child(m)
-	var c := CollisionShape3D.new()
-	var bs := BoxShape3D.new()
-	bs.size = boyut
-	c.shape = bs
-	b.add_child(c)
-	b.position = pos
-	add_child(b)
-	return b
-
-func _zemin() -> void:
-	_kutu(Vector3(0, -0.5, 0), Vector3(120, 1, 120), Color(0.28, 0.27, 0.25))   # kaldırım/zemin
-	_kutu(Vector3(0, -0.45, 0), Vector3(10, 1, 120), Color(0.14, 0.14, 0.15))   # yol
-
-func _binalar() -> void:
-	var renkler := [Color(0.45, 0.25, 0.2), Color(0.5, 0.42, 0.3), Color(0.33, 0.33, 0.38), Color(0.4, 0.3, 0.25)]
-	var i := 0
-	for z in range(-50, 51, 20):
-		for yon in [-1, 1]:
-			var yuk := 8.0 + float((i * 7) % 9)
-			_kutu(Vector3(yon * 14.0, yuk / 2.0, z), Vector3(12, yuk, 16), renkler[i % renkler.size()])
-			i += 1
