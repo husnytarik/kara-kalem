@@ -3,6 +3,7 @@
 import { clamp, DAY, log, spend, staff, addStress } from './util.js';
 import { fame, perceived } from './social.js';
 import { BOLGELER, PLACES, bolgeAt } from './world.js';
+import { pusuCarpan } from './meslek.js';
 import { etki, aileDeg, hakimOf, hakimAd, addInf, kudret, erisim, brnd, hakimDegisti, yaraliMi, FAK } from './bolge.js';
 
 export const EKIP_MAX = 8;
@@ -67,7 +68,7 @@ export function pusuP(s, id) {
   const koruma = 1 + 0.6 * (st.ekip + (staff(s, 'koruma') ? 1 : 0));
   const iliski = (1 - Math.min(0.4, b.sev / 250)) * (1 - Math.min(0.3, b.kor / 300)) * clamp(1 - st.aile[f].g / 200, 0.6, 1.5) * (1 - st.aile[f].k / 250);
   const ahit = f === 'marchetti' && s.unvan.ahit ? 0.1 : 1;
-  return { p: clamp(0.014 * v * taninma * bende * ofke * ahit * iliski / koruma, 0, 0.6), f, v };
+  return { p: clamp(0.014 * v * taninma * bende * ofke * ahit * iliski * pusuCarpan(s) / koruma, 0, 0.6), f, v };
 }
 
 // ---------- yaralanma ----------

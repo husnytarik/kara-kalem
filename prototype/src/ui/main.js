@@ -7,6 +7,7 @@ import {
 import {
   hakimOf, FAK, HARAC, HAKIM_ESIK, GARNIZON_MAX, ADAM_MAAS, HAVUZ, IS_AD, BEKLEME, erisim, hakimAd, oyuncuBolgeleri, KARAKTER, etki,
 } from '../core/bolge.js';
+import { MESLEKLER, BECERI_AD, seviye, kabul, maasGun, isletmeGelir, etkiGuc } from '../core/meslek.js';
 import { EKIP_MAX, EKIP_FIYAT, EKIP_MAAS, BASKIN_MALIYET, ekipGuc, ekipDetay, pusuP, baskinTahmin } from '../core/savas.js';
 import { dateOf, fmtTime, fmtDate, money, opinion, SEASONS, DAY, clamp, staff, informed } from '../core/util.js';
 import {
@@ -16,7 +17,7 @@ import {
 import { TRAITS, blocked } from '../core/traits.js';
 import { ROAD_HALF } from '../core/world.js';
 
-const SAVE_KEY = 'kara_kalem_v07';
+const SAVE_KEY = 'kara_kalem_v08';
 const $ = (id) => document.getElementById(id);
 const SVGNS = 'http://www.w3.org/2000/svg';
 
@@ -32,7 +33,7 @@ function load() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const st = JSON.parse(raw);
-    if (st.v !== 7) return null;
+    if (st.v !== 8) return null;
     st.speed = 0; st.mesafe = true;
     return st;
   } catch { return null; }
@@ -469,6 +470,31 @@ function infBar(b) {
     `<div class="infleg">${parts.map((f) => `<span><b style="color:${FAK[f].renk}">■</b> ${FAK[f].ad} %${Math.round(b.inf[f])}</span>`).join(' ')}</div>`;
 }
 
+function panelIs() {
+  const M = s.meslek, ids = Object.keys(BOLGELER), bid = ui.bolge;
+  const ac = { taksi: 'yürüyüş hızı', hamal: 'pusu riski azalır', berber: 'halk sevgisi', katip: 'aklama ücreti ve kapasitesi' };
+  let h = `<h3>Düz İş</h3><div class="note">Mafya dışında dürüst bir işte de çalışabilirsin: temiz maaş, öğrenilen meslek ve meşru bir yüz. Tanınırlığın ve korkunçluğun işe kabulü etkiler: yüzü bilinen adama kimse taksi emanet etmez; ama liman, korkulan adamı sever. Çalışırken meyhaneye az bakarsın (satış −%10). Tecrübeni kazandığın işin işletmesini alırsan avantajı katlanır.</div>`;
+  if (M.is) {
+    const m = MESLEKLER[M.is.j];
+    h += `<div class="box"><div class="t">Şu an: ${m.ad} <small>(${BOLGELER[M.is.b].ad})</small></div>` + row('Günlük maaş', `${money(maasGun(s, M.is.j, M.is.b))} temiz`) +
+      row('Çalıştığın gün', M.is.gun) + `<div class="btns"><button ${A({ type: 'isBirak' })}>İşten ayrıl</button></div></div>`;
+  }
+  h += `<div class="bzlist">${ids.map((id) => `<button data-bz="${id}" class="${bid === id ? 'on' : ''}">${BOLGELER[id].ad}</button>`).join('')}</div>` +
+    `<div class="note">Çalışmak istediğin bölgeyi seç: <b>${BOLGELER[bid].ad}</b> · tanınırlık ${Math.round(s.bolge.list[bid].tan)} · sevgi ${Math.round(s.bolge.list[bid].sev)} · korku ${Math.round(s.bolge.list[bid].kor)}</div>`;
+  for (const j of Object.keys(MESLEKLER)) {
+    const m = MESLEKLER[j], xp = M.beceri[j], k = kabul(s, j, bid), sa = M.isletme[j];
+    h += `<div class="box"><div class="t">${m.ad}${sa ? ` <span class="gold">· ${m.isletme} sende</span>` : ''}</div>` +
+      `<div class="note">${m.ac}</div>` +
+      row('Tecrübe', `${BECERI_AD[seviye(xp)]} · ${Math.round(xp)}/100`) + meter(xp, 100, '') +
+      row('Etki: ' + m.perk, `${m.max} · şu an %${Math.round(etkiGuc(s, j) * 100 / 1)} ${sa ? '' : '<small>(işletmeyle ×4)</small>'}`) +
+      row('Maaş / gün', money(maasGun(s, j, bid))) +
+      row(`Kabul (${BOLGELER[bid].ad})`, `<span class="${k.ok ? 'good' : 'bad'}">${k.puan} / ${k.esik}</span>`) +
+      `<div class="btns"><button ${A({ type: 'isGir', j, b: bid })} ${M.is ? 'disabled' : ''}>İşe gir</button>` +
+      (sa ? `<span class="dim">işletme geliri ${money(isletmeGelir(s, j))} / ay</span>` : `<button ${A({ type: 'isletmeAl', j })}>${m.isletme} al <small>${money(m.fiyat)} temiz · ~${money(isletmeGelir(s, j))}/ay</small></button>`) + `</div></div>`;
+  }
+  return h;
+}
+
 function panelBolge() {
   const st = s.bolge, ids = Object.keys(BOLGELER);
   const mine = oyuncuBolgeleri(s);
@@ -682,12 +708,12 @@ function panelKararlar() {
   return s.cards.map((c) => { const v = cardView(s, c); return `<div class="box"><div class="t">${v.title}</div><div class="note">Kalan süre: ${v.hoursLeft >= 24 ? `${Math.floor(v.hoursLeft / 24)} gün ${v.hoursLeft % 24} saat` : `${v.hoursLeft} saat`}</div><button data-card="${c.id}">Aç</button></div>`; }).join('');
 }
 
-const TABS = [['mekan', 'Mekân'], ['defter', 'Hesap'], ['bolge', 'Bölgeler'], ['kisiler', 'Kişiler'], ['guc', 'Güç'], ['kara', 'Kara Defter'], ['kararlar', 'Kararlar']];
+const TABS = [['mekan', 'Mekân'], ['defter', 'Hesap'], ['bolge', 'Bölgeler'], ['is', 'İş'], ['kisiler', 'Kişiler'], ['guc', 'Güç'], ['kara', 'Kara Defter'], ['kararlar', 'Kararlar']];
 function renderPanel() {
   $('tabs').innerHTML = TABS.map(([id, n]) => `<button data-tab="${id}" class="${ui.tab === id ? 'on' : ''}">${n}${id === 'kararlar' && s.cards.length ? `<span class="badge">${s.cards.length}</span>` : ''}</button>`).join('');
   const p = $('panel');
   const top = p.scrollTop;
-  p.innerHTML = { mekan: panelMekan, defter: panelDefter, bolge: panelBolge, kisiler: panelKisiler, guc: panelGuc, kara: panelKara, kararlar: panelKararlar }[ui.tab]();
+  p.innerHTML = { mekan: panelMekan, defter: panelDefter, bolge: panelBolge, is: panelIs, kisiler: panelKisiler, guc: panelGuc, kara: panelKara, kararlar: panelKararlar }[ui.tab]();
   p.scrollTop = top;
 }
 

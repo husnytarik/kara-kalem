@@ -12,6 +12,7 @@ import {
 import { stressFor, blocked } from './traits.js';
 import { PLACES, BOLGELER, W, WALK, snapRow, route, pathLen, advanceAlong, bolgeAt } from './world.js';
 import { brnd as brndSim, newBolge, bolgeMonth, bolgeIs, bolgeAdam, bolgeYatirim, bolgeHarac, aileHediye, yaraliMi } from './bolge.js';
+import { newMeslek, isGir, isBirak, isletmeAl, meslekGun, meslekAy, yurumeCarpan, akalamaUcret, akalamaKapasite, aklamaEk, mesaiCarpan } from './meslek.js';
 import { ekipAl, bolgeBaskin, pusuKur, pusuP } from './savas.js';
 
 export const C = {
@@ -55,15 +56,15 @@ export function here(s) {
   for (const [id, p] of Object.entries(PLACES)) if (Math.hypot(p.x - s.pos.x, p.y - s.pos.y) < 6) return id;
   return null;
 }
-export const walkMinutes = (s, id) => Math.ceil(pathLen(s.pos, route(s.pos, PLACES[id])) / WALK);
+export const walkMinutes = (s, id) => Math.ceil(pathLen(s.pos, route(s.pos, PLACES[id])) / (WALK * yurumeCarpan(s)));
 // Arayüz için akıcı konum: bir dakikanın kesri kadar ileri
 export function walkerAt(s, frac = 0) {
   if (!s.walk) return { x: s.pos.x, y: s.pos.y, path: [] };
-  const r = advanceAlong(s.pos, s.walk.path, WALK * Math.min(1, frac));
+  const r = advanceAlong(s.pos, s.walk.path, WALK * yurumeCarpan(s) * Math.min(1, frac));
   return { x: r.x, y: r.y, path: r.rest };
 }
 function walkStep(s) {
-  const r = advanceAlong(s.pos, s.walk.path, WALK);
+  const r = advanceAlong(s.pos, s.walk.path, WALK * yurumeCarpan(s));
   s.pos.x = r.x; s.pos.y = r.y; s.walk.path = r.rest;
   if (r.last) s.walk.prev = { x: r.last.x, y: r.last.y };
   if (!r.rest.length) s.walk = null;
@@ -85,12 +86,13 @@ function startWalk(s, dest, to) {
 
 export function newGame(seed = (Date.now() & 0x7fffffff)) {
   const s = {
-    v: 7, seed, t: 6 * 60, speed: 0, mesafe: false, pos: { x: PLACES.meyhane.x, y: PLACES.meyhane.y }, walk: null,
+    v: 8, seed, t: 6 * 60, speed: 0, mesafe: false, pos: { x: PLACES.meyhane.x, y: PLACES.meyhane.y }, walk: null,
     cash: { clean: 1500, dirty: 0 },
     debt: { principal: 6000, installment: 600, missed: 0 },
     patron: { ad: 'Sen', yas: 34, traits: ['Temkinli', 'Cömert', 'Merhametli'], stres: 10 },
     ...newSocial(),
     bolge: newBolge(seed),
+    meslek: newMeslek(),
     biz: {
       meyhane: { id: 'meyhane', type: 'meyhane', name: "Murphy's Tavern", price: 1, quality: 50, rep: 50, mRev: 0, mCost: 0 },
       rakip: { id: 'rakip', name: "Duffy'nin Yeri", price: 1, quality: 50, rep: 55 },
@@ -162,8 +164,8 @@ export const stageName = (s) => C.STAGES.find(([th]) => s.dosya >= th)[1];
 const stageIdx = (s) => (s.dosya >= 75 ? 3 : s.dosya >= 50 ? 2 : s.dosya >= 25 ? 1 : 0);
 
 export function launderInfo(s) {
-  const cap = s.biz.meyhane.mRev * C.LAUNDER.meyhane + (s.biz.camasir ? s.biz.camasir.mRev * C.LAUNDER.camasir : 0);
-  const fee = staff(s, 'muhasebeci') ? 0.12 : C.LAUNDER_FEE;
+  const cap = (s.biz.meyhane.mRev * C.LAUNDER.meyhane + (s.biz.camasir ? s.biz.camasir.mRev * C.LAUNDER.camasir : 0)) * akalamaKapasite(s) + aklamaEk(s);
+  const fee = akalamaUcret(s, staff(s, 'muhasebeci') ? 0.12 : C.LAUNDER_FEE);
   const amt = Math.min(s.cash.dirty, cap * s.launderPct / 100);
   return { cap, fee, amt };
 }
@@ -295,7 +297,7 @@ function hourTick(s) {
     const m = s.biz.meyhane;
     const sh = marketShare(s).me;
     s.share = sh;
-    const vol = C.MEY_DEMAND * C.SEAS_MEY[d.season] * w * sh * (staff(s, 'garson') ? 1 : 0.7) * yaral;
+    const vol = C.MEY_DEMAND * C.SEAS_MEY[d.season] * w * sh * (staff(s, 'garson') ? 1 : 0.7) * yaral * mesaiCarpan(s);
     const rev = vol * m.price, cost = vol * C.VAR_COST * varCostMult(s);
     s.cash.clean += rev - cost; m.mRev += rev; m.mCost += cost; s.today.rev += rev;
   }
@@ -354,6 +356,7 @@ function rollEvents(s) {
 
 function dayTick(s) {
   const di = s.dist;
+  meslekGun(s);
   s.today = { rev: 0, liq: 0 };
   s.evHour = 9 + Math.floor(rnd(s) * 13);
 
@@ -427,6 +430,8 @@ function monthTick(s) {
   const legalRev = m.mRev + (cm ? cm.mRev : 0), legalCost = m.mCost + (cm ? cm.mCost : 0);
   R.push(`YASAL İŞLER  ciro ${money(legalRev)} · mal/işletme gideri ${money(legalCost)}`);
   if (s.month.liqSold > 0) R.push(`BODRUM  ${Math.round(s.month.liqSold)} şişe satıldı · kirli gelir ${money(s.month.liqRev)} · hammadde ${money(s.month.prodCost)}`);
+
+  meslekAy(s, R);
 
   // aklama
   const li = launderInfo(s);
@@ -562,6 +567,9 @@ export function act(s, a) {
     case 'bolgeBaskin': return bolgeBaskin(s, a, pushCard);
     case 'ekipAl': return ekipAl(s, a);
     case 'aileHediye': return aileHediye(s, a);
+    case 'isGir': return isGir(s, a);
+    case 'isBirak': return isBirak(s);
+    case 'isletmeAl': return isletmeAl(s, a);
     case 'bolgeIs': return bolgeIs(s, a);
     case 'bolgeAdam': return bolgeAdam(s, a);
     case 'bolgeYatirim': return bolgeYatirim(s, a);
