@@ -12,6 +12,9 @@ var kamera: Node3D
 var _etiket: Label
 var _ipucu: Label
 var _hiz := 1.0
+var takip_id := 0
+var _takip_sure := 0.0
+var _onceki_hiz := 1.0
 var _adam_gorsel := {}   # adam id -> Node3D (haritada yürüyen adam)
 
 func _ready() -> void:
@@ -46,6 +49,7 @@ func _ready() -> void:
 	add_child(gruplar)
 	gruplar.kur(harita, oyun, oyuncu)
 	gruplar.yakinlasti.connect(_karsilasti)
+	gruplar.temas.connect(func(g): arayuz.karsilasma_ac(g))
 	arayuz = load("res://scripts/ui/arayuz.gd").new()
 	add_child(arayuz)
 	arayuz.kur(oyun, self)
@@ -75,6 +79,8 @@ func _ready() -> void:
 		if a.begins_with("--hedef="):
 			var p := a.substr(8).split(",")
 			oyuncu.git(Vector3(float(p[0]), 0, float(p[1])))
+		elif a.begins_with("--diyalog="):
+			_diyalog_testi(a.substr(10))
 		elif a == "--test":
 			_otomatik_test()
 
@@ -85,12 +91,30 @@ func _karsilasti(g: Dictionary) -> void:
 		"rakip":
 			oyun.kayit("%s yakınında (%d kişi)." % [g["ad"], g["kisi"]], "bad")
 
+func takip_ver(g: Dictionary) -> void:
+	takip_id = g["id"]
+	gruplar.takip_id = g["id"]
+	oyun.kayit("%s kovalanıyor." % g["ad"], "info")
+
+func takip_birak() -> void:
+	takip_id = 0
+	gruplar.takip_id = 0
+
+func modal_duraklat(ac: bool) -> void:
+	if ac:
+		_onceki_hiz = _hiz
+		Engine.time_scale = 0.0
+	else:
+		Engine.time_scale = _onceki_hiz
+
 func hiz_ayarla(v: float) -> void:
 	if v > 0.0:
 		_hiz = v
 	Engine.time_scale = v
 
 func _unhandled_input(e: InputEvent) -> void:
+	if arayuz.modal:
+		return
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 		var k: Camera3D = kamera.kamera()
 		var o := k.project_ray_origin(e.position)
@@ -116,6 +140,18 @@ func _unhandled_input(e: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	oyun.ilerle(delta)
+	if takip_id != 0:
+		_takip_sure -= delta
+		if _takip_sure <= 0.0:
+			_takip_sure = 0.5
+			var hedef := {}
+			for g in gruplar.liste:
+				if g["id"] == takip_id:
+					hedef = g
+			if hedef.is_empty():
+				takip_birak()
+			else:
+				oyuncu.git(hedef["pos"])
 	_adamlari_guncelle()
 	var id: String = harita.bolge_at(oyuncu.global_position)
 	_etiket.text = harita.bolgeler[id]["ad"] if id != "" else "Yollar"
@@ -204,6 +240,23 @@ func _otomatik_test() -> void:
 	arayuz.bina_ac(hedef)
 	Engine.time_scale = 4.0
 	_hiz = 4.0
+
+# Doğrulama: verilen türden bir grubu yanına getirir, diyaloğu açar ve tüm seçenekleri dener.
+func _diyalog_testi(tur: String) -> void:
+	for g in gruplar.liste:
+		if g["tur"] == tur:
+			g["pos"] = oyuncu.global_position + Vector3(4, 0, 0)
+			if tur == "rakip":
+				g["mod"] = "kovala"
+			elif tur == "polis":
+				oyun.arama = 50.0
+			print("DIYALOG ", tur, " ", g["ad"])
+			var kars: RefCounted = load("res://scripts/core/karsilasma.gd").new(oyun, gruplar)
+			for sec in kars.secenekler(g):
+				var kopya: Dictionary = g.duplicate()
+				print("  ", sec["id"], " -> ", kars.uygula(kopya, sec["id"])["metin"])
+			arayuz.karsilasma_ac(g)
+			return
 
 func _cevre() -> void:
 	var sky := ProceduralSkyMaterial.new()

@@ -28,12 +28,20 @@ var _sag: PanelContainer
 var _ic: VBoxContainer
 var _log: VBoxContainer
 var _log_n := -1
+var modal := false           # karşılaşma diyaloğu açıkken true
+var _kars: RefCounted
+var _dlg: PanelContainer
+var _dlg_ic: VBoxContainer
+var _dlg_g: Dictionary = {}
+var _dlg_sonuc: Dictionary = {}
+const YAKIN := 16.0          # bir binayla/grupla işlem için gereken en büyük uzaklık (m)
 
 func kur(o: Node, s: Node) -> void:
 	oyun = o
 	sokak = s
 	_ust_cubuk()
 	_sag_panel()
+	_diyalog_kur()
 	_log = VBoxContainer.new()
 	_log.position = Vector2(16, 520)
 	_log.custom_minimum_size = Vector2(620, 0)
@@ -191,6 +199,17 @@ func _bolge_dugmesi() -> void:
 		id = "southside"
 	bolge_ac(id)
 
+func yakin_bina(i: int) -> bool:
+	var ab: AABB = oyun.harita.yerler[i]["aabb"]
+	var p: Vector3 = sokak.oyuncu.global_position
+	return ab.grow(YAKIN).has_point(Vector3(p.x, ab.position.y + ab.size.y * 0.5, p.z))
+
+func yakin_grup(g: Dictionary) -> bool:
+	return (g["pos"] as Vector3).distance_to(sokak.oyuncu.global_position) < YAKIN
+
+func bolgede_mi(id: String) -> bool:
+	return oyun.harita.bolge_at(sokak.oyuncu.global_position) == id
+
 func kapat() -> void:
 	_mod = ""
 	_sag.visible = false
@@ -229,14 +248,14 @@ func _imza() -> String:
 			var i: int = _hedef
 			var y: Dictionary = oyun.harita.yerler[i]
 			var gs: Array = oyun.gorevler.filter(func(g): return g["hedef"] == i).map(func(g): return [g["adam"], g["gorev"], (g["bitis"] - oyun.t) / 60])
-			return str([oyun.isy.get(i), oyun.kontrol(i), oyun.bolge[y["bolge"]]["inf"], oyun.bos_adamlar().map(func(a): return a["id"]), gs, oyun.temiz, oyun.kirli, _sonuc])
+			return str([oyun.isy.get(i), oyun.kontrol(i), oyun.bolge[y["bolge"]]["inf"], oyun.bos_adamlar().map(func(a): return a["id"]), gs, oyun.temiz, oyun.kirli, _sonuc, yakin_bina(i)])
 		"bolge":
-			return str([oyun.bolge[_hedef], oyun.erisim(_hedef), oyun.temiz, oyun.kirli, oyun.adamlar.size(), oyun.tarih()["gun"], _sonuc])
+			return str([oyun.bolge[_hedef], oyun.erisim(_hedef), oyun.temiz, oyun.kirli, oyun.adamlar.size(), oyun.tarih()["gun"], _sonuc, bolgede_mi(_hedef)])
 		"adamlar":
 			return str([oyun.adamlar, oyun.gorevler.map(func(g): return [g["adam"], (g["bitis"] - oyun.t) / 60]), oyun.kirli, _sonuc])
 		"grup":
 			var g: Dictionary = _hedef
-			return str([g["kisi"], g["durum"], g["ev"], sokak.gruplar.liste.has(g)])
+			return str([g["kisi"], g["durum"], g["ev"], sokak.gruplar.liste.has(g), yakin_grup(g), sokak.takip_id])
 		"defter":
 			return str(oyun.defter.size())
 	return ""
@@ -316,9 +335,12 @@ func _bina_paneli() -> void:
 	ob.item_selected.connect(func(n: int): _adam_secim = n)
 	_ic.add_child(ob)
 	var secili: int = _adam_idler[clampi(_adam_secim, 0, _adam_idler.size() - 1)]
+	var yakin := yakin_bina(i)
+	if not yakin:
+		_lbl(_ic, "Uzaktasın: işlem yapmak için binaya yaklaş.", 15, RENK["warn"])
 	for gk in ["haraclan", "topla", "koru"]:
-		_btn(_ic, "%s  (%d dk iş)" % [oyun.GOREVLER[gk]["ad"], oyun.GOREVLER[gk]["is"]], func(): _sonuc_goster(oyun.gorev_ver(i, gk, secili), "Adam yola çıktı."))
-	_btn(_ic, "Satın al  (%s temiz)" % oyun.para(oyun.fiyat(i)), func(): _sonuc_goster(oyun.satin_al(i), "Satın aldın."), r["sahip"])
+		_btn(_ic, "%s  (%d dk iş)" % [oyun.GOREVLER[gk]["ad"], oyun.GOREVLER[gk]["is"]], func(): _sonuc_goster(oyun.gorev_ver(i, gk, secili), "Adam yola çıktı."), not yakin)
+	_btn(_ic, "Satın al  (%s temiz)" % oyun.para(oyun.fiyat(i)), func(): _sonuc_goster(oyun.satin_al(i), "Satın aldın."), r["sahip"] or not yakin)
 	_btn(_ic, "Buraya git", func(): sokak.oyuncu.git(y["pos"]))
 	_sonuc_satiri()
 
@@ -350,12 +372,16 @@ func _bolge_paneli() -> void:
 		_lbl(_ic, "Buraya girmek için önce komşu bir bölgeye hakim ol.", 15, RENK["warn"])
 	else:
 		_lbl(_ic, "Bölge işleri", 16, RENK["altin"])
+		var ici := bolgede_mi(id)
+		if not ici:
+			_lbl(_ic, "Bölge işleri için bu bölgede olmalısın.", 15, RENK["warn"])
+			_btn(_ic, "Bölgeye git", func(): sokak.oyuncu.git(oyun.harita.merkez(id)))
 		for tur in ["himaye", "hediye", "gozdagi"]:
-			_btn(_ic, "%s  (%s)" % [oyun.IS_AD[tur], oyun.IS_BEDEL[tur]], func(): _sonuc_goster(oyun.bolge_is(id, tur)))
+			_btn(_ic, "%s  (%s)" % [oyun.IS_AD[tur], oyun.IS_BEDEL[tur]], func(): _sonuc_goster(oyun.bolge_is(id, tur)), not ici)
 	if hk == "oyuncu":
 		_ayrac(_ic)
 		_lbl(_ic, "Yönetim", 16, RENK["altin"])
-		_btn(_ic, "Yatırım yap  ($400 temiz)", func(): _sonuc_goster(oyun.bolge_yatirim(id)))
+		_btn(_ic, "Yatırım yap  ($400 temiz)", func(): _sonuc_goster(oyun.bolge_yatirim(id)), not bolgede_mi(id))
 		var ob := OptionButton.new()
 		ob.focus_mode = Control.FOCUS_NONE
 		for h in oyun.HARAC:
@@ -423,4 +449,66 @@ func _grup_paneli() -> void:
 		"sivil":
 			_lbl(_ic, "Mahalle halkı. İleride dedikodu ve bilgi buradan alınacak.", 15, RENK["soluk"])
 	_ayrac(_ic)
-	_btn(_ic, "Yanına git", func(): sokak.oyuncu.git(g["pos"]))
+	if yakin_grup(g):
+		_btn(_ic, "Konuş / karşılaş", func(): karsilasma_ac(g))
+	else:
+		_lbl(_ic, "Uzaktasın: konuşmak için yanına git.", 15, RENK["warn"])
+		_btn(_ic, "Yanına git", func(): sokak.oyuncu.git(g["pos"]))
+	if sokak.takip_id == g["id"]:
+		_btn(_ic, "Kovalamayı bırak", func(): sokak.takip_birak())
+	else:
+		_btn(_ic, "Kovala", func(): sokak.takip_ver(g))
+
+# ---------- karşılaşma diyaloğu (ekran ortasında, oyun duraklar) ----------
+func _diyalog_kur() -> void:
+	_dlg = PanelContainer.new()
+	_dlg.add_theme_stylebox_override("panel", _stil(Color(0.05, 0.05, 0.07, 0.97)))
+	_dlg.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_dlg.custom_minimum_size = Vector2(520, 0)
+	_dlg.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_dlg.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_dlg.visible = false
+	add_child(_dlg)
+	_dlg_ic = VBoxContainer.new()
+	_dlg_ic.add_theme_constant_override("separation", 8)
+	_dlg.add_child(_dlg_ic)
+	_kars = load("res://scripts/core/karsilasma.gd").new(oyun, sokak.gruplar)
+
+func karsilasma_ac(g: Dictionary) -> void:
+	if modal:
+		return
+	modal = true
+	_dlg_g = g
+	_dlg_sonuc = {}
+	sokak.modal_duraklat(true)
+	_diyalog_ciz()
+
+func _diyalog_ciz() -> void:
+	for c in _dlg_ic.get_children():
+		c.queue_free()
+	var g := _dlg_g
+	var renk: Color = sokak.gruplar._renk(g)
+	_lbl(_dlg_ic, _kars.baslik(g), 24, renk.lerp(Color.WHITE, 0.4))
+	_lbl(_dlg_ic, _kars.giris(g), 16)
+	if _dlg_sonuc.is_empty() or not _dlg_sonuc["bitir"]:
+		if not _dlg_sonuc.is_empty():
+			_lbl(_dlg_ic, _dlg_sonuc["metin"], 16, RENK[_dlg_sonuc["tur"]])
+		_ayrac(_dlg_ic)
+		for sec in _kars.secenekler(g):
+			var id: String = sec["id"]
+			var b := _btn(_dlg_ic, sec["ad"], func(): _secenek(id))
+			b.tooltip_text = sec["ipucu"]
+	else:
+		_ayrac(_dlg_ic)
+		_lbl(_dlg_ic, _dlg_sonuc["metin"], 17, RENK[_dlg_sonuc["tur"]])
+		_btn(_dlg_ic, "Tamam", _diyalog_kapat)
+	_dlg.visible = true
+
+func _secenek(id: String) -> void:
+	_dlg_sonuc = _kars.uygula(_dlg_g, id)
+	_diyalog_ciz()
+
+func _diyalog_kapat() -> void:
+	modal = false
+	_dlg.visible = false
+	sokak.modal_duraklat(false)

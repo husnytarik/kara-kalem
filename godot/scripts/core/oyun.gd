@@ -92,6 +92,7 @@ var ofke := {"marchetti": 0.0, "obrien": 0.0, "tammany": 0.0}
 var adamlar: Array[Dictionary] = []   # {id, ad, yumruk, bicak, zeka, gorev}
 var gorevler: Array[Dictionary] = []  # {adam, hedef, gorev, basla, yol, bitis, yolu}
 var isy := {}                         # bina indeksi -> {tur, sahip, haracli, birikim, korumaBitis}
+var arama := 0.0   # polisin seni arama seviyesi (0-100)
 var defter: Array[Dictionary] = []    # {t, metin, tur}
 var _sayac := 0
 var _ev := -1
@@ -299,6 +300,17 @@ func adam_bul(id: int) -> Dictionary:
 			return a
 	return {}
 
+# Çatışmadaki gücün: sen + boştaki adamlar (becerisine göre).
+func guc() -> float:
+	var p := 1.0
+	for a in bos_adamlar():
+		p += 1.0 + beceri(a) / 60.0
+	return p
+
+func yarala(a: Dictionary, gun: int) -> void:
+	a["gorev"] = "tutuklu"
+	gorevler.append({"adam": a["id"], "hedef": -1, "gorev": "tutuklu", "yarali": true, "basla": t, "yol": 0, "bitis": t + gun * DAY, "yolu": PackedVector3Array()})
+
 func bos_adamlar() -> Array:
 	return adamlar.filter(func(a): return a["gorev"] == "")
 
@@ -402,6 +414,8 @@ func _coz(g: Dictionary) -> void:
 	if adam.is_empty() or not isy.has(i):
 		return
 	adam["gorev"] = ""
+	if g["gorev"] == "haraclan" or g["gorev"] == "topla":
+		arama = minf(100.0, arama + 4.0)
 	var r: Dictionary = isy[i]
 	var y: Dictionary = harita.yerler[i]
 	var bid: String = y["bolge"]
@@ -560,6 +574,7 @@ func ilerle(delta: float) -> void:
 	degisti.emit()
 
 func _saat() -> void:
+	arama = maxf(0.0, arama - 0.5)
 	for g in gorevler.duplicate():
 		if t >= g["bitis"]:
 			gorevler.erase(g)
@@ -567,7 +582,7 @@ func _saat() -> void:
 				var a := adam_bul(g["adam"])
 				if not a.is_empty():
 					a["gorev"] = ""
-					kayit("%s karakoldan çıktı." % a["ad"], "info")
+					kayit(("%s iyileşti." if g.get("yarali", false) else "%s karakoldan çıktı.") % a["ad"], "info")
 			else:
 				_coz(g)
 

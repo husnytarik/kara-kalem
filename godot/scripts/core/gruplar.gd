@@ -3,9 +3,12 @@ extends Node3D
 # Her grubun adı, kaç kişi olduğu, fraksiyonu ve durumu var; etiketi kafasının üstünde yazar.
 # Yürüyüş: harita.yol_bul (A*). Hareket delta ile (Engine.time_scale hızı uygular).
 
-signal yakinlasti(g: Dictionary)   # oyuncu bir grubun yanına girdi
+signal yakinlasti(g: Dictionary)   # oyuncu bir grubun yanına girdi (uyarı)
+signal temas(g: Dictionary)        # yetiştik / yakalandık: karşılaşma diyaloğu açılır
 
 const GORUS := 14.0        # bu mesafede "karşılaşma" sayılır (m)
+const TEMAS := 7.0         # kovalama bu mesafede yetişme sayılır (m)
+const GORUS_AV := 45.0     # rakip/polis seni bu mesafeden fark eder (m)
 const SECIM := 5.0         # tıklama/üzerine gelme yarıçapı (m)
 const SIVIL_AD := ["Esnaf", "İşçiler", "Pazarcılar", "Denizciler", "Komşular", "Yolcular", "Çocuklar", "Tüccar"]
 const POLIS_AD := ["Devriye", "Karakol Ekibi", "Bekçiler"]
@@ -17,6 +20,7 @@ var oyuncu: Node3D
 var liste: Array[Dictionary] = []
 var rng := RandomNumberGenerator.new()
 var _sayac := 0
+var takip_id := 0          # oyuncunun kovaladığı grup
 var _esitle_sure := 0.0
 var _gorus_sure := 0.0
 var _temas := {}   # grup id -> oyuncunun yakınında mı (tekrar uyarı vermesin)
@@ -40,7 +44,7 @@ func _yeni(tur: String, fak: String, ad: String, kisi: int, ev: String) -> Dicti
 	var g := {
 		"id": _sayac, "tur": tur, "fak": fak, "ad": ad, "kisi": kisi, "ev": ev,
 		"pos": bas, "yol": PackedVector3Array(), "bekle": rng.randf_range(0.0, 4.0),
-		"durum": "Bekliyor", "hiz": HIZ[tur] * rng.randf_range(0.9, 1.1), "dugum": null, "etiket": null, "gorunen": -1,
+		"durum": "Bekliyor", "mod": "", "serbest": 0, "ai": 0.0, "kisi_max": kisi, "rejen": 0, "hiz": HIZ[tur] * rng.randf_range(0.9, 1.1), "dugum": null, "etiket": null, "gorunen": -1,
 	}
 	_gorsel_kur(g)
 	liste.append(g)
@@ -60,6 +64,10 @@ func _rakip_ekle(f: String, ev: String) -> void:
 
 # Her fraksiyonun, hâkim olduğu bölge başına bir ekibi olur. Bölge el değiştirirse ekip de taşınır.
 func _esitle() -> void:
+	for g in liste:
+		if g["kisi"] < g["kisi_max"] and oyun.t >= g["rejen"]:
+			g["kisi"] += 1
+			g["rejen"] = oyun.t + 360
 	for f in oyun.NPC:
 		var bolgeleri: Array = []
 		for id in harita.bolgeler:
@@ -168,8 +176,77 @@ func _process(delta: float) -> void:
 		_gorus_sure = 0.0
 		_karsilasma()
 
+func serbest_birak(g: Dictionary, dakika: int) -> void:
+	g["serbest"] = oyun.t + dakika
+	if g["mod"] == "kovala":
+		g["mod"] = ""
+	g["yol"] = PackedVector3Array()
+	g["bekle"] = 2.0
+	if takip_id == g["id"]:
+		takip_id = 0
+
+func dagit(g: Dictionary) -> void:
+	if takip_id == g["id"]:
+		takip_id = 0
+	_sil(g)
+
+func _ai(g: Dictionary, delta: float) -> void:
+	if g["tur"] == "sivil":
+		return
+	g["ai"] -= delta
+	if g["ai"] > 0.0:
+		return
+	g["ai"] = 0.7
+	var d: float = (g["pos"] as Vector3).distance_to(oyuncu.global_position)
+	var serbest: bool = oyun.t < g["serbest"]
+	if serbest:
+		if g["mod"] == "kovala":
+			g["mod"] = ""
+			g["yol"] = PackedVector3Array()
+		return
+	if g["tur"] == "polis":
+		if g["mod"] == "" and oyun.arama >= 30.0 and d < GORUS_AV:
+			g["mod"] = "kovala"
+		elif g["mod"] == "kovala" and (d > 130.0 or oyun.arama < 30.0):
+			g["mod"] = ""
+	elif g["tur"] == "rakip":
+		if g["mod"] == "" and d < GORUS_AV:
+			g["mod"] = "kovala" if g["kisi"] >= 0.8 * oyun.guc() else "kac"
+		elif g["mod"] != "" and d > 120.0:
+			g["mod"] = ""
+	match g["mod"]:
+		"kovala":
+			g["durum"] = "Seni kovalıyor!"
+			g["hiz"] = HIZ[g["tur"]] * 1.2
+			_git(g, oyuncu.global_position)
+		"kac":
+			g["durum"] = "Kaçıyor"
+			g["hiz"] = HIZ[g["tur"]] * 1.1
+			var en := Vector3.ZERO
+			var en_uz := -1.0
+			var yerler := _bolge_yerleri(g["ev"])
+			for k in 5:
+				var h: Vector3 = harita.yerler[yerler[rng.randi() % yerler.size()]]["pos"]
+				var u := h.distance_to(oyuncu.global_position)
+				if u > en_uz:
+					en_uz = u
+					en = h
+			if (g["yol"] as PackedVector3Array).size() == 0:
+				_git(g, en)
+		_:
+			g["hiz"] = HIZ[g["tur"]]
+
+func _git(g: Dictionary, hedef: Vector3) -> void:
+	var yol: PackedVector3Array = harita.yol_bul(g["pos"], hedef)
+	if yol.size() > 1:
+		yol.remove_at(0)
+		g["yol"] = yol
+
 func _yuru(g: Dictionary, delta: float) -> void:
+	_ai(g, delta)
 	var yol: PackedVector3Array = g["yol"]
+	if yol.size() == 0 and g["mod"] != "":
+		return
 	if yol.size() == 0:
 		g["bekle"] -= delta
 		g["durum"] = "Bekliyor" if g["tur"] != "polis" else "Nöbette"
@@ -233,6 +310,13 @@ func _hedef_sec(g: Dictionary) -> void:
 
 # ---------- karşılaşma ----------
 func _karsilasma() -> void:
+	# yedek: yeni "temas" için önce en yakın uygun grubu bul
+	for g in liste.duplicate():
+		var uz: float = (g["pos"] as Vector3).distance_to(oyuncu.global_position)
+		var serbest: bool = oyun.t < g["serbest"]
+		if uz < TEMAS and not serbest and (g["mod"] != "" or takip_id == g["id"]):
+			temas.emit(g)
+			return
 	for g in liste:
 		var uz: float = (g["pos"] as Vector3).distance_to(oyuncu.global_position)
 		var yakin: bool = uz < GORUS
