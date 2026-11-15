@@ -167,6 +167,11 @@ Kod: `core/savas.js` (+ `bolge.js`, `sim.js` saatlik kancası). Konum yalnızca 
 - **Hava:** mevsime göre açık/yağmur/kar/sis/sıcak; haritada efekt ve kalabalık yoğunluğu.
 - **Harita hayatı:** Saate, havaya ve bölge huzuruna göre değişen yayalar, arabalar ve limanda tekneler (yalnız görsel).
 
+#### 5.1.5 Araba ve görsel katman `[UYGULANDI v0.6]`
+- **Araba:** Ford Model T / Buick Master Six / Packard Twin Six (temiz parayla alınır, %60'a satılır). Arabayla yürüyüş ×2,0–3,2 hızlıdır ve pusu riskini azaltır (×0,9–0,65). Yakıt litreyle yanar (mesafeye bağlı); bitince yaya kalınır. Aylık bakım, yolda arıza (90 dk yaya).
+- **Kolaylık (0–1):** 0,4×ekip/8 + 0,3×para/15.000 + 0,3×bölge/4. Yüksek kolaylıkta yakıt −%60, bakım −%50, arıza −%80: güçlü, kalabalık ve zengin adamın pompası ve tamircisi vardır.
+- **Görsel katman:** bina gölgesi, tuğla dokusu, korniş/kaide, bacalar, çizgili tenteler, kaldırım, yaya geçidi, asfalt dokusu, sokak lambası (gece ışık), limanda dalga animasyonu.
+
 ### 5.2 Parseller ve binalar
 
 Semtler parsellerden oluşur. Her bina: tür, sahip, kiracı, durum, değer, **görünen işlev** ve varsa **gizli işlev**. Bina özellikleri: Kapasite, Görünürlük (ana cadde / ara sokak), Bodrum var/yok, Arka çıkış, Güvenlik.

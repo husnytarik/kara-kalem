@@ -7,6 +7,7 @@ import {
 import {
   hakimOf, FAK, HARAC, HAKIM_ESIK, GARNIZON_MAX, ADAM_MAAS, HAVUZ, IS_AD, BEKLEME, erisim, hakimAd, oyuncuBolgeleri, KARAKTER, etki,
 } from '../core/bolge.js';
+import { ARACLAR, kolaylik, yakitFiyat, bakimGider, arizaP100, aracSurulur, aracHiz } from '../core/arac.js';
 import { HAVA_AD } from '../core/sehir.js';
 import { MESLEKLER, BECERI_AD, seviye, kabul, maasGun, isletmeGelir, etkiGuc } from '../core/meslek.js';
 import { EKIP_MAX, EKIP_FIYAT, EKIP_MAAS, BASKIN_MALIYET, ekipGuc, ekipDetay, pusuP, baskinTahmin } from '../core/savas.js';
@@ -18,7 +19,7 @@ import {
 import { TRAITS, blocked } from '../core/traits.js';
 import { ROAD_HALF } from '../core/world.js';
 
-const SAVE_KEY = 'kara_kalem_v09';
+const SAVE_KEY = 'kara_kalem_v10';
 const $ = (id) => document.getElementById(id);
 const SVGNS = 'http://www.w3.org/2000/svg';
 
@@ -34,7 +35,7 @@ function load() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const st = JSON.parse(raw);
-    if (st.v !== 9) return null;
+    if (st.v !== 10) return null;
     st.speed = 0; st.mesafe = true;
     return st;
   } catch { return null; }
@@ -78,6 +79,7 @@ function renderTop() {
     st('Dosya', `${Math.round(s.dosya)} · ${stageName(s)}`, s.dosya >= 50 ? 'bad' : s.dosya >= 25 ? 'gold' : '') +
     st('Mevki', `${BASAMAK[s.unvan.basamak].ad}${lakap(s) ? ` · "${lakap(s)}"` : ''} <small>GP ${gucPuani(s).gp.toFixed(0)}</small>`, 'blue') +
     st('Stres', Math.round(s.patron.stres), s.patron.stres >= 60 ? 'bad' : '') +
+    (s.arac.tip ? st('Benzin', `${Math.round(s.arac.yakit)} L`, s.arac.yakit < 6 ? 'bad' : '') : '') +
     (s.raid && informed(s) ? st('Baskın', `${Math.max(1, Math.ceil((s.raid.at - s.t) / DAY))} gün içinde`, 'bad') : '');
 }
 
@@ -108,17 +110,47 @@ function applyCam() {
 }
 
 const M = {};
+// renk tonlama: f>0 açar, f<0 koyulaştırır
+function shade(hex, f) {
+  if (!/^#[0-9a-f]{6}$/i.test(hex)) return hex;
+  const n = parseInt(hex.slice(1), 16);
+  const m = (c) => Math.max(0, Math.min(255, Math.round(f >= 0 ? c + (255 - c) * f : c * (1 + f))));
+  return '#' + [n >> 16, (n >> 8) & 255, n & 255].map((c) => m(c).toString(16).padStart(2, '0')).join('');
+}
+const hashS = (str) => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967296; };
+const AWN = ['#9b2f2f', '#2f5f8f', '#2f7a4f', '#b88a2a', '#7a3f7a'];
+
 function buildMap() {
   const svg = $('map');
   svg.innerHTML = '';
+  const defs = el('defs', {}, svg);
+  const pat = (id, w, h, inner) => { const p = el('pattern', { id, width: w, height: h, patternUnits: 'userSpaceOnUse' }, defs); inner(p); };
+  pat('brick', 16, 8, (p) => { el('path', { d: 'M0 .5H16M0 4.5H16M4 0V4M12 4V8', stroke: '#000', 'stroke-opacity': 0.16, 'stroke-width': 1, fill: 'none' }, p); });
+  pat('asf', 24, 24, (p) => { for (const [x, y] of [[3, 5], [14, 9], [8, 19], [20, 16], [18, 2]]) el('circle', { cx: x, cy: y, r: 1, fill: '#000', 'fill-opacity': 0.13 }, p); });
+  pat('grass', 30, 30, (p) => { for (const [x, y] of [[4, 6], [20, 12], [11, 24], [26, 26]]) el('path', { d: `M${x} ${y}l1.5-4 1.5 4`, stroke: '#7d9a52', 'stroke-opacity': 0.35, fill: 'none' }, p); });
+  pat('wave', 60, 20, (p) => { el('path', { d: 'M0 10Q15 4 30 10T60 10', stroke: '#6fa0b8', 'stroke-opacity': 0.28, fill: 'none', 'stroke-width': 1.5 }, p); });
   el('rect', { width: W, height: H, fill: '#3b3528' }, svg);
+  el('rect', { width: W, height: H, fill: 'url(#grass)', opacity: 0.8, 'pointer-events': 'none' }, svg);
   const SU = ROWS[ROWS.length - 1] + 138;
   el('rect', { y: SU, width: W, height: H - SU, fill: '#1f3a4a' }, svg); // liman suyu
+  M.su = el('rect', { y: SU, width: W + 120, x: -60, height: H - SU, fill: 'url(#wave)', 'pointer-events': 'none' }, svg);
+  el('rect', { y: SU - 6, width: W, height: 8, fill: '#6a5a40' }, svg); // rıhtım
   for (const r of ROWS) {
     el('rect', { y: r - ROAD_HALF, width: W, height: ROAD_HALF * 2, fill: '#57503f' }, svg);
-    el('line', { x1: 0, y1: r, x2: W, y2: r, stroke: '#6d6552', 'stroke-width': 2, 'stroke-dasharray': '14 12' }, svg);
+    el('rect', { y: r - ROAD_HALF, width: W, height: ROAD_HALF * 2, fill: 'url(#asf)', 'pointer-events': 'none' }, svg);
+    el('rect', { y: r - ROAD_HALF - 5, width: W, height: 5, fill: '#8c8268' }, svg); // kaldırım
+    el('rect', { y: r + ROAD_HALF, width: W, height: 5, fill: '#8c8268' }, svg);
+    el('line', { x1: 0, y1: r, x2: W, y2: r, stroke: '#d9c27a', 'stroke-opacity': 0.55, 'stroke-width': 2, 'stroke-dasharray': '18 14' }, svg);
   }
   for (const v of V) el('rect', { x: v - 10, y: ROWS[0], width: 20, height: ROWS[ROWS.length - 1] - ROWS[0], fill: '#57503f' }, svg);
+  // yaya geçitleri: kesişimlerin iki yanı
+  const cw = [];
+  for (const v of V) for (const r of ROWS) { cw.push(`M${v - 9} ${r - ROAD_HALF + 4}H${v + 9}`, `M${v - 9} ${r + ROAD_HALF - 4}H${v + 9}`); }
+  el('path', { d: cw.join(''), stroke: '#e8e0c8', 'stroke-opacity': 0.5, 'stroke-width': 7, 'stroke-dasharray': '3 3', fill: 'none', 'pointer-events': 'none' }, svg);
+  // sokak lambaları: direkler burada, ışıkları geceleyin üstte
+  const lampPos = [];
+  for (const r of ROWS) for (let x = 120; x < W; x += 230) lampPos.push([x, r - ROAD_HALF - 3], [x + 115, r + ROAD_HALF + 3]);
+  for (const [x, y] of lampPos) el('circle', { cx: x, cy: y, r: 2.6, fill: '#1a1612', stroke: '#9a8f72', 'stroke-width': 1 }, svg);
   // bölge zeminleri: hakimin rengiyle yarı saydam; tıklamayı engellemez
   M.z = {};
   for (const [id, B] of Object.entries(BOLGELER)) {
@@ -130,8 +162,17 @@ function buildMap() {
   for (const [id, b] of Object.entries(PLACES)) {
     if (b.row === 2 && b.side === 1) el('rect', { x: b.x - 14, y: b.by + b.bh, width: 28, height: 868 - (b.by + b.bh) + 8, fill: '#5b4a35' }, svg); // iskele
     const g = el('g', { class: `bld${b.fn ? '' : ' gen'}`, 'data-b': id }, svg);
+    const hh = hashS(id);
+    el('rect', { x: b.bx + 7, y: b.by + 8, width: b.bw, height: b.bh, rx: 3, fill: '#000', 'fill-opacity': 0.32, 'pointer-events': 'none' }, g); // gölge
     el('rect', { class: 'body', x: b.bx, y: b.by, width: b.bw, height: b.bh, fill: b.fill, rx: 3 }, g);
+    el('rect', { x: b.bx, y: b.by, width: b.bw, height: b.bh, rx: 3, fill: 'url(#brick)', 'pointer-events': 'none' }, g);
     el('rect', { x: b.bx, y: b.by, width: b.bw, height: 10, fill: '#0003' }, g);
+    el('rect', { x: b.bx - 2, y: b.by - 3, width: b.bw + 4, height: 4, rx: 1, fill: shade(b.fill, 0.28), 'pointer-events': 'none' }, g); // korniş
+    el('rect', { x: b.bx, y: b.by + b.bh - 5, width: b.bw, height: 5, fill: shade(b.fill, -0.35), 'pointer-events': 'none' }, g); // kaide
+    if (hh < 0.45) { const cx = b.bx + 14 + Math.floor(hh * 100) % Math.max(10, Math.floor(b.bw - 40)); el('rect', { x: cx, y: b.by - 9, width: 8, height: 9, fill: shade(b.fill, -0.45), 'pointer-events': 'none' }, g); } // baca
+    // kapı üstü tente: çizgili
+    const ay = b.side < 0 ? b.by + b.bh - 3 : b.by - 5, ac = AWN[Math.floor(hh * 50) % 5];
+    for (let i = 0; i < 4; i++) el('rect', { x: b.x - 16 + i * 8, y: ay, width: 8, height: 8, fill: i % 2 ? '#e8dfc6' : ac, opacity: 0.92, 'pointer-events': 'none' }, g);
     const wins = [];
     for (let i = 0; i < Math.floor(b.bw / 34); i++) wins.push(el('rect', { x: b.bx + 14 + i * 34, y: b.by + 22, width: 14, height: 14, fill: '#1c1812' }, g));
     el('rect', { x: b.x - 9, y: b.side < 0 ? b.by + b.bh - 7 : b.by, width: 18, height: 7, fill: '#cfa84f', opacity: 0.85 }, g); // kapı
@@ -168,12 +209,17 @@ function buildMap() {
     return { g, t };
   });
   M.night = el('rect', { width: W, height: H, fill: '#070b20', opacity: 0, 'pointer-events': 'none' }, svg);
+  M.lampGlow = el('g', { 'pointer-events': 'none', opacity: 0 }, svg);
+  for (const [x, y] of lampPos) el('circle', { cx: x, cy: y, r: 46, fill: '#f2c96a', 'fill-opacity': 0.2 }, M.lampGlow);
   M.patrolLight = el('circle', { r: 16, fill: '#7da0c4', opacity: 0.18, 'pointer-events': 'none' }, svg);
   M.patrol = el('circle', { r: 6, fill: '#7da0c4', stroke: '#0b1220', 'stroke-width': 1.5, 'pointer-events': 'none' }, svg);
   M.me = el('g', { class: 'me', 'pointer-events': 'none' }, svg);
   el('circle', { r: 13, fill: '#cfa84f', opacity: 0.25 }, M.me);
   el('circle', { r: 7.5, fill: '#cfa84f', stroke: '#1a1408', 'stroke-width': 2 }, M.me);
-  const lbl = el('text', { y: -14 }, M.me); lbl.textContent = 'Sen';
+  M.meCar = el('g', { opacity: 0 }, M.me);
+  el('rect', { x: -13, y: -7, width: 26, height: 14, rx: 4, fill: '#7a2f2f', stroke: '#1a1408', 'stroke-width': 2 }, M.meCar);
+  el('rect', { x: -2, y: -5, width: 8, height: 10, rx: 2, fill: '#9fb8d0' }, M.meCar);
+  M.meLbl = el('text', { y: -16 }, M.me); M.meLbl.textContent = 'Sen';
 
   // tıklama: bina → panel + yürü; sokak → yürü. Sürükleme tıklama sayılmaz.
   const drag = { on: false, moved: false, x: 0, y: 0 };
@@ -258,6 +304,8 @@ function renderMap(tf) {
   let n = 0;
   if (hf >= 21 || hf < 4.5) n = 0.6; else if (hf >= 18.5) n = 0.6 * (hf - 18.5) / 2.5; else if (hf < 7) n = 0.6 * (7 - hf) / 2.5;
   M.night.setAttribute('opacity', n.toFixed(2));
+  M.lampGlow.setAttribute('opacity', (n / 0.6).toFixed(2));
+  M.su.setAttribute('x', (-60 + (ambT * 6) % 60).toFixed(1));
   const lit = n > 0.25;
   for (const [id, m] of Object.entries(M.b)) {
     m.g.classList.toggle('sel', ui.sel === id);
@@ -314,6 +362,7 @@ function renderMap(tf) {
 
   // karakter
   const frac = s.speed > 0 ? Math.max(0, Math.min(1, tf - s.t)) : 0, me = walkerAt(s, frac);
+  M.meCar.setAttribute('opacity', aracSurulur(s) ? 1 : 0);
   M.me.setAttribute('transform', `translate(${me.x.toFixed(1)} ${me.y.toFixed(1)})`);
   if (me.path.length) M.route.setAttribute('points', [[me.x, me.y], ...me.path.map((q) => [q.x, q.y])].map((q) => q.join(',')).join(' ')); else M.route.removeAttribute('points');
   // yaşayan sokak
@@ -504,6 +553,30 @@ function infBar(b) {
   const bos = 100 - parts.reduce((a, f) => a + b.inf[f], 0);
   return `<div class="infbar">${parts.map((f) => `<i style="width:${b.inf[f]}%;background:${FAK[f].renk}" title="${FAK[f].ad} %${Math.round(b.inf[f])}"></i>`).join('')}${bos > 0.5 ? `<i class="bos" style="width:${bos}%"></i>` : ''}<u style="left:${HAKIM_ESIK}%"></u></div>` +
     `<div class="infleg">${parts.map((f) => `<span><b style="color:${FAK[f].renk}">■</b> ${FAK[f].ad} %${Math.round(b.inf[f])}</span>`).join(' ')}</div>`;
+}
+
+function panelGaraj() {
+  const A_ = s.arac, k = kolaylik(s);
+  let h = `<h3>Garaj</h3><div class="note">Arabayla gidersen yoldaki süren kısalır ve pusuya yakalanman zorlaşır; ama araç para, benzin ve bakım ister. Gücün, ekibin ve paran büyüdükçe benzin, bakım ve arıza derdin azalır: kendi pompan, kendi tamircin olur.</div>`;
+  h += `<div class="box"><div class="t">Kolaylık: %${Math.round(k * 100)}</div>` + meter(k * 100, 100, 'green') +
+    row('Benzin / litre', money(yakitFiyat(s)).replace('$', '$') + ` <small>(taban $1.80)</small>`) +
+    (A_.tip ? row('Aylık bakım', money(bakimGider(s))) + row('Arıza ihtimali (1000 px)', `%${(arizaP100(s) * 10).toFixed(1)}`) : '') +
+    `<div class="note">Ekip ${s.bolge.ekip}/8 · bölgelerin ${oyuncuBolgeleri(s).length}/4 · para ${money(s.cash.clean + s.cash.dirty)}/ $15.000 → kolaylık.</div></div>`;
+  if (A_.tip) {
+    const T = ARACLAR[A_.tip];
+    h += `<div class="box"><div class="t">${T.ad} ${aracSurulur(s) ? '<span class="good">· sürülüyor</span>' : A_.kullan ? '<span class="bad">· kullanılamıyor</span>' : '<span class="dim">· park halinde</span>'}</div>` +
+      row('Yakıt', `${Math.round(A_.yakit)} / ${T.tank} L`) + meter(A_.yakit, T.tank, A_.yakit < T.tank * 0.2 ? 'red' : 'green') +
+      row('Hız', `×${T.hiz.toFixed(1)}`) + row('Pusu riski', `×${T.pusu.toFixed(2)}`) +
+      (s.t < A_.ariza ? `<div class="note bad">Araba arızalı: ${Math.ceil((A_.ariza - s.t) / 60)} saat yürüyeceksin.</div>` : '') +
+      `<div class="btns"><button ${A({ type: 'aracSur', v: !A_.kullan })}>${A_.kullan ? 'Yaya git' : 'Arabayla git'}</button>` +
+      `<button ${A({ type: 'benzinAl' })}>Depoyu doldur <small>${money(yakitFiyat(s))}/L</small></button>` +
+      `<button ${A({ type: 'aracSat' })}>Sat <small>${money(T.fiyat * 0.6)}</small></button></div></div>`;
+  } else {
+    h += Object.entries(ARACLAR).map(([id, T]) => `<div class="box"><div class="t">${T.ad}</div><div class="note">${T.ac}</div>` +
+      row('Hız', `×${T.hiz.toFixed(1)}`) + row('Depo', `${T.tank} L · ${T.tuk} L / 100 px`) + row('Aylık bakım', money(T.bakim)) + row('Pusu riski', `×${T.pusu.toFixed(2)}`) +
+      `<div class="btns"><button ${A({ type: 'aracAl', tip: id })}>Satın al <small>${money(T.fiyat)} temiz</small></button></div></div>`).join('');
+  }
+  return h;
 }
 
 function panelIs() {
@@ -745,12 +818,12 @@ function panelKararlar() {
   return s.cards.map((c) => { const v = cardView(s, c); return `<div class="box"><div class="t">${v.title}</div><div class="note">Kalan süre: ${v.hoursLeft >= 24 ? `${Math.floor(v.hoursLeft / 24)} gün ${v.hoursLeft % 24} saat` : `${v.hoursLeft} saat`}</div><button data-card="${c.id}">Aç</button></div>`; }).join('');
 }
 
-const TABS = [['mekan', 'Mekân'], ['defter', 'Hesap'], ['bolge', 'Bölgeler'], ['is', 'İş'], ['kisiler', 'Kişiler'], ['guc', 'Güç'], ['kara', 'Kara Defter'], ['kararlar', 'Kararlar']];
+const TABS = [['mekan', 'Mekân'], ['defter', 'Hesap'], ['bolge', 'Bölgeler'], ['is', 'İş'], ['garaj', 'Garaj'], ['kisiler', 'Kişiler'], ['guc', 'Güç'], ['kara', 'Kara Defter'], ['kararlar', 'Kararlar']];
 function renderPanel() {
   $('tabs').innerHTML = TABS.map(([id, n]) => `<button data-tab="${id}" class="${ui.tab === id ? 'on' : ''}">${n}${id === 'kararlar' && s.cards.length ? `<span class="badge">${s.cards.length}</span>` : ''}</button>`).join('');
   const p = $('panel');
   const top = p.scrollTop;
-  p.innerHTML = { mekan: panelMekan, defter: panelDefter, bolge: panelBolge, is: panelIs, kisiler: panelKisiler, guc: panelGuc, kara: panelKara, kararlar: panelKararlar }[ui.tab]();
+  p.innerHTML = { mekan: panelMekan, defter: panelDefter, bolge: panelBolge, is: panelIs, garaj: panelGaraj, kisiler: panelKisiler, guc: panelGuc, kara: panelKara, kararlar: panelKararlar }[ui.tab]();
   p.scrollTop = top;
 }
 

@@ -12,6 +12,7 @@ import {
 import { stressFor, blocked } from './traits.js';
 import { PLACES, BOLGELER, W, WALK, snapRow, route, pathLen, advanceAlong, bolgeAt } from './world.js';
 import { brnd as brndSim, newBolge, bolgeMonth, bolgeIs, bolgeAdam, bolgeYatirim, bolgeHarac, aileHediye, yaraliMi } from './bolge.js';
+import { newArac, aracAl, aracSat, aracSur, benzinAl, aracAy, aracHiz, aracAdim } from './arac.js';
 import { newSehir, sehirGun } from './sehir.js';
 import { newMeslek, isGir, isBirak, isletmeAl, meslekGun, meslekAy, yurumeCarpan, akalamaUcret, akalamaKapasite, aklamaEk, mesaiCarpan } from './meslek.js';
 import { ekipAl, bolgeBaskin, pusuKur, pusuP } from './savas.js';
@@ -57,15 +58,17 @@ export function here(s) {
   for (const [id, p] of Object.entries(PLACES)) if (Math.hypot(p.x - s.pos.x, p.y - s.pos.y) < 6) return id;
   return null;
 }
-export const walkMinutes = (s, id) => Math.ceil(pathLen(s.pos, route(s.pos, PLACES[id])) / (WALK * yurumeCarpan(s)));
+export const walkMinutes = (s, id) => Math.ceil(pathLen(s.pos, route(s.pos, PLACES[id])) / (WALK * yurumeCarpan(s) * aracHiz(s)));
 // Arayüz için akıcı konum: bir dakikanın kesri kadar ileri
 export function walkerAt(s, frac = 0) {
   if (!s.walk) return { x: s.pos.x, y: s.pos.y, path: [] };
-  const r = advanceAlong(s.pos, s.walk.path, WALK * yurumeCarpan(s) * Math.min(1, frac));
+  const r = advanceAlong(s.pos, s.walk.path, WALK * yurumeCarpan(s) * aracHiz(s) * Math.min(1, frac));
   return { x: r.x, y: r.y, path: r.rest };
 }
 function walkStep(s) {
-  const r = advanceAlong(s.pos, s.walk.path, WALK * yurumeCarpan(s));
+  const adim = WALK * yurumeCarpan(s) * aracHiz(s);
+  const r = advanceAlong(s.pos, s.walk.path, adim);
+  aracAdim(s, Math.hypot(r.x - s.pos.x, r.y - s.pos.y));
   s.pos.x = r.x; s.pos.y = r.y; s.walk.path = r.rest;
   if (r.last) s.walk.prev = { x: r.last.x, y: r.last.y };
   if (!r.rest.length) s.walk = null;
@@ -87,7 +90,7 @@ function startWalk(s, dest, to) {
 
 export function newGame(seed = (Date.now() & 0x7fffffff)) {
   const s = {
-    v: 9, seed, t: 6 * 60, speed: 0, mesafe: false, pos: { x: PLACES.meyhane.x, y: PLACES.meyhane.y }, walk: null,
+    v: 10, seed, t: 6 * 60, speed: 0, mesafe: false, pos: { x: PLACES.meyhane.x, y: PLACES.meyhane.y }, walk: null,
     cash: { clean: 1500, dirty: 0 },
     debt: { principal: 6000, installment: 600, missed: 0 },
     patron: { ad: 'Sen', yas: 34, traits: ['Temkinli', 'Cömert', 'Merhametli'], stres: 10 },
@@ -95,6 +98,7 @@ export function newGame(seed = (Date.now() & 0x7fffffff)) {
     bolge: newBolge(seed),
     meslek: newMeslek(),
     sehir: newSehir(seed),
+    arac: newArac(seed),
     biz: {
       meyhane: { id: 'meyhane', type: 'meyhane', name: "Murphy's Tavern", price: 1, quality: 50, rep: 50, mRev: 0, mCost: 0 },
       rakip: { id: 'rakip', name: "Duffy'nin Yeri", price: 1, quality: 50, rep: 55 },
@@ -435,6 +439,7 @@ function monthTick(s) {
   if (s.month.liqSold > 0) R.push(`BODRUM  ${Math.round(s.month.liqSold)} şişe satıldı · kirli gelir ${money(s.month.liqRev)} · hammadde ${money(s.month.prodCost)}`);
 
   meslekAy(s, R);
+  aracAy(s, R);
 
   // aklama
   const li = launderInfo(s);
@@ -570,6 +575,10 @@ export function act(s, a) {
     case 'bolgeBaskin': return bolgeBaskin(s, a, pushCard);
     case 'ekipAl': return ekipAl(s, a);
     case 'aileHediye': return aileHediye(s, a);
+    case 'aracAl': return aracAl(s, a);
+    case 'aracSat': return aracSat(s);
+    case 'aracSur': return aracSur(s, a);
+    case 'benzinAl': return benzinAl(s);
     case 'isGir': return isGir(s, a);
     case 'isBirak': return isBirak(s);
     case 'isletmeAl': return isletmeAl(s, a);
