@@ -3,7 +3,7 @@
 import { clamp, DAY, log, spend, staff, addStress } from './util.js';
 import { fame, perceived } from './social.js';
 import { BOLGELER, PLACES, bolgeAt } from './world.js';
-import { hakimOf, hakimAd, addInf, kudret, erisim, brnd, hakimDegisti, yaraliMi, FAK } from './bolge.js';
+import { etki, aileDeg, hakimOf, hakimAd, addInf, kudret, erisim, brnd, hakimDegisti, yaraliMi, FAK } from './bolge.js';
 
 export const EKIP_MAX = 8;
 export const EKIP_FIYAT = 100;      // işe alım ($ kirli)
@@ -65,8 +65,9 @@ export function pusuP(s, id) {
   const bende = 1 - Math.min(0.7, (b.inf.oyuncu || 0) / 100);
   const taninma = 0.3 + b.tan / 100;
   const koruma = 1 + 0.6 * (st.ekip + (staff(s, 'koruma') ? 1 : 0));
+  const iliski = (1 - Math.min(0.4, b.sev / 250)) * (1 - Math.min(0.3, b.kor / 300)) * clamp(1 - st.aile[f].g / 200, 0.6, 1.5) * (1 - st.aile[f].k / 250);
   const ahit = f === 'marchetti' && s.unvan.ahit ? 0.1 : 1;
-  return { p: clamp(0.014 * v * taninma * bende * ofke * ahit / koruma, 0, 0.6), f, v };
+  return { p: clamp(0.014 * v * taninma * bende * ofke * ahit * iliski / koruma, 0, 0.6), f, v };
 }
 
 // ---------- yaralanma ----------
@@ -98,7 +99,8 @@ function carpisma(s, id, f, n, carpan, tur, pushCard) {
     s.cash.dirty += ganimet;
     st.ofke[f] = Math.min(60, st.ofke[f] + 12);
     addInf(bd, f, -4); addInf(bd, 'oyuncu', 3);
-    bd.tan = clamp(bd.tan + 8, 0, 100);
+    bd.tan = clamp(bd.tan + 8, 0, 100); bd.kor = clamp(bd.kor + 3, 0, 100);
+    aileDeg(st, f, -5, 4);
     fame(s, 'yeralti', 'cephe', { t: 3, k: 3 }, 1);
     log(s, `${ad}: ${fad}'ın ${n} adamını ${tur === 'pusu' ? 'pusuda' : ''} yendin${kayip ? `, ${kayip} adamını kaybettin` : ', kayıpsız'}. Üzerlerinden $${ganimet} çıktı.`, 'good', detay);
     return { win: true };
@@ -106,7 +108,8 @@ function carpisma(s, id, f, n, carpan, tur, pushCard) {
   const kayip = Math.min(ek, Math.ceil(ek * (0.5 + brnd(st) * 0.4)));
   st.ekip -= kayip;
   st.ofke[f] = Math.min(60, st.ofke[f] + 8);
-  addInf(bd, 'oyuncu', -3);
+  addInf(bd, 'oyuncu', -3); bd.kor = clamp(bd.kor - 2, 0, 100);
+  aileDeg(st, f, -2, -2);
   const soyulan = Math.round(Math.min(s.cash.dirty, 500) * 0.3); s.cash.dirty -= soyulan;
   fame(s, 'yeralti', 'cephe', { k: -2 }, 1);
   log(s, `${ad}: ${fad} adamları seni ezdi${kayip ? `, ${kayip} adamını kaybettin` : ''}${soyulan ? `, $${soyulan} soydular` : ''}.`, 'bad', detay);
@@ -185,6 +188,8 @@ export function bolgeBaskin(s, a, pushCard) {
     addInf(b, 'oyuncu', (10 + brnd(st) * 6) * (1 - (b.inf.oyuncu || 0) / 140));
     b.tan = clamp(b.tan + 10, 0, 100);
     b.huzur = clamp(b.huzur - 10, 0, 100);
+    b.kor = clamp(b.kor + 12, 0, 100); b.sev = clamp(b.sev - 6, 0, 100);
+    aileDeg(st, hk, -12, 8);
     st.ofke[hk] = Math.min(60, st.ofke[hk] + 25);
     const ganimet = Math.round(b.servet * 120);
     s.cash.dirty += ganimet;
@@ -195,7 +200,8 @@ export function bolgeBaskin(s, a, pushCard) {
   } else {
     const kayip = Math.min(ek, Math.ceil(ek * (0.4 + brnd(st) * 0.4)));
     st.ekip -= kayip;
-    addInf(b, 'oyuncu', -3);
+    addInf(b, 'oyuncu', -3); b.kor = clamp(b.kor - 6, 0, 100);
+    aileDeg(st, hk, -4, -4);
     st.ofke[hk] = Math.min(60, st.ofke[hk] + 10);
     fame(s, 'yeralti', 'cephe', { k: -3 }, 1);
     log(s, `BASKIN: ${ad}'da ${fad} seni püskürttü; ${kayip} adamını kaybettin.`, 'bad', detay);
@@ -213,16 +219,17 @@ export function bolgeBaskin(s, a, pushCard) {
 // Rakip aile senin bölgene ya da mekanlarının bulunduğu bölgeye adam yollar.
 export function dusmanBaskin(s, f, id, kazan, hk, pushCard) {
   const st = s.bolge, bd = st.list[id], ad = BOLGELER[id].ad, fad = hakimAd(f), k = kudret(st, f);
-  const n = 2 + k / 4 + brnd(st) * 2;
+  const n = (2 + k / 4 + brnd(st) * 2) * (1 - st.aile[f].k / 250);
   const orada = s.mesafe && !s.walk && !yaraliMi(s) && bolgeAt(s.pos) === id;
   const mekan = id === MEKAN_BOLGE;
   const ek = st.ekip;
-  const D = 1 + bd.garnizon * 1.1 + (orada ? ekipGuc(s) : 0) + perceived(s, 'yeralti').K / 30 + (bd.inf.oyuncu || 0) / 25;
+  const D = 1 + bd.garnizon * 1.1 + (orada ? ekipGuc(s) : 0) + perceived(s, 'yeralti').K / 30 + (bd.inf.oyuncu || 0) / 25 + etki(bd, id).s * 1.2; // halk sevdiği hakimi uyarır
   const w = kazanP(n, D);
   const detay = `Saldıranlar ${n.toFixed(1)}, savunman ${D.toFixed(1)} (garnizon ${bd.garnizon}${orada ? `, yanındaki ekip ${ek}` : ''}) → baskının tutma ihtimali %${Math.round(w * 100)}.`;
   if (brnd(st) < w) {
     addInf(bd, f, kazan);
     bd.huzur = clamp(bd.huzur - 10, 0, 100);
+    bd.sev = clamp(bd.sev - 5, 0, 100); bd.kor = clamp(bd.kor - 4, 0, 100);
     const gitti = Math.min(bd.garnizon, Math.ceil(n * 0.3));
     bd.garnizon -= gitti;
     let metin = `${fad}, ${ad}'a baskın düzenledi. Savunma çöktü; nüfuzun düşüyor${gitti ? `, garnizondan ${gitti} adam ölüp kaçtı` : ''}.`;
@@ -244,6 +251,8 @@ export function dusmanBaskin(s, f, id, kazan, hk, pushCard) {
   } else {
     addInf(bd, f, kazan * 0.3);
     bd.tan = clamp(bd.tan + 3, 0, 100);
+    bd.sev = clamp(bd.sev + 3, 0, 100); bd.kor = clamp(bd.kor + 2, 0, 100);
+    aileDeg(st, f, -3, 4);
     const gitti = Math.min(bd.garnizon, Math.floor(n * 0.15));
     bd.garnizon -= gitti;
     fame(s, 'yeralti', 'cephe', { k: 2 }, 1);

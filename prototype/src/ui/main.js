@@ -5,7 +5,7 @@ import {
   BOLGELER, bolgeAt,
 } from '../core/sim.js';
 import {
-  hakimOf, FAK, HARAC, HAKIM_ESIK, GARNIZON_MAX, ADAM_MAAS, HAVUZ, IS_AD, BEKLEME, erisim, hakimAd, oyuncuBolgeleri,
+  hakimOf, FAK, HARAC, HAKIM_ESIK, GARNIZON_MAX, ADAM_MAAS, HAVUZ, IS_AD, BEKLEME, erisim, hakimAd, oyuncuBolgeleri, KARAKTER, etki,
 } from '../core/bolge.js';
 import { EKIP_MAX, EKIP_FIYAT, EKIP_MAAS, BASKIN_MALIYET, ekipGuc, ekipDetay, pusuP, baskinTahmin } from '../core/savas.js';
 import { dateOf, fmtTime, fmtDate, money, opinion, SEASONS, DAY, clamp, staff, informed } from '../core/util.js';
@@ -16,7 +16,7 @@ import {
 import { TRAITS, blocked } from '../core/traits.js';
 import { ROAD_HALF } from '../core/world.js';
 
-const SAVE_KEY = 'kara_kalem_v06';
+const SAVE_KEY = 'kara_kalem_v07';
 const $ = (id) => document.getElementById(id);
 const SVGNS = 'http://www.w3.org/2000/svg';
 
@@ -32,7 +32,7 @@ function load() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const st = JSON.parse(raw);
-    if (st.v !== 6) return null;
+    if (st.v !== 7) return null;
     st.speed = 0; st.mesafe = true;
     return st;
   } catch { return null; }
@@ -476,6 +476,13 @@ function panelBolge() {
   let h = `<h3>Bölgeler</h3><div class="note">Bir bölgenin hakimi, nüfuzu <b>%${HAKIM_ESIK}</b>'i geçen ve en yüksek olandır. Hakim haraç toplar; huzurlu bölge büyür (★), huzursuz bölge küçülür. Rakipler komşu bölgelere genişler. Sen de bir komşuna hakim olduktan sonra yanındaki bölgeye el atabilirsin. Reis olmak için 2 bölgeye hakim olman gerekir.</div>` +
     `<div class="box"><div class="row"><span>Hakim olduğun bölge</span><b>${mine.length} / ${ids.length}</b></div>` +
     row('Tahmini aylık haraç', `<span class="gold">${money(haracAy)}</span>`) + `</div>`;
+  const gunNo = Math.floor(s.t / DAY);
+  const aileKutu = `<div class="box"><div class="t">Aileler</div>` + ['marchetti', 'obrien', 'tammany'].map((f) => {
+    const r = st.aile[f], bekle = 10 - (gunNo - r.son);
+    const gAd = r.g >= 40 ? 'dost' : r.g >= 10 ? 'ılımlı' : r.g > -10 ? 'tarafsız' : r.g > -40 ? 'soğuk' : 'düşman';
+    return `<div class="row"><span><b style="color:${FAK[f].renk}">${FAK[f].ad}</b> <small>${gAd}</small></span><span>görüş ${Math.round(r.g)} · korku ${Math.round(r.k)}</span></div>` +
+      `<div class="btns"><button ${A({ type: 'aileHediye', f })} ${bekle > 0 ? 'disabled' : ''}>Gönül al <small>$300 temiz${bekle > 0 ? ` · ${bekle} gün sonra` : ''}</small></button></div>`;
+  }).join('') + `<div class="note">Görüşü yüksek aile seni sıkıştırmaz, pusu kurmaz, bölgene göz dikmez. Korkusu yüksek aile saldırırken zayıf kalır. Baskın ve sindirme görüşü bozar, korkuyu artırır.</div></div>`;
   const yar = st.yarali > s.t, kap = st.kapali > s.t;
   h += `<div class="box"><div class="t">Ekibin</div>` +
     row('Adam', `<b>${st.ekip}</b> / ${EKIP_MAX} <small>· ayda $${st.ekip * EKIP_MAAS}</small>`) +
@@ -485,6 +492,7 @@ function panelBolge() {
     `<div class="btns"><button ${A({ type: 'ekipAl', d: 1 })} ${st.ekip >= EKIP_MAX ? 'disabled' : ''}>+ Adam tut <small>$${EKIP_FIYAT} kirli</small></button>` +
     `<button ${A({ type: 'ekipAl', d: -1 })} ${st.ekip <= 0 ? 'disabled' : ''}>− Adam sal</button></div>` +
     `<div class="note">Ekip seninle yürür. Düşman bölgede pusuya düşersen kaderini ekibin belirler; baskın için en az 2 adam gerekir. Tanınırlık: bölgede ne kadar tanınırsan o kadar kolay hedef olursun.</div></div>`;
+  h += aileKutu;
   h += `<div class="bzlist">${ids.map((id) => {
     const hk = hakimOf(st, id), b = st.list[id];
     return `<button data-bz="${id}" class="${ui.bolge === id ? 'on' : ''}" style="border-color:${hk ? FAK[hk].renk : '#666'}">${BOLGELER[id].ad}<small>${'★'.repeat(b.servet)}</small></button>`;
@@ -500,6 +508,9 @@ function panelBolge() {
     row('Huzur', `${Math.round(b.huzur)}`) + meter(b.huzur, 100, b.huzur < 30 ? 'red' : '') +
     row('Garnizon', `${b.garnizon} adam${b.garnizon ? ` · $${b.garnizon * ADAM_MAAS}/ay` : ''}`) +
     row('Tanınırlık', `${Math.round(b.tan)} / 100`) + meter(b.tan, 100, b.tan > 60 ? 'red' : '') +
+    row('Halkın sevgisi', `${Math.round(b.sev)} / 100`) + meter(b.sev, 100, 'green') +
+    row('Halkın korkusu', `${Math.round(b.kor)} / 100`) + meter(b.kor, 100, b.kor > 60 ? 'red' : '') +
+    `<div class="note">${KARAKTER[id].ac} Sevgi, ziyafet ve himaye işlerini; korku da gözdağını ve haracı güçlendirir.</div>` +
     (() => { const pp = pusuP(s, id); return pp.p > 0 ? row('Pusu riski', `<span class="${pp.p > 0.1 ? 'bad' : 'gold'}">saatte ~%${(pp.p * 100).toFixed(1)}</span> <small>(${hakimAd(pp.f)})</small>`) : ''; })() + `</div>`;
 
   if (hk === 'oyuncu') {

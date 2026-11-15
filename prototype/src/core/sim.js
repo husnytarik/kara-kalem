@@ -11,7 +11,7 @@ import {
 } from './social.js';
 import { stressFor, blocked } from './traits.js';
 import { PLACES, BOLGELER, W, WALK, snapRow, route, pathLen, advanceAlong, bolgeAt } from './world.js';
-import { brnd as brndSim, newBolge, bolgeMonth, bolgeIs, bolgeAdam, bolgeYatirim, bolgeHarac, yaraliMi } from './bolge.js';
+import { brnd as brndSim, newBolge, bolgeMonth, bolgeIs, bolgeAdam, bolgeYatirim, bolgeHarac, aileHediye, yaraliMi } from './bolge.js';
 import { ekipAl, bolgeBaskin, pusuKur, pusuP } from './savas.js';
 
 export const C = {
@@ -85,7 +85,7 @@ function startWalk(s, dest, to) {
 
 export function newGame(seed = (Date.now() & 0x7fffffff)) {
   const s = {
-    v: 6, seed, t: 6 * 60, speed: 0, mesafe: false, pos: { x: PLACES.meyhane.x, y: PLACES.meyhane.y }, walk: null,
+    v: 7, seed, t: 6 * 60, speed: 0, mesafe: false, pos: { x: PLACES.meyhane.x, y: PLACES.meyhane.y }, walk: null,
     cash: { clean: 1500, dirty: 0 },
     debt: { principal: 6000, installment: 600, missed: 0 },
     patron: { ad: 'Sen', yas: 34, traits: ['Temkinli', 'Cömert', 'Merhametli'], stres: 10 },
@@ -561,6 +561,7 @@ export function act(s, a) {
     }
     case 'bolgeBaskin': return bolgeBaskin(s, a, pushCard);
     case 'ekipAl': return ekipAl(s, a);
+    case 'aileHediye': return aileHediye(s, a);
     case 'bolgeIs': return bolgeIs(s, a);
     case 'bolgeAdam': return bolgeAdam(s, a);
     case 'bolgeYatirim': return bolgeYatirim(s, a);

@@ -27,18 +27,30 @@ const BEKLEME = { himaye: 3, hediye: 3, gozdagi: 5 }; // aynı bölgede aynı i�
 const IS_AD = { himaye: 'Esnafa himaye sat', hediye: 'Mahalleye ziyafet ver', gozdagi: 'Rakip adamları sindir' };
 
 const B0 = {
-  hilltop: { inf: { tammany: 70, marchetti: 10 }, servet: 4, ilerleme: 40, huzur: 80, tan: 3 },
-  downtown: { inf: { tammany: 55, obrien: 15, marchetti: 10 }, servet: 4, ilerleme: 20, huzur: 70, tan: 8 },
-  southside: { inf: { oyuncu: 25, obrien: 15, marchetti: 15 }, servet: 2, ilerleme: 30, huzur: 60, tan: 55 },
-  eastside: { inf: { obrien: 60, marchetti: 15 }, servet: 3, ilerleme: 50, huzur: 65, tan: 12 },
-  flats: { inf: { marchetti: 65, obrien: 10 }, servet: 3, ilerleme: 10, huzur: 70, tan: 6 },
-  docks: { inf: { marchetti: 45, tammany: 20, obrien: 10 }, servet: 4, ilerleme: 60, huzur: 60, tan: 6 },
+  hilltop: { inf: { tammany: 70, marchetti: 10 }, servet: 4, ilerleme: 40, huzur: 80, tan: 3, sev: 15, kor: 5 },
+  downtown: { inf: { tammany: 55, obrien: 15, marchetti: 10 }, servet: 4, ilerleme: 20, huzur: 70, tan: 8, sev: 20, kor: 10 },
+  southside: { inf: { oyuncu: 25, obrien: 15, marchetti: 15 }, servet: 2, ilerleme: 30, huzur: 60, tan: 55, sev: 60, kor: 10 },
+  eastside: { inf: { obrien: 60, marchetti: 15 }, servet: 3, ilerleme: 50, huzur: 65, tan: 12, sev: 40, kor: 15 },
+  flats: { inf: { marchetti: 65, obrien: 10 }, servet: 3, ilerleme: 10, huzur: 70, tan: 6, sev: 30, kor: 25 },
+  docks: { inf: { marchetti: 45, tammany: 20, obrien: 10 }, servet: 4, ilerleme: 60, huzur: 60, tan: 6, sev: 20, kor: 40 },
 };
+
+// Her bölgenin halkı farklıdır: sevgiye ve korkuya verdikleri tepki bölgeye göre değişir.
+export const KARAKTER = {
+  hilltop: { sev: 0.8, kor: 0.5, ac: 'Çekingen ve kibar: ziyafetle yumuşar; gözdağına polis çağırır.' },
+  downtown: { sev: 0.9, kor: 0.7, ac: 'Resmî ve temkinli: sevgi de korku da zor işler, rüşvet daha kolay.' },
+  southside: { sev: 1.4, kor: 0.6, ac: 'Sadık halk: sevgiyle bağlanır, korkuya soğuk bakar.' },
+  eastside: { sev: 1.1, kor: 0.9, ac: 'Kalabalık ve kapalı: yardım edeni unutmaz, sindireni de.' },
+  flats: { sev: 0.8, kor: 1.2, ac: 'Sert işçi mahallesi: korkan çok, sevgi az; haraç korkuyla ödenir.' },
+  docks: { sev: 0.6, kor: 1.5, ac: 'Sendika ve kaçakçı limanı: yalnızca güçlüyü dinler.' },
+};
+export const etki = (b, id) => ({ s: clamp(KARAKTER[id].sev * b.sev / 100, 0, 1.5), k: clamp(KARAKTER[id].kor * b.kor / 100, 0, 1.5) });
+export function aileDeg(st, f, g, k) { const a = st.aile[f]; if (!a) return; a.g = clamp(a.g + g, -100, 100); a.k = clamp(a.k + k, 0, 100); }
 
 export function newBolge(seed) {
   const list = {};
-  for (const [id, b] of Object.entries(B0)) list[id] = { inf: { ...b.inf }, servet: b.servet, ilerleme: b.ilerleme, huzur: b.huzur, garnizon: 0, harac: 1, sonIs: {}, yatirimAy: -99, hakim: null, tan: b.tan };
-  const st = { seed: (seed * 7919 + 13) | 0, ofke: { marchetti: 0, obrien: 0, tammany: 0 }, ekip: 0, yarali: 0, kapali: 0, list };
+  for (const [id, b] of Object.entries(B0)) list[id] = { inf: { ...b.inf }, servet: b.servet, ilerleme: b.ilerleme, huzur: b.huzur, garnizon: 0, harac: 1, sonIs: {}, yatirimAy: -99, hakim: null, tan: b.tan, sev: b.sev, kor: b.kor };
+  const st = { seed: (seed * 7919 + 13) | 0, ofke: { marchetti: 0, obrien: 0, tammany: 0 }, aile: { marchetti: { g: 10, k: 20, son: -99 }, obrien: { g: -10, k: 15, son: -99 }, tammany: { g: 0, k: 10, son: -99 } }, ekip: 0, yarali: 0, kapali: 0, list };
   for (const id of Object.keys(list)) list[id].hakim = hakimOf(st, id);
   return st;
 }
@@ -128,34 +140,53 @@ export function bolgeIs(s, a) {
   const kayip = 1 - (b.inf.oyuncu || 0) / 120; // nüfuz yükseldikçe her ek puan pahalılaşır
   const rakip = onceki && onceki !== 'oyuncu' ? onceki : null;
   const direnc = (rakip ? 1 - (b.inf[rakip] || 0) / 150 : 1) * (0.6 + 0.6 * b.tan / 100); // sağlam bir hakimi yerinden etmek zordur; tanınmayan birine kimse güvenmez
+  const e = etki(b, a.b);
   let kazan;
   if (a.kind === 'himaye') {
     if (!spend(s, 120, 'dirty')) return hata('Para yetmiyor ($120).');
-    kazan = 7 * kayip * direnc;
+    kazan = 7 * kayip * direnc * (0.7 + 0.5 * e.s + 0.2 * e.k);
+    b.sev = clamp(b.sev + 2, 0, 100); b.kor = clamp(b.kor + 2, 0, 100);
     fame(s, 'halk', 'golge', { k: 1.5 }, 1);
     s.attBoost += 1.5;
     log(s, `${BOLGELER[a.b].ad}: esnafa "himaye" sattın (nüfuz +${kazan.toFixed(1)}).`, 'info', 'Karşılığında bir şey istemedin. Henüz.');
   } else if (a.kind === 'hediye') {
     if (!spend(s, 200, 'clean')) return hata('Temiz para yetmiyor ($200).');
-    kazan = 4 * kayip * direnc;
+    kazan = 4 * kayip * direnc * (0.6 + 0.7 * e.s);
+    b.sev = clamp(b.sev + 8 * (1 - b.sev / 120), 0, 100); b.kor = clamp(b.kor - 2, 0, 100);
     b.huzur = clamp(b.huzur + 8, 0, 100);
     fame(s, 'halk', 'cephe', { i: 3, t: 1 }, 1);
     log(s, `${BOLGELER[a.b].ad}: mahalleye ziyafet verdin (nüfuz +${kazan.toFixed(1)}, huzur +8).`, 'good');
   } else {
     if (!staff(s, 'koruma')) return hata('Bu iş için bir koruman olmalı (İri Tony gibi).');
     if (!spend(s, 150, 'dirty')) return hata('Para yetmiyor ($150).');
-    kazan = 11 * kayip * direnc;
+    kazan = 11 * kayip * direnc * (0.7 + 0.6 * e.k + 0.2 * e.s);
+    b.kor = clamp(b.kor + 10 * (1 - b.kor / 120), 0, 100); b.sev = clamp(b.sev - 6, 0, 100);
+    if (rakip) aileDeg(st, rakip, -6, 4);
     b.huzur = clamp(b.huzur - 8, 0, 100);
     fame(s, 'halk', 'golge', { k: 3, i: -2 }, 1);
     s.attBoost += 4;
     if (rakip) st.ofke[rakip] = Math.min(60, st.ofke[rakip] + 20);
     log(s, `${BOLGELER[a.b].ad}: ${rakip ? hakimAd(rakip) + ' adamlarını' : 'sokak çetelerini'} sindirdin (nüfuz +${kazan.toFixed(1)}, huzur −8).`, 'warn', rakip ? `${hakimAd(rakip)} bunu unutmayacak: bölgelerine baskı artar.` : 'Polis dikkati artar.');
-    if (brnd(st) < 0.25) s.pendingEvidence.push({ v: 4, why: `${BOLGELER[a.b].ad}'da sindirme işini birisi gördü ve karakola anlattı.` });
+    if (brnd(st) < 0.25 * (1.3 - b.sev / 100) * (1 - b.kor / 200)) s.pendingEvidence.push({ v: 4, why: `${BOLGELER[a.b].ad}'da sindirme işini birisi gördü ve karakola anlattı.` });
   }
   addInf(b, 'oyuncu', kazan);
   b.tan = clamp(b.tan + { himaye: 3, hediye: 4, gozdagi: 6 }[a.kind] * (1 - b.tan / 120), 0, 100);
   b.sonIs[a.kind] = gun;
   hakimDegisti(s, a.b, onceki);
+  return TAMAM;
+}
+
+export function aileHediye(s, a) {
+  const st = s.bolge, f = a.f, r = st.aile[f];
+  if (!r) return hata('Böyle bir aile yok.');
+  const gun = Math.floor(s.t / DAY);
+  if (gun - r.son < 10) return hata(`${hakimAd(f)} ile 10 günde bir görüşebilirsin.`);
+  if (!spend(s, 300, 'clean')) return hata('Temiz para yetmiyor ($300).');
+  r.son = gun;
+  aileDeg(st, f, 12 * (1 - Math.max(0, r.g) / 130), 0);
+  st.ofke[f] = Math.max(0, st.ofke[f] - 10);
+  fame(s, 'yeralti', 'cephe', { t: 2 }, 1);
+  log(s, `${hakimAd(f)} ile masaya oturdun; hediye ve gönül alma ($300). Görüş: ${Math.round(r.g)}.`, 'good', 'Dost aile seni daha az sıkıştırır; ama korkmaz da.');
   return TAMAM;
 }
 
@@ -234,7 +265,10 @@ export function bolgeMonth(s, R, pushCard) {
     }
     if (hk === 'oyuncu') {
       const t = HARAC[b.harac];
-      const gelir = Math.round(havuz(b) * t.oran * (0.6 + 0.4 * b.huzur / 100));
+      const ee = etki(b, id);
+      const gelir = Math.round(havuz(b) * t.oran * (0.6 + 0.4 * b.huzur / 100) * clamp(0.7 + 0.25 * ee.s + 0.25 * ee.k, 0.5, 1.3));
+      const hd = [[3, -2], [0, 1], [-2, 2], [-5, 4]][b.harac];
+      b.sev = clamp(b.sev + hd[0], 0, 100); b.kor = clamp(b.kor + hd[1], 0, 100);
       if (gelir > 0) { s.cash.dirty += gelir; haracToplam += gelir; }
       if (b.harac === 3) fame(s, 'halk', 'golge', { k: 2, i: -3 }, 1);
       else if (b.harac === 2) fame(s, 'halk', 'golge', { i: -1 }, 1);
@@ -257,6 +291,9 @@ export function bolgeMonth(s, R, pushCard) {
       R.push(`  ! ${BOLGELER[MEKAN_BOLGE].ad}'ı ${hakimAd(mh)} yönetiyor: mekanların himaye bedeli −${money0(bedel)}`);
     }
   }
+  // sevgi ve korku yavaş yavaş durulur; ailelerle görüş de
+  for (const id of Object.keys(st.list)) { const b = st.list[id]; b.sev += (30 - b.sev) * 0.04; b.kor *= 0.95; }
+  for (const f of NPC) { const r = st.aile[f]; r.g *= 0.95; r.k *= 0.97; }
   // tanınırlık: hakim olduğun yerde artar, uzak kaldığın yerde solar
   for (const id of Object.keys(st.list)) {
     const b = st.list[id];
@@ -274,7 +311,7 @@ export function bolgeMonth(s, R, pushCard) {
   for (const id of Object.keys(st.list)) {
     const b = st.list[id], hk = hakimOf(st, id), ik = ikinci(b, hk || '');
     const ceza = hk === 'oyuncu' ? [-4, 0, 5, 12][b.harac] : 0;
-    const hedef = clamp(65 + 4 * Math.min(b.garnizon, GARNIZON_MAX) - (ik > 20 ? (ik - 20) * 0.8 : 0) - ceza, 0, 100);
+    const hedef = clamp(65 + (b.sev - 40) / 8 + 4 * Math.min(b.garnizon, GARNIZON_MAX) - (ik > 20 ? (ik - 20) * 0.8 : 0) - ceza, 0, 100);
     b.huzur = clamp(b.huzur + (hedef - b.huzur) * 0.35, 0, 100);
     let g = b.huzur < 30 ? -8 : 4.5 + (b.huzur - 50) / 10 + (brnd(st) - 0.5) * 5;
     if (hk === 'oyuncu' && b.harac === 3) g -= 3;
@@ -293,7 +330,7 @@ export function bolgeMonth(s, R, pushCard) {
       const b = st.list[id], hk = hakimOf(st, id);
       let w = (1 / (1 + (hk ? b.inf[hk] : 0) / 30)) * (0.7 + b.servet * 0.15);
       if (hk === 'oyuncu') {
-        w *= ofkeCarpan;
+        w *= ofkeCarpan * clamp(1 - st.aile[f].g / 150, 0.3, 1.5);
         if (f === 'marchetti' && s.unvan.ahit && s.unvan.ahit.himaye) w *= 0.15; // Ahit: Marchetti seni kollar
       }
       adaylar.push([id, w]);
