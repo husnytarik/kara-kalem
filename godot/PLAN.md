@@ -4,7 +4,7 @@ Durum: `[x]` bitti (senin testinle) · `[~]` JS prototipte var ya da yazıldı, 
 Görsel harita: `plan.html` (tarayıcıda aç). Bu dosya asıl kaynaktır; ilerledikçe işaretle ve `plan.html` içindeki `DATA` listesini güncelle.
 
 ## Faz 1 — Temel (sahne, karakter, kamera)
-- [~] **Harita (küp şehir)** — `harita.gd` + `sokak.gd` — 6 bölge, yollar, küp binalar, deniz ve iskeleler, bölge adı göstergesi
+- [~] **Harita (düzenlenebilir)** — `scenes/city/harita.tscn` + `harita.gd`/`arazi.gd`/`bina.gd` — yükseklik PNG ile engebeli arazi, Bina düğümleri (küp + etiket, istenince "Model" alt düğümü), `data/bolgeler.json`; ilk hali `tools/uret.gd` ile üretildi (tekrar çalıştırma: düzenlemeleri ezer)
 - [~] **Yürüme (haritada tıkla-git)** — `harita_oyuncu.gd` + `harita.gd` — A* yol bulma, yollardan yürür, zaman hızı (3. şahıs `oyuncu.gd` savaş için saklı)
 - [~] **Kamera (yukarıdan)** — `ust_kamera.gd` — M&B tarzı: takip, döndür, yakınlaş, kaydır (3. şahıs `kamera.gd` savaş için saklı)
 - [ ] **Karakter** — `karakter.gd` — ortak iskelet, modüler kıyafet parçaları (şapka, üst, alt, ayakkabı)

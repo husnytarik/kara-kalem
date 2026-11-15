@@ -51,6 +51,7 @@ func _renk(c: Color, ismesiz: bool) -> StandardMaterial3D:
 	m.albedo_color = c
 	if ismesiz:
 		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		m.no_depth_test = true   # arazi altında kalmasın
 	if c.a < 1.0:
 		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	return m
@@ -82,6 +83,7 @@ func _process(delta: float) -> void:
 			global_position += yon * kalan
 			_govde.rotation.y = lerp_angle(_govde.rotation.y, atan2(-yon.x, -yon.z), 10.0 * delta)
 			kalan = 0.0
+	global_position.y = harita.yuk(global_position.x, global_position.z)   # araziyi izle
 	_isaret.visible = _yol.size() > 0
 	_im.clear_surfaces()
 	if _yol.size() > 0:
