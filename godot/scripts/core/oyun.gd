@@ -1,0 +1,698 @@
+extends Node
+# Oyun durumu ve kuralları (JS prototipinden taşındı: bolge.js, isyeri.js, savas.js ekip kısmı).
+# 2D arayüz bu düğümün sinyallerini dinler; harita/3D bu düğümü yalnızca okur ve eylem çağırır.
+# Eylemler {ok: bool, msg: String} döndürür.
+
+signal degisti                 # durum değişti, arayüz yenilensin
+signal mesaj(metin: String, tur: String)
+
+const DAY := 1440
+const DK_SN := 8.0             # 1 gerçek saniye = 8 oyun dakikası (hız ×1)
+const HAKIM_ESIK := 35.0
+const SERVET_MAX := 5
+const HAVUZ := 600.0
+const EKIP_MAX := 8
+const EKIP_MAAS := 40
+const EKIP_FIYAT := 100
+const GARNIZON_MAX := 6
+const WALK := 2.0              # adam hızı, metre / oyun dakikası
+const DAYS_PER_MONTH := 10
+
+const HARAC := [["Yok", 0.0], ["Hafif %8", 0.08], ["Orta %15", 0.15], ["Ağır %25", 0.25]]
+const FAK := {
+	"oyuncu": {"ad": "Sen", "renk": Color("e0b24a"), "saldirgan": 1.0},
+	"marchetti": {"ad": "Marchetti Family", "renk": Color("c2506b"), "saldirgan": 1.0},
+	"obrien": {"ad": "O'Brien Çetesi", "renk": Color("58a866"), "saldirgan": 1.25},
+	"tammany": {"ad": "Belediye Makinesi", "renk": Color("5f8fc4"), "saldirgan": 0.35},
+}
+const NPC := ["marchetti", "obrien", "tammany"]
+const KOMSU := {
+	"hilltop": ["downtown", "southside"], "downtown": ["hilltop", "eastside"],
+	"southside": ["hilltop", "eastside", "flats"], "eastside": ["downtown", "southside", "flats"],
+	"flats": ["southside", "eastside", "docks"], "docks": ["flats"],
+}
+const ACIKLAMA := {
+	"hilltop": "Villalar, bankerler ve siyasetçiler. Para burada konuşur, ses çıkarmaz.",
+	"downtown": "Belediye, banka, karakol ve gazete. Şehrin resmî yüzü.",
+	"southside": "Senin semtin. Dar sokaklar, sadık halk, eski borçlar.",
+	"eastside": "Göçmen mahalleleri, pazar yerleri, kalabalık apartmanlar.",
+	"flats": "Demiryolu, depo ve atölyeler. Kimse ne yüklendiğini sormaz.",
+	"docks": "Liman. Kaçakçılık, işçi sendikaları ve yarısı Marchetti'nin olan ambarlar.",
+}
+const KARAKTER := {
+	"hilltop": {"sev": 0.8, "kor": 0.5, "ac": "Çekingen ve kibar: ziyafetle yumuşar; gözdağına polis çağırır."},
+	"downtown": {"sev": 0.9, "kor": 0.7, "ac": "Resmî ve temkinli: sevgi de korku da zor işler."},
+	"southside": {"sev": 1.4, "kor": 0.6, "ac": "Sadık halk: sevgiyle bağlanır, korkuya soğuk bakar."},
+	"eastside": {"sev": 1.1, "kor": 0.9, "ac": "Kalabalık ve kapalı: yardım edeni unutmaz, sindireni de."},
+	"flats": {"sev": 0.8, "kor": 1.2, "ac": "Sert işçi mahallesi: haraç korkuyla ödenir."},
+	"docks": {"sev": 0.6, "kor": 1.5, "ac": "Sendika ve kaçakçı limanı: yalnızca güçlüyü dinler."},
+}
+const B0 := {
+	"hilltop": {"inf": {"tammany": 70.0, "marchetti": 10.0}, "servet": 4, "ilerleme": 40.0, "huzur": 80.0, "tan": 3.0, "sev": 15.0, "kor": 5.0},
+	"downtown": {"inf": {"tammany": 55.0, "obrien": 15.0, "marchetti": 10.0}, "servet": 4, "ilerleme": 20.0, "huzur": 70.0, "tan": 8.0, "sev": 20.0, "kor": 10.0},
+	"southside": {"inf": {"oyuncu": 25.0, "obrien": 15.0, "marchetti": 15.0}, "servet": 2, "ilerleme": 30.0, "huzur": 60.0, "tan": 55.0, "sev": 60.0, "kor": 10.0},
+	"eastside": {"inf": {"obrien": 60.0, "marchetti": 15.0}, "servet": 3, "ilerleme": 50.0, "huzur": 65.0, "tan": 12.0, "sev": 40.0, "kor": 15.0},
+	"flats": {"inf": {"marchetti": 65.0, "obrien": 10.0}, "servet": 3, "ilerleme": 10.0, "huzur": 70.0, "tan": 6.0, "sev": 30.0, "kor": 25.0},
+	"docks": {"inf": {"marchetti": 45.0, "tammany": 20.0, "obrien": 10.0}, "servet": 4, "ilerleme": 60.0, "huzur": 60.0, "tan": 6.0, "sev": 20.0, "kor": 40.0},
+}
+const TURLER := {
+	"esnaf": {"ad": "Esnaf", "gelir": 14, "direnc": 3, "fiyat": 700},
+	"eglence": {"ad": "Eğlence yeri", "gelir": 28, "direnc": 5, "fiyat": 1500},
+	"luks": {"ad": "Lüks işletme", "gelir": 42, "direnc": 6, "fiyat": 2400},
+	"atolye": {"ad": "Atölye / fabrika", "gelir": 22, "direnc": 5, "fiyat": 1100},
+	"depo": {"ad": "Depo / liman işi", "gelir": 32, "direnc": 6, "fiyat": 1700},
+	"konut": {"ad": "Apartman / pansiyon", "gelir": 11, "direnc": 2, "fiyat": 500},
+	"resmi": {"ad": "Resmî kurum", "gelir": 0, "direnc": 99, "fiyat": 0},
+}
+const KURAL := [
+	["resmi", ["bank", "courier", "post office", "hospital", "church", "synagogue", "school", "courthouse", "station", "exchange", "customs", "harbor master", "chamber", "stevedore", "precinct", "hiring", "city hall", "social hall"]],
+	["luks", ["hotel", "jeweler", "club", "gallery", "mansion", "perfumery", "department", "theater", "cinema", "attorney", "library", "chauffeur", "watchmaker"]],
+	["eglence", ["pool", " bar", "sailors", "social", "soda", "boxing", "bath", "diner"]],
+	["depo", ["warehouse", "cold storage", "grain", "rail depot", "coal", "ship", "cannery", "fish market", "rope"]],
+	["atolye", ["smith", "carpenter", "foundry", "brick", "tool", "sweatshop", "junk", "print", "dentist", "tailor"]],
+	["konut", ["tenement", "boarding", "laundry"]],
+]
+const GOREVLER := {
+	"haraclan": {"ad": "Haraç bağla", "is": 60},
+	"topla": {"ad": "Haracı topla", "is": 25},
+	"koru": {"ad": "Koru", "is": 40},
+}
+const IS_AD := {"himaye": "Esnafa himaye sat", "hediye": "Mahalleye ziyafet ver", "gozdagi": "Rakip adamları sindir"}
+const IS_BEDEL := {"himaye": "$120 kirli", "hediye": "$200 temiz", "gozdagi": "$150 kirli · ekipte adam gerekir"}
+const BEKLEME := {"himaye": 3, "hediye": 3, "gozdagi": 5}
+const ISIMLER := ["Vinnie", "Moe", "Sully", "Bugsy", "Lenny", "Sal", "Dutch", "Frankie", "Mickey", "Nate", "Ray", "Hank", "Joey", "Tommy", "Lou", "Abe"]
+
+var harita: Node3D
+var rng := RandomNumberGenerator.new()
+var t := 9 * 60                       # oyun dakikası (gün 0, 09:00)
+var temiz := 1500.0
+var kirli := 0.0
+var bolge := {}                       # id -> durum
+var ofke := {"marchetti": 0.0, "obrien": 0.0, "tammany": 0.0}
+var adamlar: Array[Dictionary] = []   # {id, ad, yumruk, bicak, zeka, gorev}
+var gorevler: Array[Dictionary] = []  # {adam, hedef, gorev, basla, yol, bitis, yolu}
+var isy := {}                         # bina indeksi -> {tur, sahip, haracli, birikim, korumaBitis}
+var defter: Array[Dictionary] = []    # {t, metin, tur}
+var _sayac := 0
+var _ev := -1
+var _kesir := 0.0
+
+func kur(h: Node3D) -> void:
+	harita = h
+	rng.seed = 20260
+	for id in B0:
+		var b: Dictionary = B0[id].duplicate(true)
+		b["garnizon"] = 0
+		b["harac"] = 1
+		b["sonIs"] = {}
+		b["yatirimAy"] = -99
+		bolge[id] = b
+	for i in harita.yerler.size():
+		var y: Dictionary = harita.yerler[i]
+		if y["ad"] == "Home":
+			_ev = i
+		if y["ozel"]:
+			continue
+		var tur := _tur(y["ad"])
+		if tur != "resmi":
+			isy[i] = {"tur": tur, "sahip": false, "haracli": false, "birikim": 0.0, "korumaBitis": 0}
+	kayit("Kara Kalem: Southside senin semtin. Önce adam tut, sonra esnafa git.", "info")
+
+# ---------- yardımcılar ----------
+func _tur(ad: String) -> String:
+	var a := ad.to_lower()
+	for r in [" vi", " v", " iv", " iii", " ii"]:
+		if a.ends_with(r):
+			a = a.trim_suffix(r)
+			break
+	if a.ends_with("hall"):
+		return "resmi"
+	for k in KURAL:
+		for kelime in k[1]:
+			if a.contains(kelime):
+				return k[0]
+	return "esnaf"
+
+func kayit(metin: String, tur: String = "info") -> void:
+	defter.append({"t": t, "metin": metin, "tur": tur})
+	if defter.size() > 300:
+		defter.pop_front()
+	mesaj.emit(metin, tur)
+
+func para(x: float) -> String:
+	return "$" + str(int(round(x)))
+
+func harcama(miktar: float, mod: String) -> bool:
+	if mod == "temiz":
+		if temiz < miktar:
+			return false
+		temiz -= miktar
+		return true
+	if kirli + temiz < miktar:
+		return false
+	var d := minf(kirli, miktar)
+	kirli -= d
+	temiz -= miktar - d
+	return true
+
+func hata(m: String) -> Dictionary:
+	return {"ok": false, "msg": m}
+
+func tamam(m: String = "") -> Dictionary:
+	return {"ok": true, "msg": m}
+
+func tarih(zaman: int = -1) -> Dictionary:
+	var z := t if zaman < 0 else zaman
+	var gun := z / DAY
+	var ay := gun / DAYS_PER_MONTH
+	return {"gun": gun, "saat": (z % DAY) / 60, "dk": z % 60, "ay": ay, "ay_gun": gun % DAYS_PER_MONTH + 1, "yil": ay / 12 + 1, "ay_yil": ay % 12 + 1}
+
+func saat_yazi(zaman: int = -1) -> String:
+	var d := tarih(zaman)
+	return "%02d:%02d" % [d["saat"], d["dk"]]
+
+func tarih_yazi() -> String:
+	var d := tarih()
+	return "%d. yıl · %d. ay · %d. gün" % [d["yil"], d["ay_yil"], d["ay_gun"]]
+
+func mevsim() -> String:
+	return ["İlkbahar", "Yaz", "Sonbahar", "Kış"][(tarih()["ay"] % 12) / 3]
+
+# ---------- bölge okuma ----------
+func hakim_of(id: String) -> String:
+	var inf: Dictionary = bolge[id]["inf"]
+	var en := ""
+	var bv := HAKIM_ESIK - 1e-9
+	for f in FAK:
+		if inf.get(f, 0.0) > bv:
+			bv = inf[f]
+			en = f
+	return en
+
+func hakim_ad(f: String) -> String:
+	return FAK[f]["ad"] if f != "" else "Sahipsiz"
+
+func etki(b: Dictionary, id: String) -> Dictionary:
+	return {"s": clampf(KARAKTER[id]["sev"] * b["sev"] / 100.0, 0.0, 1.5), "k": clampf(KARAKTER[id]["kor"] * b["kor"] / 100.0, 0.0, 1.5)}
+
+func erisim(id: String) -> bool:
+	if bolge[id]["inf"].get("oyuncu", 0.0) >= 15.0:
+		return true
+	for k in KOMSU[id]:
+		if hakim_of(k) == "oyuncu":
+			return true
+	return false
+
+func kudret(f: String) -> float:
+	var k := 2.0
+	for id in bolge:
+		if hakim_of(id) == f:
+			k += bolge[id]["servet"]
+	return k
+
+func oyuncu_bolgeleri() -> Array:
+	return bolge.keys().filter(func(id): return hakim_of(id) == "oyuncu")
+
+func add_inf(b: Dictionary, f: String, d: float) -> void:
+	var inf: Dictionary = b["inf"]
+	inf[f] = clampf(inf.get(f, 0.0) + d, 0.0, 100.0)
+	var top := 0.0
+	for k in inf:
+		top += inf[k]
+	if top > 100.0:
+		var digerleri: float = top - inf[f]
+		var k2: float = (100.0 - inf[f]) / digerleri if digerleri > 0.0 else 0.0
+		for o in inf.keys():
+			if o != f:
+				inf[o] *= k2
+	for k in inf.keys():
+		if inf[k] < 0.05:
+			inf.erase(k)
+
+func _hakim_degisti(id: String, onceki: String) -> void:
+	var yeni := hakim_of(id)
+	if yeni == onceki:
+		return
+	var ad: String = harita.bolgeler[id]["ad"]
+	if yeni == "oyuncu":
+		kayit("%s artık senin. Bölgenin hakimisin." % ad, "good")
+	elif onceki == "oyuncu":
+		kayit("%s'ı kaybettin: artık %s hakim." % [ad, hakim_ad(yeni)], "bad")
+	elif yeni != "":
+		kayit("%s: %s bölgeyi %s aldı." % [ad, hakim_ad(yeni), hakim_ad(onceki) if onceki != "" else "sahipsizlikten"], "info")
+	else:
+		kayit("%s sahipsiz kaldı: %s nüfuzunu yitirdi." % [ad, hakim_ad(onceki)], "info")
+
+func _nufuz(id: String, miktar: float) -> void:
+	var b: Dictionary = bolge[id]
+	var onceki := hakim_of(id)
+	add_inf(b, "oyuncu", miktar * (1.0 - b["inf"].get("oyuncu", 0.0) / 120.0))
+	_hakim_degisti(id, onceki)
+
+func hakim_icin_kalan(id: String) -> float:
+	var inf: Dictionary = bolge[id]["inf"]
+	var en := 0.0
+	for f in inf:
+		if f != "oyuncu":
+			en = maxf(en, inf[f])
+	return maxf(HAKIM_ESIK, en + 0.1) - inf.get("oyuncu", 0.0)
+
+# ---------- ekip / adamlar ----------
+func _yeni_adam() -> Dictionary:
+	var kullanilan := adamlar.map(func(a): return a["ad"])
+	var ad: String = ISIMLER[rng.randi() % ISIMLER.size()]
+	for i in 40:
+		if not kullanilan.has(ad):
+			break
+		ad = ISIMLER[(ISIMLER.find(ad) + 1) % ISIMLER.size()]
+	_sayac += 1
+	return {"id": _sayac, "ad": ad, "yumruk": 20 + rng.randi() % 55, "bicak": 20 + rng.randi() % 55, "zeka": 20 + rng.randi() % 55, "gorev": ""}
+
+func beceri(a: Dictionary) -> int:
+	return int(round(0.5 * a["yumruk"] + 0.3 * a["bicak"] + 0.2 * a["zeka"]))
+
+func adam_tut() -> Dictionary:
+	if adamlar.size() >= EKIP_MAX:
+		return hata("Ekip en fazla %d kişi olabilir." % EKIP_MAX)
+	if not harcama(EKIP_FIYAT, "kirli"):
+		return hata("Para yetmiyor ($%d)." % EKIP_FIYAT)
+	var a := _yeni_adam()
+	adamlar.append(a)
+	kayit("Ekibe %s katıldı (%d adam). Ayda $%d." % [a["ad"], adamlar.size(), EKIP_MAAS], "info")
+	degisti.emit()
+	return tamam()
+
+func adam_cikar(id: int) -> Dictionary:
+	for i in adamlar.size():
+		if adamlar[i]["id"] == id:
+			if adamlar[i]["gorev"] != "":
+				return hata("Görevdeki adam çıkarılamaz.")
+			kayit("%s ekipten ayrıldı." % adamlar[i]["ad"], "info")
+			adamlar.remove_at(i)
+			degisti.emit()
+			return tamam()
+	return hata("Adam bulunamadı.")
+
+func adam_bul(id: int) -> Dictionary:
+	for a in adamlar:
+		if a["id"] == id:
+			return a
+	return {}
+
+func bos_adamlar() -> Array:
+	return adamlar.filter(func(a): return a["gorev"] == "")
+
+func _adam_sec(gorev: String, id: int) -> Dictionary:
+	if id > 0:
+		var a := adam_bul(id)
+		return a if not a.is_empty() and a["gorev"] == "" else {}
+	var en := {}
+	var en_p := -1e9
+	for a in bos_adamlar():
+		var p: float = beceri(a) - maxf(0.0, a["bicak"] - a["yumruk"] - 20.0) if gorev == "haraclan" else (a["yumruk"] if gorev == "koru" else a["zeka"])
+		if p > en_p:
+			en_p = p
+			en = a
+	return en
+
+# ---------- iş yeri ----------
+func haftalik(i: int) -> int:
+	var y: Dictionary = harita.yerler[i]
+	var tt: Dictionary = TURLER[isy[i]["tur"]]
+	var b: Dictionary = bolge[y["bolge"]]
+	return int(round(tt["gelir"] * (0.5 + 0.25 * b["servet"]) * (0.6 + 0.4 * b["huzur"] / 100.0)))
+
+func kontrol(i: int) -> String:
+	if not isy.has(i):
+		return ""
+	var r: Dictionary = isy[i]
+	if r["sahip"]:
+		return "sahip"
+	if r["haracli"]:
+		return "haraci"
+	return hakim_of(harita.yerler[i]["bolge"])
+
+func tur_ad(i: int) -> String:
+	return TURLER[isy[i]["tur"]]["ad"] if isy.has(i) else ("Özel yer" if harita.yerler[i]["ozel"] else "Resmî kurum")
+
+func fiyat(i: int) -> int:
+	return TURLER[isy[i]["tur"]]["fiyat"]
+
+func yol_dakika(i: int) -> Dictionary:
+	var a: Vector3 = harita.yerler[_ev]["pos"] if _ev >= 0 else Vector3.ZERO
+	var yol: PackedVector3Array = harita.yol_bul(a, harita.yerler[i]["pos"])
+	var uz := 0.0
+	for k in range(1, yol.size()):
+		uz += yol[k - 1].distance_to(yol[k])
+	return {"dk": maxi(5, int(round(uz / WALK))), "yol": yol}
+
+func gorev_ver(i: int, gorev: String, adam_id: int = 0) -> Dictionary:
+	if not isy.has(i):
+		return hata("Bu yer iş yeri değil.")
+	var r: Dictionary = isy[i]
+	var y: Dictionary = harita.yerler[i]
+	var G: Dictionary = GOREVLER[gorev]
+	if not erisim(y["bolge"]):
+		return hata("%s'da henüz ayağın yok: önce komşu bir bölgeye hakim ol." % harita.bolgeler[y["bolge"]]["ad"])
+	var k := kontrol(i)
+	if gorev == "haraclan" and (k == "haraci" or k == "sahip"):
+		return hata("Bu yer zaten senin.")
+	if gorev == "topla" and k != "haraci":
+		return hata("Toplanacak haraç yok.")
+	if gorev == "topla" and r["birikim"] < 1.0:
+		return hata("Henüz biriken para yok.")
+	if gorev == "koru" and k != "haraci" and k != "sahip":
+		return hata("Önce haraç bağla ya da satın al.")
+	for g in gorevler:
+		if g["hedef"] == i:
+			return hata("Bu yere zaten bir adam gidiyor.")
+	var adam := _adam_sec(gorev, adam_id)
+	if adam.is_empty():
+		return hata("Boşta adam yok." if adamlar.size() > 0 else "Ekibinde adam yok. Önce adam tut.")
+	var yd := yol_dakika(i)
+	adam["gorev"] = gorev
+	gorevler.append({"adam": adam["id"], "hedef": i, "gorev": gorev, "basla": t, "yol": yd["dk"], "bitis": t + yd["dk"] + G["is"], "yolu": yd["yol"]})
+	kayit("%s %s'a gidiyor: %s (~%d dk)." % [adam["ad"], y["ad"], G["ad"].to_lower(), yd["dk"] + G["is"]], "info")
+	degisti.emit()
+	return tamam()
+
+func satin_al(i: int) -> Dictionary:
+	if not isy.has(i):
+		return hata("Bu yer iş yeri değil.")
+	var y: Dictionary = harita.yerler[i]
+	var r: Dictionary = isy[i]
+	if not erisim(y["bolge"]):
+		return hata("Bu bölgede henüz ayağın yok.")
+	if r["sahip"]:
+		return hata("Zaten senin.")
+	var f := fiyat(i)
+	if not harcama(f, "temiz"):
+		return hata("Temiz para yetmiyor (%s)." % para(f))
+	r["sahip"] = true
+	r["haracli"] = false
+	r["birikim"] = 0.0
+	_nufuz(y["bolge"], 4.0)
+	kayit("%s'ı satın aldın (%s). Haftalık meşru gelir akacak." % [y["ad"], para(f)], "good")
+	degisti.emit()
+	return tamam()
+
+func _coz(g: Dictionary) -> void:
+	var adam := adam_bul(g["adam"])
+	var i: int = g["hedef"]
+	if adam.is_empty() or not isy.has(i):
+		return
+	adam["gorev"] = ""
+	var r: Dictionary = isy[i]
+	var y: Dictionary = harita.yerler[i]
+	var bid: String = y["bolge"]
+	var b: Dictionary = bolge[bid]
+	var ad: String = y["ad"]
+	var T: Dictionary = TURLER[r["tur"]]
+	if g["gorev"] == "haraclan":
+		var hk := hakim_of(bid)
+		var rakip := hk if hk != "" and hk != "oyuncu" else ""
+		var need: int = T["direnc"] * 10
+		var e := etki(b, bid)
+		var pw := clampf(0.38 + (beceri(adam) - need) / 60.0 + 0.15 * e["k"] + 0.1 * e["s"] - (0.05 if b["huzur"] > 80 else 0.0), 0.08, 0.95)
+		if rng.randf() < pw:
+			r["haracli"] = true
+			r["birikim"] = 0.0
+			b["kor"] = clampf(b["kor"] + 1.5, 0, 100)
+			b["sev"] = clampf(b["sev"] - 1.5, 0, 100)
+			b["tan"] = clampf(b["tan"] + 1.5, 0, 100)
+			_nufuz(bid, 3.0)
+			var extra := ""
+			if adam["bicak"] - adam["yumruk"] > 25 and rng.randf() < 0.3:
+				extra = " %s bıçağı fazla kullandı; sahibi yaralandı." % adam["ad"]
+				b["sev"] = clampf(b["sev"] - 5, 0, 100)
+			if rakip != "":
+				ofke[rakip] = minf(60.0, ofke[rakip] + 6.0)
+			kayit("%s: %s haraç bağladı. Haftalık ~%s.%s" % [ad, adam["ad"], para(haftalik(i)), extra], "good")
+		else:
+			b["sev"] = clampf(b["sev"] - 1, 0, 100)
+			if rng.randf() < 0.35:
+				adam["gorev"] = "tutuklu"
+				kayit("%s: %s esnafı ikna edemedi ve karakola götürüldü. Üç gün sonra çıkar." % [ad, adam["ad"]], "bad")
+				gorevler.append({"adam": adam["id"], "hedef": i, "gorev": "tutuklu", "basla": t, "yol": 0, "bitis": t + 3 * DAY, "yolu": PackedVector3Array()})
+			else:
+				kayit("%s: %s sahibi ikna edemedi. Daha becerikli bir adam gönder (beceri %d < direnç %d)." % [ad, adam["ad"], beceri(adam), need], "warn")
+	elif g["gorev"] == "topla":
+		if not r["haracli"]:
+			kayit("%s: haraç artık sende değil." % ad, "warn")
+			return
+		var direnir := rng.randf() < clampf(0.25 - 0.3 * etki(b, bid)["k"] - 0.001 * adam["yumruk"], 0.02, 0.4)
+		var al := int(round(r["birikim"] * (0.5 if direnir else 1.0)))
+		r["birikim"] = 0.0
+		kirli += al
+		kayit("%s: %s %s topladı%s." % [ad, adam["ad"], para(al), " (sahibi yarısını ödedi)" if direnir else ""], "warn" if direnir else "good")
+	elif g["gorev"] == "koru":
+		r["korumaBitis"] = t + 7 * DAY
+		b["sev"] = clampf(b["sev"] + 1, 0, 100)
+		kayit("%s: %s bir hafta boyunca kapıda nöbet tutacak." % [ad, adam["ad"]], "info")
+
+# ---------- bölge işleri ----------
+func bolge_is(id: String, tur: String) -> Dictionary:
+	var b: Dictionary = bolge[id]
+	if not erisim(id):
+		return hata("%s'a girmek için önce komşu bir bölgeye hakim olmalısın." % harita.bolgeler[id]["ad"])
+	var gun: int = tarih()["gun"]
+	if b["sonIs"].get(tur, -99) + BEKLEME[tur] > gun:
+		return hata("Bu işi bu bölgede %d günde bir yapabilirsin." % BEKLEME[tur])
+	var onceki := hakim_of(id)
+	var kayip: float = 1.0 - b["inf"].get("oyuncu", 0.0) / 120.0
+	var rakip := onceki if onceki != "" and onceki != "oyuncu" else ""
+	var direnc: float = (1.0 - b["inf"].get(rakip, 0.0) / 150.0 if rakip != "" else 1.0) * (0.6 + 0.6 * b["tan"] / 100.0)
+	var e := etki(b, id)
+	var kazan := 0.0
+	var ad: String = harita.bolgeler[id]["ad"]
+	if tur == "himaye":
+		if not harcama(120, "kirli"):
+			return hata("Para yetmiyor ($120).")
+		kazan = 7.0 * kayip * direnc * (0.7 + 0.5 * e["s"] + 0.2 * e["k"])
+		b["sev"] = clampf(b["sev"] + 2, 0, 100)
+		b["kor"] = clampf(b["kor"] + 2, 0, 100)
+		kayit("%s: esnafa \"himaye\" sattın (nüfuz +%.1f)." % [ad, kazan], "info")
+	elif tur == "hediye":
+		if not harcama(200, "temiz"):
+			return hata("Temiz para yetmiyor ($200).")
+		kazan = 4.0 * kayip * direnc * (0.6 + 0.7 * e["s"])
+		b["sev"] = clampf(b["sev"] + 8.0 * (1.0 - b["sev"] / 120.0), 0, 100)
+		b["kor"] = clampf(b["kor"] - 2, 0, 100)
+		b["huzur"] = clampf(b["huzur"] + 8, 0, 100)
+		kayit("%s: mahalleye ziyafet verdin (nüfuz +%.1f, huzur +8)." % [ad, kazan], "good")
+	else:
+		if adamlar.is_empty():
+			return hata("Bu iş için ekibinde en az bir adam olmalı.")
+		if not harcama(150, "kirli"):
+			return hata("Para yetmiyor ($150).")
+		kazan = 11.0 * kayip * direnc * (0.7 + 0.6 * e["k"] + 0.2 * e["s"])
+		b["kor"] = clampf(b["kor"] + 10.0 * (1.0 - b["kor"] / 120.0), 0, 100)
+		b["sev"] = clampf(b["sev"] - 6, 0, 100)
+		b["huzur"] = clampf(b["huzur"] - 8, 0, 100)
+		if rakip != "":
+			ofke[rakip] = minf(60.0, ofke[rakip] + 20.0)
+		kayit("%s: %s sindirdin (nüfuz +%.1f, huzur −8)." % [ad, (hakim_ad(rakip) + " adamlarını") if rakip != "" else "sokak çetelerini", kazan], "warn")
+	add_inf(b, "oyuncu", kazan)
+	b["tan"] = clampf(b["tan"] + {"himaye": 3, "hediye": 4, "gozdagi": 6}[tur] * (1.0 - b["tan"] / 120.0), 0, 100)
+	b["sonIs"][tur] = gun
+	_hakim_degisti(id, onceki)
+	degisti.emit()
+	return tamam()
+
+func bolge_yatirim(id: String) -> Dictionary:
+	var b: Dictionary = bolge[id]
+	if hakim_of(id) != "oyuncu":
+		return hata("Yalnızca hakim olduğun bölgeye yatırım yaparsın.")
+	var ay: int = tarih()["ay"]
+	if b["yatirimAy"] == ay:
+		return hata("Bu bölgeye bu ay zaten yatırım yaptın.")
+	if b["servet"] >= SERVET_MAX and b["ilerleme"] >= 99:
+		return hata("Bölge zaten en büyük hâlinde.")
+	if not harcama(400, "temiz"):
+		return hata("Temiz para yetmiyor ($400).")
+	b["yatirimAy"] = ay
+	_ilerlet(id, 35.0)
+	add_inf(b, "oyuncu", 2.0 * (1.0 - b["inf"].get("oyuncu", 0.0) / 120.0))
+	kayit("%s'a yatırım yaptın." % harita.bolgeler[id]["ad"], "good")
+	degisti.emit()
+	return tamam()
+
+func bolge_harac(id: String, v: int) -> Dictionary:
+	if hakim_of(id) != "oyuncu":
+		return hata("Yalnızca hakim olduğun bölgeden haraç toplarsın.")
+	bolge[id]["harac"] = clampi(v, 0, HARAC.size() - 1)
+	degisti.emit()
+	return tamam()
+
+func _ilerlet(id: String, miktar: float) -> void:
+	var b: Dictionary = bolge[id]
+	var ad: String = harita.bolgeler[id]["ad"]
+	b["ilerleme"] += miktar
+	while b["ilerleme"] >= 100.0 and b["servet"] < SERVET_MAX:
+		b["ilerleme"] -= 100.0
+		b["servet"] += 1
+		kayit("%s büyüdü (%s)." % [ad, "★".repeat(b["servet"])], "good" if hakim_of(id) == "oyuncu" else "info")
+	if b["servet"] >= SERVET_MAX:
+		b["ilerleme"] = minf(b["ilerleme"], 99.0)
+	while b["ilerleme"] < 0.0 and b["servet"] > 1:
+		b["ilerleme"] += 100.0
+		b["servet"] -= 1
+		kayit("%s küçüldü (%s)." % [ad, "★".repeat(b["servet"])], "bad" if hakim_of(id) == "oyuncu" else "info")
+	if b["servet"] <= 1:
+		b["ilerleme"] = maxf(b["ilerleme"], 0.0)
+
+# ---------- zaman ----------
+# Gerçek zamanlı akış: sokak.gd her karede çağırır (delta oyun hızıyla zaten ölçeklenmiş).
+func ilerle(delta: float) -> void:
+	_kesir += delta * DK_SN
+	var n := int(_kesir)
+	if n <= 0:
+		return
+	_kesir -= n
+	for k in n:
+		t += 1
+		if t % 60 == 0:
+			_saat()
+		if t % DAY == 0:
+			_gun()
+			if (t / DAY) % DAYS_PER_MONTH == 0:
+				_ay()
+	degisti.emit()
+
+func _saat() -> void:
+	for g in gorevler.duplicate():
+		if t >= g["bitis"]:
+			gorevler.erase(g)
+			if g["gorev"] == "tutuklu":
+				var a := adam_bul(g["adam"])
+				if not a.is_empty():
+					a["gorev"] = ""
+					kayit("%s karakoldan çıktı." % a["ad"], "info")
+			else:
+				_coz(g)
+
+func _gun() -> void:
+	for i in isy:
+		var r: Dictionary = isy[i]
+		var w := haftalik(i)
+		if r["sahip"]:
+			temiz += w * 1.5 / 7.0
+			continue
+		if not r["haracli"]:
+			continue
+		r["birikim"] = minf(w * 3.0, r["birikim"] + w / 7.0)
+		var bid: String = harita.yerler[i]["bolge"]
+		var hk := hakim_of(bid)
+		if hk != "" and hk != "oyuncu" and t >= r["korumaBitis"] and rng.randf() < 0.012:
+			r["haracli"] = false
+			r["birikim"] = 0.0
+			kayit("%s: %s adamları esnafı geri aldı; haracı artık onlara ödüyor." % [harita.yerler[i]["ad"], hakim_ad(hk)], "bad")
+	temiz += 40.0 + rng.randf() * 20.0   # Murphy's Tavern günlük geliri (şimdilik sabit; meyhane sistemi sonra)
+
+func _ay() -> void:
+	var onceki := {}
+	for id in bolge:
+		onceki[id] = hakim_of(id)
+	var harac_toplam := 0.0
+	var maas := 0.0
+	for id in bolge:
+		var b: Dictionary = bolge[id]
+		if b["garnizon"] > 0:
+			maas += b["garnizon"] * 40.0
+		if hakim_of(id) == "oyuncu":
+			var tt: Array = HARAC[b["harac"]]
+			var ee := etki(b, id)
+			var gelir := int(round(HAVUZ * b["servet"] * tt[1] * (0.6 + 0.4 * b["huzur"] / 100.0) * clampf(0.7 + 0.25 * ee["s"] + 0.25 * ee["k"], 0.5, 1.3)))
+			var hd: Array = [[3, -2], [0, 1], [-2, 2], [-5, 4]][b["harac"]]
+			b["sev"] = clampf(b["sev"] + hd[0], 0, 100)
+			b["kor"] = clampf(b["kor"] + hd[1], 0, 100)
+			if gelir > 0:
+				kirli += gelir
+				harac_toplam += gelir
+	if adamlar.size() > 0:
+		var gider := adamlar.size() * EKIP_MAAS
+		if harcama(gider, "kirli"):
+			maas += gider
+		else:
+			var son: Dictionary = adamlar[adamlar.size() - 1]
+			if son["gorev"] == "":
+				adamlar.pop_back()
+				kayit("Ekibin maaşını ödeyemedin, %s çekip gitti." % son["ad"], "bad")
+	for id in bolge:
+		var b: Dictionary = bolge[id]
+		b["sev"] += (30.0 - b["sev"]) * 0.04
+		b["kor"] *= 0.95
+		if hakim_of(id) == "oyuncu":
+			b["tan"] = clampf(b["tan"] + 1.5, 0, 100)
+		else:
+			b["tan"] = maxf(30.0 if id == "southside" else 0.0, b["tan"] * 0.94)
+	if harac_toplam > 0.0 or maas > 0.0:
+		kayit("AYLIK: haraç %s · maaşlar %s." % [para(harac_toplam), para(maas)], "info")
+	for id in bolge:
+		var b: Dictionary = bolge[id]
+		var hk := hakim_of(id)
+		var ik := 0.0
+		for f in b["inf"]:
+			if f != hk:
+				ik = maxf(ik, b["inf"][f])
+		var ceza: float = [-4.0, 0.0, 5.0, 12.0][b["harac"]] if hk == "oyuncu" else 0.0
+		var rakip_ceza := (ik - 20.0) * 0.8 if ik > 20.0 else 0.0
+		var hedef := clampf(65.0 + (b["sev"] - 40.0) / 8.0 + 4.0 * minf(b["garnizon"], GARNIZON_MAX) - rakip_ceza - ceza, 0.0, 100.0)
+		b["huzur"] = clampf(b["huzur"] + (hedef - b["huzur"]) * 0.35, 0, 100)
+		var g: float = -8.0 if b["huzur"] < 30.0 else 4.5 + (b["huzur"] - 50.0) / 10.0 + (rng.randf() - 0.5) * 5.0
+		if hk == "oyuncu" and b["harac"] == 3:
+			g -= 3.0
+		_ilerlet(id, g)
+	for f in NPC:
+		var ofke_c: float = 1.0 + ofke[f] / 30.0
+		var k := kudret(f)
+		for id in bolge:
+			if hakim_of(id) == f:
+				add_inf(bolge[id], f, 1.2)
+		var adaylar := []
+		for id in bolge:
+			if hakim_of(id) == f:
+				continue
+			var var_komsu := false
+			for n in KOMSU[id]:
+				if hakim_of(n) == f:
+					var_komsu = true
+			if not var_komsu:
+				continue
+			var b: Dictionary = bolge[id]
+			var hk := hakim_of(id)
+			var w: float = (1.0 / (1.0 + (b["inf"].get(hk, 0.0) / 30.0 if hk != "" else 0.0))) * (0.7 + b["servet"] * 0.15)
+			if hk == "oyuncu":
+				w *= ofke_c
+			adaylar.append([id, w])
+		if adaylar.is_empty():
+			continue
+		var p: float = clampf(0.1 + 0.012 * k, 0.0, 0.5) * FAK[f]["saldirgan"] * ofke_c
+		if rng.randf() >= p:
+			continue
+		var top := 0.0
+		for a in adaylar:
+			top += a[1]
+		var r := rng.randf() * top
+		var hedef_id: String = adaylar[0][0]
+		for a in adaylar:
+			r -= a[1]
+			if r <= 0.0:
+				hedef_id = a[0]
+				break
+		var b: Dictionary = bolge[hedef_id]
+		var hk := hakim_of(hedef_id)
+		var kazan := 4.0 + rng.randf() * 5.0 + k / 6.0
+		if hk == "oyuncu" or b["inf"].get("oyuncu", 0.0) > 0.0:
+			kazan = maxf(1.5, kazan - 1.8 * b["garnizon"] - 1.0)
+		add_inf(b, f, kazan)
+		b["huzur"] = clampf(b["huzur"] - 5, 0, 100)
+		var hed_ad: String = harita.bolgeler[hedef_id]["ad"]
+		if hk != "":
+			kayit("%s, %s'in %s'daki hâkimiyetini zorluyor." % [hakim_ad(f), hakim_ad(hk), hed_ad], "warn" if hk == "oyuncu" else "info")
+		else:
+			kayit("%s sahipsiz %s'a el attı." % [hakim_ad(f), hed_ad], "info")
+	for f in NPC:
+		ofke[f] *= 0.8
+	for id in bolge:
+		_hakim_degisti(id, onceki[id])

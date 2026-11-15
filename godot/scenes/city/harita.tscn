@@ -1,9 +1,8 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://d137ubevcyoej"]
 
-[ext_resource type="Script" path="res://scripts/core/harita.gd" id="1_d1jwg"]
-[ext_resource type="Script" path="res://scripts/core/arazi.gd" id="2_mq5n1"]
+[ext_resource type="Script" uid="uid://b6fqbbj3fsdoa" path="res://scripts/core/harita.gd" id="1_d1jwg"]
+[ext_resource type="Script" uid="uid://civ1qwsnecqy7" path="res://scripts/core/arazi.gd" id="2_mq5n1"]
 [ext_resource type="PackedScene" path="res://scenes/city/bina.tscn" id="3_vwpxd"]
-[ext_resource type="Script" path="res://scripts/core/bina.gd" id="4_m10mx"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ghm4q"]
 albedo_color = Color(0.42, 0.42, 0.4, 1)
@@ -357,1097 +356,962 @@ script = ExtResource("2_mq5n1")
 
 [node name="Binalar" type="Node3D" parent="." unique_id=1739776054]
 
-[node name="Hotel_Belmont_0" type="Node3D" parent="Binalar" unique_id=882093252 instance=ExtResource("3_vwpxd")]
+[node name="Hotel_Belmont_0" parent="Binalar" unique_id=882093252 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 35.619244, -209)
-script = ExtResource("4_m10mx")
 ad = "Hotel Belmont"
 bolge = "hilltop"
 boyut = Vector3(16, 10.306479, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="Jeweler_1" type="Node3D" parent="Binalar" unique_id=2121133033 instance=ExtResource("3_vwpxd")]
+
+[node name="Jeweler_1" parent="Binalar" unique_id=2121133033 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 32.34626, -209)
-script = ExtResource("4_m10mx")
 ad = "Jeweler"
 bolge = "hilltop"
 boyut = Vector3(16, 8.63861, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="Attorney_2" type="Node3D" parent="Binalar" unique_id=345935549 instance=ExtResource("3_vwpxd")]
+[node name="Attorney_2" parent="Binalar" unique_id=345935549 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 31.255438, -209)
-script = ExtResource("4_m10mx")
 ad = "Attorney"
 bolge = "hilltop"
 boyut = Vector3(16, 8.180538, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="Watchmaker_3" type="Node3D" parent="Binalar" unique_id=1302929448 instance=ExtResource("3_vwpxd")]
+[node name="Watchmaker_3" parent="Binalar" unique_id=1302929448 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 28.383532, -209)
-script = ExtResource("4_m10mx")
 ad = "Watchmaker"
 bolge = "hilltop"
 boyut = Vector3(16, 7.082557, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="Grand_Theater_4" type="Node3D" parent="Binalar" unique_id=2013581392 instance=ExtResource("3_vwpxd")]
+[node name="Grand_Theater_4" parent="Binalar" unique_id=2013581392 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 31.11477, -171)
-script = ExtResource("4_m10mx")
 ad = "Grand Theater"
 bolge = "hilltop"
 boyut = Vector3(16, 7.376976, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="Florist_5" type="Node3D" parent="Binalar" unique_id=1277370569 instance=ExtResource("3_vwpxd")]
+[node name="Florist_5" parent="Binalar" unique_id=1277370569 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 28.300098, -171)
-script = ExtResource("4_m10mx")
 ad = "Florist"
 bolge = "hilltop"
 boyut = Vector3(16, 8.909896, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="Tailor_6" type="Node3D" parent="Binalar" unique_id=360519232 instance=ExtResource("3_vwpxd")]
+[node name="Tailor_6" parent="Binalar" unique_id=360519232 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 26.530664, -171)
-script = ExtResource("4_m10mx")
 ad = "Tailor"
 bolge = "hilltop"
 boyut = Vector3(16, 10.327022, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="Dentist_7" type="Node3D" parent="Binalar" unique_id=744097406 instance=ExtResource("3_vwpxd")]
+[node name="Dentist_7" parent="Binalar" unique_id=744097406 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 25.194153, -171)
-script = ExtResource("4_m10mx")
 ad = "Dentist"
 bolge = "hilltop"
 boyut = Vector3(16, 9.635435, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="Country_Club_8" type="Node3D" parent="Binalar" unique_id=1723826996 instance=ExtResource("3_vwpxd")]
+[node name="Country_Club_8" parent="Binalar" unique_id=1723826996 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 25.220295, -133)
-script = ExtResource("4_m10mx")
 ad = "Country Club"
 bolge = "hilltop"
 boyut = Vector3(16, 10.129227, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="Art_Gallery_9" type="Node3D" parent="Binalar" unique_id=1726362935 instance=ExtResource("3_vwpxd")]
+[node name="Art_Gallery_9" parent="Binalar" unique_id=1726362935 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 23.449232, -133)
-script = ExtResource("4_m10mx")
 ad = "Art Gallery"
 bolge = "hilltop"
 boyut = Vector3(16, 9.183308, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="Mansion_10" type="Node3D" parent="Binalar" unique_id=72152589 instance=ExtResource("3_vwpxd")]
+[node name="Mansion_10" parent="Binalar" unique_id=72152589 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 22.283253, -133)
-script = ExtResource("4_m10mx")
 ad = "Mansion"
 bolge = "hilltop"
 boyut = Vector3(16, 8.234932, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="Private_Library_11" type="Node3D" parent="Binalar" unique_id=1565333017 instance=ExtResource("3_vwpxd")]
+[node name="Private_Library_11" parent="Binalar" unique_id=1565333017 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 19.598299, -133)
-script = ExtResource("4_m10mx")
 ad = "Private Library"
 bolge = "hilltop"
 boyut = Vector3(16, 8.197177, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="Chauffeur_Garage_12" type="Node3D" parent="Binalar" unique_id=308468631 instance=ExtResource("3_vwpxd")]
+[node name="Chauffeur_Garage_12" parent="Binalar" unique_id=308468631 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 19.454521, -95)
-script = ExtResource("4_m10mx")
 ad = "Chauffeur Garage"
 bolge = "hilltop"
 boyut = Vector3(16, 10.475079, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="Perfumery_13" type="Node3D" parent="Binalar" unique_id=1158227939 instance=ExtResource("3_vwpxd")]
+[node name="Perfumery_13" parent="Binalar" unique_id=1158227939 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 18.361767, -95)
-script = ExtResource("4_m10mx")
 ad = "Perfumery"
 bolge = "hilltop"
 boyut = Vector3(16, 10.011366, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="Hotel_Belmont_II_14" type="Node3D" parent="Binalar" unique_id=1682394174 instance=ExtResource("3_vwpxd")]
+[node name="Hotel_Belmont_II_14" parent="Binalar" unique_id=1682394174 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 17.437471, -95)
-script = ExtResource("4_m10mx")
 ad = "Hotel Belmont II"
 bolge = "hilltop"
 boyut = Vector3(16, 10.051747, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="Jeweler_II_15" type="Node3D" parent="Binalar" unique_id=445046192 instance=ExtResource("3_vwpxd")]
+[node name="Jeweler_II_15" parent="Binalar" unique_id=445046192 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 17.134554, -95)
-script = ExtResource("4_m10mx")
 ad = "Jeweler II"
 bolge = "hilltop"
 boyut = Vector3(16, 7.7119546, 16)
 renk = Color(0.78, 0.7, 0.55, 1)
 
-[node name="City_Hall_0" type="Node3D" parent="Binalar" unique_id=1564370997 instance=ExtResource("3_vwpxd")]
+[node name="City_Hall_0" parent="Binalar" unique_id=1564370997 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 25.6829, -209)
-script = ExtResource("4_m10mx")
 ad = "City Hall"
 bolge = "downtown"
 boyut = Vector3(20, 41.26375, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="First_National_Bank_1" type="Node3D" parent="Binalar" unique_id=1309704239 instance=ExtResource("3_vwpxd")]
+[node name="First_National_Bank_1" parent="Binalar" unique_id=1309704239 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 25.247896, -209)
-script = ExtResource("4_m10mx")
 ad = "First National Bank"
 bolge = "downtown"
 boyut = Vector3(20, 30.276205, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="Daily_Courier_2" type="Node3D" parent="Binalar" unique_id=1355013345 instance=ExtResource("3_vwpxd")]
+[node name="Daily_Courier_2" parent="Binalar" unique_id=1355013345 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 26.262049, -209)
-script = ExtResource("4_m10mx")
 ad = "Daily Courier"
 bolge = "downtown"
 boyut = Vector3(20, 29.863209, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="Post_Office_3" type="Node3D" parent="Binalar" unique_id=836069975 instance=ExtResource("3_vwpxd")]
+[node name="Post_Office_3" parent="Binalar" unique_id=836069975 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 25.960474, -209)
-script = ExtResource("4_m10mx")
 ad = "Post Office"
 bolge = "downtown"
 boyut = Vector3(20, 53.569756, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="Orpheum_Cinema_4" type="Node3D" parent="Binalar" unique_id=575915984 instance=ExtResource("3_vwpxd")]
+[node name="Orpheum_Cinema_4" parent="Binalar" unique_id=575915984 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 22.831528, -171)
-script = ExtResource("4_m10mx")
 ad = "Orpheum Cinema"
 bolge = "downtown"
 boyut = Vector3(20, 52.586174, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="Drugstore_5" type="Node3D" parent="Binalar" unique_id=905907756 instance=ExtResource("3_vwpxd")]
+[node name="Drugstore_5" parent="Binalar" unique_id=905907756 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 22.772018, -171)
-script = ExtResource("4_m10mx")
 ad = "Drugstore"
 bolge = "downtown"
 boyut = Vector3(20, 32.723396, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="Precinct_House_6" type="Node3D" parent="Binalar" unique_id=195770003 instance=ExtResource("3_vwpxd")]
+[node name="Precinct_House_6" parent="Binalar" unique_id=195770003 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 22.799534, -171)
-script = ExtResource("4_m10mx")
 ad = "Precinct House"
 bolge = "downtown"
 ozel = true
 boyut = Vector3(20, 46.783554, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="Courthouse_7" type="Node3D" parent="Binalar" unique_id=1404198681 instance=ExtResource("3_vwpxd")]
+[node name="Courthouse_7" parent="Binalar" unique_id=1404198681 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 21.716717, -171)
-script = ExtResource("4_m10mx")
 ad = "Courthouse"
 bolge = "downtown"
 boyut = Vector3(20, 54.062057, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="Union_Station_8" type="Node3D" parent="Binalar" unique_id=671657013 instance=ExtResource("3_vwpxd")]
+[node name="Union_Station_8" parent="Binalar" unique_id=671657013 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 19.852013, -133)
-script = ExtResource("4_m10mx")
 ad = "Union Station"
 bolge = "downtown"
 boyut = Vector3(20, 35.156425, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="Stock_Exchange_9" type="Node3D" parent="Binalar" unique_id=1579891237 instance=ExtResource("3_vwpxd")]
+[node name="Stock_Exchange_9" parent="Binalar" unique_id=1579891237 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 19.613997, -133)
-script = ExtResource("4_m10mx")
 ad = "Stock Exchange"
 bolge = "downtown"
 boyut = Vector3(20, 47.23076, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="Telephone_Exchange_10" type="Node3D" parent="Binalar" unique_id=1445249852 instance=ExtResource("3_vwpxd")]
+[node name="Telephone_Exchange_10" parent="Binalar" unique_id=1445249852 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 19.210579, -133)
-script = ExtResource("4_m10mx")
 ad = "Telephone Exchange"
 bolge = "downtown"
 boyut = Vector3(20, 27.711895, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="Hat_Shop_11" type="Node3D" parent="Binalar" unique_id=1889385646 instance=ExtResource("3_vwpxd")]
+[node name="Hat_Shop_11" parent="Binalar" unique_id=1889385646 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 18.211292, -133)
-script = ExtResource("4_m10mx")
 ad = "Hat Shop"
 bolge = "downtown"
 boyut = Vector3(20, 36.139286, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="Chamber_of_Commerce_12" type="Node3D" parent="Binalar" unique_id=1838316978 instance=ExtResource("3_vwpxd")]
+[node name="Chamber_of_Commerce_12" parent="Binalar" unique_id=1838316978 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 14.902892, -95)
-script = ExtResource("4_m10mx")
 ad = "Chamber of Commerce"
 bolge = "downtown"
 boyut = Vector3(20, 30.909855, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="City_Hall_II_13" type="Node3D" parent="Binalar" unique_id=1127378407 instance=ExtResource("3_vwpxd")]
+[node name="City_Hall_II_13" parent="Binalar" unique_id=1127378407 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 15.581103, -95)
-script = ExtResource("4_m10mx")
 ad = "City Hall II"
 bolge = "downtown"
 boyut = Vector3(20, 31.052883, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="First_National_Bank_II_14" type="Node3D" parent="Binalar" unique_id=224662919 instance=ExtResource("3_vwpxd")]
+[node name="First_National_Bank_II_14" parent="Binalar" unique_id=224662919 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 15.151397, -95)
-script = ExtResource("4_m10mx")
 ad = "First National Bank II"
 bolge = "downtown"
 boyut = Vector3(20, 48.007698, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="Daily_Courier_II_15" type="Node3D" parent="Binalar" unique_id=578222360 instance=ExtResource("3_vwpxd")]
+[node name="Daily_Courier_II_15" parent="Binalar" unique_id=578222360 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 15.253675, -95)
-script = ExtResource("4_m10mx")
 ad = "Daily Courier II"
 bolge = "downtown"
 boyut = Vector3(20, 31.935898, 20)
 renk = Color(0.5, 0.55, 0.62, 1)
 
-[node name="Corner_Grocer_0" type="Node3D" parent="Binalar" unique_id=1223332704 instance=ExtResource("3_vwpxd")]
+[node name="Corner_Grocer_0" parent="Binalar" unique_id=1223332704 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -140, 14.881152, -57)
-script = ExtResource("4_m10mx")
 ad = "Corner Grocer"
 bolge = "southside"
 boyut = Vector3(12, 15.122939, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Barber_Shop_1" type="Node3D" parent="Binalar" unique_id=952131035 instance=ExtResource("3_vwpxd")]
+[node name="Barber_Shop_1" parent="Binalar" unique_id=952131035 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -126, 14.881152, -57)
-script = ExtResource("4_m10mx")
 ad = "Barber Shop"
 bolge = "southside"
 boyut = Vector3(12, 14.360455, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Home_2" type="Node3D" parent="Binalar" unique_id=964342144 instance=ExtResource("3_vwpxd")]
+[node name="Home_2" parent="Binalar" unique_id=964342144 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -102, 14.168909, -57)
-script = ExtResource("4_m10mx")
 ad = "Home"
 bolge = "southside"
 ozel = true
 boyut = Vector3(12, 13.7161875, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Pool_Hall_3" type="Node3D" parent="Binalar" unique_id=682627261 instance=ExtResource("3_vwpxd")]
+[node name="Pool_Hall_3" parent="Binalar" unique_id=682627261 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -88, 14.168909, -57)
-script = ExtResource("4_m10mx")
 ad = "Pool Hall"
 bolge = "southside"
 boyut = Vector3(12, 13.686178, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Pawn_Shop_4" type="Node3D" parent="Binalar" unique_id=1627922208 instance=ExtResource("3_vwpxd")]
+[node name="Pawn_Shop_4" parent="Binalar" unique_id=1627922208 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64, 14.2135935, -57)
-script = ExtResource("4_m10mx")
 ad = "Pawn Shop"
 bolge = "southside"
 boyut = Vector3(12, 13.548244, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Murphys_Tavern_5" type="Node3D" parent="Binalar" unique_id=1892500113 instance=ExtResource("3_vwpxd")]
+[node name="Murphys_Tavern_5" parent="Binalar" unique_id=1892500113 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50, 14.2135935, -57)
-script = ExtResource("4_m10mx")
 ad = "Murphy's Tavern"
 bolge = "southside"
 ozel = true
 boyut = Vector3(12, 16.248827, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Laundry_Tenement_6" type="Node3D" parent="Binalar" unique_id=39317251 instance=ExtResource("3_vwpxd")]
+[node name="Laundry_Tenement_6" parent="Binalar" unique_id=39317251 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 12.365003, -57)
-script = ExtResource("4_m10mx")
 ad = "Laundry Tenement"
 bolge = "southside"
 boyut = Vector3(12, 14.507547, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Soda_Fountain_7" type="Node3D" parent="Binalar" unique_id=1355720562 instance=ExtResource("3_vwpxd")]
+[node name="Soda_Fountain_7" parent="Binalar" unique_id=1355720562 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 12.365003, -57)
-script = ExtResource("4_m10mx")
 ad = "Soda Fountain"
 bolge = "southside"
 boyut = Vector3(12, 12.470417, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Boxing_Gym_8" type="Node3D" parent="Binalar" unique_id=981945668 instance=ExtResource("3_vwpxd")]
+[node name="Boxing_Gym_8" parent="Binalar" unique_id=981945668 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -140, 12.11222, -19)
-script = ExtResource("4_m10mx")
 ad = "Boxing Gym"
 bolge = "southside"
 boyut = Vector3(12, 13.582095, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Laundromat_9" type="Node3D" parent="Binalar" unique_id=862832843 instance=ExtResource("3_vwpxd")]
+[node name="Laundromat_9" parent="Binalar" unique_id=862832843 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -126, 12.11222, -19)
-script = ExtResource("4_m10mx")
 ad = "Laundromat"
 bolge = "southside"
 ozel = true
 boyut = Vector3(12, 15.335332, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Social_Hall_10" type="Node3D" parent="Binalar" unique_id=1047643802 instance=ExtResource("3_vwpxd")]
+[node name="Social_Hall_10" parent="Binalar" unique_id=1047643802 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -102, 10.824517, -19)
-script = ExtResource("4_m10mx")
 ad = "Social Hall"
 bolge = "southside"
 boyut = Vector3(12, 14.503371, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Corner_Grocer_II_11" type="Node3D" parent="Binalar" unique_id=674766817 instance=ExtResource("3_vwpxd")]
+[node name="Corner_Grocer_II_11" parent="Binalar" unique_id=674766817 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -88, 10.824517, -19)
-script = ExtResource("4_m10mx")
 ad = "Corner Grocer II"
 bolge = "southside"
 boyut = Vector3(12, 15.54509, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Barber_Shop_II_12" type="Node3D" parent="Binalar" unique_id=1461505079 instance=ExtResource("3_vwpxd")]
+[node name="Barber_Shop_II_12" parent="Binalar" unique_id=1461505079 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64, 11.4371605, -19)
-script = ExtResource("4_m10mx")
 ad = "Barber Shop II"
 bolge = "southside"
 boyut = Vector3(12, 14.984654, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Bakery_II_13" type="Node3D" parent="Binalar" unique_id=1928859735 instance=ExtResource("3_vwpxd")]
+[node name="Bakery_II_13" parent="Binalar" unique_id=1928859735 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50, 11.4371605, -19)
-script = ExtResource("4_m10mx")
 ad = "Bakery II"
 bolge = "southside"
 boyut = Vector3(12, 13.828718, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Duffys_Bar_14" type="Node3D" parent="Binalar" unique_id=1862655101 instance=ExtResource("3_vwpxd")]
+[node name="Duffys_Bar_14" parent="Binalar" unique_id=1862655101 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 10.124748, -19)
-script = ExtResource("4_m10mx")
 ad = "Duffy's Bar"
 bolge = "southside"
 ozel = true
 boyut = Vector3(12, 12.749733, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Pawn_Shop_II_15" type="Node3D" parent="Binalar" unique_id=25708412 instance=ExtResource("3_vwpxd")]
+[node name="Pawn_Shop_II_15" parent="Binalar" unique_id=25708412 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 10.124748, -19)
-script = ExtResource("4_m10mx")
 ad = "Pawn Shop II"
 bolge = "southside"
 boyut = Vector3(12, 12.670929, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Butcher_Row_II_16" type="Node3D" parent="Binalar" unique_id=179067565 instance=ExtResource("3_vwpxd")]
+[node name="Butcher_Row_II_16" parent="Binalar" unique_id=179067565 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -140, 8.466004, 19)
-script = ExtResource("4_m10mx")
 ad = "Butcher Row II"
 bolge = "southside"
 boyut = Vector3(12, 15.704214, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Laundry_Tenement_II_17" type="Node3D" parent="Binalar" unique_id=1446160639 instance=ExtResource("3_vwpxd")]
+[node name="Laundry_Tenement_II_17" parent="Binalar" unique_id=1446160639 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -126, 8.466004, 19)
-script = ExtResource("4_m10mx")
 ad = "Laundry Tenement II"
 bolge = "southside"
 boyut = Vector3(12, 17.577784, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Soda_Fountain_II_18" type="Node3D" parent="Binalar" unique_id=1962454844 instance=ExtResource("3_vwpxd")]
+[node name="Soda_Fountain_II_18" parent="Binalar" unique_id=1962454844 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -102, 8.155042, 19)
-script = ExtResource("4_m10mx")
 ad = "Soda Fountain II"
 bolge = "southside"
 boyut = Vector3(12, 13.0474825, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Boxing_Gym_II_19" type="Node3D" parent="Binalar" unique_id=878541251 instance=ExtResource("3_vwpxd")]
+[node name="Boxing_Gym_II_19" parent="Binalar" unique_id=878541251 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -88, 8.155042, 19)
-script = ExtResource("4_m10mx")
 ad = "Boxing Gym II"
 bolge = "southside"
 boyut = Vector3(12, 17.274647, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Sal_the_Shark_20" type="Node3D" parent="Binalar" unique_id=293380331 instance=ExtResource("3_vwpxd")]
+[node name="Sal_the_Shark_20" parent="Binalar" unique_id=293380331 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64, 7.900041, 19)
-script = ExtResource("4_m10mx")
 ad = "Sal the Shark"
 bolge = "southside"
 ozel = true
 boyut = Vector3(12, 13.926659, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Social_Hall_II_21" type="Node3D" parent="Binalar" unique_id=1607794072 instance=ExtResource("3_vwpxd")]
+[node name="Social_Hall_II_21" parent="Binalar" unique_id=1607794072 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50, 7.900041, 19)
-script = ExtResource("4_m10mx")
 ad = "Social Hall II"
 bolge = "southside"
 boyut = Vector3(12, 12.400826, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Corner_Grocer_III_22" type="Node3D" parent="Binalar" unique_id=2040374988 instance=ExtResource("3_vwpxd")]
+[node name="Corner_Grocer_III_22" parent="Binalar" unique_id=2040374988 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 7.770764, 19)
-script = ExtResource("4_m10mx")
 ad = "Corner Grocer III"
 bolge = "southside"
 boyut = Vector3(12, 17.58582, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Barber_Shop_III_23" type="Node3D" parent="Binalar" unique_id=811284662 instance=ExtResource("3_vwpxd")]
+[node name="Barber_Shop_III_23" parent="Binalar" unique_id=811284662 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 7.770764, 19)
-script = ExtResource("4_m10mx")
 ad = "Barber Shop III"
 bolge = "southside"
 boyut = Vector3(12, 14.147413, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Bakery_III_24" type="Node3D" parent="Binalar" unique_id=1074295366 instance=ExtResource("3_vwpxd")]
+[node name="Bakery_III_24" parent="Binalar" unique_id=1074295366 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -140, 6.701248, 57)
-script = ExtResource("4_m10mx")
 ad = "Bakery III"
 bolge = "southside"
 boyut = Vector3(12, 16.88942, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Pool_Hall_III_25" type="Node3D" parent="Binalar" unique_id=1684659782 instance=ExtResource("3_vwpxd")]
+[node name="Pool_Hall_III_25" parent="Binalar" unique_id=1684659782 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -126, 6.701248, 57)
-script = ExtResource("4_m10mx")
 ad = "Pool Hall III"
 bolge = "southside"
 boyut = Vector3(12, 14.336313, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Pawn_Shop_III_26" type="Node3D" parent="Binalar" unique_id=8729454 instance=ExtResource("3_vwpxd")]
+[node name="Pawn_Shop_III_26" parent="Binalar" unique_id=8729454 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -102, 6.2891994, 57)
-script = ExtResource("4_m10mx")
 ad = "Pawn Shop III"
 bolge = "southside"
 boyut = Vector3(12, 17.850159, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Butcher_Row_III_27" type="Node3D" parent="Binalar" unique_id=1896381118 instance=ExtResource("3_vwpxd")]
+[node name="Butcher_Row_III_27" parent="Binalar" unique_id=1896381118 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -88, 6.2891994, 57)
-script = ExtResource("4_m10mx")
 ad = "Butcher Row III"
 bolge = "southside"
 boyut = Vector3(12, 12.494738, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Laundry_Tenement_III_28" type="Node3D" parent="Binalar" unique_id=209899070 instance=ExtResource("3_vwpxd")]
+[node name="Laundry_Tenement_III_28" parent="Binalar" unique_id=209899070 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64, 5.3375726, 57)
-script = ExtResource("4_m10mx")
 ad = "Laundry Tenement III"
 bolge = "southside"
 boyut = Vector3(12, 13.374275, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Soda_Fountain_III_29" type="Node3D" parent="Binalar" unique_id=559726077 instance=ExtResource("3_vwpxd")]
+[node name="Soda_Fountain_III_29" parent="Binalar" unique_id=559726077 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50, 5.3375726, 57)
-script = ExtResource("4_m10mx")
 ad = "Soda Fountain III"
 bolge = "southside"
 boyut = Vector3(12, 16.32494, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Boxing_Gym_III_30" type="Node3D" parent="Binalar" unique_id=208756739 instance=ExtResource("3_vwpxd")]
+[node name="Boxing_Gym_III_30" parent="Binalar" unique_id=208756739 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 5.897955, 57)
-script = ExtResource("4_m10mx")
 ad = "Boxing Gym III"
 bolge = "southside"
 boyut = Vector3(12, 16.108162, 22)
 renk = Color(0.55, 0.3, 0.25, 1)
 
-[node name="Cobbler_III_31" type="Node3D" parent="Binalar" unique_id=52544874 instance=ExtResource("3_vwpxd")]
+[node name="Cobbler_III_31" parent="Binalar" unique_id=52544874 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 5.897955, 57)
-script = ExtResource("4_m10mx")
 ad = "Cobbler III"
 bolge = "southside"
 boyut = Vector3(12, 16.30236, 22)
 renk = Color(0.586, 0.356, 0.31, 1)
 
-[node name="Synagogue_0" type="Node3D" parent="Binalar" unique_id=380880771 instance=ExtResource("3_vwpxd")]
+[node name="Synagogue_0" parent="Binalar" unique_id=380880771 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 12.190449, -57)
-script = ExtResource("4_m10mx")
 ad = "Synagogue"
 bolge = "eastside"
 boyut = Vector3(12, 16.888966, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Corner_Diner_1" type="Node3D" parent="Binalar" unique_id=1155228992 instance=ExtResource("3_vwpxd")]
+[node name="Corner_Diner_1" parent="Binalar" unique_id=1155228992 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 12.190449, -57)
-script = ExtResource("4_m10mx")
 ad = "Corner Diner"
 bolge = "eastside"
 boyut = Vector3(12, 15.974773, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Boarding_House_2" type="Node3D" parent="Binalar" unique_id=1063894222 instance=ExtResource("3_vwpxd")]
+[node name="Boarding_House_2" parent="Binalar" unique_id=1063894222 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 12.2053385, -57)
-script = ExtResource("4_m10mx")
 ad = "Boarding House"
 bolge = "eastside"
 boyut = Vector3(12, 15.049629, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Print_Shop_3" type="Node3D" parent="Binalar" unique_id=2068609579 instance=ExtResource("3_vwpxd")]
+[node name="Print_Shop_3" parent="Binalar" unique_id=2068609579 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 12.2053385, -57)
-script = ExtResource("4_m10mx")
 ad = "Print Shop"
 bolge = "eastside"
 boyut = Vector3(12, 16.100986, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Bakeshop_4" type="Node3D" parent="Binalar" unique_id=657845585 instance=ExtResource("3_vwpxd")]
+[node name="Bakeshop_4" parent="Binalar" unique_id=657845585 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 12.030398, -57)
-script = ExtResource("4_m10mx")
 ad = "Bakeshop"
 bolge = "eastside"
 boyut = Vector3(12, 16.836573, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Shoe_Repair_5" type="Node3D" parent="Binalar" unique_id=728355401 instance=ExtResource("3_vwpxd")]
+[node name="Shoe_Repair_5" parent="Binalar" unique_id=728355401 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102, 12.030398, -57)
-script = ExtResource("4_m10mx")
 ad = "Shoe Repair"
 bolge = "eastside"
 boyut = Vector3(12, 15.030903, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Public_School_12_6" type="Node3D" parent="Binalar" unique_id=1233270197 instance=ExtResource("3_vwpxd")]
+[node name="Public_School_12_6" parent="Binalar" unique_id=1233270197 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126, 12.668526, -57)
-script = ExtResource("4_m10mx")
 ad = "Public School 12"
 bolge = "eastside"
 boyut = Vector3(12, 14.5610485, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Open_Market_7" type="Node3D" parent="Binalar" unique_id=2012246977 instance=ExtResource("3_vwpxd")]
+[node name="Open_Market_7" parent="Binalar" unique_id=2012246977 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 12.668526, -57)
-script = ExtResource("4_m10mx")
 ad = "Open Market"
 bolge = "eastside"
 boyut = Vector3(12, 16.978828, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Garment_Sweatshop_8" type="Node3D" parent="Binalar" unique_id=775285311 instance=ExtResource("3_vwpxd")]
+[node name="Garment_Sweatshop_8" parent="Binalar" unique_id=775285311 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 10.906378, -19)
-script = ExtResource("4_m10mx")
 ad = "Garment Sweatshop"
 bolge = "eastside"
 boyut = Vector3(12, 13.788425, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Yiddish_Theater_9" type="Node3D" parent="Binalar" unique_id=2132103219 instance=ExtResource("3_vwpxd")]
+[node name="Yiddish_Theater_9" parent="Binalar" unique_id=2132103219 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 10.906378, -19)
-script = ExtResource("4_m10mx")
 ad = "Yiddish Theater"
 bolge = "eastside"
 boyut = Vector3(12, 15.479476, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Deli_10" type="Node3D" parent="Binalar" unique_id=974388530 instance=ExtResource("3_vwpxd")]
+[node name="Deli_10" parent="Binalar" unique_id=974388530 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 10.875925, -19)
-script = ExtResource("4_m10mx")
 ad = "Deli"
 bolge = "eastside"
 boyut = Vector3(12, 13.268442, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Pushcart_Alley_11" type="Node3D" parent="Binalar" unique_id=1089140033 instance=ExtResource("3_vwpxd")]
+[node name="Pushcart_Alley_11" parent="Binalar" unique_id=1089140033 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 10.875925, -19)
-script = ExtResource("4_m10mx")
 ad = "Pushcart Alley"
 bolge = "eastside"
 boyut = Vector3(12, 12.112482, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Synagogue_II_12" type="Node3D" parent="Binalar" unique_id=1832675065 instance=ExtResource("3_vwpxd")]
+[node name="Synagogue_II_12" parent="Binalar" unique_id=1832675065 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 10.186644, -19)
-script = ExtResource("4_m10mx")
 ad = "Synagogue II"
 bolge = "eastside"
 boyut = Vector3(12, 17.134594, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Corner_Diner_II_13" type="Node3D" parent="Binalar" unique_id=846778037 instance=ExtResource("3_vwpxd")]
+[node name="Corner_Diner_II_13" parent="Binalar" unique_id=846778037 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102, 10.186644, -19)
-script = ExtResource("4_m10mx")
 ad = "Corner Diner II"
 bolge = "eastside"
 boyut = Vector3(12, 13.028016, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Boarding_House_II_14" type="Node3D" parent="Binalar" unique_id=663434153 instance=ExtResource("3_vwpxd")]
+[node name="Boarding_House_II_14" parent="Binalar" unique_id=663434153 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126, 10.300954, -19)
-script = ExtResource("4_m10mx")
 ad = "Boarding House II"
 bolge = "eastside"
 boyut = Vector3(12, 15.5769615, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Print_Shop_II_15" type="Node3D" parent="Binalar" unique_id=229601817 instance=ExtResource("3_vwpxd")]
+[node name="Print_Shop_II_15" parent="Binalar" unique_id=229601817 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 10.300954, -19)
-script = ExtResource("4_m10mx")
 ad = "Print Shop II"
 bolge = "eastside"
 boyut = Vector3(12, 12.314709, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Bakeshop_II_16" type="Node3D" parent="Binalar" unique_id=661205732 instance=ExtResource("3_vwpxd")]
+[node name="Bakeshop_II_16" parent="Binalar" unique_id=661205732 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 8.093316, 19)
-script = ExtResource("4_m10mx")
 ad = "Bakeshop II"
 bolge = "eastside"
 boyut = Vector3(12, 13.141032, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Shoe_Repair_II_17" type="Node3D" parent="Binalar" unique_id=665834851 instance=ExtResource("3_vwpxd")]
+[node name="Shoe_Repair_II_17" parent="Binalar" unique_id=665834851 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 8.093316, 19)
-script = ExtResource("4_m10mx")
 ad = "Shoe Repair II"
 bolge = "eastside"
 boyut = Vector3(12, 17.671959, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Public_School_12_II_18" type="Node3D" parent="Binalar" unique_id=2117367319 instance=ExtResource("3_vwpxd")]
+[node name="Public_School_12_II_18" parent="Binalar" unique_id=2117367319 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 8.126333, 19)
-script = ExtResource("4_m10mx")
 ad = "Public School 12 II"
 bolge = "eastside"
 boyut = Vector3(12, 16.150047, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Open_Market_II_19" type="Node3D" parent="Binalar" unique_id=1180386149 instance=ExtResource("3_vwpxd")]
+[node name="Open_Market_II_19" parent="Binalar" unique_id=1180386149 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 8.126333, 19)
-script = ExtResource("4_m10mx")
 ad = "Open Market II"
 bolge = "eastside"
 boyut = Vector3(12, 13.901152, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Garment_Sweatshop_II_20" type="Node3D" parent="Binalar" unique_id=280423750 instance=ExtResource("3_vwpxd")]
+[node name="Garment_Sweatshop_II_20" parent="Binalar" unique_id=280423750 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 7.449688, 19)
-script = ExtResource("4_m10mx")
 ad = "Garment Sweatshop II"
 bolge = "eastside"
 boyut = Vector3(12, 14.853388, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Yiddish_Theater_II_21" type="Node3D" parent="Binalar" unique_id=934879756 instance=ExtResource("3_vwpxd")]
+[node name="Yiddish_Theater_II_21" parent="Binalar" unique_id=934879756 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102, 7.449688, 19)
-script = ExtResource("4_m10mx")
 ad = "Yiddish Theater II"
 bolge = "eastside"
 boyut = Vector3(12, 13.853514, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Deli_II_22" type="Node3D" parent="Binalar" unique_id=1832220611 instance=ExtResource("3_vwpxd")]
+[node name="Deli_II_22" parent="Binalar" unique_id=1832220611 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126, 8.68432, 19)
-script = ExtResource("4_m10mx")
 ad = "Deli II"
 bolge = "eastside"
 boyut = Vector3(12, 17.026365, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Pushcart_Alley_II_23" type="Node3D" parent="Binalar" unique_id=2139079978 instance=ExtResource("3_vwpxd")]
+[node name="Pushcart_Alley_II_23" parent="Binalar" unique_id=2139079978 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 8.68432, 19)
-script = ExtResource("4_m10mx")
 ad = "Pushcart Alley II"
 bolge = "eastside"
 boyut = Vector3(12, 15.717738, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Synagogue_III_24" type="Node3D" parent="Binalar" unique_id=593048253 instance=ExtResource("3_vwpxd")]
+[node name="Synagogue_III_24" parent="Binalar" unique_id=593048253 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 6.3956666, 57)
-script = ExtResource("4_m10mx")
 ad = "Synagogue III"
 bolge = "eastside"
 boyut = Vector3(12, 13.05048, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Corner_Diner_III_25" type="Node3D" parent="Binalar" unique_id=1790112154 instance=ExtResource("3_vwpxd")]
+[node name="Corner_Diner_III_25" parent="Binalar" unique_id=1790112154 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 6.3956666, 57)
-script = ExtResource("4_m10mx")
 ad = "Corner Diner III"
 bolge = "eastside"
 boyut = Vector3(12, 13.129075, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Boarding_House_III_26" type="Node3D" parent="Binalar" unique_id=2046328737 instance=ExtResource("3_vwpxd")]
+[node name="Boarding_House_III_26" parent="Binalar" unique_id=2046328737 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 6.1245303, 57)
-script = ExtResource("4_m10mx")
 ad = "Boarding House III"
 bolge = "eastside"
 boyut = Vector3(12, 13.193842, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Print_Shop_III_27" type="Node3D" parent="Binalar" unique_id=1525678294 instance=ExtResource("3_vwpxd")]
+[node name="Print_Shop_III_27" parent="Binalar" unique_id=1525678294 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 6.1245303, 57)
-script = ExtResource("4_m10mx")
 ad = "Print Shop III"
 bolge = "eastside"
 boyut = Vector3(12, 14.42738, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Bakeshop_III_28" type="Node3D" parent="Binalar" unique_id=467618887 instance=ExtResource("3_vwpxd")]
+[node name="Bakeshop_III_28" parent="Binalar" unique_id=467618887 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 5.06698, 57)
-script = ExtResource("4_m10mx")
 ad = "Bakeshop III"
 bolge = "eastside"
 boyut = Vector3(12, 17.964008, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Shoe_Repair_III_29" type="Node3D" parent="Binalar" unique_id=1840898651 instance=ExtResource("3_vwpxd")]
+[node name="Shoe_Repair_III_29" parent="Binalar" unique_id=1840898651 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102, 5.06698, 57)
-script = ExtResource("4_m10mx")
 ad = "Shoe Repair III"
 bolge = "eastside"
 boyut = Vector3(12, 16.414074, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Public_School_12_III_30" type="Node3D" parent="Binalar" unique_id=339590687 instance=ExtResource("3_vwpxd")]
+[node name="Public_School_12_III_30" parent="Binalar" unique_id=339590687 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126, 6.013674, 57)
-script = ExtResource("4_m10mx")
 ad = "Public School 12 III"
 bolge = "eastside"
 boyut = Vector3(12, 15.5846, 22)
 renk = Color(0.5, 0.42, 0.32, 1)
 
-[node name="Open_Market_III_31" type="Node3D" parent="Binalar" unique_id=1111395857 instance=ExtResource("3_vwpxd")]
+[node name="Open_Market_III_31" parent="Binalar" unique_id=1111395857 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 6.013674, 57)
-script = ExtResource("4_m10mx")
 ad = "Open Market III"
 bolge = "eastside"
 boyut = Vector3(12, 17.144432, 22)
 renk = Color(0.54, 0.4664, 0.3744, 1)
 
-[node name="Blacksmith_0" type="Node3D" parent="Binalar" unique_id=303520355 instance=ExtResource("3_vwpxd")]
+[node name="Blacksmith_0" parent="Binalar" unique_id=303520355 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 4.4732046, 95)
-script = ExtResource("4_m10mx")
 ad = "Blacksmith"
 bolge = "flats"
 boyut = Vector3(22, 8.620518, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Carpenter_1" type="Node3D" parent="Binalar" unique_id=1004044397 instance=ExtResource("3_vwpxd")]
+[node name="Carpenter_1" parent="Binalar" unique_id=1004044397 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 4.2579, 95)
-script = ExtResource("4_m10mx")
 ad = "Carpenter"
 bolge = "flats"
 boyut = Vector3(22, 11.534627, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Junk_Yard_2" type="Node3D" parent="Binalar" unique_id=1091973469 instance=ExtResource("3_vwpxd")]
+[node name="Junk_Yard_2" parent="Binalar" unique_id=1091973469 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 4.0774145, 95)
-script = ExtResource("4_m10mx")
 ad = "Junk Yard"
 bolge = "flats"
 boyut = Vector3(22, 11.5725, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Tenement_3" type="Node3D" parent="Binalar" unique_id=647561768 instance=ExtResource("3_vwpxd")]
+[node name="Tenement_3" parent="Binalar" unique_id=647561768 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 4.2342334, 95)
-script = ExtResource("4_m10mx")
 ad = "Tenement"
 bolge = "flats"
 boyut = Vector3(22, 9.052847, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Turkish_Bath_4" type="Node3D" parent="Binalar" unique_id=403646825 instance=ExtResource("3_vwpxd")]
+[node name="Turkish_Bath_4" parent="Binalar" unique_id=403646825 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 3.4532783, 95)
-script = ExtResource("4_m10mx")
 ad = "Turkish Bath"
 bolge = "flats"
 boyut = Vector3(22, 8.93, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Produce_Stand_5" type="Node3D" parent="Binalar" unique_id=94034934 instance=ExtResource("3_vwpxd")]
+[node name="Produce_Stand_5" parent="Binalar" unique_id=94034934 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 3.2061703, 95)
-script = ExtResource("4_m10mx")
 ad = "Produce Stand"
 bolge = "flats"
 boyut = Vector3(22, 10.639585, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Butcher_6" type="Node3D" parent="Binalar" unique_id=1443656107 instance=ExtResource("3_vwpxd")]
+[node name="Butcher_6" parent="Binalar" unique_id=1443656107 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 3.7247097, 95)
-script = ExtResource("4_m10mx")
 ad = "Butcher"
 bolge = "flats"
 boyut = Vector3(22, 9.681156, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Marchetti_Family_7" type="Node3D" parent="Binalar" unique_id=1347848739 instance=ExtResource("3_vwpxd")]
+[node name="Marchetti_Family_7" parent="Binalar" unique_id=1347848739 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 3.6287358, 95)
-script = ExtResource("4_m10mx")
 ad = "Marchetti Family"
 bolge = "flats"
 ozel = true
 boyut = Vector3(22, 9.534995, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Foundry_8" type="Node3D" parent="Binalar" unique_id=1142590272 instance=ExtResource("3_vwpxd")]
+[node name="Foundry_8" parent="Binalar" unique_id=1142590272 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 2.410132, 133)
-script = ExtResource("4_m10mx")
 ad = "Foundry"
 bolge = "flats"
 boyut = Vector3(22, 10.169436, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Brick_Yard_9" type="Node3D" parent="Binalar" unique_id=143414319 instance=ExtResource("3_vwpxd")]
+[node name="Brick_Yard_9" parent="Binalar" unique_id=143414319 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 2.6904461, 133)
-script = ExtResource("4_m10mx")
 ad = "Brick Yard"
 bolge = "flats"
 boyut = Vector3(22, 10.953424, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Cold_Storage_10" type="Node3D" parent="Binalar" unique_id=2107289313 instance=ExtResource("3_vwpxd")]
+[node name="Cold_Storage_10" parent="Binalar" unique_id=2107289313 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 2.6562502, 133)
-script = ExtResource("4_m10mx")
 ad = "Cold Storage"
 bolge = "flats"
 boyut = Vector3(22, 10.262939, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Tool_&_Die_11" type="Node3D" parent="Binalar" unique_id=1457629666 instance=ExtResource("3_vwpxd")]
+[node name="Tool_&_Die_11" parent="Binalar" unique_id=1457629666 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 3.2131426, 133)
-script = ExtResource("4_m10mx")
 ad = "Tool & Die"
 bolge = "flats"
 boyut = Vector3(22, 10.129879, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Blacksmith_II_12" type="Node3D" parent="Binalar" unique_id=56642634 instance=ExtResource("3_vwpxd")]
+[node name="Blacksmith_II_12" parent="Binalar" unique_id=56642634 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 3.0510528, 133)
-script = ExtResource("4_m10mx")
 ad = "Blacksmith II"
 bolge = "flats"
 boyut = Vector3(22, 11.303872, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Carpenter_II_13" type="Node3D" parent="Binalar" unique_id=1916449464 instance=ExtResource("3_vwpxd")]
+[node name="Carpenter_II_13" parent="Binalar" unique_id=1916449464 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 3.3931549, 133)
-script = ExtResource("4_m10mx")
 ad = "Carpenter II"
 bolge = "flats"
 boyut = Vector3(22, 10.463694, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Junk_Yard_II_14" type="Node3D" parent="Binalar" unique_id=633492088 instance=ExtResource("3_vwpxd")]
+[node name="Junk_Yard_II_14" parent="Binalar" unique_id=633492088 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 3.1286135, 133)
-script = ExtResource("4_m10mx")
 ad = "Junk Yard II"
 bolge = "flats"
 boyut = Vector3(22, 10.967252, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Tenement_II_15" type="Node3D" parent="Binalar" unique_id=788729599 instance=ExtResource("3_vwpxd")]
+[node name="Tenement_II_15" parent="Binalar" unique_id=788729599 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 3.1628375, 133)
-script = ExtResource("4_m10mx")
 ad = "Tenement II"
 bolge = "flats"
 boyut = Vector3(22, 10.927418, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Turkish_Bath_II_16" type="Node3D" parent="Binalar" unique_id=769658573 instance=ExtResource("3_vwpxd")]
+[node name="Turkish_Bath_II_16" parent="Binalar" unique_id=769658573 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 2.2009509, 171)
-script = ExtResource("4_m10mx")
 ad = "Turkish Bath II"
 bolge = "flats"
 boyut = Vector3(22, 10.269009, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Produce_Stand_II_17" type="Node3D" parent="Binalar" unique_id=772623034 instance=ExtResource("3_vwpxd")]
+[node name="Produce_Stand_II_17" parent="Binalar" unique_id=772623034 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 2.3897407, 171)
-script = ExtResource("4_m10mx")
 ad = "Produce Stand II"
 bolge = "flats"
 boyut = Vector3(22, 9.895936, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Butcher_II_18" type="Node3D" parent="Binalar" unique_id=2077951957 instance=ExtResource("3_vwpxd")]
+[node name="Butcher_II_18" parent="Binalar" unique_id=2077951957 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 2.4524639, 171)
-script = ExtResource("4_m10mx")
 ad = "Butcher II"
 bolge = "flats"
 boyut = Vector3(22, 8.923458, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Rail_Depot_II_19" type="Node3D" parent="Binalar" unique_id=515677136 instance=ExtResource("3_vwpxd")]
+[node name="Rail_Depot_II_19" parent="Binalar" unique_id=515677136 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 2.5394213, 171)
-script = ExtResource("4_m10mx")
 ad = "Rail Depot II"
 bolge = "flats"
 boyut = Vector3(22, 10.06118, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Foundry_II_20" type="Node3D" parent="Binalar" unique_id=1966444171 instance=ExtResource("3_vwpxd")]
+[node name="Foundry_II_20" parent="Binalar" unique_id=1966444171 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 2.4441102, 171)
-script = ExtResource("4_m10mx")
 ad = "Foundry II"
 bolge = "flats"
 boyut = Vector3(22, 9.458613, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Brick_Yard_II_21" type="Node3D" parent="Binalar" unique_id=656626852 instance=ExtResource("3_vwpxd")]
+[node name="Brick_Yard_II_21" parent="Binalar" unique_id=656626852 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 2.2694814, 171)
-script = ExtResource("4_m10mx")
 ad = "Brick Yard II"
 bolge = "flats"
 boyut = Vector3(22, 8.21708, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Cold_Storage_II_22" type="Node3D" parent="Binalar" unique_id=923904283 instance=ExtResource("3_vwpxd")]
+[node name="Cold_Storage_II_22" parent="Binalar" unique_id=923904283 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 1.9443892, 171)
-script = ExtResource("4_m10mx")
 ad = "Cold Storage II"
 bolge = "flats"
 boyut = Vector3(22, 10.427266, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Tool_&_Die_II_23" type="Node3D" parent="Binalar" unique_id=748019359 instance=ExtResource("3_vwpxd")]
+[node name="Tool_&_Die_II_23" parent="Binalar" unique_id=748019359 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 2.2137637, 171)
-script = ExtResource("4_m10mx")
 ad = "Tool & Die II"
 bolge = "flats"
 boyut = Vector3(22, 9.597436, 22)
 renk = Color(0.45, 0.4, 0.36, 1)
 
-[node name="Warehouse_0" type="Node3D" parent="Binalar" unique_id=1266330650 instance=ExtResource("3_vwpxd")]
+[node name="Warehouse_0" parent="Binalar" unique_id=1266330650 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 1.6025773, 209)
-script = ExtResource("4_m10mx")
 ad = "Warehouse"
 bolge = "docks"
 boyut = Vector3(22, 8.965195, 22)
 renk = Color(0.38, 0.4, 0.42, 1)
 
-[node name="Bonded_Warehouse_1" type="Node3D" parent="Binalar" unique_id=1718398126 instance=ExtResource("3_vwpxd")]
+[node name="Bonded_Warehouse_1" parent="Binalar" unique_id=1718398126 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 1.6852231, 209)
-script = ExtResource("4_m10mx")
 ad = "Bonded Warehouse"
 bolge = "docks"
 boyut = Vector3(22, 7.8726177, 22)
 renk = Color(0.38, 0.4, 0.42, 1)
 
-[node name="Fish_Market_2" type="Node3D" parent="Binalar" unique_id=389769440 instance=ExtResource("3_vwpxd")]
+[node name="Fish_Market_2" parent="Binalar" unique_id=389769440 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 1.4270709, 209)
-script = ExtResource("4_m10mx")
 ad = "Fish Market"
 bolge = "docks"
 boyut = Vector3(22, 7.952938, 22)
 renk = Color(0.38, 0.4, 0.42, 1)
 
-[node name="Customs_House_3" type="Node3D" parent="Binalar" unique_id=1754747745 instance=ExtResource("3_vwpxd")]
+[node name="Customs_House_3" parent="Binalar" unique_id=1754747745 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 1.1120521, 209)
-script = ExtResource("4_m10mx")
 ad = "Customs House"
 bolge = "docks"
 boyut = Vector3(22, 7.938929, 22)
 renk = Color(0.38, 0.4, 0.42, 1)
 
-[node name="Harbor_Trust_4" type="Node3D" parent="Binalar" unique_id=702106355 instance=ExtResource("3_vwpxd")]
+[node name="Harbor_Trust_4" parent="Binalar" unique_id=702106355 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 1.1712712, 209)
-script = ExtResource("4_m10mx")
 ad = "Harbor Trust"
 bolge = "docks"
 ozel = true
 boyut = Vector3(22, 8.457279, 22)
 renk = Color(0.38, 0.4, 0.42, 1)
 
-[node name="Shipyard_5" type="Node3D" parent="Binalar" unique_id=1906948628 instance=ExtResource("3_vwpxd")]
+[node name="Shipyard_5" parent="Binalar" unique_id=1906948628 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 1.4334342, 209)
-script = ExtResource("4_m10mx")
 ad = "Shipyard"
 bolge = "docks"
 boyut = Vector3(22, 8.591751, 22)
 renk = Color(0.38, 0.4, 0.42, 1)
 
-[node name="Rope_Works_6" type="Node3D" parent="Binalar" unique_id=1527426171 instance=ExtResource("3_vwpxd")]
+[node name="Rope_Works_6" parent="Binalar" unique_id=1527426171 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 1.352038, 209)
-script = ExtResource("4_m10mx")
 ad = "Rope Works"
 bolge = "docks"
 boyut = Vector3(22, 8.173506, 22)
 renk = Color(0.38, 0.4, 0.42, 1)
 
-[node name="Dock_Hiring_Hall_7" type="Node3D" parent="Binalar" unique_id=1015333814 instance=ExtResource("3_vwpxd")]
+[node name="Dock_Hiring_Hall_7" parent="Binalar" unique_id=1015333814 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 1.2649285, 209)
-script = ExtResource("4_m10mx")
 ad = "Dock Hiring Hall"
 bolge = "docks"
 boyut = Vector3(22, 8.127213, 22)
 renk = Color(0.38, 0.4, 0.42, 1)
 
-[node name="Coal_Yard_8" type="Node3D" parent="Binalar" unique_id=1110022090 instance=ExtResource("3_vwpxd")]
+[node name="Coal_Yard_8" parent="Binalar" unique_id=1110022090 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 0.7680966, 247)
-script = ExtResource("4_m10mx")
 ad = "Coal Yard"
 bolge = "docks"
 boyut = Vector3(22, 8.154628, 22)
 renk = Color(0.38, 0.4, 0.42, 1)
 
-[node name="Sailors_Bar_9" type="Node3D" parent="Binalar" unique_id=800013808 instance=ExtResource("3_vwpxd")]
+[node name="Sailors_Bar_9" parent="Binalar" unique_id=800013808 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 0.86974484, 247)
-script = ExtResource("4_m10mx")
 ad = "Sailors Bar"
 bolge = "docks"
 boyut = Vector3(22, 8.746019, 22)
 renk = Color(0.38, 0.4, 0.42, 1)
 
-[node name="Cannery_10" type="Node3D" parent="Binalar" unique_id=256093787 instance=ExtResource("3_vwpxd")]
+[node name="Cannery_10" parent="Binalar" unique_id=256093787 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 0.93025595, 247)
-script = ExtResource("4_m10mx")
 ad = "Cannery"
 bolge = "docks"
 boyut = Vector3(22, 8.735323, 22)
 renk = Color(0.38, 0.4, 0.42, 1)
 
-[node name="Ship_Chandler_11" type="Node3D" parent="Binalar" unique_id=870099081 instance=ExtResource("3_vwpxd")]
+[node name="Ship_Chandler_11" parent="Binalar" unique_id=870099081 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0.732375, 247)
-script = ExtResource("4_m10mx")
 ad = "Ship Chandler"
 bolge = "docks"
 boyut = Vector3(22, 7.2965875, 22)
 renk = Color(0.38, 0.4, 0.42, 1)
 
-[node name="Stevedore_Union_12" type="Node3D" parent="Binalar" unique_id=128830503 instance=ExtResource("3_vwpxd")]
+[node name="Stevedore_Union_12" parent="Binalar" unique_id=128830503 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 1.0723431, 247)
-script = ExtResource("4_m10mx")
 ad = "Stevedore Union"
 bolge = "docks"
 boyut = Vector3(22, 7.80405, 22)
 renk = Color(0.38, 0.4, 0.42, 1)
 
-[node name="Grain_Elevator_13" type="Node3D" parent="Binalar" unique_id=1952429102 instance=ExtResource("3_vwpxd")]
+[node name="Grain_Elevator_13" parent="Binalar" unique_id=1952429102 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 0.9180605, 247)
-script = ExtResource("4_m10mx")
 ad = "Grain Elevator"
 bolge = "docks"
 boyut = Vector3(22, 7.9480224, 22)
 renk = Color(0.38, 0.4, 0.42, 1)
 
-[node name="Warehouse_II_14" type="Node3D" parent="Binalar" unique_id=123732571 instance=ExtResource("3_vwpxd")]
+[node name="Warehouse_II_14" parent="Binalar" unique_id=123732571 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 0.98043776, 247)
-script = ExtResource("4_m10mx")
 ad = "Warehouse II"
 bolge = "docks"
 boyut = Vector3(22, 7.178278, 22)
 renk = Color(0.38, 0.4, 0.42, 1)
 
-[node name="Bonded_Warehouse_II_15" type="Node3D" parent="Binalar" unique_id=2106577198 instance=ExtResource("3_vwpxd")]
+[node name="Bonded_Warehouse_II_15" parent="Binalar" unique_id=2106577198 instance=ExtResource("3_vwpxd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 1.1404257, 247)
-script = ExtResource("4_m10mx")
 ad = "Bonded Warehouse II"
 bolge = "docks"
 boyut = Vector3(22, 8.680964, 22)
@@ -2013,3 +1877,5 @@ mesh = SubResource("BoxMesh_yrflf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 303)
 material_override = SubResource("StandardMaterial3D_vf2nf")
 mesh = SubResource("PlaneMesh_apd2y")
+
+[editable path="Binalar/Hotel_Belmont_0"]
