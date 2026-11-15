@@ -705,6 +705,12 @@ function panelBolge() {
   h += `<div class="box"><div class="t">${B.ad} ${'★'.repeat(b.servet)}${'☆'.repeat(5 - b.servet)}</div><div class="note">${B.ac}</div>` +
     row('Hakim', hk ? `<b style="color:${FAK[hk].renk}">${hakimAd(hk)}</b>` : '<span class="dim">Sahipsiz</span>') +
     `<div class="note">Nüfuz (çizgi: hakimlik eşiği %${HAKIM_ESIK})</div>${infBar(b)}` +
+    (() => {
+      if (hk === 'oyuncu') return row('Hakimlik', '<span class="good">sende</span>');
+      const ben = b.inf.oyuncu || 0, rakip = Math.max(0, ...Object.keys(b.inf).filter((f) => f !== 'oyuncu').map((f) => b.inf[f] || 0));
+      const hedef = Math.max(HAKIM_ESIK, rakip + 0.1);
+      return row('Hakim olmak için', `<span class="gold">+${Math.max(0, hedef - ben).toFixed(1)} nüfuz</span> <small>(haraç bağla ≈+3, satın al ≈+4)</small>`);
+    })() +
     row('Büyüme', `${Math.round(b.ilerleme)} / 100`) + meter(b.ilerleme, 100, 'green') +
     row('Huzur', `${Math.round(b.huzur)}`) + meter(b.huzur, 100, b.huzur < 30 ? 'red' : '') +
     row('Garnizon', `${b.garnizon} adam${b.garnizon ? ` · $${b.garnizon * ADAM_MAAS}/ay` : ''}`) +
