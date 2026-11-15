@@ -66,7 +66,7 @@ export function pusuP(s, id) {
   const taninma = 0.3 + b.tan / 100;
   const koruma = 1 + 0.6 * (st.ekip + (staff(s, 'koruma') ? 1 : 0));
   const ahit = f === 'marchetti' && s.unvan.ahit ? 0.1 : 1;
-  return { p: clamp(0.0012 * v * taninma * bende * ofke * ahit / koruma, 0, 0.3), f, v };
+  return { p: clamp(0.014 * v * taninma * bende * ofke * ahit / koruma, 0, 0.6), f, v };
 }
 
 // ---------- yaralanma ----------
