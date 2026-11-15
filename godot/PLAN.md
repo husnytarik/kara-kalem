@@ -1,12 +1,12 @@
 # Kara Kalem 3D — PLAN
 
-Durum: `[x]` bitti · `[~]` JS prototipte var, Godot'a taşınacak · `[ ]` yapılmadı.
+Durum: `[x]` bitti (senin testinle) · `[~]` JS prototipte var ya da yazıldı, test bekliyor · `[ ]` yapılmadı.
 Görsel harita: `plan.html` (tarayıcıda aç). Bu dosya asıl kaynaktır; ilerledikçe işaretle ve `plan.html` içindeki `DATA` listesini güncelle.
 
 ## Faz 1 — Temel (sahne, karakter, kamera)
-- [ ] **Sokak** — `sokak.gd` — tek sokaklık test sahnesi, zemin, ışık, binalar (kutu)
-- [ ] **Yürüme** — `oyuncu.gd` — WASD, koşma, çömelme, çarpışma
-- [ ] **Kamera** — `kamera.gd` — üçüncü şahıs, omuz kamerası, nişan modu
+- [~] **Sokak** — `sokak.gd` — tek sokaklık test sahnesi, zemin, ışık, binalar (kutu)
+- [~] **Yürüme** — `oyuncu.gd` — WASD, koşma, çömelme, çarpışma
+- [~] **Kamera** — `kamera.gd` — üçüncü şahıs, omuz kamerası, nişan modu
 - [ ] **Karakter** — `karakter.gd` — ortak iskelet, modüler kıyafet parçaları (şapka, üst, alt, ayakkabı)
 - [ ] **Animasyon** — `animasyon.gd` — durma, yürüme, koşma, ateş etme, vurulma, ölme
 - [ ] **Gün döngüsü** — `gun_dongusu.gd` — güneş, gece, sokak lambaları
