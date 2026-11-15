@@ -1,0 +1,11 @@
+; Kara Kalem - Godot projesi
+config_version=5
+
+[application]
+
+config/name="Kara Kalem"
+config/features=PackedStringArray("4.3", "Forward Plus")
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
