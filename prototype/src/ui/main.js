@@ -80,7 +80,7 @@ function renderTop() {
 }
 
 // ---------- harita ----------
-const PATROL = [[20, ROWS[0]], [V[4], ROWS[0]], [V[4], ROWS[1]], [20, ROWS[1]], [20, ROWS[2]], [V[4], ROWS[2]], [V[4], ROWS[1]], [20, ROWS[1]]];
+const PATROL = ROWS.flatMap((r, i) => (i % 2 ? [[V[V.length - 1], r], [20, r]] : [[20, r], [V[V.length - 1], r]])); // yılan gibi tüm sokaklar, sonra sol kenardan başa
 
 function el(tag, attrs = {}, parent) {
   const e = document.createElementNS(SVGNS, tag);
@@ -97,7 +97,7 @@ let camKey = '';
 function applyCam() {
   const svg = $('map');
   const cw = svg.clientWidth || 880, ch = svg.clientHeight || 600;
-  cam.vw = clamp(cam.vw, 320, 1500);
+  cam.vw = clamp(cam.vw, 320, 3000);
   const vh = cam.vw * ch / cw;
   const lim = (v, half, size) => (2 * half >= size ? size / 2 : clamp(v, half - 60, size - half + 60));
   cam.x = lim(cam.x, cam.vw / 2, W); cam.y = lim(cam.y, vh / 2, H);
@@ -110,12 +110,13 @@ function buildMap() {
   const svg = $('map');
   svg.innerHTML = '';
   el('rect', { width: W, height: H, fill: '#3b3528' }, svg);
-  el('rect', { y: 868, width: W, height: H - 868, fill: '#1f3a4a' }, svg); // liman suyu
+  const SU = ROWS[ROWS.length - 1] + 138;
+  el('rect', { y: SU, width: W, height: H - SU, fill: '#1f3a4a' }, svg); // liman suyu
   for (const r of ROWS) {
     el('rect', { y: r - ROAD_HALF, width: W, height: ROAD_HALF * 2, fill: '#57503f' }, svg);
     el('line', { x1: 0, y1: r, x2: W, y2: r, stroke: '#6d6552', 'stroke-width': 2, 'stroke-dasharray': '14 12' }, svg);
   }
-  for (const v of V) el('rect', { x: v - 10, y: ROWS[0], width: 20, height: ROWS[2] - ROWS[0], fill: '#57503f' }, svg);
+  for (const v of V) el('rect', { x: v - 10, y: ROWS[0], width: 20, height: ROWS[ROWS.length - 1] - ROWS[0], fill: '#57503f' }, svg);
   // bölge zeminleri: hakimin rengiyle yarı saydam; tıklamayı engellemez
   M.z = {};
   for (const [id, B] of Object.entries(BOLGELER)) {
@@ -300,7 +301,7 @@ function renderMap(tf) {
   M.me.setAttribute('transform', `translate(${me.x.toFixed(1)} ${me.y.toFixed(1)})`);
   if (me.path.length) M.route.setAttribute('points', [[me.x, me.y], ...me.path.map((q) => [q.x, q.y])].map((q) => q.join(',')).join(' ')); else M.route.removeAttribute('points');
   // devriye
-  const p = pathPoint(PATROL, tf / 1350);
+  const p = pathPoint(PATROL, tf / 3000);
   M.patrol.setAttribute('cx', p[0]); M.patrol.setAttribute('cy', p[1]);
   M.patrolLight.setAttribute('cx', p[0]); M.patrolLight.setAttribute('cy', p[1]);
   M.patrolLight.setAttribute('r', 10 + attention(s) * 0.35);

@@ -1,99 +1,158 @@
 // Şehir yerleşimi ve yürüme yolu. Çizim yok: yalnızca koordinatlar ve yol bulma.
-// Üç yatay sokak (ROWS) ve beş dikey bağlantı (V). Her binanın kapısı bir sokağa açılır.
-export const W = 1380, H = 930;
-export const ROWS = [230, 480, 730];
-export const V = [20, 357.5, 687.5, 1017.5, 1355];
+// Altı yatay sokak (ROWS) ve dokuz dikey bağlantı (V). Her binanın kapısı bir sokağa açılır.
+// Şehir üç kuşak (her biri iki sokak) × iki yarıdan oluşur: 6 bölge, ~196 bina.
+export const W = 2760, H = 1830;
+export const ROWS = [230, 510, 790, 1070, 1350, 1630];
+export const V = [20, 357.5, 687.5, 1017.5, 1347.5, 1677.5, 2007.5, 2337.5, 2667.5];
 export const ROAD_HALF = 28;
-export const WALK = 10; // oyun dakikası başına harita birimi
+export const WALK = 14; // oyun dakikası başına harita birimi
 const BH = 90;
 
 // p: satır öneki, row: hangi sokak, side: -1 sokağın üstünde / +1 altında
 const LAYOUT = [
-  { p: 't', row: 0, side: -1, n: 8, w: 140, step: 165 },
-  { p: 'a', row: 0, side: 1, n: 8, w: 140, step: 165 },
-  { p: 'b', row: 1, side: -1, n: 8, w: 140, step: 165 },
-  { p: 'c', row: 1, side: 1, n: 8, w: 140, step: 165 },
-  { p: 'd', row: 2, side: -1, n: 8, w: 140, step: 165 },
-  { p: 'h', row: 2, side: 1, n: 10, w: 110, step: 135 },
+  { p: 't', row: 0, side: -1, n: 16, w: 140, step: 165 },
+  { p: 'a', row: 0, side: 1, n: 16, w: 140, step: 165 },
+  { p: 'b', row: 1, side: -1, n: 16, w: 140, step: 165 },
+  { p: 'c', row: 1, side: 1, n: 16, w: 140, step: 165 },
+  { p: 'd', row: 2, side: -1, n: 16, w: 140, step: 165 },
+  { p: 'e', row: 2, side: 1, n: 16, w: 140, step: 165 },
+  { p: 'f', row: 3, side: -1, n: 16, w: 140, step: 165 },
+  { p: 'g', row: 3, side: 1, n: 16, w: 140, step: 165 },
+  { p: 'i', row: 4, side: -1, n: 16, w: 140, step: 165 },
+  { p: 'j', row: 4, side: 1, n: 16, w: 140, step: 165 },
+  { p: 'k', row: 5, side: -1, n: 16, w: 140, step: 165 },
+  { p: 'h', row: 5, side: 1, n: 20, w: 110, step: 135 },
 ];
 
 // Oyunla bağlı 8 yer
 const FN = {
-  a6: { id: 'karakol', ad: 'Precinct House', fill: '#3c4a5c', saat: [0, 24] },
-  b1: { id: 'ev', ad: 'Home', fill: '#5a5040', saat: [18, 23] },
-  b3: { id: 'meyhane', ad: "Murphy's Tavern", fill: '#7a4a2a', saat: [11, 25] },
-  c0: { id: 'camasir', ad: 'Laundromat', fill: '#4f5a55', saat: [8, 18] },
-  c3: { id: 'rakip', ad: "Duffy's Bar", fill: '#5d4038', saat: [11, 25] },
-  c6: { id: 'tefeci', ad: 'Sal the Shark', fill: '#4a3d2e', saat: [9, 18] },
-  d5: { id: 'karaca', ad: 'Marchetti Family', fill: '#4a2f3a', saat: [17, 28] },
+  a12: { id: 'karakol', ad: 'Precinct House', fill: '#3c4a5c', saat: [0, 24] },
+  d1: { id: 'ev', ad: 'Home', fill: '#5a5040', saat: [18, 23] },
+  d3: { id: 'meyhane', ad: "Murphy's Tavern", fill: '#7a4a2a', saat: [11, 25] },
+  e0: { id: 'camasir', ad: 'Laundromat', fill: '#4f5a55', saat: [8, 18] },
+  e3: { id: 'rakip', ad: "Duffy's Bar", fill: '#5d4038', saat: [11, 25] },
+  e9: { id: 'tefeci', ad: 'Sal the Shark', fill: '#4a3d2e', saat: [9, 18] },
+  j5: { id: 'karaca', ad: 'Marchetti Family', fill: '#4a2f3a', saat: [17, 28] },
   h4: { id: 'liman', ad: 'Harbor Trust', fill: '#2f4a58', saat: [9, 18] },
 };
 
-// Süs / mahalle dokusu: şimdilik yalnızca hikâye ve coğrafya (v0.3'te iş ve olay getirecek).
-const GEN = [
-  // Hilltop (t0-t3, a0-a3)
-  ['Hotel Belmont', 'Resepsiyondaki adam her şeyi görür, hiçbir şeyi hatırlamaz.', [0, 24]],
-  ['Jeweler', 'Kasası geceleri iki kilitle kapanır.', [10, 18]],
-  ['Attorney', 'Genç, aç ve her işi alır.', [9, 18]],
-  ['Watchmaker', 'Vitrinindeki saatlerin hiçbiri aynı vakti göstermez.', [9, 18]],
-  ['Grand Theater', 'Locaları şehrin eşrafı tutar.', [18, 24]],
-  ['Florist', 'Düğüne de cenazeye de aynı güller gider.', [8, 19]],
-  ['Tailor', 'Dikiş makinesinin sesi kapıdan taşar.', [8, 19]],
-  ['Dentist', 'Kapıdaki levha: "Sıra numarası bekleyiniz".', [9, 17]],
-  // Downtown (t4-t7, a4, a5, a7)
-  ['City Hall', 'Mühürlü kâğıt ve uzun sıralar.', [9, 17]],
-  ['First National Bank', 'Kayıtlı paranın yeri; kirli parayı sevmez.', [9, 16]],
-  ['Daily Courier', 'Yarının manşeti bu gece yazılıyor.', [10, 23]],
-  ['Post Office', 'Telgraf memuru sorulmadan bilgi vermez.', [9, 17]],
-  ['Orpheum Cinema', 'Sessiz film, canlı piyano.', [17, 24]],
-  ['Drugstore', 'Gece nöbetçi tabelası sönük; kapı zili çalışır.', [8, 20]],
-  ["St. Mary's Hospital", 'Gece gündüz açık. Yaralıları sorgusuz alırlar, kayıt tutarlar.', [0, 24]],
-  // Southside (b0, b2, c1, c2)
-  ['Corner Grocer', 'Veresiye defteri kalın, kulağı daha da kalındır.', [7, 21]],
-  ['Barber Shop', 'Traş olurken en çok söz duyulan yer.', [8, 20]],
-  ['Bakery', 'Sabahları ilk o açar; ekmek kokusu bütün sokağı tutar.', [5, 15]],
-  ["St. Patrick's Church", 'Çanı mahalleye saati bildirir.', [6, 21]],
-  // Eastside (b4-b7, c4, c5, c7)
-  ['Synagogue', 'Cumartesi sabahları avlusu dolar taşar.', [5, 22]],
-  ['Corner Diner', 'Kahve, gazete ve fısıltı.', [6, 24]],
-  ['Boarding House', 'Yük arabaları ve yol yorgunu adamlar.', [0, 24]],
-  ['Print Shop', 'Mürekkep kokusu; bu ay dört ilan bastılar.', [8, 18]],
-  ['Bakeshop', 'Şeker kıtlığında bile turta çıkar.', [7, 21]],
-  ['Shoe Repair', 'Her gün biri yeni tabana, biri yeni dedikoduya gelir.', [8, 19]],
-  ['Public School 12', 'Dört yüz çocuk, iki öğretmen.', [8, 16]],
-  // The Flats (d0-d4, d6, d7)
-  ['Blacksmith', 'Ocak sabahtan akşama yanar.', [7, 18]],
-  ['Carpenter', 'İskele tahtası, tabut, beşik: hepsini yapar.', [7, 18]],
-  ['Junk Yard', 'Eski ne varsa onda yeni bir hayat bulur.', [8, 18]],
-  ['Tenement', 'Beş kat, kırk kiracı, bir kapıcı.', [0, 24]],
-  ['Turkish Bath', 'Konuşulanlar buharla birlikte dışarı sızmaz.', [7, 22]],
-  ['Produce Stand', 'Tezgâhta ne varsa mahalleli o gün onu yer.', [7, 19]],
-  ['Butcher', 'Biftek fiyatı bu semtin gerçek ekonomi göstergesidir.', [7, 18]],
-  // Docks (h0-h3, h5-h9)
-  ['Warehouse 1', 'Kilitli ambar; içindekiler kayıtta başka türlü yazılı.', [8, 18]],
-  ['Warehouse 2', 'Gümrüklü mal burada bekler.', [8, 18]],
-  ['Fish Market', 'Sabah beşte açık artırma, öğlen koku.', [4, 14]],
-  ['Customs House', 'Mühür bunun elinde, uğraşan çok.', [8, 17]],
-  ['Harbor Master', 'Hangi gemi ne zaman girip çıkacak, burada bilinir.', [7, 19]],
-  ['Shipyard', 'Bir gövde iskelede yarım duruyor.', [7, 18]],
-  ['Rope Works', 'Kenevir kokusu ve çıplak ayaklı çocuklar.', [7, 18]],
-  ['Dock Hiring Hall', 'Hamallar buradan iş alır.', [6, 18]],
-  ['Coal Yard', 'Kara toz her şeye siner.', [6, 18]],
-];
+// Süs / mahalle dokusu: her bölgenin havuzu; boş slotlar sırayla doldurulur, tekrarlar numaralanır.
+const POOL = {
+  hilltop: [
+    ['Hotel Belmont', 'Resepsiyondaki adam her şeyi görür, hiçbir şeyi hatırlamaz.', [0, 24]],
+    ['Jeweler', 'Kasası geceleri iki kilitle kapanır.', [10, 18]],
+    ['Attorney', 'Genç, aç ve her işi alır.', [9, 18]],
+    ['Watchmaker', 'Vitrinindeki saatlerin hiçbiri aynı vakti göstermez.', [9, 18]],
+    ['Grand Theater', 'Locaları şehrin eşrafı tutar.', [18, 24]],
+    ['Florist', 'Düğüne de cenazeye de aynı güller gider.', [8, 19]],
+    ['Tailor', 'Dikiş makinesinin sesi kapıdan taşar.', [8, 19]],
+    ['Dentist', 'Kapıdaki levha: "Sıra numarası bekleyiniz".', [9, 17]],
+    ['Country Club', 'Üyelik için üç referans, bir de soyadı gerekir.', [10, 24]],
+    ['Art Gallery', 'Tablolar pahalı, alıcılar sessiz.', [10, 18]],
+    ['Mansion', 'Perdeler hep inik; bahçıvan bile içeri girmez.', [0, 24]],
+    ['Private Library', 'Kitapların yarısı hiç açılmamış.', [9, 20]],
+    ['Chauffeur Garage', 'Cilalı arabalar, bekleyen şoförler.', [7, 21]],
+    ['Perfumery', 'Fransız şişeler, İtalyan fiyatlar.', [10, 19]],
+  ],
+  downtown: [
+    ['City Hall', 'Mühürlü kâğıt ve uzun sıralar.', [9, 17]],
+    ['First National Bank', 'Kayıtlı paranın yeri; kirli parayı sevmez.', [9, 16]],
+    ['Daily Courier', 'Yarının manşeti bu gece yazılıyor.', [10, 23]],
+    ['Post Office', 'Telgraf memuru sorulmadan bilgi vermez.', [9, 17]],
+    ['Orpheum Cinema', 'Sessiz film, canlı piyano.', [17, 24]],
+    ['Drugstore', 'Gece nöbetçi tabelası sönük; kapı zili çalışır.', [8, 20]],
+    ["St. Mary's Hospital", 'Gece gündüz açık. Yaralıları sorgusuz alırlar, kayıt tutarlar.', [0, 24]],
+    ['Department Store', 'Dört kat, bir asansör, yüz tezgâh.', [9, 19]],
+    ['Courthouse', 'Merdivenlerde avukatlar, avluda şahitler.', [9, 17]],
+    ['Union Station', 'Her tren yeni bir yüz, yeni bir bavul.', [0, 24]],
+    ['Stock Exchange', 'Bağırışlar camdan taşar.', [9, 16]],
+    ['Telephone Exchange', 'Kızlar her konuşmayı duyar, hiçbirini anlatmaz.', [0, 24]],
+    ['Hat Shop', 'Fötr şapka, bir de takibe uygun gölge.', [9, 19]],
+    ['Chamber of Commerce', 'Kokteyl ve kontrat, sırasıyla.', [9, 18]],
+  ],
+  southside: [
+    ['Corner Grocer', 'Veresiye defteri kalın, kulağı daha da kalındır.', [7, 21]],
+    ['Barber Shop', 'Traş olurken en çok söz duyulan yer.', [8, 20]],
+    ['Bakery', 'Sabahları ilk o açar; ekmek kokusu bütün sokağı tutar.', [5, 15]],
+    ["St. Patrick's Church", 'Çanı mahalleye saati bildirir.', [6, 21]],
+    ['Pool Hall', 'Bilardo topu ve borç sesi.', [12, 26]],
+    ['Pawn Shop', 'Her yüzük bir hikâye, her saat bir pişmanlık.', [9, 19]],
+    ['Butcher Row', 'Zincirler ve sessiz pazarlıklar.', [7, 18]],
+    ['Laundry Tenement', 'İp üstünde çarşaflar, avluda dedikodu.', [0, 24]],
+    ['Soda Fountain', 'Çocuklar limonata içer, büyükler haber toplar.', [10, 22]],
+    ['Boxing Gym', 'Terli eldivenler, kırık burunlar.', [9, 22]],
+    ['Cobbler', 'Çivi ağızda, kulak kapıda.', [8, 19]],
+    ['Social Hall', 'Cumartesi düğünleri, pazar toplantıları.', [10, 24]],
+  ],
+  eastside: [
+    ['Synagogue', 'Cumartesi sabahları avlusu dolar taşar.', [5, 22]],
+    ['Corner Diner', 'Kahve, gazete ve fısıltı.', [6, 24]],
+    ['Boarding House', 'Yük arabaları ve yol yorgunu adamlar.', [0, 24]],
+    ['Print Shop', 'Mürekkep kokusu; bu ay dört ilan bastılar.', [8, 18]],
+    ['Bakeshop', 'Şeker kıtlığında bile turta çıkar.', [7, 21]],
+    ['Shoe Repair', 'Her gün biri yeni tabana, biri yeni dedikoduya gelir.', [8, 19]],
+    ['Public School 12', 'Dört yüz çocuk, iki öğretmen.', [8, 16]],
+    ['Open Market', 'Pazarlık dört dilde yapılır.', [6, 18]],
+    ['Garment Sweatshop', 'Makineler gece yarısına dek durmaz.', [7, 23]],
+    ['Yiddish Theater', 'Salon küçük, alkış büyük.', [17, 24]],
+    ['Deli', 'Turşu, pastırma ve eski dostlar.', [7, 21]],
+    ['Pushcart Alley', 'Her arabanın bir sahibi, her sahibin bir borcu.', [6, 18]],
+  ],
+  flats: [
+    ['Blacksmith', 'Ocak sabahtan akşama yanar.', [7, 18]],
+    ['Carpenter', 'İskele tahtası, tabut, beşik: hepsini yapar.', [7, 18]],
+    ['Junk Yard', 'Eski ne varsa onda yeni bir hayat bulur.', [8, 18]],
+    ['Tenement', 'Beş kat, kırk kiracı, bir kapıcı.', [0, 24]],
+    ['Turkish Bath', 'Konuşulanlar buharla birlikte dışarı sızmaz.', [7, 22]],
+    ['Produce Stand', 'Tezgâhta ne varsa mahalleli o gün onu yer.', [7, 19]],
+    ['Butcher', 'Biftek fiyatı bu semtin gerçek ekonomi göstergesidir.', [7, 18]],
+    ['Rail Depot', 'Vagonlar gece boşalır, kimse içindekini sormaz.', [0, 24]],
+    ['Foundry', 'Kızgın demir, çıplak kollar.', [6, 18]],
+    ['Brick Yard', 'Kırmızı toz, kırmızı gözler.', [6, 18]],
+    ['Cold Storage', 'Buz blokları ve kilitli kapılar.', [7, 19]],
+    ['Tool & Die', 'Küçük atölye, büyük siparişler.', [7, 18]],
+  ],
+  docks: [
+    ['Warehouse', 'Kilitli ambar; içindekiler kayıtta başka türlü yazılı.', [8, 18]],
+    ['Bonded Warehouse', 'Gümrüklü mal burada bekler.', [8, 18]],
+    ['Fish Market', 'Sabah beşte açık artırma, öğlen koku.', [4, 14]],
+    ['Customs House', 'Mühür bunun elinde, uğraşan çok.', [8, 17]],
+    ['Harbor Master', 'Hangi gemi ne zaman girip çıkacak, burada bilinir.', [7, 19]],
+    ['Shipyard', 'Bir gövde iskelede yarım duruyor.', [7, 18]],
+    ['Rope Works', 'Kenevir kokusu ve çıplak ayaklı çocuklar.', [7, 18]],
+    ['Dock Hiring Hall', 'Hamallar buradan iş alır.', [6, 18]],
+    ['Coal Yard', 'Kara toz her şeye siner.', [6, 18]],
+    ['Sailors Bar', 'Her gece başka bir bayrak, aynı kavga.', [12, 27]],
+    ['Cannery', 'Teneke sesi ve balık kokusu.', [6, 18]],
+    ['Ship Chandler', 'Zincir, halat, fener ve sorulmayan sorular.', [7, 19]],
+    ['Stevedore Union', 'Rozetli adamlar, kapalı kapı toplantıları.', [8, 20]],
+    ['Grain Elevator', 'Silo uğultusu; fareler de sendikalı.', [6, 18]],
+  ],
+};
 const TONES = ['#5b4e3c', '#4d5a4c', '#5a4a4a', '#4a5260', '#605641', '#4e4458', '#564c40', '#44564f'];
+const ROMAN = ['', ' II', ' III', ' IV', ' V', ' VI'];
 
 const dizi = (p, a, b) => Array.from({ length: b - a + 1 }, (_, i) => p + (a + i));
+const blok = (lines, a, b) => lines.flatMap((p) => dizi(p, a, b));
 export const BOLGELER = {
-  hilltop: { ad: 'Hilltop', ac: 'Villalar, bankerler ve siyasetçiler. Para burada konuşur, ses çıkarmaz.', slots: [...dizi('t', 0, 3), ...dizi('a', 0, 3)], komsu: ['downtown', 'southside'] },
-  downtown: { ad: 'Downtown', ac: 'Belediye, banka, karakol ve gazete. Şehrin resmî yüzü.', slots: [...dizi('t', 4, 7), ...dizi('a', 4, 7)], komsu: ['hilltop', 'eastside'] },
-  southside: { ad: 'Southside', ac: 'Senin semtin. Dar sokaklar, sadık halk, eski borçlar.', slots: [...dizi('b', 0, 3), ...dizi('c', 0, 3)], komsu: ['hilltop', 'eastside', 'flats'] },
-  eastside: { ad: 'Eastside', ac: 'Göçmen mahalleleri, pazar yerleri, kalabalık apartmanlar.', slots: [...dizi('b', 4, 7), ...dizi('c', 4, 7)], komsu: ['downtown', 'southside', 'flats'] },
-  flats: { ad: 'The Flats', ac: 'Demiryolu, depo ve atölyeler. Kimse ne yüklendiğini sormaz.', slots: dizi('d', 0, 7), komsu: ['southside', 'eastside', 'docks'] },
-  docks: { ad: 'Docks', ac: "Liman. Kaçakçılık, işçi sendikaları ve yarısı Marchetti'nin olan ambarlar.", slots: dizi('h', 0, 9), komsu: ['flats'] },
+  hilltop: { ad: 'Hilltop', ac: 'Villalar, bankerler ve siyasetçiler. Para burada konuşur, ses çıkarmaz.', slots: blok(['t', 'a', 'b', 'c'], 0, 7), komsu: ['downtown', 'southside'] },
+  downtown: { ad: 'Downtown', ac: 'Belediye, banka, karakol ve gazete. Şehrin resmî yüzü.', slots: blok(['t', 'a', 'b', 'c'], 8, 15), komsu: ['hilltop', 'eastside'] },
+  southside: { ad: 'Southside', ac: 'Senin semtin. Dar sokaklar, sadık halk, eski borçlar.', slots: blok(['d', 'e', 'f', 'g'], 0, 7), komsu: ['hilltop', 'eastside', 'flats'] },
+  eastside: { ad: 'Eastside', ac: 'Göçmen mahalleleri, pazar yerleri, kalabalık apartmanlar.', slots: blok(['d', 'e', 'f', 'g'], 8, 15), komsu: ['downtown', 'southside', 'flats'] },
+  flats: { ad: 'The Flats', ac: 'Demiryolu, depo ve atölyeler. Kimse ne yüklendiğini sormaz.', slots: blok(['i', 'j'], 0, 15), komsu: ['southside', 'eastside', 'docks'] },
+  docks: { ad: 'Docks', ac: "Liman. Kaçakçılık, işçi sendikaları ve yarısı Marchetti'nin olan ambarlar.", slots: [...dizi('k', 0, 15), ...dizi('h', 0, 19)], komsu: ['flats'] },
 };
-// Süs binalar: GEN dizisi bölge sırasıyla (hilltop, downtown, ...) ve bölge içinde slot sırasıyla dağıtılır.
+// Süs binalar: bölge havuzundan sırayla; havuz biterse "II", "III" eklenir.
 const GENSLOT = {};
-{ let i = 0; for (const B of Object.values(BOLGELER)) for (const k of B.slots) if (!FN[k]) GENSLOT[k] = GEN[i++]; }
+for (const [id, B] of Object.entries(BOLGELER)) {
+  let i = 0;
+  for (const k of B.slots) {
+    if (FN[k]) continue;
+    const [ad, fl, saat] = POOL[id][i % POOL[id].length];
+    GENSLOT[k] = [ad + ROMAN[Math.floor(i / POOL[id].length)], fl, saat];
+    i++;
+  }
+}
 
 export const PLACES = {};
 {
