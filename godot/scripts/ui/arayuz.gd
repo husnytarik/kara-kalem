@@ -169,6 +169,12 @@ func adamlar_ac() -> void:
 	_sonuc = ""
 	_yenile(true)
 
+func grup_ac(g: Dictionary) -> void:
+	_mod = "grup"
+	_hedef = g
+	_sonuc = ""
+	_yenile(true)
+
 func defter_ac() -> void:
 	if _mod == "defter":
 		kapat()
@@ -228,6 +234,9 @@ func _imza() -> String:
 			return str([oyun.bolge[_hedef], oyun.erisim(_hedef), oyun.temiz, oyun.kirli, oyun.adamlar.size(), oyun.tarih()["gun"], _sonuc])
 		"adamlar":
 			return str([oyun.adamlar, oyun.gorevler.map(func(g): return [g["adam"], (g["bitis"] - oyun.t) / 60]), oyun.kirli, _sonuc])
+		"grup":
+			var g: Dictionary = _hedef
+			return str([g["kisi"], g["durum"], g["ev"], sokak.gruplar.liste.has(g)])
 		"defter":
 			return str(oyun.defter.size())
 	return ""
@@ -245,6 +254,7 @@ func _yenile(zorla: bool) -> void:
 		"bolge": _bolge_paneli()
 		"adamlar": _adam_paneli()
 		"defter": _defter_paneli()
+		"grup": _grup_paneli()
 	_kapat_dugmesi()
 
 func _kapat_dugmesi() -> void:
@@ -386,3 +396,31 @@ func _defter_paneli() -> void:
 	for k in range(n - 1, maxi(-1, n - 41), -1):
 		var e: Dictionary = oyun.defter[k]
 		_lbl(_ic, "%s %s" % [oyun.saat_yazi(e["t"]), e["metin"]], 14, RENK[e["tur"]])
+
+# ---------- grup paneli (polis, rakip ekip, sivil) ----------
+func _grup_paneli() -> void:
+	var g: Dictionary = _hedef
+	if not sokak.gruplar.liste.has(g):
+		_lbl(_ic, "Grup dağıldı.", 16, RENK["soluk"])
+		return
+	var tur_ad := {"polis": "Polis", "rakip": "Rakip ekip", "sivil": "Siviller"}
+	var renk: Color = sokak.gruplar._renk(g)
+	_lbl(_ic, g["ad"], 24, renk.lerp(Color.WHITE, 0.4))
+	_lbl(_ic, "%s · %d kişi" % [tur_ad[g["tur"]], g["kisi"]], 16, RENK["soluk"])
+	_ayrac(_ic)
+	_lbl(_ic, "Durum: %s" % g["durum"], 16)
+	_lbl(_ic, "Bölgesi: %s" % oyun.harita.bolgeler[g["ev"]]["ad"], 16)
+	var simdi: String = oyun.harita.bolge_at(g["pos"])
+	if simdi != "":
+		_lbl(_ic, "Şu an: %s" % oyun.harita.bolgeler[simdi]["ad"], 16)
+	match g["tur"]:
+		"polis":
+			_lbl(_ic, "Devriye gezen polisler. Yanlarında kirli iş yapma; ileride delil ve arama buraya bağlanacak.", 15, RENK["warn"])
+		"rakip":
+			var f: Dictionary = oyun.FAK[g["fak"]]
+			_lbl(_ic, "Fraksiyon: %s" % f["ad"], 16, f["renk"])
+			_lbl(_ic, "Bu ekibin bölgesinde rakip sayılırsın. İleride pazarlık, baskın ve çatışma buradan açılacak.", 15, RENK["warn"])
+		"sivil":
+			_lbl(_ic, "Mahalle halkı. İleride dedikodu ve bilgi buradan alınacak.", 15, RENK["soluk"])
+	_ayrac(_ic)
+	_btn(_ic, "Yanına git", func(): sokak.oyuncu.git(g["pos"]))

@@ -6,6 +6,8 @@ var harita: Node3D
 var oyun: Node
 var arayuz: CanvasLayer
 var oyuncu: Node3D
+var gruplar: Node3D
+var _oy_etiket: Label3D
 var kamera: Node3D
 var _etiket: Label
 var _ipucu: Label
@@ -30,6 +32,20 @@ func _ready() -> void:
 	kamera.set_script(load("res://scripts/characters/ust_kamera.gd"))
 	add_child(kamera)
 	kamera.hedef = oyuncu
+	_oy_etiket = Label3D.new()
+	_oy_etiket.font_size = 40
+	_oy_etiket.pixel_size = 0.07
+	_oy_etiket.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_oy_etiket.no_depth_test = true
+	_oy_etiket.outline_size = 12
+	_oy_etiket.modulate = Color(1.0, 0.85, 0.4)
+	_oy_etiket.position.y = 12.0
+	oyuncu.add_child(_oy_etiket)
+	gruplar = load("res://scripts/core/gruplar.gd").new()
+	gruplar.name = "Gruplar"
+	add_child(gruplar)
+	gruplar.kur(harita, oyun, oyuncu)
+	gruplar.yakinlasti.connect(_karsilasti)
 	arayuz = load("res://scripts/ui/arayuz.gd").new()
 	add_child(arayuz)
 	arayuz.kur(oyun, self)
@@ -61,6 +77,13 @@ func _ready() -> void:
 			oyuncu.git(Vector3(float(p[0]), 0, float(p[1])))
 		elif a == "--test":
 			_otomatik_test()
+
+func _karsilasti(g: Dictionary) -> void:
+	match g["tur"]:
+		"polis":
+			oyun.kayit("%s yakınında (%d polis)." % [g["ad"], g["kisi"]], "warn")
+		"rakip":
+			oyun.kayit("%s yakınında (%d kişi)." % [g["ad"], g["kisi"]], "bad")
 
 func hiz_ayarla(v: float) -> void:
 	if v > 0.0:
@@ -98,8 +121,12 @@ func _process(delta: float) -> void:
 	_etiket.text = harita.bolgeler[id]["ad"] if id != "" else "Yollar"
 	var k: Camera3D = kamera.kamera()
 	var fp := get_viewport().get_mouse_position()
+	var gh: Dictionary = gruplar.isinla(k.project_ray_origin(fp), k.project_ray_normal(fp))
 	var i: int = harita.yer_isinla(k.project_ray_origin(fp), k.project_ray_normal(fp))
-	if i >= 0:
+	_oy_etiket.text = "Sen · %d kişi" % (1 + oyun.adamlar.size())
+	if not gh.is_empty():
+		_ipucu.text = "%s — %s" % [gruplar.etiket_yazi(gh), gh["durum"]]
+	elif i >= 0:
 		var y: Dictionary = harita.yerler[i]
 		_ipucu.text = "%s  (%s)" % [y["ad"], harita.bolgeler[y["bolge"]]["ad"]]
 	else:

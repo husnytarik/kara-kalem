@@ -1,0 +1,262 @@
+extends Node3D
+# Haritada gezen gruplar (Warband'daki "party" gibi): polis devriyeleri, rakip ekipler, siviller.
+# Her grubun adı, kaç kişi olduğu, fraksiyonu ve durumu var; etiketi kafasının üstünde yazar.
+# Yürüyüş: harita.yol_bul (A*). Hareket delta ile (Engine.time_scale hızı uygular).
+
+signal yakinlasti(g: Dictionary)   # oyuncu bir grubun yanına girdi
+
+const GORUS := 14.0        # bu mesafede "karşılaşma" sayılır (m)
+const SECIM := 5.0         # tıklama/üzerine gelme yarıçapı (m)
+const SIVIL_AD := ["Esnaf", "İşçiler", "Pazarcılar", "Denizciler", "Komşular", "Yolcular", "Çocuklar", "Tüccar"]
+const POLIS_AD := ["Devriye", "Karakol Ekibi", "Bekçiler"]
+const HIZ := {"polis": 7.0, "rakip": 6.5, "sivil": 4.0}
+
+var harita: Node3D
+var oyun: Node
+var oyuncu: Node3D
+var liste: Array[Dictionary] = []
+var rng := RandomNumberGenerator.new()
+var _sayac := 0
+var _esitle_sure := 0.0
+var _gorus_sure := 0.0
+var _temas := {}   # grup id -> oyuncunun yakınında mı (tekrar uyarı vermesin)
+
+func kur(h: Node3D, o: Node, p: Node3D) -> void:
+	harita = h
+	oyun = o
+	oyuncu = p
+	rng.seed = 777
+	for id in harita.bolgeler:
+		_polis_ekle(id)
+		for k in 5:
+			_sivil_ekle(id)
+	_esitle()
+
+# ---------- oluşturma ----------
+func _yeni(tur: String, fak: String, ad: String, kisi: int, ev: String) -> Dictionary:
+	_sayac += 1
+	var yerler: Array = _bolge_yerleri(ev)
+	var bas: Vector3 = harita.yerler[yerler[rng.randi() % yerler.size()]]["pos"]
+	var g := {
+		"id": _sayac, "tur": tur, "fak": fak, "ad": ad, "kisi": kisi, "ev": ev,
+		"pos": bas, "yol": PackedVector3Array(), "bekle": rng.randf_range(0.0, 4.0),
+		"durum": "Bekliyor", "hiz": HIZ[tur] * rng.randf_range(0.9, 1.1), "dugum": null, "etiket": null, "gorunen": -1,
+	}
+	_gorsel_kur(g)
+	liste.append(g)
+	return g
+
+func _polis_ekle(ev: String) -> void:
+	var n: int = 3 + oyun.bolge[ev]["servet"] / 2 + rng.randi() % 2
+	var ad := "%s %s" % [harita.bolgeler[ev]["ad"], POLIS_AD[rng.randi() % POLIS_AD.size()]]
+	_yeni("polis", "polis", ad, n, ev)
+
+func _sivil_ekle(ev: String) -> void:
+	_yeni("sivil", "sivil", SIVIL_AD[rng.randi() % SIVIL_AD.size()], 1 + rng.randi() % 3, ev)
+
+func _rakip_ekle(f: String, ev: String) -> void:
+	var ad: String = "%s Ekibi" % oyun.FAK[f]["ad"].split(" ")[0]
+	_yeni("rakip", f, ad, 3 + rng.randi() % 4, ev)
+
+# Her fraksiyonun, hâkim olduğu bölge başına bir ekibi olur. Bölge el değiştirirse ekip de taşınır.
+func _esitle() -> void:
+	for f in oyun.NPC:
+		var bolgeleri: Array = []
+		for id in harita.bolgeler:
+			if oyun.hakim_of(id) == f:
+				bolgeleri.append(id)
+		var ekipler: Array = liste.filter(func(g): return g["fak"] == f)
+		while ekipler.size() < bolgeleri.size():
+			_rakip_ekle(f, bolgeleri[ekipler.size()])
+			ekipler = liste.filter(func(g): return g["fak"] == f)
+		while ekipler.size() > bolgeleri.size() and ekipler.size() > 1:
+			_sil(ekipler.pop_back())
+		for k in ekipler.size():
+			if bolgeleri.size() > 0:
+				ekipler[k]["ev"] = bolgeleri[k % bolgeleri.size()]
+	# polis her bölgede bir devriye; sivil sayısı sabit
+
+func _sil(g: Dictionary) -> void:
+	if g["dugum"]:
+		(g["dugum"] as Node3D).queue_free()
+	liste.erase(g)
+
+# ---------- görünüm ----------
+func _renk(g: Dictionary) -> Color:
+	match g["tur"]:
+		"polis": return Color(0.2, 0.3, 0.75)
+		"sivil": return Color(0.65, 0.62, 0.55)
+	return oyun.FAK[g["fak"]]["renk"]
+
+func _gorsel_kur(g: Dictionary) -> void:
+	var n := Node3D.new()
+	add_child(n)
+	g["dugum"] = n
+	var l := Label3D.new()
+	l.font_size = 44
+	l.pixel_size = 0.07
+	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	l.no_depth_test = true
+	l.outline_size = 10
+	l.position.y = 11.0
+	l.modulate = _renk(g).lerp(Color.WHITE, 0.45)
+	if g["tur"] == "sivil":
+		l.visibility_range_end = 110.0
+		l.font_size = 36
+		l.pixel_size = 0.05
+	else:
+		l.visibility_range_end = 400.0
+	n.add_child(l)
+	g["etiket"] = l
+	var halka := MeshInstance3D.new()
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = 3.6
+	cyl.bottom_radius = 3.6
+	cyl.height = 0.12
+	var hm := StandardMaterial3D.new()
+	hm.albedo_color = Color(_renk(g), 0.65)
+	hm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	hm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	cyl.material = hm
+	halka.mesh = cyl
+	halka.position.y = 0.15
+	n.add_child(halka)
+	_kisileri_yenile(g)
+
+# Kişi sayısı kadar (en çok 6) kapsül, küme halinde.
+func _kisileri_yenile(g: Dictionary) -> void:
+	var n: Node3D = g["dugum"]
+	for c in n.get_children():
+		if c.has_meta("kisi"):
+			c.queue_free()
+	var goster := mini(g["kisi"], 6)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = _renk(g)
+	for k in goster:
+		var m := MeshInstance3D.new()
+		var cm := CapsuleMesh.new()
+		cm.radius = 0.35
+		cm.height = 1.8
+		cm.material = mat
+		m.mesh = cm
+		m.set_meta("kisi", true)
+		var a := TAU * k / maxf(goster, 1.0)
+		var r := 0.0 if goster == 1 else 2.4
+		m.position = Vector3(cos(a) * r, 0.9 * 3.2, sin(a) * r)
+		m.scale = Vector3.ONE * 3.2
+		n.add_child(m)
+	g["gorunen"] = g["kisi"]
+
+func etiket_yazi(g: Dictionary) -> String:
+	return "%s (%d)" % [g["ad"], g["kisi"]]
+
+# ---------- hareket ----------
+func _process(delta: float) -> void:
+	_esitle_sure += delta
+	if _esitle_sure > 4.0:
+		_esitle_sure = 0.0
+		_esitle()
+	for g in liste:
+		_yuru(g, delta)
+		var n: Node3D = g["dugum"]
+		n.global_position = g["pos"]
+		if g["gorunen"] != g["kisi"]:
+			_kisileri_yenile(g)
+		(g["etiket"] as Label3D).text = etiket_yazi(g)
+	_gorus_sure += delta
+	if _gorus_sure > 0.4:
+		_gorus_sure = 0.0
+		_karsilasma()
+
+func _yuru(g: Dictionary, delta: float) -> void:
+	var yol: PackedVector3Array = g["yol"]
+	if yol.size() == 0:
+		g["bekle"] -= delta
+		g["durum"] = "Bekliyor" if g["tur"] != "polis" else "Nöbette"
+		if g["bekle"] <= 0.0:
+			_hedef_sec(g)
+		return
+	var kalan: float = g["hiz"] * delta
+	var p: Vector3 = g["pos"]
+	while kalan > 0.0 and yol.size() > 0:
+		var f := yol[0] - p
+		f.y = 0
+		var uz := f.length()
+		if uz <= kalan:
+			p = Vector3(yol[0].x, p.y, yol[0].z)
+			kalan -= uz
+			yol.remove_at(0)
+		else:
+			p += f / uz * kalan
+			kalan = 0.0
+	p.y = harita.yuk(p.x, p.z)
+	g["pos"] = p
+	g["yol"] = yol
+	if yol.size() == 0:
+		g["bekle"] = rng.randf_range(3.0, 9.0) if g["tur"] != "polis" else rng.randf_range(1.0, 4.0)
+
+func _bolge_yerleri(id: String) -> Array:
+	var r: Array = []
+	for i in harita.yerler.size():
+		if harita.yerler[i]["bolge"] == id:
+			r.append(i)
+	return r
+
+func _hedef_sec(g: Dictionary) -> void:
+	var ev: String = g["ev"]
+	var bolge := ev
+	var sans := rng.randf()
+	match g["tur"]:
+		"polis":
+			if sans < 0.3:   # komşu bölgeye de uğra
+				var k: Array = oyun.KOMSU[ev]
+				bolge = k[rng.randi() % k.size()]
+			g["durum"] = "Devriye geziyor"
+		"sivil":
+			if sans < 0.25:
+				var k2: Array = oyun.KOMSU[ev]
+				bolge = k2[rng.randi() % k2.size()]
+			g["durum"] = "Yolda"
+		"rakip":
+			if sans < 0.15:
+				var k3: Array = oyun.KOMSU[ev]
+				bolge = k3[rng.randi() % k3.size()]
+			g["durum"] = "Bölgesini geziyor"
+	var yerler := _bolge_yerleri(bolge)
+	var hedef: Vector3 = harita.yerler[yerler[rng.randi() % yerler.size()]]["pos"]
+	var yol: PackedVector3Array = harita.yol_bul(g["pos"], hedef)
+	if yol.size() > 1:
+		yol.remove_at(0)
+		g["yol"] = yol
+	else:
+		g["bekle"] = 2.0
+
+# ---------- karşılaşma ----------
+func _karsilasma() -> void:
+	for g in liste:
+		var uz: float = (g["pos"] as Vector3).distance_to(oyuncu.global_position)
+		var yakin: bool = uz < GORUS
+		if yakin and not _temas.get(g["id"], false):
+			yakinlasti.emit(g)
+		_temas[g["id"]] = yakin
+
+# ---------- seçim ----------
+# Işına en yakın grup (yoksa boş sözlük).
+func isinla(o: Vector3, n: Vector3) -> Dictionary:
+	var en: Dictionary = {}
+	var en_uz := SECIM
+	for g in liste:
+		var p: Vector3 = (g["pos"] as Vector3) + Vector3(0, 3.0, 0)
+		var t := maxf((p - o).dot(n), 0.0)
+		var uz := p.distance_to(o + n * t)
+		if uz < en_uz:
+			en_uz = uz
+			en = g
+	return en
+
+func say(tur: String) -> int:
+	var s := 0
+	for g in liste:
+		if g["tur"] == tur:
+			s += g["kisi"]
+	return s
