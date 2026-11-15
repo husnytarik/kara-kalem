@@ -180,6 +180,9 @@ Kod: `core/savas.js` (+ `bolge.js`, `sim.js` saatlik kancası). Konum yalnızca 
 - **Satın alma:** temiz parayla alınan yer haftalık 1,5× temiz gelir verir; haraç yerine meşru yol ("dürüst iş" zaferinin temeli).
 - Sıradaki: haftalık plan ekranı, avukat/muhasebeci görevleri, adam terfisi ve ekip liderliği, yangın/baskın görevleri, belediye başkanlığı ve dürüst iş zafer yolları.
 
+#### 5.1.7 Zafer yolları
+Her ay kontrol edilir; ilk gerçekleşen oyunu kazanç olarak bitirir. **Dürüst iş:** ≥4 yer sahibi, ≥$12.000 temiz, dosya ≤15, sıfır haraçlı yer, ekip ≤2; 2 ay üst üste. **Belediye başkanlığı:** 2. yıldan itibaren her yıl 12. ay seçim; oy = 12 + 0,3×(hakim bölgelerin ort. sevgisi) + 22×(kampanya fonu/$6.000) + 4×bölge − 0,3×dosya (±5), ≥%50 kazanır; kaybedersen fon erir. **Hâkimiyet:** 6 bölgenin 5'ine hakim, 2 ay.
+
 ### 5.2 Parseller ve binalar
 
 Semtler parsellerden oluşur. Her bina: tür, sahip, kiracı, durum, değer, **görünen işlev** ve varsa **gizli işlev**. Bina özellikleri: Kapasite, Görünürlük (ana cadde / ara sokak), Bodrum var/yok, Arka çıkış, Güvenlik.

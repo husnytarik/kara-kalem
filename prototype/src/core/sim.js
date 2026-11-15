@@ -14,6 +14,7 @@ import { PLACES, BOLGELER, W, WALK, snapRow, route, pathLen, advanceAlong, bolge
 import { brnd as brndSim, newBolge, bolgeMonth, bolgeIs, bolgeAdam, bolgeYatirim, bolgeHarac, aileHediye, yaraliMi } from './bolge.js';
 import { newArac, aracAl, aracSat, aracSur, benzinAl, aracAy, aracHiz, aracAdim } from './arac.js';
 import { newIsy, gorevVer, satinAl as isyeriSatinAl, isyeriSaat, isyeriGun } from './isyeri.js';
+import { newZafer, kampanyaFon, zaferAy } from './zafer.js';
 import { newSehir, sehirGun } from './sehir.js';
 import { newMeslek, isGir, isBirak, isletmeAl, meslekGun, meslekAy, yurumeCarpan, akalamaUcret, akalamaKapasite, aklamaEk, mesaiCarpan } from './meslek.js';
 import { ekipAl, bolgeBaskin, pusuKur, pusuP } from './savas.js';
@@ -101,6 +102,7 @@ export function newGame(seed = (Date.now() & 0x7fffffff)) {
     sehir: newSehir(seed),
     arac: newArac(seed),
     isy: newIsy(seed),
+    zafer: newZafer(seed),
     biz: {
       meyhane: { id: 'meyhane', type: 'meyhane', name: "Murphy's Tavern", price: 1, quality: 50, rep: 50, mRev: 0, mCost: 0 },
       rakip: { id: 'rakip', name: "Duffy'nin Yeri", price: 1, quality: 50, rep: 55 },
@@ -444,6 +446,7 @@ function monthTick(s) {
 
   meslekAy(s, R);
   aracAy(s, R);
+  zaferAy(s, R);
 
   // aklama
   const li = launderInfo(s);
@@ -579,6 +582,7 @@ export function act(s, a) {
     case 'bolgeBaskin': return bolgeBaskin(s, a, pushCard);
     case 'ekipAl': return ekipAl(s, a);
     case 'aileHediye': return aileHediye(s, a);
+    case 'kampanya': return kampanyaFon(s, a);
     case 'gorev': return gorevVer(s, a);
     case 'isyeriAl': return isyeriSatinAl(s, a);
     case 'aracAl': return aracAl(s, a);

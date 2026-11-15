@@ -8,6 +8,7 @@ import {
   hakimOf, FAK, HARAC, HAKIM_ESIK, GARNIZON_MAX, ADAM_MAAS, HAVUZ, IS_AD, BEKLEME, erisim, hakimAd, oyuncuBolgeleri, KARAKTER, etki,
 } from '../core/bolge.js';
 import { ARACLAR, kolaylik, yakitFiyat, bakimGider, arizaP100, aracSurulur, aracHiz } from '../core/arac.js';
+import { zaferDurum, KAMPANYA_HEDEF } from '../core/zafer.js';
 import { HAVA_AD } from '../core/sehir.js';
 import { TURLER, GOREVLER, kontrol, haftalik, fiyatOf, adamSecOnizle, yolDakika, adamKonum, sahipSayisi, haracSayisi } from '../core/isyeri.js';
 import { MESLEKLER, BECERI_AD, seviye, kabul, maasGun, isletmeGelir, etkiGuc } from '../core/meslek.js';
@@ -578,9 +579,21 @@ function panelKaraca() {
 
 const chips = (c) => (c.traits || []).map((t) => `<span class="chip ${TRAITS[t] ? TRAITS[t].kind : ''}" title="${TRAITS[t] ? TRAITS[t].hint : ''}">${t}</span>`).join('');
 
+function zaferKutu(baslik, ac, liste, ek = '') {
+  return `<div class="box"><div class="t">${baslik}</div><div class="note">${ac}</div>` + liste.map((x) => row(x.k, `<span class="${x.ok ? 'good' : 'dim'}">${x.v}</span>`)).join('') + ek + `</div>`;
+}
+function panelHedef() {
+  const D = zaferDurum(s);
+  return `<h3>Hedefler</h3><div class="note">Üç yoldan birini bitir; hangisi olursa oyun biter. Dürüst iş en kolayı, hâkimiyet en zoru.</div>` +
+    zaferKutu('1 · Dürüst iş', `Meşru bir imparatorluk kur ve geçmişini kapat. Koşullar <b>2 ay üst üste</b> tutmalı (şu an ${D.durustAy}/2).`, D.durust) +
+    zaferKutu('2 · Belediye başkanlığı', 'Her yıl 12. ayda seçim olur (2. yıldan sonra). Bölge halkının sevgisi, kampanya fonu ve temiz dosya oyu belirler.', D.baskan,
+      `<div class="btns">${[500, 1500].map((v) => `<button ${A({ type: 'kampanya', amount: v })}>Kampanyaya ${money(v)} <small>temiz</small></button>`).join('')}</div>`) +
+    zaferKutu('3 · Hâkimiyet', `Altı bölgenin beşine hakim ol ve <b>2 ay</b> tut (şu an ${D.hakimAy}/2).`, D.hakim);
+}
+
 function panelGuc() {
   const g = gucPuani(s), u = s.unvan, nxt = BASAMAK[u.basamak + 1];
-  let h = `<h3>Mevki: ${BASAMAK[u.basamak].ad}${lakap(s) ? ` · "${lakap(s)}"` : ''}</h3>` +
+  let h = panelHedef() + `<h3>Mevki: ${BASAMAK[u.basamak].ad}${lakap(s) ? ` · "${lakap(s)}"` : ''}</h3>` +
     `<div class="box"><div class="t">Güç Puanı: ${g.gp.toFixed(1)}${nxt ? ` / ${nxt.gp} (${nxt.ad})` : ''}</div>` +
     g.parts.map((p) => `<div class="row"><span class="dim">${p.k}</span><span class="good">+${p.v.toFixed(1)}</span></div>`).join('') +
     (nxt ? meter(g.gp, nxt.gp, '', []) : '') +
@@ -902,7 +915,7 @@ function renderModal() {
   const mo = $('modal');
   if (s.over) {
     mo.hidden = false;
-    mo.innerHTML = `<div class="card"><h2>${{ dava: 'Dava', borc: 'İflas', olum: 'Son' }[s.over.kind]}</h2><div class="when">${fmtDate(s.t)}</div><p>${s.over.text}</p>` +
+    mo.innerHTML = `<div class="card"><h2>${{ dava: 'Dava', borc: 'İflas', olum: 'Son', zafer: 'Zafer' }[s.over.kind]}</h2><div class="when">${fmtDate(s.t)}</div><p>${s.over.text}</p>` +
       `<p class="mono">Temiz ${money(s.cash.clean)} · kirli ${money(s.cash.dirty)} · borç ${money(s.debt.principal)} · Dosya ${Math.round(s.dosya)}</p>` +
       `<button class="opt" id="restart">Baştan başla</button></div>`;
     return;
