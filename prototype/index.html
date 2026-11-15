@@ -1,37 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kara Kalem — prototip v0.2</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<header id="top">
-  <div class="brand">KARA KALEM <small>v0.2</small></div>
-  <div id="clock"></div>
-  <div id="speed">
-    <button data-speed="0" title="Boşluk">❚❚</button>
-    <button data-speed="1" title="1">×1</button>
-    <button data-speed="2" title="2">×2</button>
-    <button data-speed="3" title="3">×3</button>
-  </div>
-  <div id="stats"></div>
-  <button id="newgame" title="Kaydı sil, baştan başla">Yeni oyun</button>
-</header>
-<main>
-  <section id="left">
-    <div id="mapwrap"><svg id="map" viewBox="0 0 760 500" preserveAspectRatio="xMidYMid meet"></svg><div id="fx"></div><div id="maphud"><span id="hudmsg"></span><button id="findme">Seni bul</button></div></div>
-    <div id="log"></div>
-  </section>
-  <aside id="side">
-    <nav id="tabs"></nav>
-    <div id="panel"></div>
-  </aside>
-</main>
-<div id="modal" hidden></div>
-<div id="toast" hidden></div>
-<script type="module" src="src/ui/main.js"></script>
-<noscript>Bu oyun JavaScript ister.</noscript>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kara Kalem — prototip v0.2</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header id="top">
+      <div class="brand">KARA KALEM <small>v0.2</small></div>
+      <div id="clock"></div>
+      <div id="speed">
+        <button data-speed="0" title="Boşluk">❚❚</button>
+        <button data-speed="1" title="1">×1</button>
+        <button data-speed="2" title="2">×2</button>
+        <button data-speed="3" title="3">×3</button>
+      </div>
+      <div id="stats"></div>
+      <button id="newgame" title="Kaydı sil, baştan başla">Yeni oyun</button>
+    </header>
+    <main>
+      <section id="left">
+        <div id="mapwrap">
+          <svg
+            id="map"
+            viewBox="0 0 760 500"
+            preserveAspectRatio="xMidYMid meet"
+          ></svg>
+          <div id="fx"></div>
+          <div id="maphud">
+            <span id="hudmsg"></span><button id="findme">Seni bul</button>
+          </div>
+        </div>
+        <div id="log"></div>
+      </section>
+      <aside id="side">
+        <nav id="tabs"></nav>
+        <div id="panel"></div>
+      </aside>
+    </main>
+    <div id="modal" hidden></div>
+    <div id="toast" hidden></div>
+    <script type="module" src="src/ui/main.js"></script>
+    <noscript>Bu oyun JavaScript ister.</noscript>
+  </body>
 </html>

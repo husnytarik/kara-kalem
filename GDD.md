@@ -172,6 +172,14 @@ Kod: `core/savas.js` (+ `bolge.js`, `sim.js` saatlik kancası). Konum yalnızca 
 - **Kolaylık (0–1):** 0,4×ekip/8 + 0,3×para/15.000 + 0,3×bölge/4. Yüksek kolaylıkta yakıt −%60, bakım −%50, arıza −%80: güçlü, kalabalık ve zengin adamın pompası ve tamircisi vardır.
 - **Görsel katman:** bina gölgesi, tuğla dokusu, korniş/kaide, bacalar, çizgili tenteler, kaldırım, yaya geçidi, asfalt dokusu, sokak lambası (gece ışık), limanda dalga animasyonu.
 
+#### 5.1.6 İş yerleri ve adamlar (Gangsters: Organized Crime'dan ilham)
+- **Her bina bir işletmedir** (resmî kurumlar hariç): esnaf, eğlence, lüks, atölye, depo, apartman. Türü direncini (zorlukla boyun eğme), haftalık haraç gelirini ve fiyatını belirler; gelir bölgenin servetine ve huzuruna bağlıdır.
+- **Adamlar bireydir:** isim, yumruk, bıçak, zekâ (20–75). Ekip sayısı ile eşitlenir. Görev verilir: *Haraç bağla*, *Haracı topla*, *Nöbet koy*. Adam meyhaneden binaya yürür (haritada görünür), iş bitince sonuç çıkar.
+- **Eşleşme önemlidir:** zayıf adam sert yerde başarısız olur ve yakalanabilir (3 gün karakol, dosya +); bıçağı yumruğundan çok yüksek adam esnafı yaralayabilir (halk sevgisi ve polis kanıtı). Rakip hakimin bölgesinde haraç bağlamak onun öfkesini artırır.
+- **Haraç** birikir (en çok 3 hafta) ve adam gönderip toplanır; direnç edebilir. Nöbetsiz, rakip hakimli bölgedeki haraçlı yerler geri alınabilir.
+- **Satın alma:** temiz parayla alınan yer haftalık 1,5× temiz gelir verir; haraç yerine meşru yol ("dürüst iş" zaferinin temeli).
+- Sıradaki: haftalık plan ekranı, avukat/muhasebeci görevleri, adam terfisi ve ekip liderliği, yangın/baskın görevleri, belediye başkanlığı ve dürüst iş zafer yolları.
+
 ### 5.2 Parseller ve binalar
 
 Semtler parsellerden oluşur. Her bina: tür, sahip, kiracı, durum, değer, **görünen işlev** ve varsa **gizli işlev**. Bina özellikleri: Kapasite, Görünürlük (ana cadde / ara sokak), Bodrum var/yok, Arka çıkış, Güvenlik.
