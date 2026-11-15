@@ -5,8 +5,8 @@ Görsel harita: `plan.html` (tarayıcıda aç). Bu dosya asıl kaynaktır; ilerl
 
 ## Faz 1 — Temel (sahne, karakter, kamera)
 - [~] **Harita (küp şehir)** — `harita.gd` + `sokak.gd` — 6 bölge, yollar, küp binalar, deniz ve iskeleler, bölge adı göstergesi
-- [~] **Yürüme** — `oyuncu.gd` — WASD, koşma, çömelme, çarpışma
-- [~] **Kamera** — `kamera.gd` — üçüncü şahıs, omuz kamerası, nişan modu
+- [~] **Yürüme (haritada tıkla-git)** — `harita_oyuncu.gd` + `harita.gd` — A* yol bulma, yollardan yürür, zaman hızı (3. şahıs `oyuncu.gd` savaş için saklı)
+- [~] **Kamera (yukarıdan)** — `ust_kamera.gd` — M&B tarzı: takip, döndür, yakınlaş, kaydır (3. şahıs `kamera.gd` savaş için saklı)
 - [ ] **Karakter** — `karakter.gd` — ortak iskelet, modüler kıyafet parçaları (şapka, üst, alt, ayakkabı)
 - [ ] **Animasyon** — `animasyon.gd` — durma, yürüme, koşma, ateş etme, vurulma, ölme
 - [ ] **Gün döngüsü** — `gun_dongusu.gd` — güneş, gece, sokak lambaları

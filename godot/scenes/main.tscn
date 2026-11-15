@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://bqw7vmqtx1yxt"]
 
-[ext_resource type="Script" path="res://scripts/core/sokak.gd" id="1"]
+[ext_resource type="Script" uid="uid://blnj3b5tsc0qk" path="res://scripts/core/sokak.gd" id="1"]
 
-[node name="Sokak" type="Node3D"]
+[node name="Sokak" type="Node3D" unique_id=2060702975]
 script = ExtResource("1")

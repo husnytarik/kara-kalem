@@ -34,6 +34,80 @@ func kur() -> void:
 		_bolge(id)
 	_deniz(son_z, gen)
 	_duvarlar(son_z, gen)
+	_izgara_kur(son_z, gen)
+
+# ---------- yol bulma (1 m'lik ızgara üzerinde A*) ----------
+# Bloklar (binalar) kapalı, yollar ve iskeleler açık, deniz kapalı.
+var _izgara: AStarGrid2D
+
+func _izgara_kur(son_z: float, gen: float) -> void:
+	var w := int(gen)
+	var h := int(son_z - KOK.z) + 40
+	_izgara = AStarGrid2D.new()
+	_izgara.region = Rect2i(0, 0, w, h)
+	_izgara.cell_size = Vector2.ONE
+	_izgara.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
+	_izgara.default_compute_heuristic = AStarGrid2D.HEURISTIC_EUCLIDEAN
+	_izgara.default_estimate_heuristic = AStarGrid2D.HEURISTIC_EUCLIDEAN
+	_izgara.update()
+	for id in bolgeler:
+		var b: Dictionary = bolgeler[id]
+		for i in int(b["w"]):
+			for j in int(b["h"]):
+				var x0 := int((b["gx"] + i) * ADIM + YOL / 2.0) - 1
+				var z0 := int((b["gz"] + j) * ADIM + YOL / 2.0) - 1
+				_kapat(x0, z0, x0 + int(BLOK) + 2, z0 + int(BLOK) + 2)
+	var su_z := int(son_z - KOK.z)
+	for k in 6:   # iskeleler açık kalır
+		var ix := int(30 + k * 48.0)
+		if k == 0:
+			_kapat(0, su_z, ix - 2, h)
+		if k == 5:
+			_kapat(ix + 3, su_z, w, h)
+		else:
+			_kapat(ix + 3, su_z, int(30 + (k + 1) * 48.0) - 2, h)
+
+func _kapat(x0: int, z0: int, x1: int, z1: int) -> void:
+	for x in range(maxi(x0, 0), mini(x1, _izgara.region.size.x)):
+		for z in range(maxi(z0, 0), mini(z1, _izgara.region.size.y)):
+			_izgara.set_point_solid(Vector2i(x, z), true)
+
+func _hucre(p: Vector3) -> Vector2i:
+	var r := _izgara.region.size
+	return Vector2i(clampi(int(floor(p.x - KOK.x)), 0, r.x - 1), clampi(int(floor(p.z - KOK.z)), 0, r.y - 1))
+
+func _acik(c: Vector2i) -> Vector2i:
+	if not _izgara.is_point_solid(c):
+		return c
+	for r in range(1, 60):
+		var en := Vector2i(-1, -1)
+		var en_d := 1e9
+		for dx in range(-r, r + 1):
+			for dz in range(-r, r + 1):
+				if maxi(absi(dx), absi(dz)) != r:
+					continue
+				var q := c + Vector2i(dx, dz)
+				if _izgara.is_in_boundsv(q) and not _izgara.is_point_solid(q) and float(dx * dx + dz * dz) < en_d:
+					en = q
+					en_d = float(dx * dx + dz * dz)
+		if en.x >= 0:
+			return en
+	return c
+
+# Dünya koordinatından dünya koordinatına yol. Boşsa ulaşılamaz.
+func yol_bul(a: Vector3, b: Vector3) -> PackedVector3Array:
+	var cikti := PackedVector3Array()
+	var ga := _acik(_hucre(a))
+	var gb := _acik(_hucre(b))
+	var ham := _izgara.get_id_path(ga, gb)
+	for i in ham.size():
+		var p: Vector2i = ham[i]
+		if i > 0 and i < ham.size() - 1:
+			var sonraki: Vector2i = ham[i + 1]
+			if sonraki - p == p - ham[i - 1]:
+				continue   # düz giden noktaları at
+		cikti.append(Vector3(KOK.x + p.x + 0.5, 0.0, KOK.z + p.y + 0.5))
+	return cikti
 
 func merkez(id: String) -> Vector3:
 	var b: Dictionary = bolgeler[id]
