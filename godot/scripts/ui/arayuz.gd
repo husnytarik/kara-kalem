@@ -24,6 +24,7 @@ var _temiz: Label
 var _kirli: Label
 var _ekip: Label
 var _durum: Label
+var _arama: Label
 var _sag: PanelContainer
 var _ic: VBoxContainer
 var _log: VBoxContainer
@@ -123,8 +124,9 @@ func _ust_cubuk() -> void:
 	_temiz = _lbl(h, "", 20, Color("9be39b"))
 	_kirli = _lbl(h, "", 20, Color("e09b9b"))
 	_ekip = _lbl(h, "", 18)
+	_arama = _lbl(h, "", 18)
 	_durum = _lbl(h, "", 18, RENK["warn"])
-	for l in [_tarih, _saat, _temiz, _kirli, _ekip, _durum]:
+	for l in [_tarih, _saat, _temiz, _kirli, _ekip, _arama, _durum]:
 		l.autowrap_mode = TextServer.AUTOWRAP_OFF
 		l.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -227,6 +229,10 @@ func _process(_d: float) -> void:
 	_temiz.text = "Temiz %s" % oyun.para(oyun.temiz)
 	_kirli.text = "Kirli %s" % oyun.para(oyun.kirli)
 	_ekip.text = "Ekip %d/%d" % [oyun.adamlar.size(), oyun.EKIP_MAX]
+	_arama.text = "Arama %d" % int(oyun.arama)
+	_arama.add_theme_color_override("font_color", RENK["bad"] if oyun.arama >= 30.0 else (RENK["warn"] if oyun.arama >= 10.0 else RENK["soluk"]))
+	_arama.tooltip_text = "Polis seni arıyor: 30 ve üstünde devriyeler kovalar."
+	_arama.mouse_filter = Control.MOUSE_FILTER_PASS
 	_durum.text = "DURAKLATILDI" if Engine.time_scale == 0.0 else ""
 	if oyun.defter.size() != _log_n:
 		_log_n = oyun.defter.size()

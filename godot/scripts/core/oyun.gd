@@ -586,7 +586,68 @@ func _saat() -> void:
 			else:
 				_coz(g)
 
+# ---------- kayıt / yükleme ----------
+func durum_al() -> Dictionary:
+	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
+		"isy": isy, "arama": arama, "defter": defter, "sayac": _sayac}
+
+func durum_yukle(d: Dictionary) -> void:
+	t = d["t"]
+	temiz = d["temiz"]
+	kirli = d["kirli"]
+	bolge = d["bolge"]
+	ofke = d["ofke"]
+	adamlar.assign(d["adamlar"])
+	gorevler.assign(d["gorevler"])
+	isy = d["isy"]
+	arama = d["arama"]
+	defter.assign(d["defter"])
+	_sayac = d["sayac"]
+	degisti.emit()
+
+# ---------- günlük rastgele olaylar ----------
+func _olay() -> void:
+	if rng.randf() > 0.3:
+		return
+	var harackilar: Array = isy.keys().filter(func(i): return isy[i]["haracli"])
+	var idler: Array = harita.bolgeler.keys()
+	var bid: String = idler[rng.randi() % idler.size()]
+	var bad: String = harita.bolgeler[bid]["ad"]
+	var b: Dictionary = bolge[bid]
+	match rng.randi() % 6:
+		0:
+			if harackilar.is_empty():
+				return
+			var i: int = harackilar[rng.randi() % harackilar.size()]
+			isy[i]["birikim"] = 0.0
+			arama = minf(100.0, arama + 6.0)
+			kayit("Polis %s'a baskın yaptı: biriken haraç el konuldu, arama arttı." % harita.yerler[i]["ad"], "bad")
+		1:
+			if harackilar.is_empty():
+				return
+			arama = minf(100.0, arama + 8.0)
+			kayit("Biri polise seni ihbar etti. Arama arttı.", "bad")
+		2:
+			if harackilar.is_empty():
+				return
+			var i2: int = harackilar[rng.randi() % harackilar.size()]
+			var m := 30 + rng.randi() % 51
+			kirli += m
+			kayit("%s sahibi minnet duydu, $%d kirli bahşiş bıraktı." % [harita.yerler[i2]["ad"], m], "good")
+		3:
+			var f: String = NPC[rng.randi() % NPC.size()]
+			add_inf(b, f, 2.0)
+			kayit("%s'da %s adamları görünür oldu (nüfuz arttı)." % [bad, FAK[f]["ad"]], "warn")
+		4:
+			b["huzur"] = maxf(0.0, b["huzur"] - 5.0)
+			kayit("%s'da hırsızlık dalgası: huzur düştü." % bad, "warn")
+		5:
+			b["huzur"] = minf(100.0, b["huzur"] + 5.0)
+			b["sev"] = minf(100.0, b["sev"] + 2.0)
+			kayit("%s'da mahalle şenliği: huzur ve sevgi arttı." % bad, "good")
+
 func _gun() -> void:
+	_olay()
 	for i in isy:
 		var r: Dictionary = isy[i]
 		var w := haftalik(i)

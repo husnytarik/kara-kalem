@@ -68,7 +68,7 @@ func _ready() -> void:
 	_ipucu.modulate = Color(1.0, 0.85, 0.4)
 	hud.add_child(_ipucu)
 	var yardim := Label.new()
-	yardim.text = "Sol tık: git/bina seç · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · 1/2/3: hız · B: bölge · A: adamlar · D: defter"
+	yardim.text = "Sol tık: git/bina seç · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · 1/2/3: hız · B: bölge · A: adamlar · D: defter · F6: kaydet · F9: yükle"
 	yardim.position = Vector2(20, 694)
 	yardim.add_theme_font_size_override("font_size", 14)
 	yardim.modulate = Color(1, 1, 1, 0.7)
@@ -81,6 +81,16 @@ func _ready() -> void:
 			oyuncu.git(Vector3(float(p[0]), 0, float(p[1])))
 		elif a.begins_with("--diyalog="):
 			_diyalog_testi(a.substr(10))
+		elif a == "--kayit-testi":
+			oyun.adam_tut()
+			kaydet()
+			oyun.adam_tut()
+			print("once: ", oyun.adamlar.size())
+			yukle()
+			print("sonra: ", oyun.adamlar.size())
+			for k in 400:
+				oyun._gun()
+			print("olaylar tamam, defter: ", oyun.defter.size())
 		elif a == "--test":
 			_otomatik_test()
 
@@ -90,6 +100,31 @@ func _karsilasti(g: Dictionary) -> void:
 			oyun.kayit("%s yakınında (%d polis)." % [g["ad"], g["kisi"]], "warn")
 		"rakip":
 			oyun.kayit("%s yakınında (%d kişi)." % [g["ad"], g["kisi"]], "bad")
+
+const KAYIT := "user://kayit.dat"
+
+func kaydet() -> void:
+	var f := FileAccess.open(KAYIT, FileAccess.WRITE)
+	if f == null:
+		oyun.kayit("Kayıt yazılamadı.", "bad")
+		return
+	f.store_var({"oyun": oyun.durum_al(), "oyuncu": oyuncu.global_position, "surum": 1}, true)
+	oyun.kayit("Oyun kaydedildi (F9 ile yüklenir).", "good")
+
+func yukle() -> void:
+	if not FileAccess.file_exists(KAYIT):
+		oyun.kayit("Kayıt bulunamadı (F6 ile kaydet).", "bad")
+		return
+	var f := FileAccess.open(KAYIT, FileAccess.READ)
+	var d: Variant = f.get_var(true)
+	if typeof(d) != TYPE_DICTIONARY or not d.has("oyun"):
+		oyun.kayit("Kayıt dosyası bozuk.", "bad")
+		return
+	oyun.durum_yukle(d["oyun"])
+	oyuncu.global_position = d["oyuncu"]
+	oyuncu._yol = PackedVector3Array()
+	takip_birak()
+	oyun.kayit("Kayıt yüklendi.", "good")
 
 func takip_ver(g: Dictionary) -> void:
 	takip_id = g["id"]
@@ -137,6 +172,8 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_A: arayuz.adamlar_ac()
 			KEY_D: arayuz.defter_ac()
 			KEY_ESCAPE: arayuz.kapat()
+			KEY_F6: kaydet()
+			KEY_F9: yukle()
 
 func _process(delta: float) -> void:
 	oyun.ilerle(delta)
