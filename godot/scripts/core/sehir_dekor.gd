@@ -66,7 +66,7 @@ func _coklu(mesh: Mesh, noktalar: Array, yuk: float, renk: Color, isik: bool) ->
 # Göl ve nehir: tek büyük saydam su düzlemi (arazi suyun altında çukur kalır).
 func _su_kur() -> void:
 	var pm := PlaneMesh.new()
-	pm.size = Vector2(364.0, 594.0)
+	pm.size = Vector2(728.0, 1188.0)
 	var mt := StandardMaterial3D.new()
 	mt.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mt.albedo_color = Color(0.10, 0.27, 0.38, 0.88)
@@ -75,5 +75,5 @@ func _su_kur() -> void:
 	var mi := MeshInstance3D.new()
 	mi.mesh = pm
 	mi.material_override = mt
-	mi.position = Vector3(0, 0, 39)
+	mi.position = Vector3(0, 0, 78)
 	add_child(mi)

@@ -8,13 +8,13 @@ extends Node3D
 
 @export_file("*.png") var yukseklik_yolu := "res://assets/environment/terrain/yukseklik.png"
 @export_file("*.png") var renk_yolu := "res://assets/environment/terrain/renk.png"
-@export var x0 := -182.0           # arazinin sol-üst köşesi (metre)
-@export var z0 := -258.0
-@export var genislik := 364.0
-@export var derinlik := 594.0
+@export var x0 := -364.0           # arazinin sol-üst köşesi (metre)
+@export var z0 := -516.0
+@export var genislik := 728.0
+@export var derinlik := 1188.0
 @export var min_h := -4.0
 @export var max_h := 18.0
-@export var adim := 2.0            # mesh ızgara aralığı (metre)
+@export var adim := 3.0            # mesh ızgara aralığı (metre)
 @export var yenile := false:
 	set(v):
 		yenile = false
@@ -28,6 +28,9 @@ var _govde: StaticBody3D
 
 func _ready() -> void:
 	_kur()
+
+func yukseklik_resmi() -> Image:
+	return _y
 
 func yuk(x: float, z: float) -> float:
 	if _y == null:

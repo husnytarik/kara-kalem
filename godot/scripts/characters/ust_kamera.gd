@@ -28,7 +28,7 @@ func _unhandled_input(e: InputEvent) -> void:
 		if e.button_index == MOUSE_BUTTON_WHEEL_UP:
 			mesafe = maxf(25.0, mesafe * 0.9)
 		elif e.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			mesafe = minf(380.0, mesafe * 1.1)
+			mesafe = minf(800.0, mesafe * 1.1)
 	elif e is InputEventKey and e.pressed and e.keycode == KEY_C:
 		_kayma = Vector3.ZERO
 

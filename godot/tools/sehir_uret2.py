@@ -17,13 +17,18 @@ TSCN = KOK / "scenes/city/harita.tscn"
 RENK = KOK / "assets/environment/terrain/renk.png"
 YUK = KOK / "assets/environment/terrain/yukseklik.png"
 SOKAK = KOK / "data/sokak_ag.json"
-X0, Z0, GEN, DER = -182.0, -258.0, 364.0, 594.0
+K = 2.0   # şehir ölçeği (1 = ilk küçük harita, 2 = her yönde iki kat)
+X0, Z0, GEN, DER = -182.0 * K, -258.0 * K, 364.0 * K, 594.0 * K
 MIN_H, MAX_H = -4.0, 18.0
 S = 2                      # piksel / metre
 W, H = int(GEN * S), int(DER * S)
 rng = random.Random(1920)
 nrng = np.random.default_rng(1920)
-BOL = json.loads((KOK / "data/bolgeler.json").read_text(encoding="utf-8"))
+_TABAN = {"docks": ("Docks", -152, 152, 190, 266), "downtown": ("Downtown", 0, 152, -228, -76),
+          "eastside": ("Eastside", 0, 152, -76, 76), "flats": ("The Flats", -152, 152, 76, 190),
+          "hilltop": ("Hilltop", -152, 0, -228, -76), "southside": ("Southside", -152, 0, -76, 76)}
+BOL = {k: {"ad": v[0], "x0": v[1] * K, "x1": v[2] * K, "z0": v[3] * K, "z1": v[4] * K} for k, v in _TABAN.items()}
+(KOK / "data/bolgeler.json").write_text(json.dumps(BOL, indent=1, ensure_ascii=False), encoding="utf-8")
 KALDIRIM = 2.2
 ZEMIN = 2.0                # kara seviyesi
 SU_DIP = -3.0
@@ -47,15 +52,17 @@ def inreg(x, z, pay=0.0):
 
 # ---------------- su: göl + nehir ----------------
 def kiyi(x):
-    return 238 + 7 * np.sin(x / 37.0) + 4 * np.sin(x / 13.0 + 1) + 5 * np.sin(x / 71.0 + 2)
+    u = x / K
+    return K * (238 + 7 * np.sin(u / 37.0) + 4 * np.sin(u / 13.0 + 1) + 5 * np.sin(u / 71.0 + 2))
 
 
 def nehir_x(z):
-    return 2 + 6 * np.sin(z / 55.0) + 3 * np.sin(z / 23.0 + 1)
+    u = z / K
+    return K * (2 + 6 * np.sin(u / 55.0) + 3 * np.sin(u / 23.0 + 1))
 
 
 def nehir_yari(z):
-    return 8 + 2.5 * np.sin(z / 41.0 + 2)
+    return 10 + 3 * np.sin(z / 82.0 + 2)
 
 
 GOL = ZZ > kiyi(XX)
@@ -65,7 +72,7 @@ d_su = ndi.distance_transform_edt(~SU) / S          # karada sudan uzaklık (m)
 
 # ---------------- yükseklik ----------------
 taban = ZEMIN + gurultu(14, 0.12) + gurultu(40, 0.12)
-taban += 12.0 * np.exp(-(((XX + 85) ** 2 + (ZZ + 150) ** 2) / (2 * 48.0 ** 2)))   # Hilltop tepesi
+taban += 14.0 * np.exp(-(((XX + 85 * K) ** 2 + (ZZ + 150 * K) ** 2) / (2 * (48.0 * K) ** 2)))   # Hilltop tepesi
 sd = d_su - ndi.distance_transform_edt(SU) / S
 t = np.clip((sd + 2.0) / 6.0, 0, 1)
 t = t * t * (3 - 2 * t)
@@ -115,18 +122,18 @@ def yol_ekle(pts, w, sinif, sari=False, gec=False, kes_su=True):
 
 
 # ana caddeler (eksene paralel; nehri köprüyle geçerler)
-for z, w in [(-152, 8), (-76, 12), (0, 14), (76, 12), (190, 8)]:
-    yol_ekle([(-152, z), (152, z)], w, "ana", sari=(w >= 12), gec=True)
-for x, w in [(-76, 11), (76, 11)]:
-    yol_ekle([(x, -228), (x, 266)], w, "ana", sari=(w >= 11))
+XM, ZA, ZB = 152 * K, -228 * K, 266 * K
+for z, w in [(-304, 8), (-228, 8), (-152, 10), (-76, 12), (0, 14), (76, 12), (152, 10), (228, 8), (304, 10), (380, 8)]:
+    yol_ekle([(-XM, z), (XM, z)], w, "ana", sari=(w >= 12), gec=True)
+for x, w in [(-228, 9), (-152, 11), (-76, 11), (76, 11), (152, 11), (228, 9)]:
+    yol_ekle([(x, ZA), (x, ZB)], w, "ana", sari=(w >= 11))
 # tren hattı (Flats), nehri demir köprüyle geçer
-yol_ekle([(-152, 118), (152, 118)], 6, "ray", gec=True)
-# göl kıyısı bulvarı (nehri geçmez)
-xs = np.linspace(-150, 150, 80)
-pass  # kıyı bulvarı kaldırıldı: depolar kıyıya kadar uzanır
+yol_ekle([(-XM, 236), (XM, 236)], 6, "ray", gec=True)
 # çapraz caddeler
-yol_ekle([(150, 52), (112, -20), (60, -110), (22, -226)], 10, "ana", sari=True)
-yol_ekle([(-150, 188), (-118, 150), (-82, 108), (-12, 78)], 9, "ana")
+yol_ekle([(300, 104), (224, -40), (120, -220), (44, -452)], 10, "ana", sari=True)
+yol_ekle([(-300, 376), (-236, 300), (-164, 216), (-24, 156)], 9, "ana")
+yol_ekle([(-300, -250), (-200, -330), (-110, -420)], 8, "ana")
+yol_ekle([(300, 330), (230, 250), (160, 180), (40, 120)], 9, "ana")
 
 
 def izgara(reg, aci, sa, sb, w, warp=0.0, lam=70.0, birak=0.12):
@@ -216,9 +223,9 @@ for y in yollar:
     ray = y["sinif"] == "ray"
     guverte.append({"x": (xa + xb) / 2, "z": zc, "y": ZEMIN + 0.05, "w": xb - xa, "d": y["w"] + (1.0 if not ray else 0.5),
                     "renk": [0.30, 0.30, 0.32] if not ray else [0.22, 0.2, 0.2]})
-for xp in (-120, -72, -24, 28, 76, 124):
+for xp in range(-270, 300, 54):
     zk = float(kiyi(xp))
-    z_a, z_b = zk - 8, min(zk + 24, 263.0)
+    z_a, z_b = zk - 8, min(zk + 24, ZB - 3)
     guverte.append({"x": xp, "z": (z_a + z_b) / 2, "y": ZEMIN, "w": 7.0, "d": z_b - z_a, "renk": [0.36, 0.27, 0.18]})
 PIER = np.zeros((H, W), bool)
 for g in guverte:
@@ -343,17 +350,18 @@ for sira_no in (0, 1, 2):
 
 # ---------------- boşlukları doldur: en yakın yola dönük ek parseller ----------------
 from scipy.spatial import cKDTree
-ornek, teget, ygen = [], [], []
-for y in yollar:
+ornek, teget, ygen, yid = [], [], [], []
+for ki, y in enumerate(yollar):
     if y["sinif"] == "ray":
         continue
     p = y["pts"]
     t = np.gradient(p, axis=0)
     t /= (np.hypot(t[:, 0], t[:, 1])[:, None] + 1e-9)
+    yid.append(np.full(len(p), ki))
     ornek.append(p)
     teget.append(t)
     ygen.append(np.full(len(p), y["w"]))
-ornek, teget, ygen = np.concatenate(ornek), np.concatenate(teget), np.concatenate(ygen)
+ornek, teget, ygen, yid = np.concatenate(ornek), np.concatenate(teget), np.concatenate(ygen), np.concatenate(yid)
 agac_ = cKDTree(ornek)
 for gecis in range(2):
     adaylar = []
@@ -503,10 +511,10 @@ SARI, BEYAZ = (214, 178, 60), (200, 200, 196)
 for y in yollar:
     if y["sinif"] == "ray":
         z = float(y["pts"][0][1])
-        for x in np.arange(-152, 152, 0.9):
+        for x in np.arange(-XM, XM, 0.9):
             d.line(px([(x, z - 2.4), (x, z + 2.4)]), fill=(58, 44, 34), width=1)
         for dz in (-0.7, 0.7):
-            d.line(px([(-152, z + dz), (152, z + dz)]), fill=(150, 150, 154), width=1)
+            d.line(px([(-XM, z + dz), (XM, z + dz)]), fill=(150, 150, 154), width=1)
 # sarı şerit (diğer yollarla kesişen yerleri atla)
 tum = [(q["pts"], q["w"], k) for k, q in enumerate(yollar) if q["sinif"] != "ray"]
 for k, y in enumerate(yollar):
@@ -519,7 +527,7 @@ for k, y in enumerate(yollar):
         a = np.array([np.interp(s0, sc, p[:, 0]), np.interp(s0, sc, p[:, 1])])
         b = np.array([np.interp(s0 + 2.5, sc, p[:, 0]), np.interp(s0 + 2.5, sc, p[:, 1])])
         m = (a + b) / 2
-        if any(kk != k and np.min(np.hypot(*(q[0] - m).T)) < q[1] / 2 + 1.5 for q, kk in [((o["pts"], o["w"]), kk) for kk, o in enumerate(yollar) if o["sinif"] != "ray"]):
+        if any(yid[h] != k and np.hypot(*(ornek[h] - m)) < ygen[h] / 2 + 1.5 for h in agac_.query_ball_point(m, 12.0)):
             continue
         if any(abs(m[1] - o["pts"][0][1]) < o["w"] / 2 + 0.5 and o["sinif"] == "ray" for o in yollar):
             continue

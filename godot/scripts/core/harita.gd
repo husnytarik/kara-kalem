@@ -119,9 +119,15 @@ func _izgara_kur() -> void:
 		var b: Dictionary = bolgeler[id]
 		_izgara.fill_solid_region(Rect2i(int(b["x0"]) - _gx0, int(b["z0"]) - _gz0, int(b["x1"] - b["x0"]), int(b["z1"] - b["z0"])), false)
 	# su (göl, nehir) yürünmez; iskele ve köprüler aşağıda yeniden açılır
+	var yim: Image = _arazi.yukseklik_resmi()
+	var yw := yim.get_width()
+	var yh := yim.get_height()
+	var yv := yim.get_data()
+	var esik := int(ceil((SU_ESIK - _arazi.min_h) / (_arazi.max_h - _arazi.min_h) * 255.0))
 	for gz in int(_arazi.derinlik):
+		var j := mini(int((gz + 0.5) / _arazi.derinlik * yh), yh - 1) * yw
 		for gx in int(_arazi.genislik):
-			if not _izgara.is_point_solid(Vector2i(gx, gz)) and _arazi.yuk(_gx0 + gx + 0.5, _gz0 + gz + 0.5) < SU_ESIK:
+			if yv[j + mini(int((gx + 0.5) / _arazi.genislik * yw), yw - 1)] < esik:
 				_izgara.set_point_solid(Vector2i(gx, gz), true)
 	for n in get_tree().get_nodes_in_group("kaide"):
 		var m := n as MeshInstance3D
