@@ -28,6 +28,7 @@ var _img: Image
 var _tex: ImageTexture
 var _mi: MeshInstance3D
 var _sure := 0.0
+var _kutular: Array = []
 var _bu_tur := {}
 var _icerde := {}           # "grupid:bina" -> true
 
@@ -164,8 +165,11 @@ func _isaretle(p: Vector3) -> void:
 
 # Görüş bir binanın duvarına çarptıysa binanın tamamı (cephe + çatı) görünür sayılır.
 func _bina_isaretle(p: Vector3) -> void:
-	for i in harita.yerler.size():
-		var a: AABB = harita.yerler[i]["aabb"]
+	if _kutular.is_empty():
+		_kutular = harita.yerler.map(func(y): return y["aabb"]) + harita.dolgu
+	var kutular := _kutular
+	for i in kutular.size():
+		var a: AABB = kutular[i]
 		if p.x >= a.position.x - 2.0 and p.x <= a.end.x + 2.0 and p.z >= a.position.z - 2.0 and p.z <= a.end.z + 2.0:
 			if _bu_tur.has(i):
 				return

@@ -4,7 +4,7 @@ extends Node3D
 # (kendi 3D modelin) küp gizlenir. Değerleri Inspector'dan değiştirebilirsin.
 # Konum (position) binanın TABAN ORTASIDIR.
 
-static var _mats := {}
+static var _sh: Shader
 
 @export var ad := "":
 	set(v):
@@ -19,6 +19,7 @@ static var _mats := {}
 	set(v):
 		boyut = v
 		_yenile()
+@export var dolgu := false   # true: süs bina (işletme/özel mekân değil, adı ve etiketi yok)
 @export var renk := Color(0.5, 0.4, 0.3):
 	set(v):
 		renk = v
@@ -43,6 +44,8 @@ func _yenile() -> void:
 		(_kutu.mesh as BoxMesh).size = boyut
 		_kutu.position = Vector3(0, boyut.y / 2.0, 0)
 		_kutu.material_override = _malzeme(renk)
+		(_kutu.material_override as ShaderMaterial).set_shader_parameter("taban", global_position.y)
+		(_kutu.material_override as ShaderMaterial).set_shader_parameter("yukseklik", boyut.y)
 	elif _kutu != null:
 		_kutu.queue_free()
 		_kutu = null
@@ -55,6 +58,8 @@ func _yenile() -> void:
 			add_child(_govde)
 		((_govde.get_child(0) as CollisionShape3D).shape as BoxShape3D).size = boyut
 		_govde.position = Vector3(0, boyut.y / 2.0, 0)
+	if dolgu:
+		return
 	if _etiket == null:
 		_etiket = Label3D.new()
 		_etiket.font_size = 40
@@ -68,14 +73,13 @@ func _yenile() -> void:
 	_etiket.modulate = Color(1.0, 0.85, 0.4) if ozel else Color(0.95, 0.95, 0.95)
 	_etiket.position = Vector3(0, boyut.y + 3.0, 0)
 
-func _malzeme(c: Color) -> StandardMaterial3D:
-	var k := c.to_html()
-	if not _mats.has(k):
-		var m := StandardMaterial3D.new()
-		m.albedo_color = c
-		m.roughness = 0.9
-		_mats[k] = m
-	return _mats[k]
+func _malzeme(c: Color) -> ShaderMaterial:
+	if _sh == null:
+		_sh = load("res://assets/environment/shaders/cephe.gdshader")
+	var m := ShaderMaterial.new()
+	m.shader = _sh
+	m.set_shader_parameter("renk", c)
+	return m
 
 # Dünya koordinatlarında kutu (yön döndürülmüşse onu kapsar).
 func dunya_aabb() -> AABB:

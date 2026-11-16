@@ -75,7 +75,7 @@ func _kur() -> void:
 			var x := x0 + i * sx
 			var z := z0 + j * sz
 			var n := Vector3(yuk(x - e, z) - yuk(x + e, z), 2.0 * e, yuk(x, z - e) - yuk(x, z + e)).normalized()
-			st.set_color(_renk(x, z))
+			st.set_uv(Vector2((x - x0) / genislik, (z - z0) / derinlik))
 			st.set_normal(n)
 			st.add_vertex(Vector3(x, yuk(x, z), z))
 	for j in nz - 1:
@@ -88,7 +88,12 @@ func _kur() -> void:
 			st.add_index(b); st.add_index(d); st.add_index(c)
 	var mesh := st.commit()
 	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
+	if _r != null:
+		_r.generate_mipmaps()
+		mat.albedo_texture = ImageTexture.create_from_image(_r)
+		mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	else:
+		mat.albedo_color = Color(0.14, 0.14, 0.15)
 	mat.roughness = 1.0
 	mesh.surface_set_material(0, mat)
 	_mi = MeshInstance3D.new()

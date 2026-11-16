@@ -9,6 +9,7 @@ var bolgeler := {}                     # id -> {ad, x0, z0, x1, z1}
 var yerler: Array[Dictionary] = []     # {ad, bolge, ozel, pos, aabb}
 var _arazi: Node3D
 var _iskeleler: Array[AABB] = []
+var dolgu: Array[AABB] = []            # süs binalar (işletme değil; yine de engel ve görüş kesici)
 var _izgara: AStarGrid2D
 var _gx0 := 0
 var _gz0 := 0
@@ -18,11 +19,18 @@ func _ready() -> void:
 	_bolgeleri_oku()
 	for n in get_tree().get_nodes_in_group("bina"):
 		var a: AABB = n.dunya_aabb()
+		if n.dolgu:
+			dolgu.append(a)
+			continue
 		yerler.append({"ad": n.ad, "bolge": n.bolge, "ozel": n.ozel, "pos": n.global_position, "aabb": a})
 	for n in get_tree().get_nodes_in_group("iskele"):
 		var m := n as MeshInstance3D
 		_iskeleler.append(m.global_transform * m.mesh.get_aabb())
 	_izgara_kur()
+	var dekor := Node3D.new()
+	dekor.set_script(load("res://scripts/core/sehir_dekor.gd"))
+	dekor.harita = self
+	add_child(dekor)
 	for id in bolgeler:
 		var l := Label3D.new()
 		l.text = bolgeler[id]["ad"]
@@ -90,6 +98,8 @@ func _izgara_kur() -> void:
 		_izgara.fill_solid_region(_rect(m.global_transform * m.mesh.get_aabb(), 1.0), true)
 	for y in yerler:
 		_izgara.fill_solid_region(_rect(y["aabb"], 1.0), true)
+	for a in dolgu:
+		_izgara.fill_solid_region(_rect(a, 1.0), true)
 	for a in _iskeleler:
 		var r := _rect(a, -0.5)
 		r.position.y -= 1
@@ -171,6 +181,10 @@ func yer_isinla(o: Vector3, n: Vector3) -> int:
 			if d < en_d:
 				en_d = d
 				en = i
+	for a in dolgu:   # süs bina önündeyse tıklama ona çarpar
+		var h2 = a.intersects_ray(o, n)
+		if h2 != null and o.distance_to(h2) < en_d:
+			return -1
 	return en
 
 # Işının araziyle kesiştiği nokta (adım adım ilerleyerek).

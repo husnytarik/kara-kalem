@@ -98,6 +98,10 @@ func _ready() -> void:
 			for k in 400:
 				oyun._gun()
 			print("olaylar tamam, defter: ", oyun.defter.size())
+		elif a == "--sissiz":
+			gorus.acik = false
+			gorus.guncelle()
+			gorus._gorunurluk()
 		elif a == "--aile-testi":
 			_aile_testi()
 		elif a.begins_with("--isletme-testi"):
