@@ -303,6 +303,10 @@ func _unhandled_input(e: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	_fps.text = "%d FPS" % Engine.get_frames_per_second()
+	# Hızlı oynatmada fizik adımı sayısı time_scale ile çarpılır; adım sıklığını düşürerek gerçek adım/sn'yi 60'ta tut.
+	var tps := clampi(roundi(60.0 / maxf(Engine.time_scale, 1.0)), 15, 60)
+	if Engine.physics_ticks_per_second != tps:
+		Engine.physics_ticks_per_second = tps
 	if savas_aktif:
 		return
 	oyun.ilerle(delta)
