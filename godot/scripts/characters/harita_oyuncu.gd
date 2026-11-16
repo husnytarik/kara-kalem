@@ -2,6 +2,7 @@ extends Node3D
 # Haritadaki karakterin işareti: tıklanan yere yol bulup yürür.
 
 var harita: Node3D
+var oyun: Node   # araba hız çarpanı ve yakıt için
 var hiz := 9.0                       # m/s (oyun hızıyla çarpılır)
 var _yol := PackedVector3Array()
 var _govde: Node3D
@@ -72,7 +73,8 @@ func git(hedef: Vector3) -> bool:
 	return true
 
 func _process(delta: float) -> void:
-	var kalan := hiz * delta
+	var kalan: float = hiz * delta * (oyun.arac_k.hiz_carpan() if oyun != null else 1.0)
+	var once := global_position
 	while kalan > 0.0 and _yol.size() > 0:
 		var p := _yol[0]
 		var fark := p - global_position
@@ -87,6 +89,8 @@ func _process(delta: float) -> void:
 			global_position += yon * kalan
 			_govde.rotation.y = lerp_angle(_govde.rotation.y, atan2(-yon.x, -yon.z), 10.0 * delta)
 			kalan = 0.0
+	if oyun != null and kalan >= 0.0:
+		oyun.arac_k.adim(global_position.distance_to(once))
 	global_position.y = harita.yuk(global_position.x, global_position.z)   # araziyi izle
 	_isaret.visible = _yol.size() > 0
 	_im.clear_surfaces()

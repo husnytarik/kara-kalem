@@ -37,6 +37,7 @@ func _ready() -> void:
 	oyuncu = Node3D.new()
 	oyuncu.set_script(load("res://scripts/characters/harita_oyuncu.gd"))
 	oyuncu.harita = harita
+	oyuncu.oyun = oyun
 	add_child(oyuncu)
 	oyuncu.global_position = oyun.baslangic_noktasi()   # köken ve eve göre
 	kamera = Node3D.new()
@@ -145,6 +146,13 @@ func _ready() -> void:
 				oyun._gun()
 			oyun._ay()
 			print("ay sonu temiz ", oyun.temiz, " borc ", oyun.kira_borc, " ev ", oyun.harita.yerler[oyun._ev]["ad"], " konum ", oyuncu.global_position)
+		elif a == "--arac-testi":
+			oyun.temiz = 5000.0
+			print(oyun.arac_k.al("ford")["msg"], " hiz x", oyun.arac_k.hiz_carpan())
+			oyun.arac_k.adim(300.0)
+			print("yakit ", oyun.arac["yakit"])
+			print(oyun.arac_k.benzin_al()["msg"])
+			arayuz.garaj_ac()
 		elif a == "--zafer-testi":
 			var n := 0
 			for k in oyun.isy:

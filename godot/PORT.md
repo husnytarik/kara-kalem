@@ -12,8 +12,8 @@ Durum: `[x]` Godot'ta var · `[~]` kısmen/farklı biçimde var · `[ ]` yok.
 
 ## Eksikler (öncelik sırasıyla)
 ### Faz A — oyunun amacı ve temel sistemler
-- [ ] **Zafer yolları** (zafer.js): dürüst iş (4 sahip, $12k temiz, dosya ≤15, 0 haraç, ekip ≤2, 2 ay), belediye başkanlığı (2 bölge, kampanya fonu $6000, yıllık seçim, oy oranı), hâkimiyet (5 bölge, 2 ay). Oyun sonu ekranı.
-- [ ] **Araba** (arac.js): Ford/Buick/Packard, yakıt, arıza, bakım gideri, "kolaylık", hız ve pusu çarpanı; garaj paneli
+- [x] **Zafer yolları** (zafer.js): dürüst iş (4 sahip, $12k temiz, dosya ≤15, 0 haraç, ekip ≤2, 2 ay), belediye başkanlığı (2 bölge, kampanya fonu $6000, yıllık seçim, oy oranı), hâkimiyet (5 bölge, 2 ay). Oyun sonu ekranı.
+- [x] **Araba** (arac.js): Ford/Buick/Packard, yakıt, arıza, bakım gideri, "kolaylık", hız ve pusu çarpanı; garaj paneli (arac.gd, Garaj paneli, harita_oyuncu hız/yakıt; test: `--arac-testi`). Pusu çarpanı `pusu_carpan()` hazır, pusu sistemi Faz D'de
 - [ ] **Meslekler** (meslek.js): taksi/hamal/berber/katip; kabul puanı, beceri (xp), maaş, işletme satın alma, perk'ler
 - [ ] **Borç / tefeci**: $6000 borç, aylık taksit, 3 taksit kaçırılırsa oyun biter; kredi (liman) ve hisse
 ### Faz B — yasa ve para

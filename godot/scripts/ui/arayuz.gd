@@ -136,6 +136,7 @@ func _ust_cubuk() -> void:
 	_btn(h, "Aileler", aile_ac)
 	_btn(h, "Defter", defter_ac)
 	_btn(h, "Hedefler", zafer_ac)
+	_btn(h, "Garaj", garaj_ac)
 
 func _sag_panel() -> void:
 	_sag = PanelContainer.new()
@@ -196,6 +197,13 @@ func zafer_ac() -> void:
 		kapat()
 		return
 	_mod = "zafer"
+	_yenile(true)
+
+func garaj_ac() -> void:
+	if _mod == "garaj":
+		kapat()
+		return
+	_mod = "garaj"
 	_yenile(true)
 
 func defter_ac() -> void:
@@ -280,6 +288,8 @@ func _imza() -> String:
 			return str([g["kisi"], g["durum"], g["ev"], sokak.gruplar.liste.has(g), yakin_grup(g), sokak.takip_id])
 		"defter":
 			return str(oyun.defter.size())
+		"garaj":
+			return str([oyun.arac, oyun.temiz, oyun.kirli, _sonuc, oyun.t / 60])
 		"zafer":
 			return str([oyun.zafer.durum(), oyun.zf, oyun.temiz, _sonuc])
 		"aile":
@@ -300,6 +310,7 @@ func _yenile(zorla: bool) -> void:
 		"adamlar": _adam_paneli()
 		"defter": _defter_paneli()
 		"zafer": _zafer_paneli()
+		"garaj": _garaj_paneli()
 		"aile": _aile_paneli()
 		"grup": _grup_paneli()
 	_kapat_dugmesi()
@@ -563,6 +574,37 @@ func _defter_paneli() -> void:
 	for k in range(n - 1, maxi(-1, n - 41), -1):
 		var e: Dictionary = oyun.defter[k]
 		_lbl(_ic, "%s %s" % [oyun.saat_yazi(e["t"]), e["metin"]], 14, RENK[e["tur"]])
+
+# ---------- garaj ----------
+func _garaj_paneli() -> void:
+	var K: RefCounted = oyun.arac_k
+	var Ar: Dictionary = K.ARACLAR
+	var a: Dictionary = oyun.arac
+	_lbl(_ic, "Garaj", 24, RENK["altin"])
+	if a["tip"] == "":
+		_lbl(_ic, "Araban yok. Araba yürümekten çok hızlıdır ama yakıt ve bakım ister; ekibin, paran ve bölgelerin büyüdükçe masrafı azalır.", 14, RENK["soluk"])
+		for tip in Ar:
+			var T: Dictionary = Ar[tip]
+			_ayrac(_ic)
+			_lbl(_ic, "%s · %s" % [T["ad"], oyun.para(T["fiyat"])], 17)
+			_lbl(_ic, "%s Hız ×%.1f · depo %d L" % [T["ac"], T["hiz"], int(T["tank"])], 14, RENK["soluk"])
+			_btn(_ic, "Satın al (temiz)", func(): _sonuc_goster(K.al(tip)), oyun.temiz < T["fiyat"])
+	else:
+		var T: Dictionary = Ar[a["tip"]]
+		_lbl(_ic, T["ad"], 18)
+		_bar(_ic, "Yakıt", a["yakit"] / T["tank"] * 100.0, Color("a89870"), "%d L" % int(a["yakit"]))
+		_lbl(_ic, "Benzin: %s / litre · aylık bakım %s · yol %d m" % [oyun.para(K.yakit_fiyat()), oyun.para(K.bakim_gider()), int(a["yol"] * K.PX_M)], 14, RENK["soluk"])
+		_lbl(_ic, "Hız ×%.1f · pusuya yakalanma ×%.2f" % [T["hiz"], T["pusu"]], 14, RENK["soluk"])
+		if oyun.t < a["ariza"]:
+			_lbl(_ic, "Serviste/arızalı: %d sa sonra hazır." % int(ceil((a["ariza"] - oyun.t) / 60.0)), 15, RENK["bad"])
+		elif a["kullan"]:
+			_lbl(_ic, "Arabayla gidiyorsun.", 15, RENK["good"])
+		var h := HBoxContainer.new()
+		_ic.add_child(h)
+		_btn(h, "Benzin al", func(): _sonuc_goster(K.benzin_al()))
+		_btn(h, "Yürüyerek git" if a["kullan"] else "Arabaya bin", func(): _sonuc_goster(K.sur(not a["kullan"])))
+		_btn(h, "Sat (%s)" % oyun.para(round(T["fiyat"] * 0.6)), func(): _sonuc_goster(K.sat()))
+	_sonuc_satiri()
 
 # ---------- hedefler / zafer yolları ----------
 func _zafer_paneli() -> void:
