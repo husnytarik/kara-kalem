@@ -230,6 +230,11 @@ func savas_baslat(g: Dictionary, ceza: float, geri: Callable, tur_zorla: String 
 		geri.call(sonuc))
 
 var _dur: Node
+var _env: Environment
+var _gunes: DirectionalLight3D
+var _hover_sure := 0.0
+var _gh: Dictionary = {}
+var _hi := -1
 
 func _duraklat_menu() -> void:
 	if _dur != null:
@@ -303,10 +308,21 @@ func _process(delta: float) -> void:
 	_adamlari_guncelle()
 	var id: String = harita.bolge_at(oyuncu.global_position)
 	_etiket.text = harita.bolgeler[id]["ad"] if id != "" else "Yollar"
-	var k: Camera3D = kamera.kamera()
-	var fp := get_viewport().get_mouse_position()
-	var gh: Dictionary = gruplar.isinla(k.project_ray_origin(fp), k.project_ray_normal(fp))
-	var i: int = harita.yer_isinla(k.project_ray_origin(fp), k.project_ray_normal(fp))
+	# kalite: uzaktan bakarken SSAO ve gölge gereksiz (ve pahalı)
+	var uz: float = kamera.mesafe
+	_env.ssao_enabled = uz < 160.0
+	_gunes.shadow_enabled = uz < 260.0
+	_gunes.directional_shadow_max_distance = clampf(uz * 2.2, 120.0, 400.0)
+	# fare altındakini bulmak (1000 bina üstünde ışın testi) her karede değil, kısa aralıkla
+	_hover_sure -= delta
+	if _hover_sure <= 0.0:
+		_hover_sure = 0.08
+		var k: Camera3D = kamera.kamera()
+		var fp := get_viewport().get_mouse_position()
+		_gh = gruplar.isinla(k.project_ray_origin(fp), k.project_ray_normal(fp))
+		_hi = harita.yer_isinla(k.project_ray_origin(fp), k.project_ray_normal(fp))
+	var gh: Dictionary = _gh
+	var i: int = _hi
 	_oy_etiket.text = "%s · %d kişi" % [oyun.profil.get("ad", "Sen"), 1 + oyun.adamlar.size()]
 	oyuncu.kilitli = not oyun.vardiya.is_empty()
 	if not gh.is_empty():
@@ -429,6 +445,7 @@ func _cevre() -> void:
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.ssao_enabled = true
+	_env = env
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
@@ -436,6 +453,7 @@ func _cevre() -> void:
 	sun.rotation_degrees = Vector3(-50, -30, 0)
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 400.0
+	_gunes = sun
 	add_child(sun)
 
 func _aile_testi() -> void:

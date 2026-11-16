@@ -28,10 +28,10 @@ func _ready() -> void:
 		var yerel := AABB(Vector3(-n.boyut.x / 2.0, 0, -n.boyut.z / 2.0), n.boyut)
 		if n.dolgu:
 			dolgu.append(a)
-			_dolgu_obb.append({"xf": n.global_transform, "yerel": yerel})
+			_dolgu_obb.append({"xf": n.global_transform, "ters": n.global_transform.affine_inverse(), "yerel": yerel, "aabb": a})
 			continue
 		yerler.append({"ad": n.ad, "bolge": n.bolge, "ozel": n.ozel, "pos": n.global_position, "aabb": a,
-			"xf": n.global_transform, "yerel": yerel})
+			"xf": n.global_transform, "ters": n.global_transform.affine_inverse(), "yerel": yerel})
 	for n in get_tree().get_nodes_in_group("iskele"):
 		var m := n as MeshInstance3D
 		_iskeleler.append(m.global_transform * m.mesh.get_aabb())
@@ -218,15 +218,20 @@ func yer_isinla(o: Vector3, n: Vector3) -> int:
 	var en := -1
 	var en_d := 1e9
 	for i in yerler.size():
-		var ters: Transform3D = (yerler[i]["xf"] as Transform3D).affine_inverse()
-		var h = (yerler[i]["yerel"] as AABB).intersects_ray(ters * o, ters.basis * n)
+		var y: Dictionary = yerler[i]
+		if (y["aabb"] as AABB).intersects_ray(o, n) == null:   # ucuz ön eleme (dünya kutusu)
+			continue
+		var ters: Transform3D = y["ters"]
+		var h = (y["yerel"] as AABB).intersects_ray(ters * o, ters.basis * n)
 		if h != null:
 			var d := (ters * o).distance_to(h)
 			if d < en_d:
 				en_d = d
 				en = i
 	for ob in _dolgu_obb:   # süs bina önündeyse tıklama ona çarpar
-		var t2: Transform3D = (ob["xf"] as Transform3D).affine_inverse()
+		if (ob["aabb"] as AABB).intersects_ray(o, n) == null:
+			continue
+		var t2: Transform3D = ob["ters"]
 		var h2 = (ob["yerel"] as AABB).intersects_ray(t2 * o, t2.basis * n)
 		if h2 != null and (t2 * o).distance_to(h2) < en_d:
 			return -1
