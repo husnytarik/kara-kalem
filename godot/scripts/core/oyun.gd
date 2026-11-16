@@ -80,6 +80,14 @@ const GOREVLER := {
 const IS_AD := {"himaye": "Esnafa himaye sat", "hediye": "Mahalleye ziyafet ver", "gozdagi": "Rakip adamları sindir"}
 const IS_BEDEL := {"himaye": "$120 kirli", "hediye": "$200 temiz", "gozdagi": "$150 kirli · ekipte adam gerekir"}
 const BEKLEME := {"himaye": 3, "hediye": 3, "gozdagi": 5}
+# Silahlar: hasar (vuruş başı), menzil (m), hiz (atış/sn), sarjor (0: yakın dövüş), yenileme (sn), sacilma (radyan), pelet (saçma sayısı), fiyat (kirli $)
+const SILAH := {
+	"yumruk": {"ad": "Yumruk", "hasar": 12.0, "menzil": 2.3, "hiz": 1.5, "sarjor": 0, "yenileme": 0.0, "sacilma": 0.0, "pelet": 1, "fiyat": 0},
+	"bicak": {"ad": "Bıçak", "hasar": 24.0, "menzil": 2.5, "hiz": 1.8, "sarjor": 0, "yenileme": 0.0, "sacilma": 0.0, "pelet": 1, "fiyat": 40},
+	"tabanca": {"ad": "Tabanca", "hasar": 18.0, "menzil": 40.0, "hiz": 2.8, "sarjor": 8, "yenileme": 1.6, "sacilma": 0.035, "pelet": 1, "fiyat": 150},
+	"pompali": {"ad": "Pompalı", "hasar": 9.0, "menzil": 20.0, "hiz": 1.0, "sarjor": 2, "yenileme": 2.2, "sacilma": 0.12, "pelet": 6, "fiyat": 300},
+	"tommy": {"ad": "Tommy Gun", "hasar": 11.0, "menzil": 45.0, "hiz": 9.0, "sarjor": 30, "yenileme": 2.4, "sacilma": 0.07, "pelet": 1, "fiyat": 450},
+}
 const ISIMLER := ["Vinnie", "Moe", "Sully", "Bugsy", "Lenny", "Sal", "Dutch", "Frankie", "Mickey", "Nate", "Ray", "Hank", "Joey", "Tommy", "Lou", "Abe"]
 
 var harita: Node3D
@@ -92,6 +100,7 @@ var ofke := {"marchetti": 0.0, "obrien": 0.0, "tammany": 0.0}
 var adamlar: Array[Dictionary] = []   # {id, ad, yumruk, bicak, zeka, gorev}
 var gorevler: Array[Dictionary] = []  # {adam, hedef, gorev, basla, yol, bitis, yolu}
 var isy := {}                         # bina indeksi -> {tur, sahip, haracli, birikim, korumaBitis}
+var oyuncu_silah := "tabanca"
 var arama := 0.0   # polisin seni arama seviyesi (0-100)
 var defter: Array[Dictionary] = []    # {t, metin, tur}
 var _sayac := 0
@@ -267,7 +276,7 @@ func _yeni_adam() -> Dictionary:
 			break
 		ad = ISIMLER[(ISIMLER.find(ad) + 1) % ISIMLER.size()]
 	_sayac += 1
-	return {"id": _sayac, "ad": ad, "yumruk": 20 + rng.randi() % 55, "bicak": 20 + rng.randi() % 55, "zeka": 20 + rng.randi() % 55, "gorev": ""}
+	return {"id": _sayac, "ad": ad, "yumruk": 20 + rng.randi() % 55, "bicak": 20 + rng.randi() % 55, "zeka": 20 + rng.randi() % 55, "gorev": "", "silah": ["bicak", "bicak", "tabanca"][rng.randi() % 3]}
 
 func beceri(a: Dictionary) -> int:
 	return int(round(0.5 * a["yumruk"] + 0.3 * a["bicak"] + 0.2 * a["zeka"]))
@@ -310,6 +319,21 @@ func guc() -> float:
 func yarala(a: Dictionary, gun: int) -> void:
 	a["gorev"] = "tutuklu"
 	gorevler.append({"adam": a["id"], "hedef": -1, "gorev": "tutuklu", "yarali": true, "basla": t, "yol": 0, "bitis": t + gun * DAY, "yolu": PackedVector3Array()})
+
+# Silah ver: adam_id 0 = sen. Yeni silahın fiyatı kirli paradan düşer (eskisi geri satılmaz).
+func silah_ver(adam_id: int, silah: String) -> Dictionary:
+	var mevcut: String = oyuncu_silah if adam_id == 0 else adam_bul(adam_id).get("silah", "yumruk")
+	if mevcut == silah:
+		return hata("Zaten bu silahı taşıyor.")
+	if not harcama(SILAH[silah]["fiyat"], "kirli"):
+		return hata("Kirli para yetmiyor ($%d)." % SILAH[silah]["fiyat"])
+	if adam_id == 0:
+		oyuncu_silah = silah
+	else:
+		adam_bul(adam_id)["silah"] = silah
+	kayit("%s artık %s taşıyor." % ["Sen" if adam_id == 0 else adam_bul(adam_id)["ad"], SILAH[silah]["ad"]], "info")
+	degisti.emit()
+	return tamam()
 
 func bos_adamlar() -> Array:
 	return adamlar.filter(func(a): return a["gorev"] == "")
@@ -589,7 +613,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "defter": defter, "sayac": _sayac}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -601,6 +625,7 @@ func durum_yukle(d: Dictionary) -> void:
 	gorevler.assign(d["gorevler"])
 	isy = d["isy"]
 	arama = d["arama"]
+	oyuncu_silah = d.get("oyuncu_silah", "tabanca")
 	defter.assign(d["defter"])
 	_sayac = d["sayac"]
 	degisti.emit()

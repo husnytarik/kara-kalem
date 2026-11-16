@@ -12,6 +12,7 @@ var kamera: Node3D
 var _etiket: Label
 var _ipucu: Label
 var _hiz := 1.0
+var _hud_kok: CanvasLayer
 var takip_id := 0
 var _takip_sure := 0.0
 var _onceki_hiz := 1.0
@@ -54,6 +55,7 @@ func _ready() -> void:
 	add_child(arayuz)
 	arayuz.kur(oyun, self)
 	var hud := CanvasLayer.new()
+	_hud_kok = hud
 	_etiket = Label.new()
 	_etiket.position = Vector2(20, 100)
 	_etiket.add_theme_font_size_override("font_size", 22)
@@ -91,6 +93,8 @@ func _ready() -> void:
 			for k in 400:
 				oyun._gun()
 			print("olaylar tamam, defter: ", oyun.defter.size())
+		elif a.begins_with("--savas="):
+			_savas_testi(a.substr(8))
 		elif a == "--test":
 			_otomatik_test()
 
@@ -142,13 +146,47 @@ func modal_duraklat(ac: bool) -> void:
 	else:
 		Engine.time_scale = _onceki_hiz
 
+var savas_aktif := false
+
+# 3D TPS savaşı başlat: dünya gizlenir, en yakın savaş alanı kurulur, bitince geri dönülür.
+func savas_baslat(g: Dictionary, ceza: float, geri: Callable, tur_zorla: String = "", oto: bool = false) -> void:
+	var veri: Dictionary = arayuz._kars.savas_verisi(g, ceza)
+	if tur_zorla != "":
+		veri["tur"] = tur_zorla
+		veri["sahne"] = ""
+	savas_aktif = true
+	var onceki_kam: Camera3D = kamera.kamera()
+	harita.visible = false
+	oyuncu.visible = false
+	gruplar.visible = false
+	gruplar.set_process(false)
+	arayuz.visible = false
+	_hud_kok.visible = false
+	Engine.time_scale = 1.0
+	var s: Node3D = load("res://scripts/battle/savas.gd").new()
+	add_child(s)
+	s.baslat(oyun, veri, oto)
+	s.bitti.connect(func(sonuc: Dictionary):
+		s.queue_free()
+		savas_aktif = false
+		harita.visible = true
+		oyuncu.visible = true
+		gruplar.visible = true
+		gruplar.set_process(true)
+		arayuz.visible = true
+		_hud_kok.visible = true
+		onceki_kam.make_current()
+		Engine.time_scale = 0.0 if arayuz.modal else _hiz
+		print("savas sonucu: ", sonuc)
+		geri.call(sonuc))
+
 func hiz_ayarla(v: float) -> void:
 	if v > 0.0:
 		_hiz = v
 	Engine.time_scale = v
 
 func _unhandled_input(e: InputEvent) -> void:
-	if arayuz.modal:
+	if arayuz.modal or savas_aktif:
 		return
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 		var k: Camera3D = kamera.kamera()
@@ -176,6 +214,8 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_F9: yukle()
 
 func _process(delta: float) -> void:
+	if savas_aktif:
+		return
 	oyun.ilerle(delta)
 	if takip_id != 0:
 		_takip_sure -= delta
@@ -279,6 +319,18 @@ func _otomatik_test() -> void:
 	_hiz = 4.0
 
 # Doğrulama: verilen türden bir grubu yanına getirir, diyaloğu açar ve tüm seçenekleri dener.
+func _savas_testi(tur: String) -> void:
+	oyun.adam_tut()
+	oyun.adam_tut()
+	var g: Dictionary = {}
+	for x in gruplar.liste:
+		if x["tur"] == "rakip":
+			g = x
+			break
+	g["kisi"] = 5
+	await get_tree().process_frame
+	savas_baslat(g, 1.0, func(s): print("TEST sonuc: ", s), tur, true)
+
 func _diyalog_testi(tur: String) -> void:
 	for g in gruplar.liste:
 		if g["tur"] == tur:

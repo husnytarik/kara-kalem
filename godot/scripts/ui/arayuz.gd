@@ -512,6 +512,15 @@ func _diyalog_ciz() -> void:
 
 func _secenek(id: String) -> void:
 	_dlg_sonuc = _kars.uygula(_dlg_g, id)
+	if _dlg_sonuc.get("savas", false):
+		var on: Dictionary = _dlg_sonuc
+		_dlg.visible = false
+		sokak.savas_baslat(_dlg_g, on["ceza"], func(s: Dictionary):
+			var r: Dictionary = _kars.savas_bitir(_dlg_g, s)
+			r["metin"] = "%s %s" % [on["metin"], r["metin"]]
+			_dlg_sonuc = r
+			_diyalog_ciz())
+		return
 	_diyalog_ciz()
 
 func _diyalog_kapat() -> void:

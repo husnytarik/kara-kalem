@@ -135,6 +135,26 @@ func yol_bul(a: Vector3, b: Vector3) -> PackedVector3Array:
 		cikti.append(Vector3(x, yuk(x, z), z))
 	return cikti
 
+# ---------- savaş alanı seçimi ----------
+# Konuma en yakın savaş seviyesi. Önce sahnede senin koyduğun "savas_alani" düğümleri (150 m içinde),
+# yoksa kural: iskele/liman bölgesi -> liman, bir binanın kapısındaysan -> ic, aksi halde sokak.
+func savas_alani(p: Vector3) -> Dictionary:
+	var en: Node = null
+	var en_uz := 150.0
+	for n in get_tree().get_nodes_in_group("savas_alani"):
+		var d: float = (n as Node3D).global_position.distance_to(p)
+		if d < en_uz:
+			en_uz = d
+			en = n
+	if en != null:
+		return {"tur": en.tur, "sahne": en.sahne.resource_path if en.sahne else ""}
+	if bolge_at(p) == "docks":
+		return {"tur": "liman", "sahne": ""}
+	for y in yerler:
+		if (y["aabb"] as AABB).grow(3.0).has_point(Vector3(p.x, y["aabb"].position.y + 1.0, p.z)):
+			return {"tur": "ic", "sahne": ""}
+	return {"tur": "sokak", "sahne": ""}
+
 # ---------- seçim (fare) ----------
 # Işının çarptığı bina (yerler indeksi) ya da -1.
 func yer_isinla(o: Vector3, n: Vector3) -> int:

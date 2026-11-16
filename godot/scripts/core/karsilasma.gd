@@ -193,7 +193,78 @@ func _para_orani(o: float) -> int:
 	return top
 
 # Otomatik çatışma. Hesap: iki tarafın gücü + zar. 3D savaş gelene kadar yer tutucu.
+var otomatik := false   # true: eski otomatik çatışma (testler için)
+
+func savas_verisi(g: Dictionary, ceza: float) -> Dictionary:
+	var ekip: Array = [{"ad": "Sen", "silah": oyun.oyuncu_silah, "hp": 100.0, "isabet": 0.5, "id": 0, "oyuncu": true}]
+	for a in oyun.bos_adamlar():
+		ekip.append({"ad": a["ad"], "silah": a.get("silah", "bicak"), "hp": 60.0 + oyun.beceri(a) / 2.0,
+			"isabet": 0.45 + a["zeka"] / 250.0, "id": a["id"]})
+	var dus: Array = []
+	var renk := Color(0.85, 0.25, 0.25)
+	var havuz: Array = ["tabanca", "bicak"]
+	var hp := 55.0
+	match g["tur"]:
+		"polis":
+			havuz = ["tabanca", "tabanca", "pompali"]
+			hp = 70.0
+			renk = Color(0.2, 0.3, 0.8)
+		"rakip":
+			match g["fak"]:
+				"marchetti": havuz = ["tommy", "tabanca", "tabanca", "bicak"]
+				"obrien": havuz = ["yumruk", "bicak", "tabanca", "tabanca", "pompali"]
+				_: havuz = ["tabanca"]
+	for i in mini(g["kisi"], 10):
+		dus.append({"ad": "Düşman", "silah": havuz[rng.randi() % havuz.size()], "hp": hp, "isabet": rng.randf_range(0.4, 0.55)})
+	var alan: Dictionary = oyun.harita.savas_alani(gruplar.oyuncu.global_position)
+	return {"tur": alan["tur"], "sahne": alan["sahne"], "oyuncu_takimi": ekip, "dusman_takimi": dus,
+		"dusman_ad": g["ad"], "dusman_renk": renk, "dezavantaj": clampf(ceza, 0.5, 1.0) if ceza < 1.0 else 1.0}
+
+func savas_bitir(g: Dictionary, s: Dictionary) -> Dictionary:
+	var ad: String = g["ad"]
+	var olen: int = s["dusman_olu"]
+	g["kisi"] = maxi(0, g["kisi"] - olen)
+	var yazi := ""
+	for id in s["adam_olu"]:
+		for a in oyun.adamlar:
+			if a["id"] == id:
+				if rng.randf() < 0.4:
+					oyun.adamlar.erase(a)
+					yazi += " %s hayatını kaybetti." % a["ad"]
+				else:
+					oyun.yarala(a, 2 + rng.randi() % 3)
+					yazi += " %s yaralandı." % a["ad"]
+				break
+	match s["sonuc"]:
+		"zafer":
+			var metin := "Çatışmayı kazandın: %d kişi yere serildi." % olen
+			if g["tur"] == "rakip":
+				oyun.kirli += olen * 20
+				metin += " Ganimet: $%d kirli para." % (olen * 20)
+				_bolge_tan(g, 3.0)
+			else:
+				oyun.arama += 15.0
+				metin += " Ama polise el kaldırdın: arama arttı."
+			if g["kisi"] <= 0:
+				gruplar.dagit(g)
+			else:
+				gruplar.serbest_birak(g, 1440)
+				g["mod"] = "kac"
+			oyun.kayit("%s çatışması: kazandın." % ad, "good")
+			return _r(metin + yazi, "good")
+		"yenilgi":
+			var k := _para_orani(0.3)
+			gruplar.serbest_birak(g, 1440)
+			oyun.kayit("%s çatışması: kaybettin, $%d gitti." % [ad, k], "bad")
+			return _r("Çatışmayı kaybettin. Cebinden $%d gitti.%s" % [k, yazi], "bad")
+	var k2 := _para_orani(0.12)
+	gruplar.serbest_birak(g, 180)
+	oyun.kayit("%s çatışmasından geri çekildin ($%d)." % [ad, k2], "warn")
+	return _r("Geri çekildin, kaçarken $%d düşürdün.%s" % [k2, yazi], "warn")
+
 func _carpis(g: Dictionary, ceza: float, giris_yazi: String) -> Dictionary:
+	if not otomatik:
+		return {"savas": true, "ceza": ceza, "metin": giris_yazi, "tur": "warn", "bitir": false}
 	var pw: float = oyun.guc() * ceza
 	var ew := _kuvvet(g) * rng.randf_range(0.8, 1.25)
 	var p := pw / (pw + ew)
