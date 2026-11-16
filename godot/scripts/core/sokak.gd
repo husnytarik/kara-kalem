@@ -10,6 +10,7 @@ var gruplar: Node3D
 var _oy_etiket: Label3D
 var kamera: Node3D
 var _etiket: Label
+var _fps: Label
 var _ipucu: Label
 var _hiz := 1.0
 var _hud_kok: CanvasLayer
@@ -66,6 +67,17 @@ func _ready() -> void:
 	arayuz.kur(oyun, self)
 	var hud := CanvasLayer.new()
 	_hud_kok = hud
+	_fps = Label.new()
+	_fps.anchor_left = 1.0
+	_fps.anchor_right = 1.0
+	_fps.offset_left = -110
+	_fps.offset_top = 76
+	_fps.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_fps.add_theme_font_size_override("font_size", 14)
+	_fps.add_theme_color_override("font_outline_color", Color.BLACK)
+	_fps.add_theme_constant_override("outline_size", 6)
+	_fps.modulate = Color(1, 1, 1, 0.75)
+	hud.add_child(_fps)
 	_etiket = Label.new()
 	_etiket.position = Vector2(14, 72)
 	_etiket.add_theme_font_size_override("font_size", 17)
@@ -290,6 +302,7 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_F9: yukle()
 
 func _process(delta: float) -> void:
+	_fps.text = "%d FPS" % Engine.get_frames_per_second()
 	if savas_aktif:
 		return
 	oyun.ilerle(delta)
