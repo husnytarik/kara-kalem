@@ -16,6 +16,7 @@ var _hud_kok: CanvasLayer
 var takip_id := 0
 var _takip_sure := 0.0
 var _onceki_hiz := 1.0
+var gorus: Node3D
 var _adam_gorsel := {}   # adam id -> Node3D (haritada yürüyen adam)
 
 func _ready() -> void:
@@ -49,6 +50,10 @@ func _ready() -> void:
 	gruplar.name = "Gruplar"
 	add_child(gruplar)
 	gruplar.kur(harita, oyun, oyuncu)
+	gorus = load("res://scripts/core/gorus.gd").new()
+	gorus.name = "Gorus"
+	add_child(gorus)
+	gorus.kur(harita, oyun, self)
 	gruplar.yakinlasti.connect(_karsilasti)
 	gruplar.temas.connect(func(g): arayuz.karsilasma_ac(g))
 	arayuz = load("res://scripts/ui/arayuz.gd").new()
@@ -70,7 +75,7 @@ func _ready() -> void:
 	_ipucu.modulate = Color(1.0, 0.85, 0.4)
 	hud.add_child(_ipucu)
 	var yardim := Label.new()
-	yardim.text = "Sol tık: git/bina seç · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · 1/2/3: hız · B: bölge · A: adamlar · D: defter · F6: kaydet · F9: yükle"
+	yardim.text = "Sol tık: git/bina seç · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · V: sis aç/kapa · 1/2/3: hız · B: bölge · A: adamlar · D: defter · F6: kaydet · F9: yükle"
 	yardim.position = Vector2(20, 694)
 	yardim.add_theme_font_size_override("font_size", 14)
 	yardim.modulate = Color(1, 1, 1, 0.7)
@@ -119,7 +124,7 @@ func kaydet() -> void:
 	if f == null:
 		oyun.kayit("Kayıt yazılamadı.", "bad")
 		return
-	f.store_var({"oyun": oyun.durum_al(), "oyuncu": oyuncu.global_position, "surum": 1}, true)
+	f.store_var({"oyun": oyun.durum_al(), "oyuncu": oyuncu.global_position, "gorus": gorus.durum_al(), "surum": 1}, true)
 	oyun.kayit("Oyun kaydedildi (F9 ile yüklenir).", "good")
 
 func yukle() -> void:
@@ -134,6 +139,8 @@ func yukle() -> void:
 	oyun.durum_yukle(d["oyun"])
 	oyuncu.global_position = d["oyuncu"]
 	oyuncu._yol = PackedVector3Array()
+	if d.has("gorus"):
+		gorus.durum_yukle(d["gorus"])
 	takip_birak()
 	oyun.kayit("Kayıt yüklendi.", "good")
 
@@ -216,6 +223,10 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_B: arayuz._bolge_dugmesi()
 			KEY_A: arayuz.adamlar_ac()
 			KEY_D: arayuz.defter_ac()
+			KEY_V:
+				gorus.acik = not gorus.acik
+				gorus.guncelle()
+				gorus._gorunurluk()
 			KEY_K: arayuz.aile_ac()
 			KEY_ESCAPE: arayuz.kapat()
 			KEY_F6: kaydet()

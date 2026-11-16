@@ -41,3 +41,5 @@ Görsel harita: `plan.html` (tarayıcıda aç). Bu dosya asıl kaynaktır; ilerl
 - JS prototip (`prototype/`) kural ve denge referansıdır; Godot'a taşırken testlerin sayıları aynı çıkmalı.
 
 - [x] İşletme işleyişi (isletme.gd): itibar, fiyat, personel (çırak/usta), rastgele olaylar (bozuk mal, denetim, hırsızlık, yangın, övgü, tahrip), rakip ajanı (zehirleme/hırsızlık/ihbar), Soruştur/Kov/İnfaz, muhbir ağı (seviye 0-3, aylık gider, ipucu, Aileler panelinde konum görünürlüğü).
+
+- [x] Savaş sisi / görüş (gorus.gd): kaynaklar = oyuncu, yürüyen adamlar, sahip/haraçlı binalar; binalar görüşü keser; bilinmeyen/keşfedilmiş/görünen; görünmeyen gruplar ve bina etiketleri gizli; bina panelinde "Görüş ve hareket" (içerideki kişi, gelen-gidenler günlüğü). V: sisi aç/kapa. Sıradaki: gerçekçi şehir haritası (yol ağı, bloklar, parsel/bina çeşitliliği).

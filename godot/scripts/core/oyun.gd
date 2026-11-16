@@ -124,6 +124,8 @@ var oyuncu_silah := "tabanca"
 var uyeler: Array = []   # aile üyeleri: {uid, ad, fak, rutbe, durum: aktif|olu, iliski, ev}
 var _uid := 0
 var _pid := 0
+var ziyaret := {}   # bina -> gelen/gidenler günlüğü (görüş altındayken tutulur)
+var gozlem := {}    # bina -> {t, n}: son gözlenen kişi sayısı
 var muhbir := {"marchetti": 0, "obrien": 0, "tammany": 0}   # aile içi muhbir ağı seviyesi (0-3)
 var ajan_sogutma := {}   # aile -> bu zamana kadar yeni sızma denemesi yok
 var isl: RefCounted
@@ -732,7 +734,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -751,6 +753,8 @@ func durum_yukle(d: Dictionary) -> void:
 		uyeler = d["uyeler"]
 		_uid = d["uid"]
 	_pid = d.get("pid", 0)
+	ziyaret = d.get("ziyaret", {})
+	gozlem = d.get("gozlem", {})
 	muhbir = d.get("muhbir", muhbir)
 	ajan_sogutma = d.get("ajan_sogutma", {})
 	degisti.emit()

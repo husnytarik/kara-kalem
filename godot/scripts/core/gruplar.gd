@@ -368,6 +368,8 @@ func isinla(o: Vector3, n: Vector3) -> Dictionary:
 	var en: Dictionary = {}
 	var en_uz := SECIM
 	for g in liste:
+		if not (g["dugum"] as Node3D).visible:
+			continue
 		var p: Vector3 = (g["pos"] as Vector3) + Vector3(0, 3.0, 0)
 		var t := maxf((p - o).dot(n), 0.0)
 		var uz := p.distance_to(o + n * t)

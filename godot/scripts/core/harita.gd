@@ -96,6 +96,10 @@ func _izgara_kur() -> void:
 		r.size.y += 1
 		_izgara.fill_solid_region(r, false)
 
+# Görüş/yürüme için: bu nokta bina, kaide ya da bölge dışı mı?
+func engelli(p: Vector3) -> bool:
+	return _izgara.is_point_solid(_hucre(p))
+
 func _hucre(p: Vector3) -> Vector2i:
 	var r := _izgara.region.size
 	return Vector2i(clampi(int(floor(p.x)) - _gx0, 0, r.x - 1), clampi(int(floor(p.z)) - _gz0, 0, r.y - 1))

@@ -262,7 +262,7 @@ func _imza() -> String:
 			var i: int = _hedef
 			var y: Dictionary = oyun.harita.yerler[i]
 			var gs: Array = oyun.gorevler.filter(func(g): return g["hedef"] == i).map(func(g): return [g["adam"], g["gorev"], (g["bitis"] - oyun.t) / 60])
-			return str([oyun.isy.get(i), oyun.kontrol(i), oyun.bolge[y["bolge"]]["inf"], oyun.bos_adamlar().map(func(a): return a["id"]), gs, oyun.temiz, oyun.kirli, _sonuc, yakin_bina(i)])
+			return str([oyun.ziyaret.get(i, []).size(), sokak.gorus.bina_gorunur(i), oyun.t / 60, oyun.isy.get(i), oyun.kontrol(i), oyun.bolge[y["bolge"]]["inf"], oyun.bos_adamlar().map(func(a): return a["id"]), gs, oyun.temiz, oyun.kirli, _sonuc, yakin_bina(i)])
 		"bolge":
 			return str([oyun.bolge[_hedef], oyun.erisim(_hedef), oyun.temiz, oyun.kirli, oyun.adamlar.size(), oyun.tarih()["gun"], _sonuc, bolgede_mi(_hedef)])
 		"adamlar":
@@ -358,10 +358,35 @@ func _bina_paneli() -> void:
 	for gk in ["haraclan", "topla", "koru"]:
 		_btn(_ic, "%s  (%d dk iş)" % [oyun.GOREVLER[gk]["ad"], oyun.GOREVLER[gk]["is"]], func(): _sonuc_goster(oyun.gorev_ver(i, gk, secili), "Adam yola çıktı."), not yakin)
 	_btn(_ic, "Satın al  (%s temiz)" % oyun.para(oyun.fiyat(i)), func(): _sonuc_goster(oyun.satin_al(i), "Satın aldın."), r["sahip"] or not yakin)
+	_hareket_bolumu(i)
 	if r["sahip"] and r.has("itibar"):
 		_isletme_bolumu(i, r)
 	_btn(_ic, "Buraya git", func(): sokak.oyuncu.git(y["pos"]))
 	_sonuc_satiri()
+
+func _hareket_bolumu(i: int) -> void:
+	var g: Node3D = sokak.gorus
+	_ayrac(_ic)
+	_lbl(_ic, "Görüş ve hareket", 18, RENK["altin"])
+	var log: Array = oyun.ziyaret.get(i, [])
+	if g.bina_gorunur(i):
+		var n: Dictionary = g.nufus(i)
+		_lbl(_ic, "Şu an içeride ≈ %d kişi" % n["toplam"], 16, RENK["good"])
+		_lbl(_ic, "Çalışan %d · müşteri/ziyaretçi %d · yabancı/silahlı grup %d" % [n["calisan"], n["musteri"], n["yabanci"]], 14, RENK["soluk"])
+	elif g.bina_kesfedildi(i):
+		var s: Dictionary = oyun.gozlem.get(i, {})
+		_lbl(_ic, "Görüş dışı — canlı bilgi yok.", 16, RENK["warn"])
+		if not s.is_empty():
+			_lbl(_ic, "Son gözlem: %s, ≈ %d kişi" % [oyun.saat_yazi(s["t"]), s["n"]], 14, RENK["soluk"])
+	else:
+		_lbl(_ic, "Burası henüz keşfedilmedi. Adam gönder ya da yaklaş.", 15, RENK["soluk"])
+		return
+	if log.is_empty():
+		_lbl(_ic, "Gelen giden kaydı yok.", 14, RENK["soluk"])
+	for k in range(log.size() - 1, maxi(-1, log.size() - 9), -1):
+		var e: Dictionary = log[k]
+		var renk: Color = RENK["warn"] if e["tur"] != "sivil" else RENK["soluk"]
+		_lbl(_ic, "%s  %s (%d kişi) %s" % [oyun.saat_yazi(e["t"]), e["ad"], e["kisi"], e["ne"]], 13, renk)
 
 func _isletme_bolumu(i: int, r: Dictionary) -> void:
 	var isl = oyun.isl
