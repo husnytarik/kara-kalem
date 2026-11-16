@@ -56,7 +56,11 @@ func _renk(c: Color, ismesiz: bool) -> StandardMaterial3D:
 		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	return m
 
+var kilitli := false   # çalışırken yürüyemezsin
+
 func git(hedef: Vector3) -> bool:
+	if kilitli:
+		return false
 	var y: PackedVector3Array = harita.yol_bul(global_position, hedef)
 	if y.size() < 2:
 		return false

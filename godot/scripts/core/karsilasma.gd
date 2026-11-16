@@ -203,7 +203,7 @@ func _para_orani(o: float) -> int:
 var otomatik := false   # true: eski otomatik çatışma (testler için)
 
 func savas_verisi(g: Dictionary, ceza: float) -> Dictionary:
-	var ekip: Array = [{"ad": "Sen", "silah": oyun.oyuncu_silah, "hp": 100.0, "isabet": 0.5, "id": 0, "oyuncu": true}]
+	var ekip: Array = [{"ad": "Sen", "silah": oyun.oyuncu_silah, "hp": oyun.ozet.get("hp", 100.0), "isabet": oyun.ozet.get("isabet", 0.5), "id": 0, "oyuncu": true}]
 	for a in oyun.bos_adamlar():
 		ekip.append({"ad": a["ad"], "silah": a.get("silah", "bicak"), "hp": 60.0 + oyun.beceri(a) / 2.0,
 			"isabet": 0.45 + a["zeka"] / 250.0, "id": a["id"]})

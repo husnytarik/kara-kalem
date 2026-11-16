@@ -240,6 +240,9 @@ disarisi = np.ones((H, W), bool)
 for k, b in BOL.items():
     disarisi[(XX >= b["x0"] + 2.5) & (XX <= b["x1"] - 2.5) & (ZZ >= b["z0"] + 2.5) & (ZZ <= b["z1"] - 2.5)] = False
 OCC |= disarisi
+# Havaalanı: Flats'in doğu ucu, apron burada; pist doğuya (şehir dışına) uzanır. Terminal ve hangarlar aşağıda elle eklenir.
+HAVA = (240.0, 246.0, 303.0, 298.0)   # x0, z0, x1, z1
+OCC[(XX >= HAVA[0] - 1) & (XX <= HAVA[2] + 1) & (ZZ >= HAVA[1] - 1) & (ZZ <= HAVA[3] + 1)] = True
 LOTMASK = np.zeros((H, W), bool)
 
 TUGLA = [(0.55, 0.30, 0.25), (0.59, 0.36, 0.31), (0.50, 0.27, 0.22), (0.62, 0.40, 0.30), (0.66, 0.55, 0.38), (0.55, 0.52, 0.48), (0.48, 0.30, 0.26), (0.60, 0.34, 0.22)]
@@ -410,7 +413,7 @@ parcalar = re.split(r"\n(?=\[node )", s_)
 kalan, isletmeler = [], []
 for p in parcalar:
     if 'parent="Binalar"' in p:
-        if "dolgu = true" not in p:
+        if "dolgu = true" not in p and 'name="Havaalani"' not in p:
             ad = re.search(r'\bad = "([^"]*)"', p)
             isletmeler.append({"isim": re.search(r'name="([^"]+)"', p).group(1), "ad": ad.group(1) if ad else "",
                                "bolge": re.search(r'bolge = "(\w+)"', p).group(1), "ozel": "ozel = true" in p})
@@ -438,6 +441,16 @@ for reg in BOL:
     for b in norm:
         if L:
             atama[id(L.pop())] = b
+
+# havaalanı binaları (adlı terminal + hangarlar), pist/apron dokuya aşağıda çizilir
+for (hx, hz, hw, hd, hkat, hkh, hrenk, hadli) in ((266, 256, 28, 11, 2, 4.4, (0.74, 0.72, 0.66), True),
+                                                 (254, 290, 24, 13, 1, 8.0, (0.42, 0.40, 0.36), False),
+                                                 (288, 290, 24, 13, 1, 8.0, (0.42, 0.40, 0.36), False)):
+    ht = {"cx": float(hx), "cz": float(hz), "th": 0.0, "w": float(hw), "d": float(hd), "reg": "flats", "kat": hkat, "kh": hkh,
+          "renk": hrenk, "ana": False}
+    lotlar.append(ht)
+    if hadli:
+        atama[id(ht)] = {"ad": "Municipal Airfield", "isim": "Havaalani", "ozel": True}
 
 yeni = []
 sayac = 0
@@ -532,6 +545,13 @@ for k, y in enumerate(yollar):
         if any(abs(m[1] - o["pts"][0][1]) < o["w"] / 2 + 0.5 and o["sinif"] == "ray" for o in yollar):
             continue
         d.line(px([a, b]), fill=SARI, width=max(1, int(0.3 * S)))
+# havaalanı: beton apron + pist (şehir sınırının dışına uzanır) + çizgiler
+d.polygon(px([(HAVA[0], HAVA[1]), (HAVA[2], HAVA[1]), (HAVA[2], HAVA[3]), (HAVA[0], HAVA[3])]), fill=(122, 120, 112))
+d.polygon(px([(HAVA[0], 266), (X0 + GEN - 1, 266), (X0 + GEN - 1, 278), (HAVA[0], 278)]), fill=(48, 48, 52))
+for xx in np.arange(HAVA[0] + 6, X0 + GEN - 8, 12.0):
+    d.line(px([(xx, 272), (xx + 6, 272)]), fill=(214, 214, 206), width=max(1, int(0.5 * S)))
+for zz in np.arange(267.5, 277.5, 1.6):
+    d.line(px([(HAVA[0] + 1.5, zz), (HAVA[0] + 5.5, zz)]), fill=(214, 214, 206), width=max(1, int(0.6 * S)))
 im.save(RENK)
 
 # ---------------- lamba ve ağaç ----------------

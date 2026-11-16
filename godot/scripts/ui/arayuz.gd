@@ -242,6 +242,8 @@ func _process(_d: float) -> void:
 	_arama.tooltip_text = "Polis seni arıyor: 30 ve üstünde devriyeler kovalar."
 	_arama.mouse_filter = Control.MOUSE_FILTER_PASS
 	_durum.text = "DURAKLATILDI" if Engine.time_scale == 0.0 else ""
+	if not oyun.vardiya.is_empty():
+		_durum.text = "ÇALIŞIYOR · %d sa kaldı" % maxi(1, int(ceil((oyun.vardiya["bitis"] - oyun.t) / 60.0)))
 	if oyun.defter.size() != _log_n:
 		_log_n = oyun.defter.size()
 		for c in _log.get_children():
@@ -262,7 +264,7 @@ func _imza() -> String:
 			var i: int = _hedef
 			var y: Dictionary = oyun.harita.yerler[i]
 			var gs: Array = oyun.gorevler.filter(func(g): return g["hedef"] == i).map(func(g): return [g["adam"], g["gorev"], (g["bitis"] - oyun.t) / 60])
-			return str([oyun.ziyaret.get(i, []).size(), sokak.gorus.bina_gorunur(i), oyun.t / 60, oyun.isy.get(i), oyun.kontrol(i), oyun.bolge[y["bolge"]]["inf"], oyun.bos_adamlar().map(func(a): return a["id"]), gs, oyun.temiz, oyun.kirli, _sonuc, yakin_bina(i)])
+			return str([oyun.ziyaret.get(i, []).size(), sokak.gorus.bina_gorunur(i), oyun.t / 60, oyun.isy.get(i), oyun.kontrol(i), oyun.bolge[y["bolge"]]["inf"], oyun.bos_adamlar().map(func(a): return a["id"]), gs, oyun.temiz, oyun.kirli, _sonuc, yakin_bina(i), oyun.vardiya])
 		"bolge":
 			return str([oyun.bolge[_hedef], oyun.erisim(_hedef), oyun.temiz, oyun.kirli, oyun.adamlar.size(), oyun.tarih()["gun"], _sonuc, bolgede_mi(_hedef)])
 		"adamlar":
@@ -358,6 +360,15 @@ func _bina_paneli() -> void:
 	for gk in ["haraclan", "topla", "koru"]:
 		_btn(_ic, "%s  (%d dk iş)" % [oyun.GOREVLER[gk]["ad"], oyun.GOREVLER[gk]["is"]], func(): _sonuc_goster(oyun.gorev_ver(i, gk, secili), "Adam yola çıktı."), not yakin)
 	_btn(_ic, "Satın al  (%s temiz)" % oyun.para(oyun.fiyat(i)), func(): _sonuc_goster(oyun.satin_al(i), "Satın aldın."), r["sahip"] or not yakin)
+	if not r["sahip"]:
+		_ayrac(_ic)
+		if oyun.vardiya.is_empty():
+			_btn(_ic, "Burada çalış  (8 saat · %s)" % oyun.para(oyun.ucret(i)), func(): _sonuc_goster(oyun.calis(i), "Mesaiye başladın."), not yakin)
+		elif oyun.vardiya["bina"] == i:
+			_lbl(_ic, "Burada çalışıyorsun (~%d saat kaldı)." % maxi(1, int(ceil((oyun.vardiya["bitis"] - oyun.t) / 60.0))), 15, RENK["info"])
+			_btn(_ic, "Mesaiyi bırak (ücret yok)", func(): oyun.mesai_birak(); _yenile(true))
+		else:
+			_lbl(_ic, "Başka yerde çalışıyorsun.", 15, RENK["soluk"])
 	_hareket_bolumu(i)
 	if r["sahip"] and r.has("itibar"):
 		_isletme_bolumu(i, r)

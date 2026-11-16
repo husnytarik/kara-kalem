@@ -168,6 +168,13 @@ func _acik(c: Vector2i) -> Vector2i:
 			return en
 	return c
 
+# Verilen noktaya en yakın yürünebilir nokta (başlangıç/ışınlama için).
+func serbest_nokta(p: Vector3) -> Vector3:
+	var c := _acik(_hucre(p))
+	var x := _gx0 + c.x + 0.5
+	var z := _gz0 + c.y + 0.5
+	return Vector3(x, yuk(x, z), z)
+
 # Dünya koordinatından dünya koordinatına yol (köşe noktaları). Boşsa ulaşılamaz.
 func yol_bul(a: Vector3, b: Vector3) -> PackedVector3Array:
 	var cikti := PackedVector3Array()

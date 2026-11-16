@@ -133,6 +133,10 @@ var arama := 0.0   # polisin seni arama seviyesi (0-100)
 var defter: Array[Dictionary] = []    # {t, metin, tur}
 var _sayac := 0
 var _ev := -1
+var profil: Dictionary = {}     # menüden gelen karakter: {ad, yas, koken, aile, gecmis}
+var ozet: Dictionary = {}       # profil.gd ozet(): statlar, hp, ücret çarpanı...
+var vardiya: Dictionary = {}    # çalışıyorsan: {bina, bitis, ucret}
+var kira_borc := 0.0
 var _kesir := 0.0
 
 func kur(h: Node3D) -> void:
@@ -156,7 +160,64 @@ func kur(h: Node3D) -> void:
 			isy[i] = {"tur": tur, "sahip": false, "haracli": false, "birikim": 0.0, "korumaBitis": 0}
 	isl = load("res://scripts/core/isletme.gd").new(self)
 	_aileleri_kur()
-	kayit("Kara Kalem: Southside senin semtin. Önce adam tut, sonra esnafa git.", "info")
+	_profil_uygula()
+
+# Karakter seçimini oyun durumuna işler: para, ev, tanınırlık, aile bağı.
+func _profil_uygula() -> void:
+	var P := load("res://scripts/core/profil.gd")
+	profil = P.al().duplicate()
+	ozet = P.ozet(profil)
+	temiz = ozet["temiz"]
+	kirli = ozet["kirli"]
+	var ev_ad: String = ozet["ev_ad"]
+	if ev_ad != "":
+		for i in harita.yerler.size():
+			if harita.yerler[i]["ad"] == ev_ad:
+				_ev = i
+				break
+	match profil["koken"]:
+		"yerli":
+			kayit("%s: Southside'da doğdun. Önce adam tut, sonra esnafa git." % profil["ad"], "info")
+		"aile":
+			var f: String = profil["aile"]
+			var a: Dictionary = P.AILELER[f]
+			var b: Dictionary = bolge[a["bolge"]]
+			b["inf"]["oyuncu"] = b["inf"].get("oyuncu", 0.0) + 12.0
+			b["tan"] = maxf(b["tan"], 30.0)
+			bolge["southside"]["inf"].erase("oyuncu")
+			bolge["southside"]["tan"] = 10.0
+			ofke[f] = 0.0
+			if _ev < 0 or harita.yerler[_ev]["ad"] != ev_ad:
+				_ev = _en_yakin_bina(harita.merkez(a["bolge"]))
+			kayit("%s: %s'nın adamı olarak başladın. Aylık pay alırsın; semtinde sözün geçer." % [profil["ad"], a["ad"]], "info")
+		"gocmen":
+			bolge["southside"]["inf"].erase("oyuncu")
+			bolge["southside"]["tan"] = 3.0
+			kayit("%s: Havaalanına indin. Cebinde %s var, ucuz bir oda tuttun. Önce çalışacak bir iş bul." % [profil["ad"], para(temiz)], "info")
+			kayit("İpucu: bir dükkâna/atölyeye yürü, binaya tıkla ve 'Burada çalış' de.", "info")
+
+func _en_yakin_bina(p: Vector3) -> int:
+	var en := -1
+	var d := 1e9
+	for i in harita.yerler.size():
+		var q: float = harita.yerler[i]["pos"].distance_squared_to(p)
+		if q < d:
+			d = q
+			en = i
+	return en
+
+# Başlangıç noktası: köken ve ev binasına göre, yürünebilir bir yer.
+func baslangic_noktasi() -> Vector3:
+	var p: Vector3
+	if profil.get("koken", "yerli") == "gocmen":
+		p = Vector3(262, 0, 272)   # havaalanı apronu (tools/sehir_uret2.py)
+	elif _ev >= 0:
+		p = harita.yerler[_ev]["pos"]
+	else:
+		p = harita.merkez("southside")
+	if profil.get("koken", "yerli") == "yerli":
+		p = harita.merkez("southside")
+	return harita.serbest_nokta(p)
 
 # ---------- aile hiyerarşisi ----------
 func _aileleri_kur() -> void:
@@ -425,7 +486,7 @@ func adam_bul(id: int) -> Dictionary:
 
 # Çatışmadaki gücün: sen + boştaki adamlar (becerisine göre).
 func guc() -> float:
-	var p := 1.0
+	var p: float = ozet.get("guc_carpan", 1.0)
 	for a in bos_adamlar():
 		p += 1.0 + beceri(a) / 60.0
 	return p
@@ -531,6 +592,28 @@ func gorev_gor_var(i: int) -> bool:
 		if g["hedef"] == i:
 			return true
 	return false
+
+# ---------- çalışma ----------
+const VARDIYA_DK := 480
+
+func ucret(i: int) -> int:
+	var tur: Dictionary = TURLER[isy[i]["tur"]]
+	return int(round((4.0 + tur["gelir"] * 0.25) * ozet.get("ucret_carpan", 1.0)))
+
+func calis(i: int) -> Dictionary:
+	if not isy.has(i) or isy[i]["sahip"]:
+		return hata("Burada çalışamazsın.")
+	if not vardiya.is_empty():
+		return hata("Zaten çalışıyorsun.")
+	vardiya = {"bina": i, "bitis": t + VARDIYA_DK, "ucret": ucret(i)}
+	kayit("%s'te mesai başladı (8 saat, %s)." % [harita.yerler[i]["ad"], para(vardiya["ucret"])], "info")
+	return tamam("Mesaiye başladın. 8 saat sonra ücretini alırsın.")
+
+func mesai_birak() -> void:
+	if vardiya.is_empty():
+		return
+	kayit("Mesaiyi yarıda bıraktın; ücret yok.", "warn")
+	vardiya = {}
 
 func satin_al(i: int) -> Dictionary:
 	if not isy.has(i):
@@ -720,6 +803,10 @@ func ilerle(delta: float) -> void:
 
 func _saat() -> void:
 	arama = maxf(0.0, arama - 0.5)
+	if not vardiya.is_empty() and t >= vardiya["bitis"]:
+		temiz += vardiya["ucret"]
+		kayit("Vardiya bitti: %s kazandın (%s)." % [para(vardiya["ucret"]), harita.yerler[vardiya["bina"]]["ad"]], "good")
+		vardiya = {}
 	for g in gorevler.duplicate():
 		if t >= g["bitis"]:
 			gorevler.erase(g)
@@ -734,7 +821,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -757,6 +844,12 @@ func durum_yukle(d: Dictionary) -> void:
 	gozlem = d.get("gozlem", {})
 	muhbir = d.get("muhbir", muhbir)
 	ajan_sogutma = d.get("ajan_sogutma", {})
+	if d.has("profil"):
+		profil = d["profil"]
+		ozet = load("res://scripts/core/profil.gd").ozet(profil)
+	vardiya = d.get("vardiya", {})
+	kira_borc = d.get("kira_borc", 0.0)
+	_ev = d.get("ev", _ev)
 	degisti.emit()
 
 # ---------- günlük rastgele olaylar ----------
@@ -818,10 +911,24 @@ func _gun() -> void:
 			r["haracli"] = false
 			r["birikim"] = 0.0
 			kayit("%s: %s adamları esnafı geri aldı; haracı artık onlara ödüyor." % [harita.yerler[i]["ad"], hakim_ad(hk)], "bad")
-	temiz += 40.0 + rng.randf() * 20.0   # Murphy's Tavern günlük geliri (şimdilik sabit; meyhane sistemi sonra)
+	if profil.get("koken", "yerli") == "yerli":
+		temiz += 40.0 + rng.randf() * 20.0   # Murphy's Tavern günlük geliri (şimdilik sabit; meyhane sistemi sonra)
 
 func _ay() -> void:
 	isl.ay()
+	var kira: float = ozet.get("kira", 0)
+	if kira > 0.0:
+		var borc := kira + kira_borc
+		if temiz >= borc:
+			temiz -= borc
+			kira_borc = 0.0
+			kayit("Oda kirası ödendi: %s." % para(borc), "info")
+		else:
+			kira_borc = borc
+			kayit("Kirayı ödeyemedin (borç %s). Ev sahibi sabırsızlanıyor." % para(borc), "bad")
+	if profil.get("koken", "") == "aile":
+		kirli += 80.0
+		kayit("%s'dan aylık pay: %s kirli." % [load("res://scripts/core/profil.gd").AILELER[profil["aile"]]["ad"], para(80.0)], "good")
 	var onceki := {}
 	for id in bolge:
 		onceki[id] = hakim_of(id)

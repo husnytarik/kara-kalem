@@ -20,6 +20,12 @@ var gorus: Node3D
 var _adam_gorsel := {}   # adam id -> Node3D (haritada yürüyen adam)
 
 func _ready() -> void:
+	for a in OS.get_cmdline_user_args():   # doğrulama: --profil=koken,aile,gecmis,yas,ad (menüyü atlar)
+		if a.begins_with("--profil="):
+			var q := a.substr(9).split(",")
+			var pr := {"ad": q[4] if q.size() > 4 else "Test Adam", "yas": int(q[3]) if q.size() > 3 else 30,
+				"koken": q[0], "aile": q[1] if q.size() > 1 else "marchetti", "gecmis": q[2] if q.size() > 2 else "yok"}
+			load("res://scripts/core/profil.gd").aktif = pr
 	_cevre()
 	harita = load("res://scenes/city/harita.tscn").instantiate()
 	add_child(harita)
@@ -31,8 +37,7 @@ func _ready() -> void:
 	oyuncu.set_script(load("res://scripts/characters/harita_oyuncu.gd"))
 	oyuncu.harita = harita
 	add_child(oyuncu)
-	oyuncu.global_position = harita.merkez("southside")   # senin semtin, yol kesişimi
-	oyuncu.global_position.y = harita.yuk(oyuncu.global_position.x, oyuncu.global_position.z)
+	oyuncu.global_position = oyun.baslangic_noktasi()   # köken ve eve göre
 	kamera = Node3D.new()
 	kamera.set_script(load("res://scripts/characters/ust_kamera.gd"))
 	add_child(kamera)
@@ -82,6 +87,10 @@ func _ready() -> void:
 	hud.add_child(yardim)
 	add_child(hud)
 	Engine.time_scale = _hiz
+	var PR := load("res://scripts/core/profil.gd")
+	if PR.yukle_basta:
+		PR.yukle_basta = false
+		yukle()
 	for a in OS.get_cmdline_user_args():   # doğrulama: --hedef=x,z  --bina=ad  --hizli
 		if a.begins_with("--hedef="):
 			var p := a.substr(8).split(",")
@@ -107,6 +116,23 @@ func _ready() -> void:
 			gorus.acik = false
 			gorus.guncelle()
 			gorus._gorunurluk()
+		elif a == "--is-testi":
+			var bi := -1
+			for k in oyun.isy:
+				if not oyun.isy[k]["sahip"]:
+					bi = k
+					break
+			print("is: ", oyun.harita.yerler[bi]["ad"], " ucret ", oyun.ucret(bi), " temiz once ", oyun.temiz)
+			print("calis: ", oyun.calis(bi))
+			for k in 500:
+				oyun.t += 1
+				if oyun.t % 60 == 0:
+					oyun._saat()
+			print("temiz sonra ", oyun.temiz, " vardiya ", oyun.vardiya)
+			for k in 10:
+				oyun._gun()
+			oyun._ay()
+			print("ay sonu temiz ", oyun.temiz, " borc ", oyun.kira_borc, " ev ", oyun.harita.yerler[oyun._ev]["ad"], " konum ", oyuncu.global_position)
 		elif a == "--aile-testi":
 			_aile_testi()
 		elif a.begins_with("--isletme-testi"):
@@ -203,6 +229,19 @@ func savas_baslat(g: Dictionary, ceza: float, geri: Callable, tur_zorla: String 
 		print("savas sonucu: ", sonuc)
 		geri.call(sonuc))
 
+var _dur: Node
+
+func _duraklat_menu() -> void:
+	if _dur != null:
+		return
+	_dur = load("res://scripts/ui/duraklat.gd").new()
+	add_child(_dur)
+	modal_duraklat(true)
+	_dur.kur(self)
+	_dur.tree_exited.connect(func():
+		_dur = null
+		modal_duraklat(false))
+
 func hiz_ayarla(v: float) -> void:
 	if v > 0.0:
 		_hiz = v
@@ -237,7 +276,11 @@ func _unhandled_input(e: InputEvent) -> void:
 				gorus.guncelle()
 				gorus._gorunurluk()
 			KEY_K: arayuz.aile_ac()
-			KEY_ESCAPE: arayuz.kapat()
+			KEY_ESCAPE:
+				if arayuz._sag.visible:
+					arayuz.kapat()
+				else:
+					_duraklat_menu()
 			KEY_F6: kaydet()
 			KEY_F9: yukle()
 
@@ -264,7 +307,8 @@ func _process(delta: float) -> void:
 	var fp := get_viewport().get_mouse_position()
 	var gh: Dictionary = gruplar.isinla(k.project_ray_origin(fp), k.project_ray_normal(fp))
 	var i: int = harita.yer_isinla(k.project_ray_origin(fp), k.project_ray_normal(fp))
-	_oy_etiket.text = "Sen · %d kişi" % (1 + oyun.adamlar.size())
+	_oy_etiket.text = "%s · %d kişi" % [oyun.profil.get("ad", "Sen"), 1 + oyun.adamlar.size()]
+	oyuncu.kilitli = not oyun.vardiya.is_empty()
 	if not gh.is_empty():
 		_ipucu.text = "%s — %s" % [gruplar.etiket_yazi(gh), gh["durum"]]
 	elif i >= 0:
