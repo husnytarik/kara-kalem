@@ -2,6 +2,8 @@ extends Node3D
 # Mount & Blade tarzı harita kamerası: yukarıdan, karakteri takip eder.
 # Sağ tık sürükle: döndür/eğ · Tekerlek: yakınlaş · WASD/ok: kaydır · C: karakteri ortala
 
+const MAKS_MESAFE := 300.0   # en uzak yakınlaşma (eskiden 800)
+
 var hedef: Node3D
 var mesafe := 110.0
 var _pitch := -1.0
@@ -16,7 +18,8 @@ func _ready() -> void:
 	top_level = true
 	_kam = Camera3D.new()
 	_kam.current = true
-	_kam.far = 3000.0
+	_kam.far = 900.0
+	_kam.fov = 55.0
 	add_child(_kam)
 	_son = Time.get_ticks_usec()
 
@@ -31,7 +34,7 @@ func _unhandled_input(e: InputEvent) -> void:
 		if e.button_index == MOUSE_BUTTON_WHEEL_UP:
 			mesafe = maxf(25.0, mesafe * 0.9)
 		elif e.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			mesafe = minf(800.0, mesafe * 1.1)
+			mesafe = minf(MAKS_MESAFE, mesafe * 1.1)
 	elif e is InputEventKey and e.pressed and e.keycode == KEY_C:
 		_kayma = Vector3.ZERO
 

@@ -40,6 +40,7 @@ func _yenile() -> void:
 		if _kutu == null:
 			_kutu = MeshInstance3D.new()
 			_kutu.mesh = BoxMesh.new()
+			_kutu.visibility_range_end = 520.0   # kameradan çok uzaktaki binalar çizilmez
 			add_child(_kutu)
 		(_kutu.mesh as BoxMesh).size = boyut
 		_kutu.position = Vector3(0, boyut.y / 2.0, 0)
