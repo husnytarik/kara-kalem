@@ -8,6 +8,9 @@ var _pitch := -1.0
 var _kayma := Vector3.ZERO
 var _kam: Camera3D
 var _son := 0
+var _poz := Vector3.ZERO      # yumuşatılmış kamera odağı
+var _poz_hazir := false
+var _mes := 110.0             # yumuşatılmış mesafe
 
 func _ready() -> void:
 	top_level = true
@@ -45,6 +48,13 @@ func _process(_d: float) -> void:
 		_kayma += g.normalized().rotated(Vector3.UP, rotation.y) * mesafe * 0.9 * dt
 		_kayma = _kayma.limit_length(400.0)
 	if hedef:
-		global_position = hedef.global_position + _kayma
-	_kam.position = Vector3(0, 0, mesafe).rotated(Vector3.RIGHT, _pitch)
+		var amac := hedef.global_position + _kayma
+		if not _poz_hazir or _poz.distance_to(amac) > 300.0:   # ilk kare / ışınlanma: atlama
+			_poz = amac
+			_mes = mesafe
+			_poz_hazir = true
+		_poz = _poz.lerp(amac, 1.0 - exp(-5.0 * dt))      # kare hızından bağımsız yumuşak takip
+		_mes = lerpf(_mes, mesafe, 1.0 - exp(-10.0 * dt))
+		global_position = _poz
+	_kam.position = Vector3(0, 0, _mes).rotated(Vector3.RIGHT, _pitch)
 	_kam.rotation.x = _pitch
