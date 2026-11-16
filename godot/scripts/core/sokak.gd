@@ -48,7 +48,7 @@ func _ready() -> void:
 	_oy_etiket.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_oy_etiket.no_depth_test = true
 	_oy_etiket.outline_size = 12
-	_oy_etiket.modulate = Color(1.0, 0.85, 0.4)
+	_oy_etiket.modulate = Color("e6e0d0")
 	_oy_etiket.position.y = 12.0
 	oyuncu.add_child(_oy_etiket)
 	gruplar = load("res://scripts/core/gruplar.gd").new()
@@ -67,23 +67,23 @@ func _ready() -> void:
 	var hud := CanvasLayer.new()
 	_hud_kok = hud
 	_etiket = Label.new()
-	_etiket.position = Vector2(20, 100)
-	_etiket.add_theme_font_size_override("font_size", 22)
+	_etiket.position = Vector2(14, 72)
+	_etiket.add_theme_font_size_override("font_size", 17)
 	_etiket.add_theme_color_override("font_outline_color", Color.BLACK)
 	_etiket.add_theme_constant_override("outline_size", 8)
 	hud.add_child(_etiket)
 	_ipucu = Label.new()
-	_ipucu.position = Vector2(20, 132)
-	_ipucu.add_theme_font_size_override("font_size", 20)
+	_ipucu.position = Vector2(14, 98)
+	_ipucu.add_theme_font_size_override("font_size", 16)
 	_ipucu.add_theme_color_override("font_outline_color", Color.BLACK)
 	_ipucu.add_theme_constant_override("outline_size", 8)
-	_ipucu.modulate = Color(1.0, 0.85, 0.4)
+	_ipucu.modulate = Color("d6c49c")
 	hud.add_child(_ipucu)
 	var yardim := Label.new()
 	yardim.text = "Sol tık: git/bina seç · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · V: sis aç/kapa · 1/2/3: hız · B: bölge · A: adamlar · D: defter · F6: kaydet · F9: yükle"
-	yardim.position = Vector2(20, 694)
-	yardim.add_theme_font_size_override("font_size", 14)
-	yardim.modulate = Color(1, 1, 1, 0.7)
+	yardim.position = Vector2(14, 700)
+	yardim.add_theme_font_size_override("font_size", 12)
+	yardim.modulate = Color(1, 1, 1, 0.5)
 	hud.add_child(yardim)
 	add_child(hud)
 	Engine.time_scale = _hiz

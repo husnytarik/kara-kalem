@@ -3,9 +3,10 @@ extends CanvasLayer
 # sol altta son olaylar. Her şey kodla kuruluyor; görünümü değiştirmek için _stil(), RENK ve
 # font boyutlarını değiştirmen yeter. Veri tarafı oyun.gd'dedir; burada kural yok, yalnızca gösterim.
 
+const Tema := preload("res://scripts/ui/tema.gd")
 const RENK := {
-	"good": Color("7ed07e"), "bad": Color("ee7070"), "warn": Color("f0b060"), "info": Color("d0d0d0"),
-	"altin": Color("e0b24a"), "soluk": Color(1, 1, 1, 0.6),
+	"good": Tema.IYI, "bad": Tema.KOTU, "warn": Tema.UYARI, "info": Tema.BILGI,
+	"altin": Tema.VURGU, "soluk": Tema.SOLUK,
 }
 
 var oyun: Node
@@ -44,24 +45,18 @@ func kur(o: Node, s: Node) -> void:
 	_sag_panel()
 	_diyalog_kur()
 	_log = VBoxContainer.new()
-	_log.position = Vector2(16, 520)
-	_log.custom_minimum_size = Vector2(620, 0)
+	_log.position = Vector2(12, 470)
+	_log.custom_minimum_size = Vector2(520, 0)
 	add_child(_log)
 
 # ---------- kurulum ----------
-func _stil(arka: Color = Color(0.07, 0.07, 0.09, 0.93)) -> StyleBoxFlat:
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = arka
-	sb.border_color = Color(0.7, 0.55, 0.2, 0.9)
-	sb.set_border_width_all(1)
-	sb.set_corner_radius_all(6)
-	sb.set_content_margin_all(10)
-	return sb
+func _stil(arka: Color = Tema.ARKA) -> StyleBoxFlat:
+	return Tema.stil(arka)
 
 func _lbl(ebeveyn: Node, metin: String, boyut: int = 16, renk: Color = Color.WHITE) -> Label:
 	var l := Label.new()
 	l.text = metin
-	l.add_theme_font_size_override("font_size", boyut)
+	l.add_theme_font_size_override("font_size", Tema.boyut(boyut))
 	l.add_theme_color_override("font_color", renk)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -82,20 +77,20 @@ func _bar(ebeveyn: Node, ad: String, deger: float, renk: Color, yazi: String = "
 	ebeveyn.add_child(h)
 	var l := _lbl(h, ad, 15)
 	l.size_flags_horizontal = Control.SIZE_FILL
-	l.custom_minimum_size = Vector2(105, 0)
+	l.custom_minimum_size = Vector2(90, 0)
 	var p := ProgressBar.new()
 	p.min_value = 0
 	p.max_value = 100
 	p.value = deger
 	p.show_percentage = false
-	p.custom_minimum_size = Vector2(0, 14)
+	p.custom_minimum_size = Vector2(0, 10)
 	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var f := StyleBoxFlat.new()
 	f.bg_color = renk
 	p.add_theme_stylebox_override("fill", f)
 	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(1, 1, 1, 0.1)
+	bg.bg_color = Color(1, 1, 1, 0.08)
 	p.add_theme_stylebox_override("background", bg)
 	h.add_child(p)
 	var v := _lbl(h, yazi if yazi != "" else str(int(round(deger))), 14, RENK["soluk"])
@@ -113,6 +108,7 @@ func _ust_cubuk() -> void:
 	pc.offset_left = 8
 	pc.offset_right = -8
 	pc.offset_top = 6
+	pc.theme = Tema.tema()
 	add_child(pc)
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 22)
@@ -120,9 +116,9 @@ func _ust_cubuk() -> void:
 	var sol := VBoxContainer.new()
 	h.add_child(sol)
 	_tarih = _lbl(sol, "", 15, RENK["soluk"])
-	_saat = _lbl(sol, "", 22, RENK["altin"])
-	_temiz = _lbl(h, "", 20, Color("9be39b"))
-	_kirli = _lbl(h, "", 20, Color("e09b9b"))
+	_saat = _lbl(sol, "", 20, RENK["altin"])
+	_temiz = _lbl(h, "", 20, Tema.IYI)
+	_kirli = _lbl(h, "", 20, Tema.KOTU)
 	_ekip = _lbl(h, "", 18)
 	_arama = _lbl(h, "", 18)
 	_durum = _lbl(h, "", 18, RENK["warn"])
@@ -144,11 +140,12 @@ func _sag_panel() -> void:
 	_sag = PanelContainer.new()
 	_sag.add_theme_stylebox_override("panel", _stil())
 	_sag.set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
-	_sag.offset_left = -400
+	_sag.offset_left = -340
 	_sag.offset_right = -8
-	_sag.offset_top = 86
+	_sag.offset_top = 66
 	_sag.offset_bottom = -40
 	_sag.visible = false
+	_sag.theme = Tema.tema()
 	add_child(_sag)
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -403,7 +400,7 @@ func _isletme_bolumu(i: int, r: Dictionary) -> void:
 	var isl = oyun.isl
 	_ayrac(_ic)
 	_lbl(_ic, "İşletme · gelir %s" % isl.gelir_yazi(i), 18, RENK["altin"])
-	_bar(_ic, "İtibar", r["itibar"], Color("e0b050"))
+	_bar(_ic, "İtibar", r["itibar"], Color("a89870"))
 	if isl.olay_var(r):
 		_lbl(_ic, "Durum: %s (%d gün kaldı)" % [r["olay"]["ad"], r["olay"]["bitis"] - oyun.t / oyun.DAY], 15, RENK["warn"])
 	var satir := HBoxContainer.new()
@@ -461,10 +458,10 @@ func _bolge_paneli() -> void:
 		_bar(_ic, oyun.FAK[f]["ad"], b["inf"][f], oyun.FAK[f]["renk"])
 	_ayrac(_ic)
 	_lbl(_ic, "Servet: " + "★".repeat(b["servet"]) + "☆".repeat(oyun.SERVET_MAX - b["servet"]), 16)
-	_bar(_ic, "Huzur", b["huzur"], Color("6fa8dc"))
-	_bar(_ic, "Sevgi", b["sev"], Color("7ed07e"))
-	_bar(_ic, "Korku", b["kor"], Color("d96060"))
-	_bar(_ic, "Tanınırlık", b["tan"], Color("c9a0dc"))
+	_bar(_ic, "Huzur", b["huzur"], Color("7f95ab"))
+	_bar(_ic, "Sevgi", b["sev"], Color("7fa386"))
+	_bar(_ic, "Korku", b["kor"], Color("b07878"))
+	_bar(_ic, "Tanınırlık", b["tan"], Color("9a8fa8"))
 	_ayrac(_ic)
 	if not oyun.erisim(id):
 		_lbl(_ic, "Buraya girmek için önce komşu bir bölgeye hakim ol.", 15, RENK["warn"])
@@ -499,9 +496,9 @@ func _adam_paneli() -> void:
 		_lbl(_ic, "Ekibin boş. Adam olmadan haraç bağlayamazsın.", 15, RENK["warn"])
 	for a in oyun.adamlar:
 		_lbl(_ic, "%s  ·  beceri %d" % [a["ad"], oyun.beceri(a)], 18)
-		_bar(_ic, "Yumruk", a["yumruk"], Color("d98a4a"))
-		_bar(_ic, "Bıçak", a["bicak"], Color("c26a6a"))
-		_bar(_ic, "Zekâ", a["zeka"], Color("6fa8dc"))
+		_bar(_ic, "Yumruk", a["yumruk"], Color("b08f6c"))
+		_bar(_ic, "Bıçak", a["bicak"], Color("a67070"))
+		_bar(_ic, "Zekâ", a["zeka"], Color("7f95ab"))
 		var durum := "Boşta"
 		if a["gorev"] == "tutuklu":
 			durum = "Karakolda"
@@ -594,12 +591,13 @@ func _grup_paneli() -> void:
 # ---------- karşılaşma diyaloğu (ekran ortasında, oyun duraklar) ----------
 func _diyalog_kur() -> void:
 	_dlg = PanelContainer.new()
-	_dlg.add_theme_stylebox_override("panel", _stil(Color(0.05, 0.05, 0.07, 0.97)))
+	_dlg.add_theme_stylebox_override("panel", _stil(Color(0.07, 0.08, 0.09, 0.97)))
 	_dlg.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	_dlg.custom_minimum_size = Vector2(520, 0)
+	_dlg.custom_minimum_size = Vector2(440, 0)
 	_dlg.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_dlg.grow_vertical = Control.GROW_DIRECTION_BOTH
 	_dlg.visible = false
+	_dlg.theme = Tema.tema()
 	add_child(_dlg)
 	_dlg_ic = VBoxContainer.new()
 	_dlg_ic.add_theme_constant_override("separation", 8)
