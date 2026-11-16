@@ -15,6 +15,7 @@ var sd: Dictionary = {}
 var hp := 100.0
 var hp_max := 100.0
 var isabet := 0.5            # yapay zekâ nişan başarısı (0-1)
+var lider := false           # düşman ekibin lideri (aile üyesi)
 var oyuncu_mu := false
 var oto := true              # true: yapay zekâ yönetir
 var renk := Color.WHITE
@@ -50,6 +51,7 @@ func kur(s: Node3D, v: Dictionary, poz: Vector3) -> void:
 	hp_max = v["hp"]
 	hp = hp_max
 	isabet = v.get("isabet", 0.5)
+	lider = v.get("lider", false)
 	oyuncu_mu = v.get("oyuncu", false)
 	oto = not oyuncu_mu
 	renk = v["renk"]
@@ -93,10 +95,17 @@ func kur(s: Node3D, v: Dictionary, poz: Vector3) -> void:
 	_etiket.outline_size = 8
 	_etiket.position.y = 2.3
 	_etiket.modulate = renk.lerp(Color.WHITE, 0.5)
+	if lider:
+		_etiket.pixel_size = 0.008
+		_etiket.modulate = Color(1.0, 0.8, 0.3)
+		_mi_olcek(mi)
 	add_child(_etiket)
 	global_position = poz
 	_atis = randf_range(0.2, 1.2)
 	hiz_yuru = 4.2 + randf() * 0.8
+
+func _mi_olcek(mi: MeshInstance3D) -> void:
+	mi.scale = Vector3(1.15, 1.05, 1.15)   # liderler biraz iri görünür
 
 func goz() -> Vector3:
 	return global_position + Vector3(0, 1.5, 0)

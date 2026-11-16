@@ -21,7 +21,11 @@ func giris(g: Dictionary) -> String:
 		"rakip":
 			if g["mod"] == "kac":
 				return "%s seni görünce kaçmaya çalışıyordu ama yetiştin. Gözleri korkuyla sende." % g["ad"]
-			return "%s yolunu kesti. Elleri ceplerinde ama niyetleri belli. Onlar %d kişi, senin tarafta %d kişi var." % [g["ad"], g["kisi"], oyun.bos_adamlar().size() + 1]
+			var lu: Dictionary = oyun.uye(g["lider"]) if g.has("lider") else {}
+			var ek := ""
+			if not lu.is_empty():
+				ek = " Başlarında %s var (ilişki: %+d)." % [oyun.uye_ad(lu), lu["iliski"]]
+			return "%s yolunu kesti.%s Onlar %d kişi, senin tarafta %d kişi var." % [g["ad"], ek, g["kisi"], oyun.bos_adamlar().size() + 1]
 		"polis":
 			if oyun.arama >= 30.0:
 				return "Polisler seni durdurdu: \"Aranan tipe benziyorsun.\" (Arama seviyen %d)" % int(oyun.arama)
@@ -81,6 +85,9 @@ func uygula(g: Dictionary, id: String) -> Dictionary:
 			if not oyun.harcama(m, "kirli"):
 				return _r("Yeterli kirli paran yok ($%d lazım)." % m, "bad", false)
 			gruplar.serbest_birak(g, 1440)
+			if g.has("lider"):
+				var lp: Dictionary = oyun.uye(g["lider"])
+				lp["iliski"] = mini(100, lp["iliski"] + 6)
 			oyun.kayit("%s'a yol parası ödedin ($%d)." % [g["ad"], m], "warn")
 			return _r("Parayı sayıp başlarını salladılar: \"Bu seferlik geç.\" Bir gün seni rahat bırakacaklar.", "warn")
 		"blof":
@@ -214,7 +221,14 @@ func savas_verisi(g: Dictionary, ceza: float) -> Dictionary:
 				"marchetti": havuz = ["tommy", "tabanca", "tabanca", "bicak"]
 				"obrien": havuz = ["yumruk", "bicak", "tabanca", "tabanca", "pompali"]
 				_: havuz = ["tabanca"]
-	for i in mini(g["kisi"], 10):
+	var n: int = mini(g["kisi"], 10)
+	var lu: Dictionary = oyun.uye(g["lider"]) if g.has("lider") else {}
+	if not lu.is_empty() and n > 0:
+		var gc: Dictionary = oyun.uye_guc(lu)
+		var sl: Array = gc["silah"]
+		dus.append({"ad": oyun.uye_ad(lu), "silah": sl[rng.randi() % sl.size()], "hp": gc["hp"], "isabet": gc["isabet"], "lider": true})
+		n -= 1
+	for i in n:
 		dus.append({"ad": "Düşman", "silah": havuz[rng.randi() % havuz.size()], "hp": hp, "isabet": rng.randf_range(0.4, 0.55)})
 	var alan: Dictionary = oyun.harita.savas_alani(gruplar.oyuncu.global_position)
 	return {"tur": alan["tur"], "sahne": alan["sahne"], "oyuncu_takimi": ekip, "dusman_takimi": dus,
@@ -225,6 +239,18 @@ func savas_bitir(g: Dictionary, s: Dictionary) -> Dictionary:
 	var olen: int = s["dusman_olu"]
 	g["kisi"] = maxi(0, g["kisi"] - olen)
 	var yazi := ""
+	var lu: Dictionary = oyun.uye(g["lider"]) if g.has("lider") else {}
+	if s.get("lider_olu", false) and not lu.is_empty():
+		var lad: String = oyun.uye_ad(lu)
+		oyun.uye_oldu(lu["uid"])
+		yazi += " %s yere serildi!" % lad
+		_bolge_tan(g, 6.0 if lu["rutbe"] in ["don", "ikinci"] else 2.0)
+		if g["kisi"] > 0 and not g.has("don"):
+			gruplar.lider_ata(g)
+		elif g.has("don"):
+			g["kisi"] = 0
+	elif not lu.is_empty() and s["sonuc"] != "kacis":
+		lu["iliski"] = maxi(-100, lu["iliski"] - 20)
 	for id in s["adam_olu"]:
 		for a in oyun.adamlar:
 			if a["id"] == id:

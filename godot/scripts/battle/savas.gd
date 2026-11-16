@@ -279,4 +279,8 @@ func _son_ver() -> void:
 		if x.takim == 0 and x.olu and x.kimlik != 0:
 			olu_adam.append(x.kimlik)
 	var s1 := _say(1)
-	bitti.emit({"sonuc": _bitis_sonuc, "dusman_olu": s1[1] - s1[0], "dusman_kalan": s1[0], "adam_olu": olu_adam})
+	var lider_olu := false
+	for x in birimler:
+		if x.takim == 1 and x.lider and x.olu:
+			lider_olu = true
+	bitti.emit({"sonuc": _bitis_sonuc, "dusman_olu": s1[1] - s1[0], "dusman_kalan": s1[0], "adam_olu": olu_adam, "lider_olu": lider_olu})

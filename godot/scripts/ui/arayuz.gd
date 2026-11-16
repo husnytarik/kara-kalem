@@ -137,6 +137,7 @@ func _ust_cubuk() -> void:
 		_btn(h, hv[0], sokak.hiz_ayarla.bind(hv[1]))
 	_btn(h, "Bölge", _bolge_dugmesi)
 	_btn(h, "Adamlar", adamlar_ac)
+	_btn(h, "Aileler", aile_ac)
 	_btn(h, "Defter", defter_ac)
 
 func _sag_panel() -> void:
@@ -183,6 +184,13 @@ func grup_ac(g: Dictionary) -> void:
 	_mod = "grup"
 	_hedef = g
 	_sonuc = ""
+	_yenile(true)
+
+func aile_ac() -> void:
+	if _mod == "aile":
+		kapat()
+		return
+	_mod = "aile"
 	_yenile(true)
 
 func defter_ac() -> void:
@@ -264,6 +272,8 @@ func _imza() -> String:
 			return str([g["kisi"], g["durum"], g["ev"], sokak.gruplar.liste.has(g), yakin_grup(g), sokak.takip_id])
 		"defter":
 			return str(oyun.defter.size())
+		"aile":
+			return str([oyun.uyeler, sokak.gruplar.liste.filter(func(g): return g.has("lider")).map(func(g): return [g["lider"], oyun.harita.bolge_at(g["pos"])])])
 	return ""
 
 func _yenile(zorla: bool) -> void:
@@ -279,6 +289,7 @@ func _yenile(zorla: bool) -> void:
 		"bolge": _bolge_paneli()
 		"adamlar": _adam_paneli()
 		"defter": _defter_paneli()
+		"aile": _aile_paneli()
 		"grup": _grup_paneli()
 	_kapat_dugmesi()
 
@@ -420,6 +431,25 @@ func _adam_paneli() -> void:
 		_btn(_ic, "Çıkar", func(): _sonuc_goster(oyun.adam_cikar(id)), a["gorev"] != "")
 		_ayrac(_ic)
 	_sonuc_satiri()
+
+# ---------- aileler (hiyerarşi) ----------
+func _aile_paneli() -> void:
+	_lbl(_ic, "Aileler", 24, RENK["altin"])
+	for f in oyun.NPC:
+		var fd: Dictionary = oyun.FAK[f]
+		_ayrac(_ic)
+		_lbl(_ic, "%s  ·  öfke %d" % [fd["ad"], int(oyun.ofke[f])], 18, fd["renk"])
+		for u in oyun.aile_uyeleri(f):
+			var yer := "karargâhta"
+			for g in sokak.gruplar.liste:
+				if g.get("lider", -1) == u["uid"]:
+					var b: String = oyun.harita.bolge_at(g["pos"])
+					yer = "%s (%d kişi)" % [oyun.harita.bolgeler[b]["ad"] if b != "" else "yollarda", g["kisi"]]
+			var renk: Color = RENK["altin"] if u["rutbe"] == "don" else Color.WHITE
+			_lbl(_ic, "%s %s — %s · ilişki %+d" % ["♛" if u["rutbe"] == "don" else "•", oyun.uye_ad(u), yer, u["iliski"]], 14, renk)
+		var oluler: Array = oyun.uyeler.filter(func(u): return u["fak"] == f and u["durum"] == "olu")
+		if not oluler.is_empty():
+			_lbl(_ic, "Ölenler: %s" % ", ".join(oluler.map(func(u): return oyun.uye_ad(u))), 13, RENK["soluk"])
 
 # ---------- defter ----------
 func _defter_paneli() -> void:

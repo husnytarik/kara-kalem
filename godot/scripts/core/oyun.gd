@@ -88,6 +88,26 @@ const SILAH := {
 	"pompali": {"ad": "Pompalı", "hasar": 9.0, "menzil": 20.0, "hiz": 1.0, "sarjor": 2, "yenileme": 2.2, "sacilma": 0.12, "pelet": 6, "fiyat": 300},
 	"tommy": {"ad": "Tommy Gun", "hasar": 11.0, "menzil": 45.0, "hiz": 9.0, "sarjor": 30, "yenileme": 2.4, "sacilma": 0.07, "pelet": 1, "fiyat": 450},
 }
+# Aile hiyerarşisi: don > ikinci > danışman > kaptan > asker. Kaptanlar ve askerler ekiplere liderlik eder.
+const RUTBE_SIRA := ["don", "ikinci", "danisman", "kaptan", "asker"]
+const RUTBE := {
+	"marchetti": {"don": "Don", "ikinci": "Underboss", "danisman": "Consigliere", "kaptan": "Capo", "asker": "Soldato"},
+	"obrien": {"don": "Patron", "ikinci": "Sağ Kol", "danisman": "Muhasebeci", "kaptan": "Kaptan", "asker": "Külhanbeyi"},
+	"tammany": {"don": "Başkan", "ikinci": "Meclis Üyesi", "danisman": "Avukat", "kaptan": "Bölge Temsilcisi", "asker": "Yardakçı"},
+}
+# Savaştaki güç: hp, silah havuzu, nişan başarısı
+const RUTBE_GUC := {
+	"don": {"hp": 140.0, "silah": ["tommy"], "isabet": 0.62},
+	"ikinci": {"hp": 115.0, "silah": ["tommy", "pompali"], "isabet": 0.58},
+	"danisman": {"hp": 80.0, "silah": ["tabanca"], "isabet": 0.55},
+	"kaptan": {"hp": 95.0, "silah": ["pompali", "tommy", "tabanca"], "isabet": 0.55},
+	"asker": {"hp": 70.0, "silah": ["tabanca", "bicak"], "isabet": 0.5},
+}
+const ADLAR := {
+	"marchetti": [["Vito", "Carlo", "Sal", "Enzo", "Paulie", "Gino", "Rocco", "Nico"], ["Marchetti", "Bruno", "Gallo", "Rizzo", "Conti", "Moretti", "Fontana", "Greco"]],
+	"obrien": [["Seamus", "Declan", "Finn", "Patrick", "Liam", "Colm", "Brendan", "Rory"], ["O'Brien", "Doyle", "Keane", "Murphy", "Quinn", "Walsh", "Byrne", "Kelly"]],
+	"tammany": [["Walter", "Harold", "Edmund", "Clarence", "Arthur", "Chester", "Lloyd", "Percy"], ["Whitcomb", "Hargrove", "Pembroke", "Ashworth", "Sterling", "Vandermeer", "Crane", "Talbot"]],
+}
 const ISIMLER := ["Vinnie", "Moe", "Sully", "Bugsy", "Lenny", "Sal", "Dutch", "Frankie", "Mickey", "Nate", "Ray", "Hank", "Joey", "Tommy", "Lou", "Abe"]
 
 var harita: Node3D
@@ -101,6 +121,8 @@ var adamlar: Array[Dictionary] = []   # {id, ad, yumruk, bicak, zeka, gorev}
 var gorevler: Array[Dictionary] = []  # {adam, hedef, gorev, basla, yol, bitis, yolu}
 var isy := {}                         # bina indeksi -> {tur, sahip, haracli, birikim, korumaBitis}
 var oyuncu_silah := "tabanca"
+var uyeler: Array = []   # aile üyeleri: {uid, ad, fak, rutbe, durum: aktif|olu, iliski, ev}
+var _uid := 0
 var arama := 0.0   # polisin seni arama seviyesi (0-100)
 var defter: Array[Dictionary] = []    # {t, metin, tur}
 var _sayac := 0
@@ -126,7 +148,92 @@ func kur(h: Node3D) -> void:
 		var tur := _tur(y["ad"])
 		if tur != "resmi":
 			isy[i] = {"tur": tur, "sahip": false, "haracli": false, "birikim": 0.0, "korumaBitis": 0}
+	_aileleri_kur()
 	kayit("Kara Kalem: Southside senin semtin. Önce adam tut, sonra esnafa git.", "info")
+
+# ---------- aile hiyerarşisi ----------
+func _aileleri_kur() -> void:
+	uyeler.clear()
+	for f in NPC:
+		uye_yarat(f, "don")
+		uye_yarat(f, "ikinci")
+		uye_yarat(f, "danisman")
+		for k in 4:
+			uye_yarat(f, "kaptan")
+
+func uye_yarat(f: String, rutbe: String) -> Dictionary:
+	_uid += 1
+	var ad := ""
+	var denendi := 0
+	while denendi < 20:
+		var a: Array = ADLAR[f]
+		ad = "%s %s" % [a[0][rng.randi() % a[0].size()], a[1][rng.randi() % a[1].size()]]
+		if uyeler.filter(func(u): return u["ad"] == ad and u["durum"] == "aktif").is_empty():
+			break
+		denendi += 1
+	var u := {"uid": _uid, "ad": ad, "fak": f, "rutbe": rutbe, "durum": "aktif", "iliski": 0, "ev": ""}
+	uyeler.append(u)
+	return u
+
+func uye(uid: int) -> Dictionary:
+	for u in uyeler:
+		if u["uid"] == uid:
+			return u
+	return {}
+
+func uye_ad(u: Dictionary) -> String:
+	return "%s %s" % [RUTBE[u["fak"]][u["rutbe"]], u["ad"]]
+
+func uye_rutbe_ad(u: Dictionary) -> String:
+	return RUTBE[u["fak"]][u["rutbe"]]
+
+func aile_uyeleri(f: String) -> Array:
+	var r: Array = uyeler.filter(func(u): return u["fak"] == f and u["durum"] == "aktif")
+	r.sort_custom(func(a, b): return RUTBE_SIRA.find(a["rutbe"]) < RUTBE_SIRA.find(b["rutbe"]))
+	return r
+
+func uye_guc(u: Dictionary) -> Dictionary:
+	return RUTBE_GUC[u["rutbe"]]
+
+# Boş bir lider lazım: kullanılmayan bir kaptan, yoksa yeni bir asker doğar. Hariç: zaten lider olanların uid'leri.
+func lider_bul(f: String, kullanilan: Array) -> Dictionary:
+	for u in aile_uyeleri(f):
+		if u["rutbe"] == "kaptan" and not kullanilan.has(u["uid"]):
+			return u
+	return uye_yarat(f, "asker")
+
+func uye_oldu(uid: int) -> String:
+	var u := uye(uid)
+	if u.is_empty() or u["durum"] != "aktif":
+		return ""
+	u["durum"] = "olu"
+	var f: String = u["fak"]
+	var yazi := "%s öldürüldü." % uye_ad(u)
+	if u["rutbe"] == "don":
+		var ik: Array = aile_uyeleri(f).filter(func(x): return x["rutbe"] == "ikinci")
+		if not ik.is_empty():
+			ik[0]["rutbe"] = "don"
+			yazi += " Yeni %s: %s." % [RUTBE[f]["don"], ik[0]["ad"]]
+			var kap: Array = aile_uyeleri(f).filter(func(x): return x["rutbe"] == "kaptan")
+			if not kap.is_empty():
+				kap[0]["rutbe"] = "ikinci"
+		else:
+			uye_yarat(f, "don")
+		for id in bolge:
+			if bolge[id]["inf"].has(f):
+				bolge[id]["inf"][f] = bolge[id]["inf"][f] * 0.85
+		ofke[f] = minf(100.0, ofke[f] + 25.0)
+		yazi += " Aile sarsıldı, intikam peşinde!"
+	elif u["rutbe"] == "ikinci":
+		var kap2: Array = aile_uyeleri(f).filter(func(x): return x["rutbe"] == "kaptan")
+		if not kap2.is_empty():
+			kap2[0]["rutbe"] = "ikinci"
+		ofke[f] = minf(100.0, ofke[f] + 12.0)
+	else:
+		ofke[f] = minf(100.0, ofke[f] + 4.0)
+	kayit(yazi, "warn")
+	degisti.emit()
+	return yazi
 
 # ---------- yardımcılar ----------
 func _tur(ad: String) -> String:
@@ -613,7 +720,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -628,6 +735,9 @@ func durum_yukle(d: Dictionary) -> void:
 	oyuncu_silah = d.get("oyuncu_silah", "tabanca")
 	defter.assign(d["defter"])
 	_sayac = d["sayac"]
+	if d.has("uyeler"):
+		uyeler = d["uyeler"]
+		_uid = d["uid"]
 	degisti.emit()
 
 # ---------- günlük rastgele olaylar ----------

@@ -93,6 +93,8 @@ func _ready() -> void:
 			for k in 400:
 				oyun._gun()
 			print("olaylar tamam, defter: ", oyun.defter.size())
+		elif a == "--aile-testi":
+			_aile_testi()
 		elif a.begins_with("--savas="):
 			_savas_testi(a.substr(8))
 		elif a == "--test":
@@ -209,6 +211,7 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_B: arayuz._bolge_dugmesi()
 			KEY_A: arayuz.adamlar_ac()
 			KEY_D: arayuz.defter_ac()
+			KEY_K: arayuz.aile_ac()
 			KEY_ESCAPE: arayuz.kapat()
 			KEY_F6: kaydet()
 			KEY_F9: yukle()
@@ -365,3 +368,13 @@ func _cevre() -> void:
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 400.0
 	add_child(sun)
+
+func _aile_testi() -> void:
+	for f in oyun.NPC:
+		print(f, ": ", oyun.aile_uyeleri(f).map(func(u): return oyun.uye_ad(u)))
+	var don: Dictionary = oyun.aile_uyeleri("marchetti")[0]
+	print("don oluyor: ", oyun.uye_oldu(don["uid"]))
+	await get_tree().create_timer(1.0).timeout
+	print("yeni: ", oyun.aile_uyeleri("marchetti").map(func(u): return oyun.uye_ad(u)))
+	print("gruplar: ", gruplar.liste.filter(func(g): return g["tur"] == "rakip").map(func(g): return g["ad"]))
+	arayuz.aile_ac()

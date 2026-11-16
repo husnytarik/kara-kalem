@@ -58,9 +58,38 @@ func _polis_ekle(ev: String) -> void:
 func _sivil_ekle(ev: String) -> void:
 	_yeni("sivil", "sivil", SIVIL_AD[rng.randi() % SIVIL_AD.size()], 1 + rng.randi() % 3, ev)
 
+func _kullanilan(f: String) -> Array:
+	return liste.filter(func(g): return g["fak"] == f and g.has("lider")).map(func(g): return g["lider"])
+
 func _rakip_ekle(f: String, ev: String) -> void:
-	var ad: String = "%s Ekibi" % oyun.FAK[f]["ad"].split(" ")[0]
-	_yeni("rakip", f, ad, 3 + rng.randi() % 4, ev)
+	var u: Dictionary = oyun.lider_bul(f, _kullanilan(f))
+	var g := _yeni("rakip", f, oyun.uye_ad(u), 3 + rng.randi() % 4, ev)
+	g["lider"] = u["uid"]
+
+func lider_ata(g: Dictionary) -> void:
+	var u: Dictionary = oyun.lider_bul(g["fak"], _kullanilan(g["fak"]))
+	g["lider"] = u["uid"]
+	g["ad"] = oyun.uye_ad(u)
+
+# Don, ailenin en güçlü grubuyla kendi bölgesinde gezer.
+func _don_gruplari() -> void:
+	for f in oyun.NPC:
+		var don: Array = oyun.aile_uyeleri(f).filter(func(u): return u["rutbe"] == "don")
+		if don.is_empty():
+			continue
+		var var_mi := not liste.filter(func(g): return g.get("lider", -1) == don[0]["uid"]).is_empty()
+		if var_mi:
+			continue
+		var ev := ""
+		for id in harita.bolgeler:
+			if oyun.hakim_of(id) == f:
+				ev = id
+				break
+		if ev == "":
+			continue
+		var g := _yeni("rakip", f, oyun.uye_ad(don[0]), 6 + rng.randi() % 3, ev)
+		g["lider"] = don[0]["uid"]
+		g["don"] = true
 
 # Her fraksiyonun, hâkim olduğu bölge başına bir ekibi olur. Bölge el değiştirirse ekip de taşınır.
 func _esitle() -> void:
@@ -68,15 +97,24 @@ func _esitle() -> void:
 		if g["kisi"] < g["kisi_max"] and oyun.t >= g["rejen"]:
 			g["kisi"] += 1
 			g["rejen"] = oyun.t + 360
+	for g in liste.duplicate():   # lideri ölmüş ekibe yeni lider
+		if g["tur"] == "rakip" and g.has("lider") and oyun.uye(g["lider"]).get("durum", "olu") != "aktif":
+			if g.has("don"):
+				_sil(g)
+			else:
+				lider_ata(g)
+		elif g.has("lider"):
+			g["ad"] = oyun.uye_ad(oyun.uye(g["lider"]))
+	_don_gruplari()
 	for f in oyun.NPC:
 		var bolgeleri: Array = []
 		for id in harita.bolgeler:
 			if oyun.hakim_of(id) == f:
 				bolgeleri.append(id)
-		var ekipler: Array = liste.filter(func(g): return g["fak"] == f)
+		var ekipler: Array = liste.filter(func(g): return g["fak"] == f and not g.has("don"))
 		while ekipler.size() < bolgeleri.size():
 			_rakip_ekle(f, bolgeleri[ekipler.size()])
-			ekipler = liste.filter(func(g): return g["fak"] == f)
+			ekipler = liste.filter(func(g): return g["fak"] == f and not g.has("don"))
 		while ekipler.size() > bolgeleri.size() and ekipler.size() > 1:
 			_sil(ekipler.pop_back())
 		for k in ekipler.size():
