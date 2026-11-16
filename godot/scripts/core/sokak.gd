@@ -95,6 +95,9 @@ func _ready() -> void:
 			print("olaylar tamam, defter: ", oyun.defter.size())
 		elif a == "--aile-testi":
 			_aile_testi()
+		elif a.begins_with("--denge="):
+			var dd := a.substr(8).split(",")
+			load("res://scripts/core/denge_testi.gd").calistir(oyun, dd[0], int(dd[1]))
 		elif a.begins_with("--savas="):
 			_savas_testi(a.substr(8))
 		elif a == "--test":

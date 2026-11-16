@@ -519,6 +519,12 @@ func gorev_ver(i: int, gorev: String, adam_id: int = 0) -> Dictionary:
 	degisti.emit()
 	return tamam()
 
+func gorev_gor_var(i: int) -> bool:
+	for g in gorevler:
+		if g["hedef"] == i:
+			return true
+	return false
+
 func satin_al(i: int) -> Dictionary:
 	if not isy.has(i):
 		return hata("Bu yer iş yeri değil.")
