@@ -39,3 +39,5 @@ Görsel harita: `plan.html` (tarayıcıda aç). Bu dosya asıl kaynaktır; ilerl
 ## Karar notları
 - Motor: Godot 4.3+, Forward+. Biçim: `.glb` tercih, `.fbx` de olur.
 - JS prototip (`prototype/`) kural ve denge referansıdır; Godot'a taşırken testlerin sayıları aynı çıkmalı.
+
+- [x] İşletme işleyişi (isletme.gd): itibar, fiyat, personel (çırak/usta), rastgele olaylar (bozuk mal, denetim, hırsızlık, yangın, övgü, tahrip), rakip ajanı (zehirleme/hırsızlık/ihbar), Soruştur/Kov/İnfaz, muhbir ağı (seviye 0-3, aylık gider, ipucu, Aileler panelinde konum görünürlüğü).

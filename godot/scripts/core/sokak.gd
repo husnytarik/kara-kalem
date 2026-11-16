@@ -95,6 +95,8 @@ func _ready() -> void:
 			print("olaylar tamam, defter: ", oyun.defter.size())
 		elif a == "--aile-testi":
 			_aile_testi()
+		elif a.begins_with("--isletme-testi"):
+			_isletme_testi(a.ends_with("ss"))
 		elif a.begins_with("--denge="):
 			var dd := a.substr(8).split(",")
 			load("res://scripts/core/denge_testi.gd").calistir(oyun, dd[0], int(dd[1]))
@@ -381,3 +383,35 @@ func _aile_testi() -> void:
 	print("yeni: ", oyun.aile_uyeleri("marchetti").map(func(u): return oyun.uye_ad(u)))
 	print("gruplar: ", gruplar.liste.filter(func(g): return g["tur"] == "rakip").map(func(g): return g["ad"]))
 	arayuz.aile_ac()
+
+func _isletme_testi(ekran: bool) -> void:
+	oyun.temiz = 20000.0
+	oyun.kirli = 5000.0
+	for f in oyun.NPC:
+		oyun.ofke[f] = 60.0
+	var sec := -1
+	for i in oyun.isy:
+		if oyun.isy[i]["tur"] == "eglence":
+			sec = i
+			break
+	oyun.bolge[oyun.harita.yerler[sec]["bolge"]]["inf"]["oyuncu"] = 50.0
+	print("satin al: ", oyun.satin_al(sec))
+	for k in 2:
+		print("tut: ", oyun.isl.tut(sec, true))
+	oyun.isy[sec]["personel"][0]["ajan"] = "marchetti"
+	oyun.isl.muhbir_ayarla("marchetti", 2)
+	oyun.isl.muhbir_ayarla("obrien", 1)
+	for g in 300:
+		oyun.t += oyun.DAY
+		oyun._gun()
+		if g % 10 == 9:
+			oyun._ay()
+		var r: Dictionary = oyun.isy[sec]
+		if r["personel"].size() < 2:
+			oyun.isl.tut(sec, true)
+	print("itibar ", oyun.isy[sec]["itibar"], " gelir ", oyun.isl.gelir_yazi(sec), " temiz ", int(oyun.temiz))
+	for e in oyun.defter:
+		print(e["metin"])
+	if ekran:
+		oyun.isy[sec]["personel"][0]["supheli"] = 80
+		arayuz.bina_ac(sec)

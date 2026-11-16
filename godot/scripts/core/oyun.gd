@@ -123,6 +123,10 @@ var isy := {}                         # bina indeksi -> {tur, sahip, haracli, bi
 var oyuncu_silah := "tabanca"
 var uyeler: Array = []   # aile üyeleri: {uid, ad, fak, rutbe, durum: aktif|olu, iliski, ev}
 var _uid := 0
+var _pid := 0
+var muhbir := {"marchetti": 0, "obrien": 0, "tammany": 0}   # aile içi muhbir ağı seviyesi (0-3)
+var ajan_sogutma := {}   # aile -> bu zamana kadar yeni sızma denemesi yok
+var isl: RefCounted
 var arama := 0.0   # polisin seni arama seviyesi (0-100)
 var defter: Array[Dictionary] = []    # {t, metin, tur}
 var _sayac := 0
@@ -148,6 +152,7 @@ func kur(h: Node3D) -> void:
 		var tur := _tur(y["ad"])
 		if tur != "resmi":
 			isy[i] = {"tur": tur, "sahip": false, "haracli": false, "birikim": 0.0, "korumaBitis": 0}
+	isl = load("res://scripts/core/isletme.gd").new(self)
 	_aileleri_kur()
 	kayit("Kara Kalem: Southside senin semtin. Önce adam tut, sonra esnafa git.", "info")
 
@@ -540,6 +545,7 @@ func satin_al(i: int) -> Dictionary:
 	r["sahip"] = true
 	r["haracli"] = false
 	r["birikim"] = 0.0
+	isl.baslat(i)
 	_nufuz(y["bolge"], 4.0)
 	kayit("%s'ı satın aldın (%s). Haftalık meşru gelir akacak." % [y["ad"], para(f)], "good")
 	degisti.emit()
@@ -726,7 +732,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -744,6 +750,9 @@ func durum_yukle(d: Dictionary) -> void:
 	if d.has("uyeler"):
 		uyeler = d["uyeler"]
 		_uid = d["uid"]
+	_pid = d.get("pid", 0)
+	muhbir = d.get("muhbir", muhbir)
+	ajan_sogutma = d.get("ajan_sogutma", {})
 	degisti.emit()
 
 # ---------- günlük rastgele olaylar ----------
@@ -789,11 +798,12 @@ func _olay() -> void:
 
 func _gun() -> void:
 	_olay()
+	isl.gunluk()
 	for i in isy:
 		var r: Dictionary = isy[i]
 		var w := haftalik(i)
 		if r["sahip"]:
-			temiz += w * 1.5 / 7.0
+			temiz += w * 1.5 / 7.0 * isl.carpan(i)
 			continue
 		if not r["haracli"]:
 			continue
@@ -807,6 +817,7 @@ func _gun() -> void:
 	temiz += 40.0 + rng.randf() * 20.0   # Murphy's Tavern günlük geliri (şimdilik sabit; meyhane sistemi sonra)
 
 func _ay() -> void:
+	isl.ay()
 	var onceki := {}
 	for id in bolge:
 		onceki[id] = hakim_of(id)

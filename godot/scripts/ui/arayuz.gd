@@ -273,7 +273,7 @@ func _imza() -> String:
 		"defter":
 			return str(oyun.defter.size())
 		"aile":
-			return str([oyun.uyeler, sokak.gruplar.liste.filter(func(g): return g.has("lider")).map(func(g): return [g["lider"], oyun.harita.bolge_at(g["pos"])])])
+			return str([oyun.muhbir, oyun.temiz, oyun.kirli, _sonuc, oyun.uyeler, sokak.gruplar.liste.filter(func(g): return g.has("lider")).map(func(g): return [g["lider"], oyun.harita.bolge_at(g["pos"])])])
 	return ""
 
 func _yenile(zorla: bool) -> void:
@@ -358,8 +358,53 @@ func _bina_paneli() -> void:
 	for gk in ["haraclan", "topla", "koru"]:
 		_btn(_ic, "%s  (%d dk iş)" % [oyun.GOREVLER[gk]["ad"], oyun.GOREVLER[gk]["is"]], func(): _sonuc_goster(oyun.gorev_ver(i, gk, secili), "Adam yola çıktı."), not yakin)
 	_btn(_ic, "Satın al  (%s temiz)" % oyun.para(oyun.fiyat(i)), func(): _sonuc_goster(oyun.satin_al(i), "Satın aldın."), r["sahip"] or not yakin)
+	if r["sahip"] and r.has("itibar"):
+		_isletme_bolumu(i, r)
 	_btn(_ic, "Buraya git", func(): sokak.oyuncu.git(y["pos"]))
 	_sonuc_satiri()
+
+func _isletme_bolumu(i: int, r: Dictionary) -> void:
+	var isl = oyun.isl
+	_ayrac(_ic)
+	_lbl(_ic, "İşletme · gelir %s" % isl.gelir_yazi(i), 18, RENK["altin"])
+	_bar(_ic, "İtibar", r["itibar"], Color("e0b050"))
+	if isl.olay_var(r):
+		_lbl(_ic, "Durum: %s (%d gün kaldı)" % [r["olay"]["ad"], r["olay"]["bitis"] - oyun.t / oyun.DAY], 15, RENK["warn"])
+	var satir := HBoxContainer.new()
+	_ic.add_child(satir)
+	for f in 3:
+		var b := Button.new()
+		b.text = ("► " if r["fiyat"] == f else "") + "Fiyat: " + isl.FIYAT_AD[f]
+		b.focus_mode = Control.FOCUS_NONE
+		b.pressed.connect(func(): isl.fiyat_ayarla(i, f))
+		satir.add_child(b)
+	_lbl(_ic, "Personel (%s) %d/%d" % [isl.rol_ad(i), r["personel"].size(), isl.PERSONEL_MAX], 16)
+	for p in r["personel"]:
+		var sp: int = p["supheli"]
+		var renk: Color = RENK["good"] if sp < 25 else (RENK["warn"] if sp < 70 else RENK["bad"])
+		var etiket := "%s · beceri %d · şüphe %d" % [p["ad"], p["beceri"], sp]
+		if p["fak_bilinen"]:
+			etiket += " · %s'in adamı!" % oyun.FAK[p["ajan"]]["ad"]
+		_lbl(_ic, etiket, 14, renk)
+		var h := HBoxContainer.new()
+		_ic.add_child(h)
+		for e in [["Soruştur ($60 kirli)", isl.sorustur], ["Kov", isl.kov], ["İnfaz et", isl.infaz]]:
+			var f2: Callable = e[1]
+			var b2 := Button.new()
+			b2.text = e[0]
+			b2.focus_mode = Control.FOCUS_NONE
+			b2.pressed.connect(func(): _sonuc_goster(f2.call(i, p["pid"]), ""))
+			h.add_child(b2)
+	if r["personel"].size() < isl.PERSONEL_MAX:
+		var h2 := HBoxContainer.new()
+		_ic.add_child(h2)
+		for e in [["Çırak tut ($80)", false], ["Usta tut ($250)", true]]:
+			var usta: bool = e[1]
+			var b3 := Button.new()
+			b3.text = e[0]
+			b3.focus_mode = Control.FOCUS_NONE
+			b3.pressed.connect(func(): _sonuc_goster(isl.tut(i, usta), ""))
+			h2.add_child(b3)
 
 # ---------- bölge paneli ----------
 func _bolge_paneli() -> void:
@@ -439,10 +484,25 @@ func _aile_paneli() -> void:
 		var fd: Dictionary = oyun.FAK[f]
 		_ayrac(_ic)
 		_lbl(_ic, "%s  ·  öfke %d" % [fd["ad"], int(oyun.ofke[f])], 18, fd["renk"])
+		var ms: int = oyun.muhbir[f]
+		var mh := HBoxContainer.new()
+		_ic.add_child(mh)
+		var ml := Label.new()
+		ml.text = "Muhbir ağı: %d/3  " % ms
+		mh.add_child(ml)
+		for dlt in [-1, 1]:
+			var mb := Button.new()
+			mb.text = "Azalt" if dlt < 0 else "Güçlendir ($%d kirli)" % oyun.isl.MUHBIR_KURULUM
+			mb.focus_mode = Control.FOCUS_NONE
+			mb.disabled = (dlt < 0 and ms <= 0) or (dlt > 0 and ms >= 3)
+			mb.pressed.connect(func(): _sonuc_goster(oyun.isl.muhbir_ayarla(f, ms + dlt), ""))
+			mh.add_child(mb)
 		for u in oyun.aile_uyeleri(f):
 			var yer := "karargâhta"
+			if ms <= 0:
+				yer = "yeri bilinmiyor (muhbir gerekir)"
 			for g in sokak.gruplar.liste:
-				if g.get("lider", -1) == u["uid"]:
+				if ms > 0 and g.get("lider", -1) == u["uid"]:
 					var b: String = oyun.harita.bolge_at(g["pos"])
 					yer = "%s (%d kişi)" % [oyun.harita.bolgeler[b]["ad"] if b != "" else "yollarda", g["kisi"]]
 			var renk: Color = RENK["altin"] if u["rutbe"] == "don" else Color.WHITE
