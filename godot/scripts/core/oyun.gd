@@ -129,6 +129,9 @@ var gozlem := {}    # bina -> {t, n}: son gözlenen kişi sayısı
 var muhbir := {"marchetti": 0, "obrien": 0, "tammany": 0}   # aile içi muhbir ağı seviyesi (0-3)
 var ajan_sogutma := {}   # aile -> bu zamana kadar yeni sızma denemesi yok
 var isl: RefCounted
+var zafer: RefCounted
+var zf := {"kampanya": 0.0, "durust_ay": 0, "hakim_ay": 0}   # zafer yolları ilerlemesi
+var son := {}                    # oyun bitti: {tur: zafer|yenilgi, metin}
 var arama := 0.0   # polisin seni arama seviyesi (0-100)
 var defter: Array[Dictionary] = []    # {t, metin, tur}
 var _sayac := 0
@@ -159,6 +162,7 @@ func kur(h: Node3D) -> void:
 		if tur != "resmi":
 			isy[i] = {"tur": tur, "sahip": false, "haracli": false, "birikim": 0.0, "korumaBitis": 0}
 	isl = load("res://scripts/core/isletme.gd").new(self)
+	zafer = load("res://scripts/core/zafer.gd").new(self)
 	_aileleri_kur()
 	_profil_uygula()
 
@@ -821,7 +825,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -850,6 +854,8 @@ func durum_yukle(d: Dictionary) -> void:
 	vardiya = d.get("vardiya", {})
 	kira_borc = d.get("kira_borc", 0.0)
 	_ev = d.get("ev", _ev)
+	zf = d.get("zf", {"kampanya": 0.0, "durust_ay": 0, "hakim_ay": 0})
+	son = d.get("son", {})
 	degisti.emit()
 
 # ---------- günlük rastgele olaylar ----------
@@ -1035,3 +1041,4 @@ func _ay() -> void:
 		ofke[f] *= 0.8
 	for id in bolge:
 		_hakim_degisti(id, onceki[id])
+	zafer.ay()

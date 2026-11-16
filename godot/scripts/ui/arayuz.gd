@@ -111,7 +111,7 @@ func _ust_cubuk() -> void:
 	pc.theme = Tema.tema()
 	add_child(pc)
 	var h := HBoxContainer.new()
-	h.add_theme_constant_override("separation", 22)
+	h.add_theme_constant_override("separation", 12)
 	pc.add_child(h)
 	var sol := VBoxContainer.new()
 	h.add_child(sol)
@@ -135,6 +135,7 @@ func _ust_cubuk() -> void:
 	_btn(h, "Adamlar", adamlar_ac)
 	_btn(h, "Aileler", aile_ac)
 	_btn(h, "Defter", defter_ac)
+	_btn(h, "Hedefler", zafer_ac)
 
 func _sag_panel() -> void:
 	_sag = PanelContainer.new()
@@ -188,6 +189,13 @@ func aile_ac() -> void:
 		kapat()
 		return
 	_mod = "aile"
+	_yenile(true)
+
+func zafer_ac() -> void:
+	if _mod == "zafer":
+		kapat()
+		return
+	_mod = "zafer"
 	_yenile(true)
 
 func defter_ac() -> void:
@@ -250,6 +258,7 @@ func _process(_d: float) -> void:
 			var l := _lbl(_log, "%s  %s" % [oyun.saat_yazi(e["t"]), e["metin"]], 15, RENK[e["tur"]])
 			l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
 			l.add_theme_constant_override("outline_size", 6)
+	_son_kontrol()
 	if _mod != "":
 		_yenile(false)
 	if d["gun"] < 0:
@@ -271,6 +280,8 @@ func _imza() -> String:
 			return str([g["kisi"], g["durum"], g["ev"], sokak.gruplar.liste.has(g), yakin_grup(g), sokak.takip_id])
 		"defter":
 			return str(oyun.defter.size())
+		"zafer":
+			return str([oyun.zafer.durum(), oyun.zf, oyun.temiz, _sonuc])
 		"aile":
 			return str([oyun.muhbir, oyun.temiz, oyun.kirli, _sonuc, oyun.uyeler, sokak.gruplar.liste.filter(func(g): return g.has("lider")).map(func(g): return [g["lider"], oyun.harita.bolge_at(g["pos"])])])
 	return ""
@@ -288,6 +299,7 @@ func _yenile(zorla: bool) -> void:
 		"bolge": _bolge_paneli()
 		"adamlar": _adam_paneli()
 		"defter": _defter_paneli()
+		"zafer": _zafer_paneli()
 		"aile": _aile_paneli()
 		"grup": _grup_paneli()
 	_kapat_dugmesi()
@@ -551,6 +563,80 @@ func _defter_paneli() -> void:
 	for k in range(n - 1, maxi(-1, n - 41), -1):
 		var e: Dictionary = oyun.defter[k]
 		_lbl(_ic, "%s %s" % [oyun.saat_yazi(e["t"]), e["metin"]], 14, RENK[e["tur"]])
+
+# ---------- hedefler / zafer yolları ----------
+func _zafer_paneli() -> void:
+	_lbl(_ic, "Hedefler", 24, RENK["altin"])
+	_lbl(_ic, "Üç zafer yolundan biri oyunu kazandırır. Koşullar ay sonunda kontrol edilir.", 14, RENK["soluk"])
+	var D: Dictionary = oyun.zafer.durum()
+	var yollar := [["durust", "Dürüst iş (2 ay üst üste)", oyun.zf["durust_ay"]], ["baskan", "Belediye başkanlığı (yıllık seçim, 12. ay)", -1], ["hakim", "Hâkimiyet (2 ay üst üste)", oyun.zf["hakim_ay"]]]
+	for y in yollar:
+		_ayrac(_ic)
+		var ad: String = y[1]
+		if y[2] >= 0:
+			ad += " · %d/2 ay" % y[2]
+		_lbl(_ic, ad, 17, RENK["altin"])
+		for x in D[y[0]]:
+			var h := HBoxContainer.new()
+			_ic.add_child(h)
+			_lbl(h, "%s %s" % ["✔" if x["ok"] else "✘", x["k"]], 15, RENK["good"] if x["ok"] else RENK["soluk"])
+			var v := _lbl(h, x["v"], 15)
+			v.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_ayrac(_ic)
+	_lbl(_ic, "Seçim kampanyası", 17, RENK["altin"])
+	_lbl(_ic, "Afiş, aşevi, miting: oy oranını yükseltir. Kazanamazsan para gider.", 14, RENK["soluk"])
+	var kh := HBoxContainer.new()
+	_ic.add_child(kh)
+	for m in [500, 1000, 2500]:
+		_btn(kh, "+$%d" % m, func(): _sonuc_goster(oyun.zafer.kampanya_fon(m)))
+	_sonuc_satiri()
+
+# Oyun sonu (zafer/yenilgi) örtüsü
+var _son_ortu: Control
+
+func _son_kontrol() -> void:
+	if oyun.son.is_empty() or _son_ortu != null:
+		return
+	var Menu := preload("res://scripts/ui/menu.gd")
+	_son_ortu = Control.new()
+	_son_ortu.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_son_ortu.mouse_filter = Control.MOUSE_FILTER_STOP
+	var dim := ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.75)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_son_ortu.add_child(dim)
+	var pc := PanelContainer.new()
+	pc.theme = Tema.tema()
+	pc.add_theme_stylebox_override("panel", Menu.panel_stil())
+	pc.set_anchors_preset(Control.PRESET_CENTER)
+	pc.custom_minimum_size = Vector2(460, 0)
+	pc.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	pc.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_son_ortu.add_child(pc)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 10)
+	pc.add_child(v)
+	var zafer: bool = oyun.son["tur"] == "zafer"
+	var b := _lbl(v, "ZAFER" if zafer else "OYUN BİTTİ", 28, RENK["good"] if zafer else RENK["bad"])
+	b.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_lbl(v, oyun.son["metin"], 16)
+	if zafer:
+		_btn(v, "Oynamaya devam et", _son_kapat)
+	_btn(v, "Ana menü", _ana_menu)
+	add_child(_son_ortu)
+	Engine.time_scale = 0.0
+	modal = true
+
+func _son_kapat() -> void:
+	_son_ortu.queue_free()
+	_son_ortu = null
+	oyun.son = {"tur": "devam", "metin": ""}   # bir daha gösterme; zafer sistemi durur
+	modal = false
+	Engine.time_scale = sokak._hiz
+
+func _ana_menu() -> void:
+	Engine.time_scale = 1.0
+	get_tree().change_scene_to_file("res://scenes/menu.tscn")
 
 # ---------- grup paneli (polis, rakip ekip, sivil) ----------
 func _grup_paneli() -> void:

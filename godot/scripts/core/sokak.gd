@@ -145,6 +145,19 @@ func _ready() -> void:
 				oyun._gun()
 			oyun._ay()
 			print("ay sonu temiz ", oyun.temiz, " borc ", oyun.kira_borc, " ev ", oyun.harita.yerler[oyun._ev]["ad"], " konum ", oyuncu.global_position)
+		elif a == "--zafer-testi":
+			var n := 0
+			for k in oyun.isy:
+				if n < 4:
+					oyun.isy[k]["sahip"] = true
+					n += 1
+			oyun.temiz = 20000.0
+			oyun.arama = 0.0
+			oyun.zafer.ay()
+			print("1. ay: ", oyun.zf, " son=", oyun.son)
+			oyun.zafer.ay()
+			print("2. ay: ", oyun.zf, " son=", oyun.son)
+			arayuz.zafer_ac()
 		elif a == "--aile-testi":
 			_aile_testi()
 		elif a.begins_with("--isletme-testi"):
