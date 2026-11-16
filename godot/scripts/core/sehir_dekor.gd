@@ -1,5 +1,5 @@
 extends Node3D
-# Sokak donanımı: lamba direkleri ve ağaçlar (data/sokak_ag.json, tools/sehir_uret.py üretir).
+# Sokak donanımı: lamba direkleri ve ağaçlar (data/sokak_ag.json, tools/sehir_uret2.py üretir).
 # MultiMesh kullanır, yani yüzlerce nesne tek çizim çağrısıdır.
 
 var harita: Node3D
@@ -9,6 +9,20 @@ func _ready() -> void:
 	if f == null:
 		return
 	var d: Dictionary = JSON.parse_string(f.get_as_text())
+	_su_kur()
+	for g in d.get("iskele", []):
+		var mi := MeshInstance3D.new()
+		var bm := BoxMesh.new()
+		bm.size = Vector3(g["w"], 1.0, g["d"])
+		mi.mesh = bm
+		var mt := StandardMaterial3D.new()
+		var c: Array = g["renk"]
+		mt.albedo_color = Color(c[0], c[1], c[2])
+		mt.roughness = 0.9
+		mi.material_override = mt
+		mi.position = Vector3(g["x"], g["y"] - 0.5, g["z"])
+		mi.add_to_group("iskele")
+		add_child(mi)
 	var direk := CylinderMesh.new()
 	direk.top_radius = 0.12
 	direk.bottom_radius = 0.18
@@ -47,4 +61,19 @@ func _coklu(mesh: Mesh, noktalar: Array, yuk: float, renk: Color, isik: bool) ->
 		mm.set_instance_transform(k, Transform3D(Basis.IDENTITY, Vector3(x, harita.yuk(x, z, false) + yuk, z)))
 	var mi := MultiMeshInstance3D.new()
 	mi.multimesh = mm
+	add_child(mi)
+
+# Göl ve nehir: tek büyük saydam su düzlemi (arazi suyun altında çukur kalır).
+func _su_kur() -> void:
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(364.0, 594.0)
+	var mt := StandardMaterial3D.new()
+	mt.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mt.albedo_color = Color(0.10, 0.27, 0.38, 0.88)
+	mt.roughness = 0.12
+	mt.metallic = 0.25
+	var mi := MeshInstance3D.new()
+	mi.mesh = pm
+	mi.material_override = mt
+	mi.position = Vector3(0, 0, 39)
 	add_child(mi)

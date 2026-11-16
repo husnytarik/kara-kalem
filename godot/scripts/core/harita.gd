@@ -10,6 +10,7 @@ var yerler: Array[Dictionary] = []     # {ad, bolge, ozel, pos, aabb}
 var _arazi: Node3D
 var _iskeleler: Array[AABB] = []
 var dolgu: Array[AABB] = []            # süs binalar (işletme değil; yine de engel ve görüş kesici)
+var _dolgu_obb: Array = []             # {xf, yerel}: dönük süs binalar için tam kutu
 var _izgara: AStarGrid2D
 var _gx0 := 0
 var _gz0 := 0
@@ -17,20 +18,24 @@ var _gz0 := 0
 func _ready() -> void:
 	_arazi = get_node("Arazi")
 	_bolgeleri_oku()
-	for n in get_tree().get_nodes_in_group("bina"):
-		var a: AABB = n.dunya_aabb()
-		if n.dolgu:
-			dolgu.append(a)
-			continue
-		yerler.append({"ad": n.ad, "bolge": n.bolge, "ozel": n.ozel, "pos": n.global_position, "aabb": a})
-	for n in get_tree().get_nodes_in_group("iskele"):
-		var m := n as MeshInstance3D
-		_iskeleler.append(m.global_transform * m.mesh.get_aabb())
-	_izgara_kur()
+	# Sokak donanımı (köprü/iskele güverteleri, su, lamba, ağaç) yol bulmadan ÖNCE kurulur.
 	var dekor := Node3D.new()
 	dekor.set_script(load("res://scripts/core/sehir_dekor.gd"))
 	dekor.harita = self
 	add_child(dekor)
+	for n in get_tree().get_nodes_in_group("bina"):
+		var a: AABB = n.dunya_aabb()
+		var yerel := AABB(Vector3(-n.boyut.x / 2.0, 0, -n.boyut.z / 2.0), n.boyut)
+		if n.dolgu:
+			dolgu.append(a)
+			_dolgu_obb.append({"xf": n.global_transform, "yerel": yerel})
+			continue
+		yerler.append({"ad": n.ad, "bolge": n.bolge, "ozel": n.ozel, "pos": n.global_position, "aabb": a,
+			"xf": n.global_transform, "yerel": yerel})
+	for n in get_tree().get_nodes_in_group("iskele"):
+		var m := n as MeshInstance3D
+		_iskeleler.append(m.global_transform * m.mesh.get_aabb())
+	_izgara_kur()
 	for id in bolgeler:
 		var l := Label3D.new()
 		l.text = bolgeler[id]["ad"]
@@ -79,6 +84,26 @@ func _rect(a: AABB, pay: float) -> Rect2i:
 	var z1 := int(ceil(a.end.z + pay)) - _gz0
 	return Rect2i(x0, z0, x1 - x0, z1 - z0)
 
+const SU_ESIK := 0.3
+
+# Dönük bir binanın taban izini (1 m pay ile) ızgarada kapat.
+func _kutu_kapat(xf: Transform3D, yerel: AABB, kaba: Variant) -> void:
+	var ters := xf.affine_inverse()
+	var a: AABB = kaba if kaba != null else xf * yerel
+	if kaba == null:
+		a = AABB(xf * Vector3(yerel.position.x, 0, yerel.position.z), Vector3.ZERO)
+		for sx in [0.0, 1.0]:
+			for sz in [0.0, 1.0]:
+				a = a.expand(xf * Vector3(yerel.position.x + sx * yerel.size.x, 0, yerel.position.z + sz * yerel.size.z))
+	var r := _rect(a, 1.0)
+	for gz in range(r.position.y, r.end.y):
+		for gx in range(r.position.x, r.end.x):
+			if not _izgara.is_in_boundsv(Vector2i(gx, gz)):
+				continue
+			var l := ters * Vector3(_gx0 + gx + 0.5, 0, _gz0 + gz + 0.5)
+			if absf(l.x - (yerel.position.x + yerel.size.x / 2.0)) <= yerel.size.x / 2.0 + 1.0 and absf(l.z - (yerel.position.z + yerel.size.z / 2.0)) <= yerel.size.z / 2.0 + 1.0:
+				_izgara.set_point_solid(Vector2i(gx, gz), true)
+
 func _izgara_kur() -> void:
 	_gx0 = int(floor(_arazi.x0))
 	_gz0 = int(floor(_arazi.z0))
@@ -93,13 +118,18 @@ func _izgara_kur() -> void:
 	for id in bolgeler:
 		var b: Dictionary = bolgeler[id]
 		_izgara.fill_solid_region(Rect2i(int(b["x0"]) - _gx0, int(b["z0"]) - _gz0, int(b["x1"] - b["x0"]), int(b["z1"] - b["z0"])), false)
+	# su (göl, nehir) yürünmez; iskele ve köprüler aşağıda yeniden açılır
+	for gz in int(_arazi.derinlik):
+		for gx in int(_arazi.genislik):
+			if not _izgara.is_point_solid(Vector2i(gx, gz)) and _arazi.yuk(_gx0 + gx + 0.5, _gz0 + gz + 0.5) < SU_ESIK:
+				_izgara.set_point_solid(Vector2i(gx, gz), true)
 	for n in get_tree().get_nodes_in_group("kaide"):
 		var m := n as MeshInstance3D
 		_izgara.fill_solid_region(_rect(m.global_transform * m.mesh.get_aabb(), 1.0), true)
 	for y in yerler:
-		_izgara.fill_solid_region(_rect(y["aabb"], 1.0), true)
-	for a in dolgu:
-		_izgara.fill_solid_region(_rect(a, 1.0), true)
+		_kutu_kapat(y["xf"], y["yerel"], y["aabb"])
+	for o in _dolgu_obb:
+		_kutu_kapat(o["xf"], o["yerel"], null)
 	for a in _iskeleler:
 		var r := _rect(a, -0.5)
 		r.position.y -= 1
@@ -175,15 +205,17 @@ func yer_isinla(o: Vector3, n: Vector3) -> int:
 	var en := -1
 	var en_d := 1e9
 	for i in yerler.size():
-		var h = (yerler[i]["aabb"] as AABB).intersects_ray(o, n)
+		var ters: Transform3D = (yerler[i]["xf"] as Transform3D).affine_inverse()
+		var h = (yerler[i]["yerel"] as AABB).intersects_ray(ters * o, ters.basis * n)
 		if h != null:
-			var d := o.distance_to(h)
+			var d := (ters * o).distance_to(h)
 			if d < en_d:
 				en_d = d
 				en = i
-	for a in dolgu:   # süs bina önündeyse tıklama ona çarpar
-		var h2 = a.intersects_ray(o, n)
-		if h2 != null and o.distance_to(h2) < en_d:
+	for ob in _dolgu_obb:   # süs bina önündeyse tıklama ona çarpar
+		var t2: Transform3D = (ob["xf"] as Transform3D).affine_inverse()
+		var h2 = (ob["yerel"] as AABB).intersects_ray(t2 * o, t2.basis * n)
+		if h2 != null and (t2 * o).distance_to(h2) < en_d:
 			return -1
 	return en
 

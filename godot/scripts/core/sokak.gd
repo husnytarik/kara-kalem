@@ -98,6 +98,11 @@ func _ready() -> void:
 			for k in 400:
 				oyun._gun()
 			print("olaylar tamam, defter: ", oyun.defter.size())
+		elif a.begins_with("--isin="):   # doğrulama: oyuncuyu doğrudan oraya koy
+			var q := a.substr(7).split(",")
+			oyuncu.global_position = Vector3(float(q[0]), harita.yuk(float(q[0]), float(q[1])), float(q[1]))
+		elif a.begins_with("--mesafe="):
+			kamera.mesafe = float(a.substr(9))
 		elif a == "--sissiz":
 			gorus.acik = false
 			gorus.guncelle()

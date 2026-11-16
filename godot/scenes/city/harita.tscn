@@ -356,1718 +356,1503 @@ script = ExtResource("2_mq5n1")
 
 [node name="Binalar" type="Node3D" parent="." unique_id=1739776054]
 
-[node name="Hotel_Belmont_0" parent="Binalar" unique_id=882093252 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 35.619244, -209)
+[node name="Hotel_Belmont_0" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -92.17, 5.672, -215.08)
 ad = "Hotel Belmont"
 bolge = "hilltop"
-boyut = Vector3(16, 10.306479, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-
-[node name="Jeweler_1" parent="Binalar" unique_id=2121133033 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 32.34626, -209)
+boyut = Vector3(16.34, 13.69, 12.56)
+renk = Color(0.820, 0.780, 0.660, 1)
+[node name="Jeweler_1" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.89752, 0, 0.44097, 0, 1, 0, -0.44097, 0, 0.89752, -26.71, 3.774, -207.35)
 ad = "Jeweler"
 bolge = "hilltop"
-boyut = Vector3(16, 8.63861, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-[node name="Attorney_2" parent="Binalar" unique_id=345935549 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 31.255438, -209)
+boyut = Vector3(12.53, 13.09, 11.20)
+renk = Color(0.850, 0.820, 0.740, 1)
+[node name="Attorney_2" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -93.53, 7.656, -99.65)
 ad = "Attorney"
 bolge = "hilltop"
-boyut = Vector3(16, 8.180538, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-[node name="Watchmaker_3" parent="Binalar" unique_id=1302929448 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 28.383532, -209)
+boyut = Vector3(10.98, 13.52, 11.55)
+renk = Color(0.700, 0.780, 0.680, 1)
+[node name="Watchmaker_3" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.93374, 0, 0.35795, 0, 1, 0, -0.35795, 0, 0.93374, -100.0, 11.021, -124.0)
 ad = "Watchmaker"
 bolge = "hilltop"
-boyut = Vector3(16, 7.082557, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-[node name="Grand_Theater_4" parent="Binalar" unique_id=2013581392 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 31.11477, -171)
+boyut = Vector3(7.76, 12.74, 7.33)
+renk = Color(0.700, 0.780, 0.680, 1)
+[node name="Grand_Theater_4" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -124.92, 7.57, -179.68)
 ad = "Grand Theater"
 bolge = "hilltop"
-boyut = Vector3(16, 7.376976, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-[node name="Florist_5" parent="Binalar" unique_id=1277370569 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 28.300098, -171)
+boyut = Vector3(16.35, 10.90, 10.35)
+renk = Color(0.660, 0.560, 0.440, 1)
+[node name="Florist_5" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.42703, 0, -0.90424, 0, 1, 0, 0.90424, 0, 0.42703, -144.0, 5.413, -110.0)
 ad = "Florist"
 bolge = "hilltop"
-boyut = Vector3(16, 8.909896, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-[node name="Tailor_6" parent="Binalar" unique_id=360519232 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 26.530664, -171)
+boyut = Vector3(8.38, 12.49, 7.68)
+renk = Color(0.850, 0.820, 0.740, 1)
+[node name="Tailor_6" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.31079, 0, -0.95048, 0, 1, 0, 0.95048, 0, 0.31079, -24.0, 2.997, -220.0)
 ad = "Tailor"
 bolge = "hilltop"
-boyut = Vector3(16, 10.327022, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-[node name="Dentist_7" parent="Binalar" unique_id=744097406 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 25.194153, -171)
+boyut = Vector3(7.22, 9.00, 7.28)
+renk = Color(0.850, 0.820, 0.740, 1)
+[node name="Dentist_7" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -41.25, 5.585, -106.4)
 ad = "Dentist"
 bolge = "hilltop"
-boyut = Vector3(16, 9.635435, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-[node name="Country_Club_8" parent="Binalar" unique_id=1723826996 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 25.220295, -133)
+boyut = Vector3(15.99, 14.30, 11.60)
+renk = Color(0.850, 0.820, 0.740, 1)
+[node name="Country_Club_8" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -92.31, 12.487, -136.54)
 ad = "Country Club"
 bolge = "hilltop"
-boyut = Vector3(16, 10.129227, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-[node name="Art_Gallery_9" parent="Binalar" unique_id=1726362935 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 23.449232, -133)
+boyut = Vector3(11.06, 12.57, 11.41)
+renk = Color(0.820, 0.780, 0.660, 1)
+[node name="Art_Gallery_9" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.39014, 0, -0.92076, 0, 1, 0, 0.92076, 0, 0.39014, -16.0, 4.981, -170.0)
 ad = "Art Gallery"
 bolge = "hilltop"
-boyut = Vector3(16, 9.183308, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-[node name="Mansion_10" parent="Binalar" unique_id=72152589 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 22.283253, -133)
+boyut = Vector3(7.86, 12.66, 7.66)
+renk = Color(0.700, 0.780, 0.680, 1)
+[node name="Mansion_10" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.91905, 0, 0.39415, 0, 1, 0, -0.39415, 0, 0.91905, -60.0, 11.193, -164.0)
 ad = "Mansion"
 bolge = "hilltop"
-boyut = Vector3(16, 8.234932, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-[node name="Private_Library_11" parent="Binalar" unique_id=1565333017 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 19.598299, -133)
+boyut = Vector3(8.30, 12.66, 7.40)
+renk = Color(0.660, 0.560, 0.440, 1)
+[node name="Private_Library_11" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, -0.0, 0, 1.0, -92.0, 6.534, -90.0)
 ad = "Private Library"
 bolge = "hilltop"
-boyut = Vector3(16, 8.197177, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-[node name="Chauffeur_Garage_12" parent="Binalar" unique_id=308468631 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 19.454521, -95)
+boyut = Vector3(8.74, 9.43, 7.13)
+renk = Color(0.700, 0.780, 0.680, 1)
+[node name="Chauffeur_Garage_12" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -127.55, 6.189, -194.8)
 ad = "Chauffeur Garage"
 bolge = "hilltop"
-boyut = Vector3(16, 10.475079, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-[node name="Perfumery_13" parent="Binalar" unique_id=1158227939 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 18.361767, -95)
+boyut = Vector3(11.36, 13.69, 12.28)
+renk = Color(0.700, 0.780, 0.680, 1)
+[node name="Perfumery_13" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -88.0, 11.021, -180.0)
 ad = "Perfumery"
 bolge = "hilltop"
-boyut = Vector3(16, 10.011366, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-[node name="Hotel_Belmont_II_14" parent="Binalar" unique_id=1682394174 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 17.437471, -95)
+boyut = Vector3(9.68, 12.74, 7.29)
+renk = Color(0.700, 0.780, 0.680, 1)
+[node name="Hotel_Belmont_II_14" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -109.38, 10.675, -136.04)
 ad = "Hotel Belmont II"
 bolge = "hilltop"
-boyut = Vector3(16, 10.051747, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-[node name="Jeweler_II_15" parent="Binalar" unique_id=445046192 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 17.134554, -95)
+boyut = Vector3(13.82, 13.69, 13.95)
+renk = Color(0.660, 0.560, 0.440, 1)
+[node name="Jeweler_II_15" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -41.07, 4.723, -93.97)
 ad = "Jeweler II"
 bolge = "hilltop"
-boyut = Vector3(16, 7.7119546, 16)
-renk = Color(0.78, 0.7, 0.55, 1)
-
-[node name="City_Hall_0" parent="Binalar" unique_id=1564370997 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 25.6829, -209)
+boyut = Vector3(12.31, 13.52, 11.78)
+renk = Color(0.850, 0.820, 0.740, 1)
+[node name="City_Hall_0" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.17641, 0, -0.98432, 0, 1, 0, 0.98432, 0, -0.17641, 49.33, 1.875, -212.36)
 ad = "City Hall"
 bolge = "downtown"
-boyut = Vector3(20, 41.26375, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="First_National_Bank_1" parent="Binalar" unique_id=1309704239 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 25.247896, -209)
+boyut = Vector3(15.34, 24.22, 14.37)
+renk = Color(0.580, 0.580, 0.600, 1)
+[node name="First_National_Bank_1" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.17626, 0, -0.98434, 0, 1, 0, 0.98434, 0, -0.17626, 132.0, 1.875, -210.0)
 ad = "First National Bank"
 bolge = "downtown"
-boyut = Vector3(20, 30.276205, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="Daily_Courier_2" parent="Binalar" unique_id=1355013345 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 26.262049, -209)
+boyut = Vector3(14.13, 27.94, 9.68)
+renk = Color(0.660, 0.600, 0.500, 1)
+[node name="Daily_Courier_2" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98633, 0, -0.16476, 0, 1, 0, 0.16476, 0, 0.98633, 38.0, 1.962, -114.0)
 ad = "Daily Courier"
 bolge = "downtown"
-boyut = Vector3(20, 29.863209, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="Post_Office_3" parent="Binalar" unique_id=836069975 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 25.960474, -209)
+boyut = Vector3(11.46, 32.00, 10.57)
+renk = Color(0.580, 0.580, 0.600, 1)
+[node name="Post_Office_3" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98654, 0, -0.16354, 0, 1, 0, 0.16354, 0, 0.98654, 124.83, 1.703, -109.42)
 ad = "Post Office"
 bolge = "downtown"
-boyut = Vector3(20, 53.569756, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="Orpheum_Cinema_4" parent="Binalar" unique_id=575915984 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 22.831528, -171)
+boyut = Vector3(16.88, 20.42, 13.46)
+renk = Color(0.500, 0.500, 0.520, 1)
+[node name="Orpheum_Cinema_4" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 115.35, 1.617, -167.19)
 ad = "Orpheum Cinema"
 bolge = "downtown"
-boyut = Vector3(20, 52.586174, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="Drugstore_5" parent="Binalar" unique_id=905907756 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 22.772018, -171)
+boyut = Vector3(17.42, 35.62, 15.01)
+renk = Color(0.580, 0.580, 0.600, 1)
+[node name="Drugstore_5" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98618, 0, -0.16568, 0, 1, 0, 0.16568, 0, 0.98618, 22.0, 2.134, -92.0)
 ad = "Drugstore"
 bolge = "downtown"
-boyut = Vector3(20, 32.723396, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="Precinct_House_6" parent="Binalar" unique_id=195770003 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 22.799534, -171)
+boyut = Vector3(14.33, 24.48, 9.31)
+renk = Color(0.660, 0.600, 0.500, 1)
+[node name="Precinct_House_6" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, -0.0, 0, 1.0, 108.0, 1.703, -140.0)
 ad = "Precinct House"
 bolge = "downtown"
 ozel = true
-boyut = Vector3(20, 46.783554, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="Courthouse_7" parent="Binalar" unique_id=1404198681 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 21.716717, -171)
+boyut = Vector3(9.33, 24.14, 8.45)
+renk = Color(0.720, 0.700, 0.640, 1)
+[node name="Courthouse_7" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 132.14, 1.789, -138.38)
 ad = "Courthouse"
 bolge = "downtown"
-boyut = Vector3(20, 54.062057, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="Union_Station_8" parent="Binalar" unique_id=671657013 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 19.852013, -133)
+boyut = Vector3(24.73, 28.02, 12.03)
+renk = Color(0.720, 0.700, 0.640, 1)
+[node name="Union_Station_8" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98667, 0, -0.16272, 0, 1, 0, 0.16272, 0, 0.98667, 98.0, 1.703, -102.0)
 ad = "Union Station"
 bolge = "downtown"
-boyut = Vector3(20, 35.156425, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="Stock_Exchange_9" parent="Binalar" unique_id=1579891237 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 19.613997, -133)
+boyut = Vector3(12.22, 20.34, 7.71)
+renk = Color(0.700, 0.670, 0.600, 1)
+[node name="Stock_Exchange_9" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98638, 0, -0.16446, 0, 1, 0, 0.16446, 0, 0.98638, 142.0, 1.789, -108.0)
 ad = "Stock Exchange"
 bolge = "downtown"
-boyut = Vector3(20, 47.23076, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="Telephone_Exchange_10" parent="Binalar" unique_id=1445249852 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 19.210579, -133)
+boyut = Vector3(11.56, 31.82, 9.22)
+renk = Color(0.500, 0.500, 0.520, 1)
+[node name="Telephone_Exchange_10" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.31131, 0, 0.95031, 0, 1, 0, -0.95031, 0, -0.31131, 48.67, 1.875, -193.51)
 ad = "Telephone Exchange"
 bolge = "downtown"
-boyut = Vector3(20, 27.711895, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="Hat_Shop_11" parent="Binalar" unique_id=1889385646 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 18.211292, -133)
+boyut = Vector3(16.40, 31.74, 12.93)
+renk = Color(0.500, 0.500, 0.520, 1)
+[node name="Hat_Shop_11" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 133.91, 1.703, -166.53)
 ad = "Hat Shop"
 bolge = "downtown"
-boyut = Vector3(20, 36.139286, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="Chamber_of_Commerce_12" parent="Binalar" unique_id=1838316978 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 14.902892, -95)
+boyut = Vector3(16.95, 27.94, 13.64)
+renk = Color(0.720, 0.700, 0.640, 1)
+[node name="Chamber_of_Commerce_12" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.17582, 0, -0.98442, 0, 1, 0, 0.98442, 0, -0.17582, 90.0, 1.875, -214.0)
 ad = "Chamber of Commerce"
 bolge = "downtown"
-boyut = Vector3(20, 30.909855, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="City_Hall_II_13" parent="Binalar" unique_id=1127378407 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 15.581103, -95)
+boyut = Vector3(11.04, 27.94, 7.37)
+renk = Color(0.720, 0.700, 0.640, 1)
+[node name="City_Hall_II_13" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98658, 0, -0.16328, 0, 1, 0, 0.16328, 0, 0.98658, 124.0, 1.789, -98.0)
 ad = "City Hall II"
 bolge = "downtown"
-boyut = Vector3(20, 31.052883, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="First_National_Bank_II_14" parent="Binalar" unique_id=224662919 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 15.151397, -95)
+boyut = Vector3(12.74, 20.25, 7.61)
+renk = Color(0.700, 0.670, 0.600, 1)
+[node name="First_National_Bank_II_14" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98638, 0, -0.16447, 0, 1, 0, 0.16447, 0, 0.98638, 40.0, 1.962, -126.0)
 ad = "First National Bank II"
 bolge = "downtown"
-boyut = Vector3(20, 48.007698, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="Daily_Courier_II_15" parent="Binalar" unique_id=578222360 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 15.253675, -95)
+boyut = Vector3(8.28, 24.31, 8.36)
+renk = Color(0.700, 0.670, 0.600, 1)
+[node name="Daily_Courier_II_15" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.17613, 0, -0.98437, 0, 1, 0, 0.98437, 0, -0.17613, 118.33, 1.789, -211.13)
 ad = "Daily Courier II"
 bolge = "downtown"
-boyut = Vector3(20, 31.935898, 20)
-renk = Color(0.5, 0.55, 0.62, 1)
-
-[node name="Synagogue_0" parent="Binalar" unique_id=380880771 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 12.190449, -57)
+boyut = Vector3(23.75, 24.22, 15.90)
+renk = Color(0.700, 0.670, 0.600, 1)
+[node name="Synagogue_0" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 60.28, 1.789, 45.6)
 ad = "Synagogue"
 bolge = "eastside"
-boyut = Vector3(12, 16.888966, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Corner_Diner_1" parent="Binalar" unique_id=1155228992 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 12.190449, -57)
+boyut = Vector3(11.49, 26.54, 12.95)
+renk = Color(0.550, 0.520, 0.480, 1)
+[node name="Corner_Diner_1" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 41.97, 1.703, 16.39)
 ad = "Corner Diner"
 bolge = "eastside"
-boyut = Vector3(12, 15.974773, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Boarding_House_2" parent="Binalar" unique_id=1063894222 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 12.2053385, -57)
+boyut = Vector3(8.43, 26.54, 10.93)
+renk = Color(0.480, 0.300, 0.260, 1)
+[node name="Boarding_House_2" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.46676, 0, 0.88438, 0, 1, 0, -0.88438, 0, -0.46676, 114.55, 1.53, 43.52)
 ad = "Boarding House"
 bolge = "eastside"
-boyut = Vector3(12, 15.049629, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Print_Shop_3" parent="Binalar" unique_id=2068609579 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 12.2053385, -57)
+boyut = Vector3(10.59, 19.34, 10.26)
+renk = Color(0.620, 0.400, 0.300, 1)
+[node name="Print_Shop_3" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 43.55, 1.789, 47.6)
 ad = "Print Shop"
 bolge = "eastside"
-boyut = Vector3(12, 16.100986, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Bakeshop_4" parent="Binalar" unique_id=657845585 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 12.030398, -57)
+boyut = Vector3(11.48, 15.65, 10.29)
+renk = Color(0.600, 0.340, 0.220, 1)
+[node name="Bakeshop_4" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.50028, 0, 0.86587, 0, 1, 0, -0.86587, 0, -0.50028, 116.15, 1.703, -43.27)
 ad = "Bakeshop"
 bolge = "eastside"
-boyut = Vector3(12, 16.836573, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Shoe_Repair_5" parent="Binalar" unique_id=728355401 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102, 12.030398, -57)
+boyut = Vector3(13.43, 23.02, 12.45)
+renk = Color(0.550, 0.520, 0.480, 1)
+[node name="Shoe_Repair_5" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 60.39, 1.789, 31.54)
 ad = "Shoe Repair"
 bolge = "eastside"
-boyut = Vector3(12, 15.030903, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Public_School_12_6" parent="Binalar" unique_id=1233270197 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126, 12.668526, -57)
+boyut = Vector3(14.02, 15.74, 12.82)
+renk = Color(0.480, 0.300, 0.260, 1)
+[node name="Public_School_12_6" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 62.0, 1.789, -18.0)
 ad = "Public School 12"
 bolge = "eastside"
-boyut = Vector3(12, 14.5610485, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Open_Market_7" parent="Binalar" unique_id=2012246977 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 12.668526, -57)
+boyut = Vector3(7.52, 22.94, 7.66)
+renk = Color(0.480, 0.300, 0.260, 1)
+[node name="Open_Market_7" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 134.49, 1.789, -46.67)
 ad = "Open Market"
 bolge = "eastside"
-boyut = Vector3(12, 16.978828, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Garment_Sweatshop_8" parent="Binalar" unique_id=775285311 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 10.906378, -19)
+boyut = Vector3(10.48, 26.62, 12.52)
+renk = Color(0.500, 0.270, 0.220, 1)
+[node name="Garment_Sweatshop_8" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.46676, 0, 0.88438, 0, 1, 0, -0.88438, 0, -0.46676, 125.12, 1.53, 37.14)
 ad = "Garment Sweatshop"
 bolge = "eastside"
-boyut = Vector3(12, 13.788425, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Yiddish_Theater_9" parent="Binalar" unique_id=2132103219 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 10.906378, -19)
+boyut = Vector3(8.63, 19.42, 12.28)
+renk = Color(0.550, 0.300, 0.250, 1)
+[node name="Yiddish_Theater_9" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 90.89, 1.53, 50.85)
 ad = "Yiddish Theater"
 bolge = "eastside"
-boyut = Vector3(12, 15.479476, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Deli_10" parent="Binalar" unique_id=974388530 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 10.875925, -19)
+boyut = Vector3(8.88, 23.11, 11.57)
+renk = Color(0.600, 0.340, 0.220, 1)
+[node name="Deli_10" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 38.62, 1.789, -16.92)
 ad = "Deli"
 bolge = "eastside"
-boyut = Vector3(12, 13.268442, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Pushcart_Alley_11" parent="Binalar" unique_id=1089140033 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 10.875925, -19)
+boyut = Vector3(9.71, 22.94, 12.78)
+renk = Color(0.550, 0.300, 0.250, 1)
+[node name="Pushcart_Alley_11" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 30.58, 1.703, 47.85)
 ad = "Pushcart Alley"
 bolge = "eastside"
-boyut = Vector3(12, 12.112482, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Synagogue_II_12" parent="Binalar" unique_id=1832675065 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 10.186644, -19)
+boyut = Vector3(12.67, 26.54, 9.26)
+renk = Color(0.620, 0.400, 0.300, 1)
+[node name="Synagogue_II_12" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 136.13, 1.789, -29.58)
 ad = "Synagogue II"
 bolge = "eastside"
-boyut = Vector3(12, 17.134594, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Corner_Diner_II_13" parent="Binalar" unique_id=846778037 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102, 10.186644, -19)
+boyut = Vector3(8.11, 15.82, 10.51)
+renk = Color(0.550, 0.300, 0.250, 1)
+[node name="Corner_Diner_II_13" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 91.02, 1.703, -16.36)
 ad = "Corner Diner II"
 bolge = "eastside"
-boyut = Vector3(12, 13.028016, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Boarding_House_II_14" parent="Binalar" unique_id=663434153 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126, 10.300954, -19)
+boyut = Vector3(9.37, 19.42, 11.41)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Boarding_House_II_14" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 51.04, 1.789, -15.66)
 ad = "Boarding House II"
 bolge = "eastside"
-boyut = Vector3(12, 15.5769615, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Print_Shop_II_15" parent="Binalar" unique_id=229601817 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 10.300954, -19)
+boyut = Vector3(12.50, 19.34, 9.57)
+renk = Color(0.590, 0.360, 0.310, 1)
+[node name="Print_Shop_II_15" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 39.76, 1.789, 60.58)
 ad = "Print Shop II"
 bolge = "eastside"
-boyut = Vector3(12, 12.314709, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Bakeshop_II_16" parent="Binalar" unique_id=661205732 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 8.093316, 19)
+boyut = Vector3(11.31, 15.74, 10.71)
+renk = Color(0.550, 0.300, 0.250, 1)
+[node name="Bakeshop_II_16" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.50028, 0, 0.86587, 0, 1, 0, -0.86587, 0, -0.50028, 92.0, 1.789, -30.0)
 ad = "Bakeshop II"
 bolge = "eastside"
-boyut = Vector3(12, 13.141032, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Shoe_Repair_II_17" parent="Binalar" unique_id=665834851 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 8.093316, 19)
+boyut = Vector3(7.93, 19.34, 7.19)
+renk = Color(0.500, 0.270, 0.220, 1)
+[node name="Shoe_Repair_II_17" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.46676, 0, 0.88438, 0, 1, 0, -0.88438, 0, -0.46676, 116.51, 1.444, 19.49)
 ad = "Shoe Repair II"
 bolge = "eastside"
-boyut = Vector3(12, 17.671959, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Public_School_12_II_18" parent="Binalar" unique_id=2117367319 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 8.126333, 19)
+boyut = Vector3(9.75, 22.94, 11.47)
+renk = Color(0.600, 0.340, 0.220, 1)
+[node name="Public_School_12_II_18" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 27.14, 1.875, -28.98)
 ad = "Public School 12 II"
 bolge = "eastside"
-boyut = Vector3(12, 16.150047, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Open_Market_II_19" parent="Binalar" unique_id=1180386149 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 8.126333, 19)
+boyut = Vector3(9.71, 15.65, 9.09)
+renk = Color(0.480, 0.300, 0.260, 1)
+[node name="Open_Market_II_19" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 26.55, 1.789, 60.3)
 ad = "Open Market II"
 bolge = "eastside"
-boyut = Vector3(12, 13.901152, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Garment_Sweatshop_II_20" parent="Binalar" unique_id=280423750 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 7.449688, 19)
+boyut = Vector3(11.60, 15.74, 11.72)
+renk = Color(0.600, 0.340, 0.220, 1)
+[node name="Garment_Sweatshop_II_20" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 91.44, 1.53, 30.15)
 ad = "Garment Sweatshop II"
 bolge = "eastside"
-boyut = Vector3(12, 14.853388, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Yiddish_Theater_II_21" parent="Binalar" unique_id=934879756 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102, 7.449688, 19)
+boyut = Vector3(9.79, 15.82, 11.69)
+renk = Color(0.550, 0.520, 0.480, 1)
+[node name="Yiddish_Theater_II_21" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 89.9, 1.617, 40.89)
 ad = "Yiddish Theater II"
 bolge = "eastside"
-boyut = Vector3(12, 13.853514, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Deli_II_22" parent="Binalar" unique_id=1832220611 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126, 8.68432, 19)
+boyut = Vector3(9.46, 22.94, 9.14)
+renk = Color(0.590, 0.360, 0.310, 1)
+[node name="Deli_II_22" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, -0.0, 0, 1.0, 144.0, 1.962, -48.0)
 ad = "Deli II"
 bolge = "eastside"
-boyut = Vector3(12, 17.026365, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Pushcart_Alley_II_23" parent="Binalar" unique_id=2139079978 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 8.68432, 19)
+boyut = Vector3(7.23, 19.34, 7.05)
+renk = Color(0.550, 0.300, 0.250, 1)
+[node name="Pushcart_Alley_II_23" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 60.87, 1.617, -46.28)
 ad = "Pushcart Alley II"
 bolge = "eastside"
-boyut = Vector3(12, 15.717738, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Synagogue_III_24" parent="Binalar" unique_id=593048253 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 6.3956666, 57)
+boyut = Vector3(10.93, 19.42, 12.09)
+renk = Color(0.550, 0.300, 0.250, 1)
+[node name="Synagogue_III_24" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.49144, 0, 0.87091, 0, 1, 0, -0.87091, 0, -0.49144, 122.38, 1.703, -29.82)
 ad = "Synagogue III"
 bolge = "eastside"
-boyut = Vector3(12, 13.05048, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Corner_Diner_III_25" parent="Binalar" unique_id=1790112154 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 6.3956666, 57)
+boyut = Vector3(14.22, 26.54, 10.34)
+renk = Color(0.550, 0.300, 0.250, 1)
+[node name="Corner_Diner_III_25" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98279, 0, 0.1847, 0, 1, 0, -0.1847, 0, 0.98279, 19.4, 1.875, -40.34)
 ad = "Corner Diner III"
 bolge = "eastside"
-boyut = Vector3(12, 13.129075, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Boarding_House_III_26" parent="Binalar" unique_id=2046328737 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 6.1245303, 57)
+boyut = Vector3(8.59, 15.65, 12.36)
+renk = Color(0.590, 0.360, 0.310, 1)
+[node name="Boarding_House_III_26" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98274, 0, 0.185, 0, 1, 0, -0.185, 0, 0.98274, 103.94, 1.53, 49.19)
 ad = "Boarding House III"
 bolge = "eastside"
-boyut = Vector3(12, 13.193842, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Print_Shop_III_27" parent="Binalar" unique_id=1525678294 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 6.1245303, 57)
+boyut = Vector3(9.55, 22.85, 10.48)
+renk = Color(0.480, 0.300, 0.260, 1)
+[node name="Print_Shop_III_27" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 140.21, 1.962, -60.62)
 ad = "Print Shop III"
 bolge = "eastside"
-boyut = Vector3(12, 14.42738, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Bakeshop_III_28" parent="Binalar" unique_id=467618887 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 5.06698, 57)
+boyut = Vector3(10.36, 15.74, 11.50)
+renk = Color(0.500, 0.270, 0.220, 1)
+[node name="Bakeshop_III_28" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 103.63, 1.53, 31.49)
 ad = "Bakeshop III"
 bolge = "eastside"
-boyut = Vector3(12, 17.964008, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Shoe_Repair_III_29" parent="Binalar" unique_id=1840898651 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102, 5.06698, 57)
+boyut = Vector3(12.47, 15.74, 9.07)
+renk = Color(0.620, 0.400, 0.300, 1)
+[node name="Shoe_Repair_III_29" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 30.47, 1.703, 16.14)
 ad = "Shoe Repair III"
 bolge = "eastside"
-boyut = Vector3(12, 16.414074, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Public_School_12_III_30" parent="Binalar" unique_id=339590687 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 126, 6.013674, 57)
+boyut = Vector3(12.43, 23.02, 10.72)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Public_School_12_III_30" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98208, 0, 0.18845, 0, 1, 0, -0.18845, 0, 0.98208, 50.0, 1.789, -42.0)
 ad = "Public School 12 III"
 bolge = "eastside"
-boyut = Vector3(12, 15.5846, 22)
-renk = Color(0.5, 0.42, 0.32, 1)
-
-[node name="Open_Market_III_31" parent="Binalar" unique_id=1111395857 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 6.013674, 57)
+boyut = Vector3(7.34, 22.94, 7.23)
+renk = Color(0.550, 0.300, 0.250, 1)
+[node name="Open_Market_III_31" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 61.6, 1.789, -32.64)
 ad = "Open Market III"
 bolge = "eastside"
-boyut = Vector3(12, 17.144432, 22)
-renk = Color(0.54, 0.4664, 0.3744, 1)
-
-[node name="Blacksmith_0" parent="Binalar" unique_id=303520355 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 4.4732046, 95)
+boyut = Vector3(12.92, 19.34, 10.26)
+renk = Color(0.480, 0.300, 0.260, 1)
+[node name="Blacksmith_0" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.01502, 0, -0.99989, 0, 1, 0, 0.99989, 0, 0.01502, 112.76, 1.962, 129.55)
 ad = "Blacksmith"
 bolge = "flats"
-boyut = Vector3(22, 8.620518, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Carpenter_1" parent="Binalar" unique_id=1004044397 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 4.2579, 95)
+boyut = Vector3(12.35, 15.02, 10.46)
+renk = Color(0.600, 0.340, 0.220, 1)
+[node name="Carpenter_1" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.01833, 0, -0.99983, 0, 1, 0, 0.99983, 0, 0.01833, -88.0, 1.789, 96.0)
 ad = "Carpenter"
 bolge = "flats"
-boyut = Vector3(22, 11.534627, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Junk_Yard_2" parent="Binalar" unique_id=1091973469 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 4.0774145, 95)
+boyut = Vector3(8.40, 11.54, 7.07)
+renk = Color(0.600, 0.340, 0.220, 1)
+[node name="Junk_Yard_2" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99983, 0, -0.01848, 0, 1, 0, 0.01848, 0, 0.99983, -140.0, 1.617, 142.0)
 ad = "Junk Yard"
 bolge = "flats"
-boyut = Vector3(22, 11.5725, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Tenement_3" parent="Binalar" unique_id=647561768 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 4.2342334, 95)
+boyut = Vector3(8.70, 14.85, 8.18)
+renk = Color(0.590, 0.360, 0.310, 1)
+[node name="Tenement_3" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 38.85, 1.444, 172.98)
 ad = "Tenement"
 bolge = "flats"
-boyut = Vector3(22, 9.052847, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Turkish_Bath_4" parent="Binalar" unique_id=403646825 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 3.4532783, 95)
+boyut = Vector3(29.00, 17.28, 18.91)
+renk = Color(0.330, 0.280, 0.260, 1)
+[node name="Turkish_Bath_4" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99992, 0, -0.01292, 0, 1, 0, 0.01292, 0, 0.99992, -14.0, 1.703, 166.0)
 ad = "Turkish Bath"
 bolge = "flats"
-boyut = Vector3(22, 8.93, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Produce_Stand_5" parent="Binalar" unique_id=94034934 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 3.2061703, 95)
+boyut = Vector3(8.58, 14.94, 9.29)
+renk = Color(0.550, 0.300, 0.250, 1)
+[node name="Produce_Stand_5" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 59.28, 1.962, 90.85)
 ad = "Produce Stand"
 bolge = "flats"
-boyut = Vector3(22, 10.639585, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Butcher_6" parent="Binalar" unique_id=1443656107 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 3.7247097, 95)
+boyut = Vector3(10.90, 15.02, 10.21)
+renk = Color(0.550, 0.520, 0.480, 1)
+[node name="Butcher_6" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.9999, 0, -0.01379, 0, 1, 0, 0.01379, 0, 0.9999, -20.08, 1.703, 142.05)
 ad = "Butcher"
 bolge = "flats"
-boyut = Vector3(22, 9.681156, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Marchetti_Family_7" parent="Binalar" unique_id=1347848739 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 3.6287358, 95)
+boyut = Vector3(12.79, 14.94, 10.90)
+renk = Color(0.620, 0.400, 0.300, 1)
+[node name="Marchetti_Family_7" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99993, 0, -0.01192, 0, 1, 0, 0.01192, 0, 0.99993, -8.0, 1.703, 132.0)
 ad = "Marchetti Family"
 bolge = "flats"
 ozel = true
-boyut = Vector3(22, 9.534995, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Foundry_8" parent="Binalar" unique_id=1142590272 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 2.410132, 133)
+boyut = Vector3(7.69, 14.94, 7.36)
+renk = Color(0.500, 0.270, 0.220, 1)
+[node name="Foundry_8" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 64.0, 2.048, 106.0)
 ad = "Foundry"
 bolge = "flats"
-boyut = Vector3(22, 10.169436, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Brick_Yard_9" parent="Binalar" unique_id=143414319 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 2.6904461, 133)
+boyut = Vector3(7.29, 14.85, 7.34)
+renk = Color(0.500, 0.270, 0.220, 1)
+[node name="Brick_Yard_9" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99994, 0, 0.01089, 0, 1, 0, -0.01089, 0, 0.99994, 113.37, 2.048, 142.35)
 ad = "Brick Yard"
 bolge = "flats"
-boyut = Vector3(22, 10.953424, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Cold_Storage_10" parent="Binalar" unique_id=2107289313 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 2.6562502, 133)
+boyut = Vector3(11.19, 14.94, 11.10)
+renk = Color(0.550, 0.520, 0.480, 1)
+[node name="Cold_Storage_10" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99983, 0, -0.01843, 0, 1, 0, 0.01843, 0, 0.99983, -142.0, 1.53, 128.0)
 ad = "Cold Storage"
 bolge = "flats"
-boyut = Vector3(22, 10.262939, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Tool_&_Die_11" parent="Binalar" unique_id=1457629666 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 3.2131426, 133)
+boyut = Vector3(12.61, 14.94, 10.03)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Tool_&_Die_11" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.00285, 0, 1, 0, 0.00285, 0, 1.0, 42.0, 1.875, 144.0)
 ad = "Tool & Die"
 bolge = "flats"
-boyut = Vector3(22, 10.129879, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Blacksmith_II_12" parent="Binalar" unique_id=56642634 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 3.0510528, 133)
+boyut = Vector3(9.54, 14.94, 7.04)
+renk = Color(0.620, 0.400, 0.300, 1)
+[node name="Blacksmith_II_12" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 124.49, 1.875, 175.22)
 ad = "Blacksmith II"
 bolge = "flats"
-boyut = Vector3(22, 11.303872, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Carpenter_II_13" parent="Binalar" unique_id=1916449464 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 3.3931549, 133)
+boyut = Vector3(12.93, 11.71, 13.86)
+renk = Color(0.620, 0.400, 0.300, 1)
+[node name="Carpenter_II_13" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99986, 0, -0.01694, 0, 1, 0, 0.01694, 0, 0.99986, -45.02, 1.703, 141.05)
 ad = "Carpenter II"
 bolge = "flats"
-boyut = Vector3(22, 10.463694, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Junk_Yard_II_14" parent="Binalar" unique_id=633492088 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 3.1286135, 133)
+boyut = Vector3(11.75, 14.94, 12.46)
+renk = Color(0.550, 0.300, 0.250, 1)
+[node name="Junk_Yard_II_14" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99999, 0, -0.00519, 0, 1, 0, 0.00519, 0, 0.99999, 29.71, 1.789, 141.64)
 ad = "Junk Yard II"
 bolge = "flats"
-boyut = Vector3(22, 10.967252, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Tenement_II_15" parent="Binalar" unique_id=788729599 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 3.1628375, 133)
+boyut = Vector3(13.50, 11.62, 13.49)
+renk = Color(0.590, 0.360, 0.310, 1)
+[node name="Tenement_II_15" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.01814, 0, -0.99984, 0, 1, 0, 0.99984, 0, 0.01814, 128.0, 1.875, 100.0)
 ad = "Tenement II"
 bolge = "flats"
-boyut = Vector3(22, 10.927418, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Turkish_Bath_II_16" parent="Binalar" unique_id=769658573 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 2.2009509, 171)
+boyut = Vector3(12.28, 18.42, 8.58)
+renk = Color(0.550, 0.520, 0.480, 1)
+[node name="Turkish_Bath_II_16" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 35.3, 1.703, 95.5)
 ad = "Turkish Bath II"
 bolge = "flats"
-boyut = Vector3(22, 10.269009, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Produce_Stand_II_17" parent="Binalar" unique_id=772623034 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 2.3897407, 171)
+boyut = Vector3(34.68, 12.00, 18.96)
+renk = Color(0.300, 0.260, 0.250, 1)
+[node name="Produce_Stand_II_17" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.01318, 0, -0.99991, 0, 1, 0, 0.99991, 0, 0.01318, -88.0, 1.875, 140.0)
 ad = "Produce Stand II"
 bolge = "flats"
-boyut = Vector3(22, 9.895936, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Butcher_II_18" parent="Binalar" unique_id=2077951957 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 2.4524639, 171)
+boyut = Vector3(7.29, 14.85, 7.26)
+renk = Color(0.590, 0.360, 0.310, 1)
+[node name="Butcher_II_18" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99987, 0, -0.01601, 0, 1, 0, 0.01601, 0, 0.99987, -36.0, 1.703, 104.0)
 ad = "Butcher II"
 bolge = "flats"
-boyut = Vector3(22, 8.923458, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Rail_Depot_II_19" parent="Binalar" unique_id=515677136 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 2.5394213, 171)
+boyut = Vector3(7.71, 14.85, 7.09)
+renk = Color(0.590, 0.360, 0.310, 1)
+[node name="Rail_Depot_II_19" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99998, 0, -0.00558, 0, 1, 0, 0.00558, 0, 0.99998, 28.0, 1.875, 130.0)
 ad = "Rail Depot II"
 bolge = "flats"
-boyut = Vector3(22, 10.06118, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Foundry_II_20" parent="Binalar" unique_id=1966444171 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 2.4441102, 171)
+boyut = Vector3(17.18, 16.94, 7.79)
+renk = Color(0.300, 0.260, 0.250, 1)
+[node name="Foundry_II_20" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -36.04, 1.53, 173.45)
 ad = "Foundry II"
 bolge = "flats"
-boyut = Vector3(22, 9.458613, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Brick_Yard_II_21" parent="Binalar" unique_id=656626852 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 2.2694814, 171)
+boyut = Vector3(33.42, 17.02, 17.06)
+renk = Color(0.380, 0.270, 0.220, 1)
+[node name="Brick_Yard_II_21" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.00742, 0, -0.99997, 0, 1, 0, 0.99997, 0, 0.00742, -88.0, 1.875, 174.0)
 ad = "Brick Yard II"
 bolge = "flats"
-boyut = Vector3(22, 8.21708, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Cold_Storage_II_22" parent="Binalar" unique_id=923904283 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 1.9443892, 171)
+boyut = Vector3(7.68, 14.85, 7.09)
+renk = Color(0.590, 0.360, 0.310, 1)
+[node name="Cold_Storage_II_22" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 60.0, 2.048, 128.0)
 ad = "Cold Storage II"
 bolge = "flats"
-boyut = Vector3(22, 10.427266, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Tool_&_Die_II_23" parent="Binalar" unique_id=748019359 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 2.2137637, 171)
+boyut = Vector3(7.63, 18.25, 7.92)
+renk = Color(0.500, 0.270, 0.220, 1)
+[node name="Tool_&_Die_II_23" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99988, 0, -0.01552, 0, 1, 0, 0.01552, 0, 0.99988, -32.79, 1.703, 141.73)
 ad = "Tool & Die II"
 bolge = "flats"
-boyut = Vector3(22, 9.597436, 22)
-renk = Color(0.45, 0.4, 0.36, 1)
-
-[node name="Warehouse_0" parent="Binalar" unique_id=1266330650 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 1.6025773, 209)
+boyut = Vector3(11.02, 14.94, 11.49)
+renk = Color(0.500, 0.270, 0.220, 1)
+[node name="Warehouse_0" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.00356, 0, -0.99999, 0, 1, 0, 0.99999, 0, -0.00356, -112.0, 1.53, 218.0)
 ad = "Warehouse"
 bolge = "docks"
-boyut = Vector3(22, 8.965195, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Bonded_Warehouse_1" parent="Binalar" unique_id=1718398126 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 1.6852231, 209)
+boyut = Vector3(9.53, 6.84, 8.23)
+renk = Color(0.360, 0.380, 0.400, 1)
+[node name="Bonded_Warehouse_1" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 52.0, 1.617, 232.0)
 ad = "Bonded Warehouse"
 bolge = "docks"
-boyut = Vector3(22, 7.8726177, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Fish_Market_2" parent="Binalar" unique_id=389769440 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 1.4270709, 209)
+boyut = Vector3(8.17, 12.42, 7.06)
+renk = Color(0.420, 0.260, 0.200, 1)
+[node name="Fish_Market_2" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.00297, 0, -1.0, 0, 1, 0, 1.0, 0, -0.00297, -46.0, 1.53, 222.0)
 ad = "Fish Market"
 bolge = "docks"
-boyut = Vector3(22, 7.952938, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Customs_House_3" parent="Binalar" unique_id=1754747745 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 1.1120521, 209)
+boyut = Vector3(8.47, 6.92, 8.84)
+renk = Color(0.500, 0.360, 0.260, 1)
+[node name="Customs_House_3" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -115.67, 1.53, 204.76)
 ad = "Customs House"
 bolge = "docks"
-boyut = Vector3(22, 7.938929, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Harbor_Trust_4" parent="Binalar" unique_id=702106355 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 1.1712712, 209)
+boyut = Vector3(18.12, 12.42, 13.90)
+renk = Color(0.400, 0.330, 0.280, 1)
+[node name="Harbor_Trust_4" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, -0.0, 0, 1.0, 22.0, 1.444, 214.0)
 ad = "Harbor Trust"
 bolge = "docks"
 ozel = true
-boyut = Vector3(22, 8.457279, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Shipyard_5" parent="Binalar" unique_id=1906948628 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 1.4334342, 209)
+boyut = Vector3(11.14, 12.34, 8.75)
+renk = Color(0.500, 0.360, 0.260, 1)
+[node name="Shipyard_5" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -133.48, 1.53, 205.39)
 ad = "Shipyard"
 bolge = "docks"
-boyut = Vector3(22, 8.591751, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Rope_Works_6" parent="Binalar" unique_id=1527426171 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 1.352038, 209)
+boyut = Vector3(13.54, 12.51, 13.94)
+renk = Color(0.420, 0.260, 0.200, 1)
+[node name="Rope_Works_6" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 108.58, 1.703, 205.6)
 ad = "Rope Works"
 bolge = "docks"
-boyut = Vector3(22, 8.173506, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Dock_Hiring_Hall_7" parent="Binalar" unique_id=1015333814 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 1.2649285, 209)
+boyut = Vector3(25.28, 7.10, 14.16)
+renk = Color(0.360, 0.380, 0.400, 1)
+[node name="Dock_Hiring_Hall_7" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 42.0, 1.53, 230.0)
 ad = "Dock Hiring Hall"
 bolge = "docks"
-boyut = Vector3(22, 8.127213, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Coal_Yard_8" parent="Binalar" unique_id=1110022090 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 0.7680966, 247)
+boyut = Vector3(10.55, 12.42, 7.84)
+renk = Color(0.500, 0.360, 0.260, 1)
+[node name="Coal_Yard_8" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.00297, 0, -1.0, 0, 1, 0, 1.0, 0, -0.00297, -102.0, 1.53, 222.0)
 ad = "Coal Yard"
 bolge = "docks"
-boyut = Vector3(22, 8.154628, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Sailors_Bar_9" parent="Binalar" unique_id=800013808 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 0.86974484, 247)
+boyut = Vector3(16.05, 7.01, 7.55)
+renk = Color(0.360, 0.380, 0.400, 1)
+[node name="Sailors_Bar_9" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.00487, 0, -0.99999, 0, 1, 0, 0.99999, 0, -0.00487, -42.94, 1.53, 208.1)
 ad = "Sailors Bar"
 bolge = "docks"
-boyut = Vector3(22, 8.746019, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Cannery_10" parent="Binalar" unique_id=256093787 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 0.93025595, 247)
+boyut = Vector3(17.06, 12.34, 10.17)
+renk = Color(0.420, 0.260, 0.200, 1)
+[node name="Cannery_10" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 60.01, 1.703, 212.9)
 ad = "Cannery"
 bolge = "docks"
-boyut = Vector3(22, 8.735323, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Ship_Chandler_11" parent="Binalar" unique_id=870099081 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0.732375, 247)
+boyut = Vector3(28.55, 6.92, 13.51)
+renk = Color(0.400, 0.330, 0.280, 1)
+[node name="Ship_Chandler_11" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.00297, 0, -1.0, 0, 1, 0, 1.0, 0, -0.00297, 110.0, 1.875, 220.0)
 ad = "Ship Chandler"
 bolge = "docks"
-boyut = Vector3(22, 7.2965875, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Stevedore_Union_12" parent="Binalar" unique_id=128830503 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 1.0723431, 247)
+boyut = Vector3(12.49, 6.84, 8.06)
+renk = Color(0.500, 0.360, 0.260, 1)
+[node name="Stevedore_Union_12" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 129.24, 1.962, 204.93)
 ad = "Stevedore Union"
 bolge = "docks"
-boyut = Vector3(22, 7.80405, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Grain_Elevator_13" parent="Binalar" unique_id=1952429102 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 0.9180605, 247)
+boyut = Vector3(12.83, 6.84, 12.56)
+renk = Color(0.360, 0.380, 0.400, 1)
+[node name="Grain_Elevator_13" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.00297, 0, -1.0, 0, 1, 0, 1.0, 0, -0.00297, 100.0, 1.789, 220.0)
 ad = "Grain Elevator"
 bolge = "docks"
-boyut = Vector3(22, 7.9480224, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Warehouse_II_14" parent="Binalar" unique_id=123732571 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 0.98043776, 247)
+boyut = Vector3(12.38, 6.84, 7.39)
+renk = Color(0.400, 0.330, 0.280, 1)
+[node name="Warehouse_II_14" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.00527, 0, -0.99999, 0, 1, 0, 0.99999, 0, -0.00527, -102.0, 1.53, 206.0)
 ad = "Warehouse II"
 bolge = "docks"
-boyut = Vector3(22, 7.178278, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Bonded_Warehouse_II_15" parent="Binalar" unique_id=2106577198 instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 1.1404257, 247)
+boyut = Vector3(11.44, 6.92, 8.38)
+renk = Color(0.500, 0.360, 0.260, 1)
+[node name="Bonded_Warehouse_II_15" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, -0.0, 0, 1.0, 46.0, 1.617, 220.0)
 ad = "Bonded Warehouse II"
 bolge = "docks"
-boyut = Vector3(22, 8.680964, 22)
-renk = Color(0.38, 0.4, 0.42, 1)
-
-[node name="Dolgu_southside_1" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -89.37, 3.491, 64.28)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(10.84, 17.05, 11.05)
-renk = Color(0.500, 0.270, 0.220, 1)
+boyut = Vector3(13.70, 7.01, 7.59)
+renk = Color(0.400, 0.330, 0.280, 1)
 [node name="Pawn_Shop_II_15" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -102.29, 9.426, -27.02)
+transform = Transform3D(0.99439, 0, -0.10581, 0, 1, 0, 0.10581, 0, 0.99439, -115.55, 2.738, -53.27)
 ad = "Pawn Shop II"
 bolge = "southside"
-boyut = Vector3(12.53, 16.21, 9.55)
-renk = Color(0.480, 0.300, 0.260, 1)
+boyut = Vector3(13.42, 20.03, 11.92)
+renk = Color(0.500, 0.270, 0.220, 1)
 [node name="Bakery_III_24" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -61.39, 3.449, 49.73)
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -128.09, 2.048, -29.66)
 ad = "Bakery III"
 bolge = "southside"
-boyut = Vector3(13.31, 16.64, 11.05)
-renk = Color(0.550, 0.300, 0.250, 1)
-[node name="Dolgu_southside_2" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -125.97, 11.925, -64.28)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(13.05, 16.82, 11.05)
-renk = Color(0.660, 0.550, 0.380, 1)
+boyut = Vector3(12.68, 19.51, 10.22)
+renk = Color(0.500, 0.270, 0.220, 1)
 [node name="Pawn_Shop_III_26" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.92, 6.127, 13.97)
+transform = Transform3D(0.9933, 0, -0.11553, 0, 1, 0, 0.11553, 0, 0.9933, -22.57, 1.703, 38.81)
 ad = "Pawn Shop III"
 bolge = "southside"
-boyut = Vector3(10.25, 16.80, 9.55)
-renk = Color(0.620, 0.400, 0.300, 1)
-[node name="Dolgu_southside_3" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.56, 5.674, 27.02)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(10.99, 16.34, 9.55)
-renk = Color(0.550, 0.520, 0.480, 1)
-[node name="Dolgu_southside_4" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.48, 10.641, -64.28)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(12.07, 13.00, 11.05)
-renk = Color(0.590, 0.360, 0.310, 1)
+boyut = Vector3(10.27, 12.22, 13.96)
+renk = Color(0.480, 0.300, 0.260, 1)
 [node name="Corner_Grocer_III_22" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -101.92, 4.126, 64.28)
+transform = Transform3D(0.99439, 0, -0.10577, 0, 1, 0, 0.10577, 0, 0.99439, -122.46, 1.875, 44.7)
 ad = "Corner Grocer III"
 bolge = "southside"
-boyut = Vector3(13.26, 16.43, 11.05)
-renk = Color(0.660, 0.550, 0.380, 1)
-[node name="Dolgu_southside_5" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.29, 3.138, 64.28)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(11.68, 16.66, 11.05)
+boyut = Vector3(14.54, 12.14, 10.47)
 renk = Color(0.550, 0.520, 0.480, 1)
 [node name="Pool_Hall_III_25" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.61, 2.607, 64.28)
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, -0.0, 0, 1.0, -24.0, 1.703, -24.0)
 ad = "Pool Hall III"
 bolge = "southside"
-boyut = Vector3(14.33, 17.57, 11.05)
-renk = Color(0.550, 0.520, 0.480, 1)
+boyut = Vector3(9.40, 19.42, 9.68)
+renk = Color(0.550, 0.300, 0.250, 1)
 [node name="Barber_Shop_1" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.22, 5.286, 27.02)
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -130.32, 1.875, -16.6)
 ad = "Barber Shop"
 bolge = "southside"
-boyut = Vector3(10.66, 19.68, 9.55)
-renk = Color(0.550, 0.520, 0.480, 1)
+boyut = Vector3(11.99, 19.42, 11.26)
+renk = Color(0.590, 0.360, 0.310, 1)
 [node name="Laundry_Tenement_III_28" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48.05, 8.44, -13.97)
+transform = Transform3D(0.99351, 0, -0.11376, 0, 1, 0, 0.11376, 0, 0.99351, -32.88, 1.962, -44.65)
 ad = "Laundry Tenement III"
 bolge = "southside"
-boyut = Vector3(9.20, 20.32, 9.55)
-renk = Color(0.620, 0.400, 0.300, 1)
+boyut = Vector3(10.11, 16.17, 11.39)
+renk = Color(0.600, 0.340, 0.220, 1)
 [node name="Barber_Shop_III_23" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -89.74, 8.839, -13.97)
+transform = Transform3D(-0.13634, 0, -0.99066, 0, 1, 0, 0.99066, 0, -0.13634, -106.0, 2.221, -24.0)
 ad = "Barber Shop III"
 bolge = "southside"
-boyut = Vector3(11.59, 16.43, 9.55)
-renk = Color(0.550, 0.520, 0.480, 1)
+boyut = Vector3(9.91, 12.31, 7.00)
+renk = Color(0.600, 0.340, 0.220, 1)
 [node name="Social_Hall_II_21" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50.71, 9.647, -27.02)
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -60.23, 2.134, -43.01)
 ad = "Social Hall II"
 bolge = "southside"
-boyut = Vector3(14.53, 13.27, 9.55)
-renk = Color(0.600, 0.340, 0.220, 1)
-[node name="Dolgu_southside_6" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -89.43, 5.656, 27.02)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(10.95, 16.26, 9.55)
-renk = Color(0.660, 0.550, 0.380, 1)
-[node name="Dolgu_southside_7" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -125.46, 5.475, 27.02)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(12.02, 16.17, 9.55)
-renk = Color(0.550, 0.300, 0.250, 1)
-[node name="Dolgu_southside_8" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -139.18, 9.985, -27.02)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(12.74, 13.66, 9.55)
-renk = Color(0.500, 0.270, 0.220, 1)
-[node name="Dolgu_southside_9" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.72, 10.089, -49.73)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(12.53, 18.07, 11.05)
-renk = Color(0.600, 0.340, 0.220, 1)
-[node name="Dolgu_southside_10" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -102.55, 6.328, 13.97)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(11.99, 16.54, 9.55)
+boyut = Vector3(14.61, 16.60, 13.38)
 renk = Color(0.600, 0.340, 0.220, 1)
 [node name="Boxing_Gym_8" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50.37, 6.017, 13.97)
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -51.45, 1.703, -29.72)
 ad = "Boxing Gym"
 bolge = "southside"
-boyut = Vector3(13.85, 16.91, 9.55)
-renk = Color(0.600, 0.340, 0.220, 1)
+boyut = Vector3(12.17, 19.77, 10.50)
+renk = Color(0.500, 0.270, 0.220, 1)
 [node name="Pawn_Shop_4" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -140.78, 9.257, -13.97)
+transform = Transform3D(0.99311, 0, -0.11719, 0, 1, 0, 0.11719, 0, 0.99311, -12.0, 1.617, 38.0)
 ad = "Pawn Shop"
 bolge = "southside"
-boyut = Vector3(9.54, 13.03, 9.55)
-renk = Color(0.550, 0.520, 0.480, 1)
+boyut = Vector3(8.78, 19.34, 8.73)
+renk = Color(0.550, 0.300, 0.250, 1)
 [node name="Pool_Hall_3" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -102.29, 8.831, -13.97)
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, -0.0, 0, 1.0, -24.0, 1.617, -14.0)
 ad = "Pool Hall"
 bolge = "southside"
-boyut = Vector3(12.51, 16.51, 9.55)
-renk = Color(0.500, 0.270, 0.220, 1)
-[node name="Dolgu_southside_11" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.35, 5.985, 13.97)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(11.81, 13.02, 9.55)
-renk = Color(0.600, 0.340, 0.220, 1)
-[node name="Dolgu_southside_12" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -63.26, 10.013, -27.02)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(9.57, 13.28, 9.55)
+boyut = Vector3(7.29, 12.22, 8.27)
 renk = Color(0.550, 0.300, 0.250, 1)
-[node name="Dolgu_southside_13" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -125.94, 11.384, -49.73)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(12.98, 16.48, 11.05)
-renk = Color(0.550, 0.300, 0.250, 1)
-[node name="Dolgu_southside_14" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.65, 5.619, 13.97)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(13.79, 20.44, 9.55)
-renk = Color(0.660, 0.550, 0.380, 1)
 [node name="Barber_Shop_II_12" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -89.74, 9.426, -27.02)
+transform = Transform3D(0.99378, 0, -0.11133, 0, 1, 0, 0.11133, 0, 0.99378, -46.77, 1.875, 51.17)
 ad = "Barber Shop II"
 bolge = "southside"
-boyut = Vector3(11.57, 12.60, 9.55)
-renk = Color(0.550, 0.520, 0.480, 1)
-[node name="Dolgu_southside_15" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90.62, 11.988, -64.28)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(13.34, 21.00, 11.05)
-renk = Color(0.550, 0.300, 0.250, 1)
-[node name="Dolgu_southside_16" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.27, 11.323, -49.73)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(11.57, 16.95, 11.05)
-renk = Color(0.550, 0.300, 0.250, 1)
-[node name="Dolgu_southside_17" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.89, 11.477, -64.28)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(12.87, 13.98, 11.05)
-renk = Color(0.620, 0.400, 0.300, 1)
-[node name="Dolgu_southside_18" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -125.84, 6.098, 13.97)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(12.79, 16.85, 9.55)
-renk = Color(0.620, 0.400, 0.300, 1)
+boyut = Vector3(9.70, 15.74, 13.97)
+renk = Color(0.660, 0.550, 0.380, 1)
 [node name="Soda_Fountain_7" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.91, 3.805, 64.28)
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -39.29, 1.703, -29.7)
 ad = "Soda Fountain"
 bolge = "southside"
-boyut = Vector3(11.27, 17.05, 11.05)
-renk = Color(0.550, 0.300, 0.250, 1)
+boyut = Vector3(9.60, 19.51, 10.62)
+renk = Color(0.660, 0.550, 0.380, 1)
 [node name="Soda_Fountain_III_29" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -139.27, 12.398, -64.28)
+transform = Transform3D(0.99437, 0, -0.10596, 0, 1, 0, 0.10596, 0, 0.99437, -112.99, 1.875, 27.86)
 ad = "Soda Fountain III"
 bolge = "southside"
-boyut = Vector3(12.55, 17.33, 11.05)
-renk = Color(0.590, 0.360, 0.310, 1)
-[node name="Dolgu_southside_19" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50.01, 5.674, 27.02)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(13.11, 16.34, 9.55)
-renk = Color(0.590, 0.360, 0.310, 1)
-[node name="Dolgu_southside_20" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48.84, 3.71, 49.73)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(10.79, 16.74, 11.05)
-renk = Color(0.590, 0.360, 0.310, 1)
+boyut = Vector3(9.06, 12.14, 12.00)
+renk = Color(0.660, 0.550, 0.380, 1)
 [node name="Soda_Fountain_II_18" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -126.02, 4.587, 49.73)
+transform = Transform3D(0.99353, 0, -0.11359, 0, 1, 0, 0.11359, 0, 0.99353, -34.42, 1.789, 35.55)
 ad = "Soda Fountain II"
 bolge = "southside"
-boyut = Vector3(13.15, 17.11, 11.05)
-renk = Color(0.480, 0.300, 0.260, 1)
+boyut = Vector3(10.73, 19.34, 10.28)
+renk = Color(0.620, 0.400, 0.300, 1)
 [node name="Butcher_Row_II_16" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.43, 7.89, -27.02)
+transform = Transform3D(-0.13533, 0, -0.9908, 0, 1, 0, 0.9908, 0, -0.13533, -104.98, 2.393, -36.36)
 ad = "Butcher Row II"
 bolge = "southside"
-boyut = Vector3(14.24, 17.43, 9.55)
-renk = Color(0.590, 0.360, 0.310, 1)
-[node name="Dolgu_southside_21" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -124.67, 3.852, 64.28)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(10.44, 19.97, 11.05)
+boyut = Vector3(9.22, 12.40, 12.18)
 renk = Color(0.550, 0.300, 0.250, 1)
-[node name="Dolgu_southside_22" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.32, 3.584, 49.73)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(11.74, 20.24, 11.05)
-renk = Color(0.590, 0.360, 0.310, 1)
 [node name="Corner_Grocer_II_11" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -89.37, 3.845, 49.73)
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -59.91, 1.875, 50.13)
 ad = "Corner Grocer II"
 bolge = "southside"
-boyut = Vector3(10.84, 13.38, 11.05)
-renk = Color(0.550, 0.520, 0.480, 1)
+boyut = Vector3(11.38, 19.34, 13.18)
+renk = Color(0.550, 0.300, 0.250, 1)
 [node name="Boxing_Gym_III_30" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.81, 9.805, -49.73)
+transform = Transform3D(0.99361, 0, -0.11289, 0, 1, 0, 0.11289, 0, 0.99361, -35.87, 1.875, 52.92)
 ad = "Boxing Gym III"
 bolge = "southside"
-boyut = Vector3(12.73, 16.77, 11.05)
-renk = Color(0.480, 0.300, 0.260, 1)
+boyut = Vector3(9.54, 12.05, 12.42)
+renk = Color(0.590, 0.360, 0.310, 1)
 [node name="Butcher_Row_III_27" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -102.42, 10.341, -49.73)
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -36.21, 1.53, -17.31)
 ad = "Butcher Row III"
 bolge = "southside"
-boyut = Vector3(12.26, 20.54, 11.05)
-renk = Color(0.620, 0.400, 0.300, 1)
+boyut = Vector3(8.68, 19.42, 12.58)
+renk = Color(0.550, 0.300, 0.250, 1)
 [node name="Boxing_Gym_II_19" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.62, 4.455, 49.73)
+transform = Transform3D(0.99437, 0, -0.106, 0, 1, 0, 0.106, 0, 0.99437, -138.53, 1.875, 42.11)
 ad = "Boxing Gym II"
 bolge = "southside"
-boyut = Vector3(13.86, 20.27, 11.05)
-renk = Color(0.660, 0.550, 0.380, 1)
+boyut = Vector3(14.13, 12.05, 12.03)
+renk = Color(0.550, 0.300, 0.250, 1)
 [node name="Social_Hall_10" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -139.24, 12.053, -49.73)
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -142.38, 1.789, -16.43)
 ad = "Social Hall"
 bolge = "southside"
-boyut = Vector3(12.62, 17.19, 11.05)
-renk = Color(0.600, 0.340, 0.220, 1)
+boyut = Vector3(9.75, 19.42, 11.68)
+renk = Color(0.590, 0.360, 0.310, 1)
 [node name="Bakery_II_13" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -139.32, 4.542, 49.73)
+transform = Transform3D(-0.13386, 0, -0.991, 0, 1, 0, 0.991, 0, -0.13386, -102.56, 2.738, -50.07)
 ad = "Bakery II"
 bolge = "southside"
-boyut = Vector3(12.45, 16.30, 11.05)
-renk = Color(0.660, 0.550, 0.380, 1)
-[node name="Dolgu_southside_23" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -137.97, 3.852, 64.28)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(15.16, 20.33, 11.05)
-renk = Color(0.550, 0.300, 0.250, 1)
+boyut = Vector3(15.41, 20.03, 10.49)
+renk = Color(0.620, 0.400, 0.300, 1)
 [node name="Laundry_Tenement_6" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -61.84, 2.887, 64.28)
+transform = Transform3D(-0.13471, 0, -0.99089, 0, 1, 0, 0.99089, 0, -0.13471, -131.13, 2.393, -46.27)
 ad = "Laundry Tenement"
 bolge = "southside"
-boyut = Vector3(12.42, 12.65, 11.05)
-renk = Color(0.600, 0.340, 0.220, 1)
+boyut = Vector3(9.64, 16.08, 11.77)
+renk = Color(0.590, 0.360, 0.310, 1)
 [node name="Laundry_Tenement_II_17" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -89.87, 10.381, -49.73)
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -91.08, 1.875, 44.09)
 ad = "Laundry Tenement II"
 bolge = "southside"
-boyut = Vector3(11.84, 17.53, 11.05)
-renk = Color(0.660, 0.550, 0.380, 1)
-[node name="Dolgu_southside_24" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.78, 10.955, -64.28)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(13.53, 16.53, 11.05)
-renk = Color(0.660, 0.550, 0.380, 1)
-[node name="Dolgu_southside_25" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -138.76, 4.759, 27.02)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(13.58, 16.89, 9.55)
-renk = Color(0.550, 0.520, 0.480, 1)
-[node name="Dolgu_southside_26" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -103.17, 11.939, -64.28)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(10.76, 20.53, 11.05)
-renk = Color(0.660, 0.550, 0.380, 1)
+boyut = Vector3(8.82, 15.65, 11.21)
+renk = Color(0.480, 0.300, 0.260, 1)
 [node name="Cobbler_III_31" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.29, 7.461, -13.97)
+transform = Transform3D(0.9944, 0, -0.10569, 0, 1, 0, 0.10569, 0, 0.9944, -128.0, 2.825, -56.0)
 ad = "Cobbler III"
 bolge = "southside"
-boyut = Vector3(10.52, 13.05, 9.55)
-renk = Color(0.590, 0.360, 0.310, 1)
+boyut = Vector3(9.26, 16.17, 7.65)
+renk = Color(0.480, 0.300, 0.260, 1)
 [node name="Corner_Grocer_0" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -101.92, 5.051, 49.73)
+transform = Transform3D(0.99436, 0, -0.10603, 0, 1, 0, 0.10603, 0, 0.99436, -141.58, 1.703, 23.87)
 ad = "Corner Grocer"
 bolge = "southside"
-boyut = Vector3(13.26, 12.82, 11.05)
-renk = Color(0.600, 0.340, 0.220, 1)
-[node name="Dolgu_southside_27" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60.6, 8.831, -13.97)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(14.90, 16.69, 9.55)
-renk = Color(0.660, 0.550, 0.380, 1)
-[node name="Dolgu_southside_28" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -125.88, 10.543, -27.02)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(12.86, 13.10, 9.55)
+boyut = Vector3(13.44, 15.74, 10.40)
 renk = Color(0.550, 0.520, 0.480, 1)
-[node name="Dolgu_southside_29" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90.0, 6.197, 13.97)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(12.11, 16.63, 9.55)
-renk = Color(0.500, 0.270, 0.220, 1)
-[node name="Dolgu_southside_30" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -127.48, 9.661, -13.97)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(16.06, 12.75, 9.55)
-renk = Color(0.660, 0.550, 0.380, 1)
-[node name="Dolgu_southside_31" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.99, 7.417, -13.97)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(15.08, 16.31, 9.55)
-renk = Color(0.660, 0.550, 0.380, 1)
-[node name="Dolgu_southside_32" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.13, 7.864, -27.02)
-ad = ""
-bolge = "southside"
-dolgu = true
-boyut = Vector3(11.36, 20.63, 9.55)
-renk = Color(0.500, 0.270, 0.220, 1)
 [node name="Sal_the_Shark_20" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -62.44, 12.691, -64.28)
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -58.47, 1.53, -16.61)
 ad = "Sal the Shark"
 bolge = "southside"
 ozel = true
-boyut = Vector3(11.23, 16.52, 11.05)
-renk = Color(0.550, 0.520, 0.480, 1)
+boyut = Vector3(12.85, 16.00, 12.16)
+renk = Color(0.620, 0.400, 0.300, 1)
 [node name="Duffys_Bar_14" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -139.14, 4.779, 13.97)
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -62.0, 1.789, -28.0)
 ad = "Duffy's Bar"
 bolge = "southside"
 ozel = true
-boyut = Vector3(12.81, 21.64, 9.55)
-renk = Color(0.500, 0.270, 0.220, 1)
+boyut = Vector3(7.91, 16.08, 7.25)
+renk = Color(0.550, 0.520, 0.480, 1)
 [node name="Laundromat_9" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.92, 4.827, 27.02)
+transform = Transform3D(0.99424, 0, -0.10715, 0, 1, 0, 0.10715, 0, 0.99424, -89.17, 1.789, 30.0)
 ad = "Laundromat"
 bolge = "southside"
 ozel = true
-boyut = Vector3(14.94, 16.76, 9.55)
-renk = Color(0.480, 0.300, 0.260, 1)
+boyut = Vector3(8.97, 19.34, 11.65)
+renk = Color(0.550, 0.520, 0.480, 1)
 [node name="Murphys_Tavern_5" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -101.98, 5.656, 27.02)
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -45.87, 1.53, -16.3)
 ad = "Murphy's Tavern"
 bolge = "southside"
 ozel = true
-boyut = Vector3(13.15, 12.70, 9.55)
-renk = Color(0.550, 0.520, 0.480, 1)
+boyut = Vector3(8.76, 23.02, 11.52)
+renk = Color(0.620, 0.400, 0.300, 1)
 [node name="Home_2" parent="Binalar" instance=ExtResource("3_vwpxd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.11, 9.692, -49.73)
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -61.2, 1.789, 35.42)
 ad = "Home"
 bolge = "southside"
 ozel = true
-boyut = Vector3(12.87, 20.53, 11.05)
+boyut = Vector3(14.16, 15.74, 10.47)
+renk = Color(0.500, 0.270, 0.220, 1)
+[node name="Dolgu_1" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -117.02, 1.962, -16.23)
+ad = ""
+bolge = "southside"
+dolgu = true
+boyut = Vector3(11.52, 15.91, 10.68)
+renk = Color(0.550, 0.300, 0.250, 1)
+[node name="Dolgu_2" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 25.84, 1.789, -16.64)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(14.13, 19.42, 11.58)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Dolgu_3" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 133.4, 1.789, -17.16)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(8.41, 19.42, 12.59)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Dolgu_4" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 53.17, 1.703, 16.34)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(10.56, 22.94, 11.47)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Dolgu_5" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 92.02, 1.617, 16.27)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(9.41, 26.54, 10.41)
+renk = Color(0.620, 0.400, 0.300, 1)
+[node name="Dolgu_6" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 102.45, 1.53, 16.61)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(8.31, 19.34, 12.13)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Dolgu_7" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -106.32, 6.017, -93.01)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(11.85, 13.78, 12.75)
+renk = Color(0.660, 0.560, 0.440, 1)
+[node name="Dolgu_8" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -56.16, 5.585, -93.84)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(15.35, 14.04, 11.90)
+renk = Color(0.820, 0.780, 0.660, 1)
+[node name="Dolgu_9" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -26.17, 3.515, -92.86)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(15.97, 10.12, 13.11)
+renk = Color(0.850, 0.820, 0.740, 1)
+[node name="Dolgu_10" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -140.55, 2.566, -59.41)
+ad = ""
+bolge = "southside"
+dolgu = true
+boyut = Vector3(13.40, 23.71, 13.94)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Dolgu_11" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 126.36, 1.875, -60.99)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(14.12, 19.34, 10.45)
+renk = Color(0.500, 0.270, 0.220, 1)
+[node name="Dolgu_12" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -129.95, 1.703, 94.05)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(34.60, 17.02, 16.65)
+renk = Color(0.380, 0.270, 0.220, 1)
+[node name="Dolgu_13" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 117.13, 1.789, 93.38)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(12.37, 14.94, 14.74)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Dolgu_14" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -58.03, 5.068, -212.69)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(14.12, 13.87, 12.81)
+renk = Color(0.820, 0.780, 0.660, 1)
+[node name="Dolgu_15" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -59.43, 7.052, -195.94)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(16.25, 14.47, 11.25)
+renk = Color(0.850, 0.820, 0.740, 1)
+[node name="Dolgu_16" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -60.42, 8.519, -114.07)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(12.98, 10.64, 10.28)
+renk = Color(0.820, 0.780, 0.660, 1)
+[node name="Dolgu_17" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -60.0, 1.53, 206.74)
+ad = ""
+bolge = "docks"
+dolgu = true
+boyut = Vector3(12.99, 7.01, 12.01)
+renk = Color(0.450, 0.300, 0.240, 1)
+[node name="Dolgu_18" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -92.26, 8.001, -197.08)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(16.32, 14.04, 10.16)
+renk = Color(0.820, 0.780, 0.660, 1)
+[node name="Dolgu_19" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 60.04, 1.962, 137.54)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(9.98, 14.94, 13.31)
+renk = Color(0.500, 0.270, 0.220, 1)
+[node name="Dolgu_20" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 60.61, 1.789, 172.38)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(15.44, 14.94, 11.64)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Dolgu_21" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.46676, 0, 0.88438, 0, 1, 0, -0.88438, 0, -0.46676, 130.1, 1.617, 44.95)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(7.55, 15.82, 11.21)
+renk = Color(0.600, 0.340, 0.220, 1)
+[node name="Dolgu_22" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.46676, 0, 0.88438, 0, 1, 0, -0.88438, 0, -0.46676, 121.07, 1.53, 28.51)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(8.34, 19.34, 11.97)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Dolgu_23" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.50028, 0, 0.86587, 0, 1, 0, -0.86587, 0, -0.50028, 108.68, 1.789, -55.42)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(11.15, 22.94, 12.27)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Dolgu_24" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.65079, 0, 0.75926, 0, 1, 0, -0.75926, 0, 0.65079, -123.18, 1.617, 134.05)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(13.34, 14.94, 11.92)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Dolgu_25" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.64414, 0, 0.76491, 0, 1, 0, -0.76491, 0, 0.64414, -118.26, 1.789, 171.56)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(14.54, 14.94, 11.05)
+renk = Color(0.550, 0.300, 0.250, 1)
+[node name="Dolgu_26" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -139.02, 6.534, -166.91)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(16.45, 14.30, 12.63)
+renk = Color(0.660, 0.560, 0.440, 1)
+[node name="Dolgu_27" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -123.41, 8.95, -167.04)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(11.23, 13.69, 10.06)
+renk = Color(0.820, 0.780, 0.660, 1)
+[node name="Dolgu_28" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -44.46, 8.519, -166.12)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(12.11, 13.78, 10.82)
+renk = Color(0.780, 0.740, 0.700, 1)
+[node name="Dolgu_29" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -125.75, 8.519, -137.34)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(14.99, 14.12, 11.00)
+renk = Color(0.700, 0.780, 0.680, 1)
+[node name="Dolgu_30" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 24.23, 1.358, 203.1)
+ad = ""
+bolge = "docks"
+dolgu = true
+boyut = Vector3(20.55, 6.92, 10.23)
+renk = Color(0.360, 0.380, 0.400, 1)
+[node name="Dolgu_31" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98616, 0, -0.16577, 0, 1, 0, 0.16577, 0, 0.98616, 22.8, 2.307, -125.87)
+ad = ""
+bolge = "downtown"
+dolgu = true
+boyut = Vector3(18.63, 21.11, 14.16)
+renk = Color(0.700, 0.670, 0.600, 1)
+[node name="Dolgu_32" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98664, 0, -0.16294, 0, 1, 0, 0.16294, 0, 0.98664, 105.04, 1.53, -112.8)
+ad = ""
+bolge = "downtown"
+dolgu = true
+boyut = Vector3(19.61, 28.02, 13.28)
+renk = Color(0.580, 0.580, 0.600, 1)
+[node name="Dolgu_33" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.17369, 0, -0.9848, 0, 1, 0, 0.9848, 0, -0.17369, 113.64, 1.703, -190.21)
+ad = ""
+bolge = "downtown"
+dolgu = true
+boyut = Vector3(16.81, 28.11, 13.56)
+renk = Color(0.700, 0.670, 0.600, 1)
+[node name="Dolgu_34" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.0031, 0, -1.0, 0, 1, 0, 1.0, 0, -0.0031, -136.64, 1.53, 222.18)
+ad = ""
+bolge = "docks"
+dolgu = true
+boyut = Vector3(17.66, 12.42, 13.45)
+renk = Color(0.360, 0.380, 0.400, 1)
+[node name="Dolgu_35" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99371, 0, -0.11203, 0, 1, 0, 0.11203, 0, 0.99371, -44.41, 2.048, -45.95)
+ad = ""
+bolge = "southside"
+dolgu = true
+boyut = Vector3(9.33, 12.74, 10.94)
+renk = Color(0.590, 0.360, 0.310, 1)
+[node name="Dolgu_36" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99439, 0, -0.10579, 0, 1, 0, 0.10579, 0, 0.99439, -127.68, 1.703, 25.68)
+ad = ""
+bolge = "southside"
+dolgu = true
+boyut = Vector3(11.39, 15.82, 11.86)
+renk = Color(0.620, 0.400, 0.300, 1)
+[node name="Dolgu_37" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99373, 0, -0.11181, 0, 1, 0, 0.11181, 0, 0.99373, -46.46, 1.789, 34.77)
+ad = ""
+bolge = "southside"
+dolgu = true
+boyut = Vector3(11.18, 15.74, 12.45)
+renk = Color(0.590, 0.360, 0.310, 1)
+[node name="Dolgu_38" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99341, 0, -0.11463, 0, 1, 0, 0.11463, 0, 0.99341, -24.84, 1.789, 55.44)
+ad = ""
+bolge = "southside"
+dolgu = true
+boyut = Vector3(10.22, 15.74, 10.18)
+renk = Color(0.620, 0.400, 0.300, 1)
+[node name="Dolgu_39" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.9932, 0, -0.11645, 0, 1, 0, 0.11645, 0, 0.9932, -13.84, 1.617, 56.96)
+ad = ""
+bolge = "southside"
+dolgu = true
+boyut = Vector3(8.63, 19.42, 10.06)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Dolgu_40" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.93842, 0, 0.3455, 0, 1, 0, -0.3455, 0, 0.93842, -102.41, 10.762, -174.51)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(12.95, 13.09, 10.10)
+renk = Color(0.660, 0.560, 0.440, 1)
+[node name="Dolgu_41" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.94408, 0, 0.32971, 0, 1, 0, -0.32971, 0, 0.94408, -122.56, 8.087, -121.0)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(12.75, 10.29, 11.70)
+renk = Color(0.780, 0.740, 0.700, 1)
+[node name="Dolgu_42" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.90837, 0, 0.41817, 0, 1, 0, -0.41817, 0, 0.90837, -47.62, 7.915, -119.86)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(10.97, 10.29, 10.71)
+renk = Color(0.700, 0.780, 0.680, 1)
+[node name="Dolgu_43" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.90179, 0, 0.43218, 0, 1, 0, -0.43218, 0, 0.90179, -34.96, 6.534, -124.65)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(12.48, 14.21, 13.84)
+renk = Color(0.780, 0.740, 0.700, 1)
+[node name="Dolgu_44" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98247, 0, 0.18643, 0, 1, 0, -0.18643, 0, 0.98247, 29.98, 1.875, -43.83)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(10.23, 15.65, 10.08)
+renk = Color(0.550, 0.300, 0.250, 1)
+[node name="Dolgu_45" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98223, 0, 0.18766, 0, 1, 0, -0.18766, 0, 0.98223, 40.23, 1.875, -44.57)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(8.29, 15.65, 11.63)
+renk = Color(0.620, 0.400, 0.300, 1)
+[node name="Dolgu_46" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.01469, 0, -0.99989, 0, 1, 0, 0.99989, 0, 0.01469, 126.91, 2.048, 131.98)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(10.39, 11.62, 13.75)
+renk = Color(0.600, 0.340, 0.220, 1)
+[node name="Dolgu_47" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.01311, 0, -0.99991, 0, 1, 0, 0.99991, 0, 0.01311, 127.71, 2.134, 142.93)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(9.96, 14.94, 12.54)
 renk = Color(0.550, 0.520, 0.480, 1)
-[node name="Kaideler" type="Node3D" parent="." unique_id=286542557]
-
-[node name="Kaide_hilltop_0_0" type="MeshInstance3D" parent="Kaideler" unique_id=279226873 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 33.119244, -209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_c0xq3")
-
-[node name="Kaide_hilltop_1_0" type="MeshInstance3D" parent="Kaideler" unique_id=1355202859 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 29.84626, -209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_w5qow")
-
-[node name="Kaide_hilltop_2_0" type="MeshInstance3D" parent="Kaideler" unique_id=269012193 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 28.755438, -209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_oa6vt")
-
-[node name="Kaide_hilltop_3_0" type="MeshInstance3D" parent="Kaideler" unique_id=1182455955 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 25.883532, -209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_dsu44")
-
-[node name="Kaide_hilltop_0_1" type="MeshInstance3D" parent="Kaideler" unique_id=402484619 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 28.61477, -171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_cue7j")
-
-[node name="Kaide_hilltop_1_1" type="MeshInstance3D" parent="Kaideler" unique_id=2002764449 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 25.800098, -171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_8myxr")
-
-[node name="Kaide_hilltop_2_1" type="MeshInstance3D" parent="Kaideler" unique_id=1464033650 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 24.030664, -171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_l8rgj")
-
-[node name="Kaide_hilltop_3_1" type="MeshInstance3D" parent="Kaideler" unique_id=1079656705 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 22.694153, -171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_j0yv7")
-
-[node name="Kaide_hilltop_0_2" type="MeshInstance3D" parent="Kaideler" unique_id=436851499 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 22.720295, -133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_ml3rb")
-
-[node name="Kaide_hilltop_1_2" type="MeshInstance3D" parent="Kaideler" unique_id=1806266695 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 20.949232, -133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_mok6f")
-
-[node name="Kaide_hilltop_2_2" type="MeshInstance3D" parent="Kaideler" unique_id=1481787087 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 19.783253, -133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_fhms7")
-
-[node name="Kaide_hilltop_3_2" type="MeshInstance3D" parent="Kaideler" unique_id=1099895678 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 17.098299, -133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_ib4hn")
-
-[node name="Kaide_hilltop_0_3" type="MeshInstance3D" parent="Kaideler" unique_id=1806920025 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 16.954521, -95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_rsgbd")
-
-[node name="Kaide_hilltop_1_3" type="MeshInstance3D" parent="Kaideler" unique_id=301824121 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 15.861767, -95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_037bt")
-
-[node name="Kaide_hilltop_2_3" type="MeshInstance3D" parent="Kaideler" unique_id=104477922 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 14.937471, -95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_2gftv")
-
-[node name="Kaide_hilltop_3_3" type="MeshInstance3D" parent="Kaideler" unique_id=2010415305 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 14.634553, -95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_bqlg0")
-
-[node name="Kaide_downtown_4_0" type="MeshInstance3D" parent="Kaideler" unique_id=1218642465 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 23.1829, -209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_7k28c")
-
-[node name="Kaide_downtown_5_0" type="MeshInstance3D" parent="Kaideler" unique_id=492930500 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 22.747896, -209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_pb1jn")
-
-[node name="Kaide_downtown_6_0" type="MeshInstance3D" parent="Kaideler" unique_id=944653357 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 23.762049, -209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_wkde7")
-
-[node name="Kaide_downtown_7_0" type="MeshInstance3D" parent="Kaideler" unique_id=156572752 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 23.460474, -209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_f5no1")
-
-[node name="Kaide_downtown_4_1" type="MeshInstance3D" parent="Kaideler" unique_id=1932628458 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 20.331528, -171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_lb0ig")
-
-[node name="Kaide_downtown_5_1" type="MeshInstance3D" parent="Kaideler" unique_id=124322623 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 20.272018, -171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_ksik1")
-
-[node name="Kaide_downtown_6_1" type="MeshInstance3D" parent="Kaideler" unique_id=1410911729 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 20.299534, -171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_d6e82")
-
-[node name="Kaide_downtown_7_1" type="MeshInstance3D" parent="Kaideler" unique_id=440482715 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 19.216717, -171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_g75hk")
-
-[node name="Kaide_downtown_4_2" type="MeshInstance3D" parent="Kaideler" unique_id=155932496 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 17.352013, -133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_gqw8b")
-
-[node name="Kaide_downtown_5_2" type="MeshInstance3D" parent="Kaideler" unique_id=978832643 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 17.113997, -133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_g812u")
-
-[node name="Kaide_downtown_6_2" type="MeshInstance3D" parent="Kaideler" unique_id=1370562262 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 16.710579, -133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_btwmt")
-
-[node name="Kaide_downtown_7_2" type="MeshInstance3D" parent="Kaideler" unique_id=388891600 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 15.711292, -133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_o5rad")
-
-[node name="Kaide_downtown_4_3" type="MeshInstance3D" parent="Kaideler" unique_id=1551600418 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 12.402892, -95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_h6x1f")
-
-[node name="Kaide_downtown_5_3" type="MeshInstance3D" parent="Kaideler" unique_id=1348986301 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 13.081103, -95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_abn3h")
-
-[node name="Kaide_downtown_6_3" type="MeshInstance3D" parent="Kaideler" unique_id=1300420478 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 12.651397, -95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_obo06")
-
-[node name="Kaide_downtown_7_3" type="MeshInstance3D" parent="Kaideler" unique_id=360879586 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 12.753675, -95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_qg0ij")
-
-[node name="Kaide_southside_0_4" type="MeshInstance3D" parent="Kaideler" unique_id=1029500343 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 12.381152, -57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_x3y31")
-
-[node name="Kaide_southside_1_4" type="MeshInstance3D" parent="Kaideler" unique_id=791028055 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 11.668909, -57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_2xkyf")
-
-[node name="Kaide_southside_2_4" type="MeshInstance3D" parent="Kaideler" unique_id=393820677 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 11.7135935, -57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_ut5mg")
-
-[node name="Kaide_southside_3_4" type="MeshInstance3D" parent="Kaideler" unique_id=721169200 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 9.865003, -57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_fork2")
-
-[node name="Kaide_southside_0_5" type="MeshInstance3D" parent="Kaideler" unique_id=1684219006 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 9.61222, -19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_1tt22")
-
-[node name="Kaide_southside_1_5" type="MeshInstance3D" parent="Kaideler" unique_id=1792632163 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 8.324517, -19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_d3kpr")
-
-[node name="Kaide_southside_2_5" type="MeshInstance3D" parent="Kaideler" unique_id=1297295051 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 8.9371605, -19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_eiklk")
-
-[node name="Kaide_southside_3_5" type="MeshInstance3D" parent="Kaideler" unique_id=1278044305 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 7.624748, -19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_igj5b")
-
-[node name="Kaide_southside_0_6" type="MeshInstance3D" parent="Kaideler" unique_id=1109151972 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 5.966004, 19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_llbeo")
-
-[node name="Kaide_southside_1_6" type="MeshInstance3D" parent="Kaideler" unique_id=1324775333 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 5.655042, 19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_2wx65")
-
-[node name="Kaide_southside_2_6" type="MeshInstance3D" parent="Kaideler" unique_id=777348006 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 5.400041, 19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_r33xn")
-
-[node name="Kaide_southside_3_6" type="MeshInstance3D" parent="Kaideler" unique_id=1176282461 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 5.270764, 19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_trlys")
-
-[node name="Kaide_southside_0_7" type="MeshInstance3D" parent="Kaideler" unique_id=184099761 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 4.201248, 57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_7e453")
-
-[node name="Kaide_southside_1_7" type="MeshInstance3D" parent="Kaideler" unique_id=1426082133 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 3.7891994, 57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_8wwa7")
-
-[node name="Kaide_southside_2_7" type="MeshInstance3D" parent="Kaideler" unique_id=450933717 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 2.8375728, 57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_w7isk")
-
-[node name="Kaide_southside_3_7" type="MeshInstance3D" parent="Kaideler" unique_id=679509276 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 3.3979547, 57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_2sw01")
-
-[node name="Kaide_eastside_4_4" type="MeshInstance3D" parent="Kaideler" unique_id=1358165250 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 9.690449, -57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_lvukg")
-
-[node name="Kaide_eastside_5_4" type="MeshInstance3D" parent="Kaideler" unique_id=1323913942 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 9.7053385, -57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_1wdbp")
-
-[node name="Kaide_eastside_6_4" type="MeshInstance3D" parent="Kaideler" unique_id=1621897978 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 9.530398, -57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_5j3lb")
-
-[node name="Kaide_eastside_7_4" type="MeshInstance3D" parent="Kaideler" unique_id=562014654 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 10.168526, -57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_wljl4")
-
-[node name="Kaide_eastside_4_5" type="MeshInstance3D" parent="Kaideler" unique_id=364374863 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 8.406378, -19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_egcdu")
-
-[node name="Kaide_eastside_5_5" type="MeshInstance3D" parent="Kaideler" unique_id=417303306 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 8.375925, -19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_53620")
-
-[node name="Kaide_eastside_6_5" type="MeshInstance3D" parent="Kaideler" unique_id=679766162 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 7.686644, -19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_d04wl")
-
-[node name="Kaide_eastside_7_5" type="MeshInstance3D" parent="Kaideler" unique_id=1730953625 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 7.800954, -19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_mr1fg")
-
-[node name="Kaide_eastside_4_6" type="MeshInstance3D" parent="Kaideler" unique_id=1428854563 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 5.5933166, 19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_r7s6b")
-
-[node name="Kaide_eastside_5_6" type="MeshInstance3D" parent="Kaideler" unique_id=1049262667 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 5.6263337, 19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_k66op")
-
-[node name="Kaide_eastside_6_6" type="MeshInstance3D" parent="Kaideler" unique_id=127983209 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 4.949688, 19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_p7kl1")
-
-[node name="Kaide_eastside_7_6" type="MeshInstance3D" parent="Kaideler" unique_id=2082187315 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 6.18432, 19)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_jyo1d")
-
-[node name="Kaide_eastside_4_7" type="MeshInstance3D" parent="Kaideler" unique_id=1051581241 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 3.8956666, 57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_4t34c")
-
-[node name="Kaide_eastside_5_7" type="MeshInstance3D" parent="Kaideler" unique_id=2103616687 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 3.6245303, 57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_w08a8")
-
-[node name="Kaide_eastside_6_7" type="MeshInstance3D" parent="Kaideler" unique_id=931906501 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 2.56698, 57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_0rihw")
-
-[node name="Kaide_eastside_7_7" type="MeshInstance3D" parent="Kaideler" unique_id=1015732687 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 3.5136738, 57)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_7vrb4")
-
-[node name="Kaide_flats_0_8" type="MeshInstance3D" parent="Kaideler" unique_id=1983758140 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, 1.9732049, 95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_vvlfh")
-
-[node name="Kaide_flats_1_8" type="MeshInstance3D" parent="Kaideler" unique_id=204121108 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 1.7579001, 95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_mcn8k")
-
-[node name="Kaide_flats_2_8" type="MeshInstance3D" parent="Kaideler" unique_id=504137615 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 1.5774144, 95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_oe2uo")
-
-[node name="Kaide_flats_3_8" type="MeshInstance3D" parent="Kaideler" unique_id=548844098 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 1.7342335, 95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_aqv8m")
-
-[node name="Kaide_flats_4_8" type="MeshInstance3D" parent="Kaideler" unique_id=338496442 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0.9532783, 95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_swjj4")
-
-[node name="Kaide_flats_5_8" type="MeshInstance3D" parent="Kaideler" unique_id=2052396112 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 0.70617026, 95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_paja1")
-
-[node name="Kaide_flats_6_8" type="MeshInstance3D" parent="Kaideler" unique_id=186254604 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 1.2247099, 95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_jgnti")
-
-[node name="Kaide_flats_7_8" type="MeshInstance3D" parent="Kaideler" unique_id=534690785 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 1.1287358, 95)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_k04bm")
-
-[node name="Kaide_flats_0_9" type="MeshInstance3D" parent="Kaideler" unique_id=915184918 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, -0.08986807, 133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_gx2s7")
-
-[node name="Kaide_flats_1_9" type="MeshInstance3D" parent="Kaideler" unique_id=1961212248 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, 0.19044612, 133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_o7ln4")
-
-[node name="Kaide_flats_2_9" type="MeshInstance3D" parent="Kaideler" unique_id=1814262756 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 0.15625028, 133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_5lx07")
-
-[node name="Kaide_flats_3_9" type="MeshInstance3D" parent="Kaideler" unique_id=256373661 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0.7131426, 133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_rdutf")
-
-[node name="Kaide_flats_4_9" type="MeshInstance3D" parent="Kaideler" unique_id=504484497 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0.5510529, 133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_rri6i")
-
-[node name="Kaide_flats_5_9" type="MeshInstance3D" parent="Kaideler" unique_id=690704114 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, 0.8931549, 133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_14lej")
-
-[node name="Kaide_flats_6_9" type="MeshInstance3D" parent="Kaideler" unique_id=2015727670 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 0.62861353, 133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_f8f57")
-
-[node name="Kaide_flats_7_9" type="MeshInstance3D" parent="Kaideler" unique_id=1373915378 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, 0.66283756, 133)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_pr5gs")
-
-[node name="Kaide_flats_0_10" type="MeshInstance3D" parent="Kaideler" unique_id=756010530 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, -0.29904926, 171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_ngxq6")
-
-[node name="Kaide_flats_1_10" type="MeshInstance3D" parent="Kaideler" unique_id=1139935869 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, -0.110259205, 171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_vaqd5")
-
-[node name="Kaide_flats_2_10" type="MeshInstance3D" parent="Kaideler" unique_id=205058612 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, -0.047536194, 171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_7b04u")
-
-[node name="Kaide_flats_3_10" type="MeshInstance3D" parent="Kaideler" unique_id=1271212407 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, 0.039421428, 171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_euvd7")
-
-[node name="Kaide_flats_4_10" type="MeshInstance3D" parent="Kaideler" unique_id=593300089 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, -0.055889834, 171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_df84v")
-
-[node name="Kaide_flats_5_10" type="MeshInstance3D" parent="Kaideler" unique_id=97681443 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, -0.23051846, 171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_c5cyc")
-
-[node name="Kaide_flats_6_10" type="MeshInstance3D" parent="Kaideler" unique_id=307832501 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, -0.5556107, 171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_0uyh5")
-
-[node name="Kaide_flats_7_10" type="MeshInstance3D" parent="Kaideler" unique_id=1231536983 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, -0.28623617, 171)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_ltvq7")
-
-[node name="Kaide_docks_0_11" type="MeshInstance3D" parent="Kaideler" unique_id=1964840622 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, -0.8974227, 209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_trlva")
-
-[node name="Kaide_docks_1_11" type="MeshInstance3D" parent="Kaideler" unique_id=804441973 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, -0.8147769, 209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_aykv6")
-
-[node name="Kaide_docks_2_11" type="MeshInstance3D" parent="Kaideler" unique_id=1646708333 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, -1.0729291, 209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_jvblr")
-
-[node name="Kaide_docks_3_11" type="MeshInstance3D" parent="Kaideler" unique_id=1383422685 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, -1.3879479, 209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_i6b5f")
-
-[node name="Kaide_docks_4_11" type="MeshInstance3D" parent="Kaideler" unique_id=204792399 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, -1.3287288, 209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_t53b7")
-
-[node name="Kaide_docks_5_11" type="MeshInstance3D" parent="Kaideler" unique_id=120059025 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, -1.0665658, 209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_4qidw")
-
-[node name="Kaide_docks_6_11" type="MeshInstance3D" parent="Kaideler" unique_id=1193477317 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, -1.147962, 209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_5v8fr")
-
-[node name="Kaide_docks_7_11" type="MeshInstance3D" parent="Kaideler" unique_id=1007631579 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, -1.2350715, 209)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_ui2dr")
-
-[node name="Kaide_docks_0_12" type="MeshInstance3D" parent="Kaideler" unique_id=1338299504 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -133, -1.7319034, 247)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_wcxa4")
-
-[node name="Kaide_docks_1_12" type="MeshInstance3D" parent="Kaideler" unique_id=999985300 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -95, -1.6302552, 247)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_qf4ci")
-
-[node name="Kaide_docks_2_12" type="MeshInstance3D" parent="Kaideler" unique_id=1654566836 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, -1.569744, 247)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_73tyk")
-
-[node name="Kaide_docks_3_12" type="MeshInstance3D" parent="Kaideler" unique_id=1507617636 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19, -1.767625, 247)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_6cqss")
-
-[node name="Kaide_docks_4_12" type="MeshInstance3D" parent="Kaideler" unique_id=1044680665 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, -1.4276569, 247)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_4tr3b")
-
-[node name="Kaide_docks_5_12" type="MeshInstance3D" parent="Kaideler" unique_id=691893911 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, -1.5819396, 247)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_dyw76")
-
-[node name="Kaide_docks_6_12" type="MeshInstance3D" parent="Kaideler" unique_id=2024332387 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, -1.5195622, 247)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_m7gsg")
-
-[node name="Kaide_docks_7_12" type="MeshInstance3D" parent="Kaideler" unique_id=1786862326 groups=["kaide"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 133, -1.3595743, 247)
-material_override = SubResource("StandardMaterial3D_ghm4q")
-mesh = SubResource("BoxMesh_vkkmw")
-
-[node name="Iskeleler" type="Node3D" parent="." unique_id=1052572149]
-
-[node name="Iskele_0" type="MeshInstance3D" parent="Iskeleler" unique_id=885085168 groups=["iskele"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -119, -0.5, 286)
-material_override = SubResource("StandardMaterial3D_0snxo")
-mesh = SubResource("BoxMesh_5qpei")
-
-[node name="Iskele_1" type="MeshInstance3D" parent="Iskeleler" unique_id=1718793722 groups=["iskele"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -71, -0.5, 286)
-material_override = SubResource("StandardMaterial3D_0snxo")
-mesh = SubResource("BoxMesh_3y1tq")
-
-[node name="Iskele_2" type="MeshInstance3D" parent="Iskeleler" unique_id=1014913923 groups=["iskele"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23, -0.5, 286)
-material_override = SubResource("StandardMaterial3D_0snxo")
-mesh = SubResource("BoxMesh_vayha")
-
-[node name="Iskele_3" type="MeshInstance3D" parent="Iskeleler" unique_id=1421085618 groups=["iskele"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, -0.5, 286)
-material_override = SubResource("StandardMaterial3D_0snxo")
-mesh = SubResource("BoxMesh_v3elv")
-
-[node name="Iskele_4" type="MeshInstance3D" parent="Iskeleler" unique_id=794725564 groups=["iskele"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73, -0.5, 286)
-material_override = SubResource("StandardMaterial3D_0snxo")
-mesh = SubResource("BoxMesh_212sy")
-
-[node name="Iskele_5" type="MeshInstance3D" parent="Iskeleler" unique_id=1187629933 groups=["iskele"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 121, -0.5, 286)
-material_override = SubResource("StandardMaterial3D_0snxo")
-mesh = SubResource("BoxMesh_yrflf")
-
-[node name="Deniz" type="Node3D" parent="." unique_id=2086679310]
-
-[node name="Su" type="MeshInstance3D" parent="Deniz" unique_id=1698273297]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 303)
-material_override = SubResource("StandardMaterial3D_vf2nf")
-mesh = SubResource("PlaneMesh_apd2y")
+[node name="Dolgu_48" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -141.6, 1.962, -30.84)
+ad = ""
+bolge = "southside"
+dolgu = true
+boyut = Vector3(11.31, 16.00, 13.18)
+renk = Color(0.500, 0.270, 0.220, 1)
+[node name="Dolgu_49" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 43.07, 1.875, -29.86)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(13.69, 19.25, 11.20)
+renk = Color(0.480, 0.300, 0.260, 1)
+[node name="Dolgu_50" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 29.11, 1.703, 30.45)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(9.72, 19.34, 12.88)
+renk = Color(0.500, 0.270, 0.220, 1)
+[node name="Dolgu_51" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 39.66, 1.703, 29.14)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(9.62, 22.85, 9.86)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Dolgu_52" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -25.53, 4.377, -107.12)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(11.73, 13.61, 13.47)
+renk = Color(0.660, 0.560, 0.440, 1)
+[node name="Dolgu_53" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -107.34, 5.326, -215.81)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(14.88, 10.21, 13.23)
+renk = Color(0.820, 0.780, 0.660, 1)
+[node name="Dolgu_54" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -107.52, 7.052, -200.83)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(12.09, 10.29, 13.23)
+renk = Color(0.780, 0.740, 0.700, 1)
+[node name="Dolgu_55" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 44.96, 1.53, 207.32)
+ad = ""
+bolge = "docks"
+dolgu = true
+boyut = Vector3(14.13, 12.60, 14.82)
+renk = Color(0.400, 0.330, 0.280, 1)
+[node name="Dolgu_56" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -140.78, 5.844, -180.71)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(12.95, 13.69, 11.06)
+renk = Color(0.850, 0.820, 0.740, 1)
+[node name="Dolgu_57" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99987, 0, -0.01624, 0, 1, 0, 0.01624, 0, 0.99987, -38.54, 1.789, 128.55)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(10.32, 14.85, 10.19)
+renk = Color(0.600, 0.340, 0.220, 1)
+[node name="Dolgu_58" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.01754, 0, -0.99985, 0, 1, 0, 0.99985, 0, 0.01754, 113.18, 1.789, 107.83)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(10.54, 15.02, 12.67)
+renk = Color(0.620, 0.400, 0.300, 1)
+[node name="Dolgu_59" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, -141.16, 4.981, -194.5)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(12.19, 13.52, 12.58)
+renk = Color(0.700, 0.780, 0.680, 1)
+[node name="Dolgu_60" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.0, 0, 1, 0, 0.0, 0, 1.0, 26.27, 1.444, 230.49)
+ad = ""
+bolge = "docks"
+dolgu = true
+boyut = Vector3(18.05, 12.42, 10.06)
+renk = Color(0.400, 0.330, 0.280, 1)
+[node name="Dolgu_61" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.17409, 0, -0.98473, 0, 1, 0, 0.98473, 0, -0.17409, 140.59, 1.789, -188.92)
+ad = ""
+bolge = "downtown"
+dolgu = true
+boyut = Vector3(17.80, 31.82, 13.06)
+renk = Color(0.500, 0.500, 0.520, 1)
+[node name="Dolgu_62" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.01812, 0, -0.99984, 0, 1, 0, 0.99984, 0, 0.01812, -19.8, 1.617, 99.41)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(14.24, 15.02, 14.14)
+renk = Color(0.590, 0.360, 0.310, 1)
+[node name="Dolgu_63" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.01796, 0, -0.99984, 0, 1, 0, 0.99984, 0, 0.01796, 90.0, 1.789, 104.0)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(9.94, 11.62, 8.37)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Dolgu_64" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98212, 0, 0.18825, 0, 1, 0, -0.18825, 0, 0.98212, 62.0, 1.875, 58.0)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(9.60, 22.85, 10.17)
+renk = Color(0.600, 0.340, 0.220, 1)
+[node name="Dolgu_65" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.00895, 0, -0.99996, 0, 1, 0, 0.99996, 0, 0.00895, 112.0, 1.875, 168.0)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(9.46, 18.42, 9.27)
+renk = Color(0.590, 0.360, 0.310, 1)
+[node name="Dolgu_66" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.95186, 0, 0.30653, 0, 1, 0, -0.30653, 0, 0.95186, -136.0, 4.377, -90.0)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(10.46, 9.43, 7.73)
+renk = Color(0.660, 0.560, 0.440, 1)
+[node name="Dolgu_67" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98645, 0, -0.16405, 0, 1, 0, 0.16405, 0, 0.98645, 140.0, 1.789, -96.0)
+ad = ""
+bolge = "downtown"
+dolgu = true
+boyut = Vector3(8.56, 20.34, 8.11)
+renk = Color(0.720, 0.700, 0.640, 1)
+[node name="Dolgu_68" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.01448, 0, -0.9999, 0, 1, 0, 0.9999, 0, 0.01448, 90.0, 1.962, 134.0)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(20.26, 11.74, 9.34)
+renk = Color(0.430, 0.300, 0.220, 1)
+[node name="Dolgu_69" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.43573, 0, -0.90008, 0, 1, 0, 0.90008, 0, 0.43573, -22.0, 5.93, -134.0)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(9.24, 13.00, 7.35)
+renk = Color(0.820, 0.780, 0.660, 1)
+[node name="Dolgu_70" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.93866, 0, 0.34484, 0, 1, 0, -0.34484, 0, 0.93866, -110.0, 9.726, -122.0)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(10.00, 13.26, 9.62)
+renk = Color(0.780, 0.740, 0.700, 1)
+[node name="Dolgu_71" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.17327, 0, -0.98487, 0, 1, 0, 0.98487, 0, -0.17327, 18.0, 2.307, -190.0)
+ad = ""
+bolge = "downtown"
+dolgu = true
+boyut = Vector3(9.76, 28.28, 7.89)
+renk = Color(0.580, 0.580, 0.600, 1)
+[node name="Dolgu_72" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.37045, 0, -0.92885, 0, 1, 0, 0.92885, 0, 0.37045, -20.0, 5.154, -180.0)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(10.88, 12.49, 8.56)
+renk = Color(0.700, 0.780, 0.680, 1)
+[node name="Dolgu_73" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.01876, 0, -0.99982, 0, 1, 0, 0.99982, 0, 0.01876, 90.0, 1.875, 94.0)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(7.14, 14.94, 7.63)
+renk = Color(0.480, 0.300, 0.260, 1)
+[node name="Dolgu_74" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -62.0, 1.789, 226.0)
+ad = ""
+bolge = "docks"
+dolgu = true
+boyut = Vector3(9.18, 6.75, 7.85)
+renk = Color(0.450, 0.300, 0.240, 1)
+[node name="Dolgu_75" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99991, 0, -0.01361, 0, 1, 0, 0.01361, 0, 0.99991, -20.0, 1.703, 128.0)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(14.70, 18.42, 11.17)
+renk = Color(0.620, 0.400, 0.300, 1)
+[node name="Dolgu_76" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.00746, 0, -0.99997, 0, 1, 0, 0.99997, 0, 0.00746, 90.0, 1.789, 176.0)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(8.08, 14.94, 9.56)
+renk = Color(0.550, 0.300, 0.250, 1)
+[node name="Dolgu_77" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.33246, 0, -0.94312, 0, 1, 0, 0.94312, 0, 0.33246, -48.0, 6.793, -196.0)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(8.93, 9.52, 7.32)
+renk = Color(0.780, 0.740, 0.700, 1)
+[node name="Dolgu_78" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, -0.0, 0, 1.0, 144.0, 1.962, -16.0)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(10.06, 23.02, 9.23)
+renk = Color(0.550, 0.300, 0.250, 1)
+[node name="Dolgu_79" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.89517, 0, 0.44573, 0, 1, 0, -0.44573, 0, 0.89517, -16.0, 2.997, -212.0)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(7.88, 12.40, 7.63)
+renk = Color(0.820, 0.780, 0.660, 1)
+[node name="Dolgu_80" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.31079, 0, -0.95048, 0, 1, 0, 0.95048, 0, 0.31079, -34.0, 3.601, -218.0)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(10.72, 12.74, 7.34)
+renk = Color(0.850, 0.820, 0.740, 1)
+[node name="Dolgu_81" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.43974, 0, -0.89812, 0, 1, 0, 0.89812, 0, 0.43974, -18.0, 5.068, -124.0)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(7.37, 12.83, 8.37)
+renk = Color(0.660, 0.560, 0.440, 1)
+[node name="Dolgu_82" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.98217, 0, 0.188, 0, 1, 0, -0.188, 0, 0.98217, 52.0, 1.789, 58.0)
+ad = ""
+bolge = "eastside"
+dolgu = true
+boyut = Vector3(7.48, 12.14, 7.73)
+renk = Color(0.660, 0.550, 0.380, 1)
+[node name="Dolgu_83" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, -0.00205, 0, 1, 0, 0.00205, 0, 1.0, 46.0, 1.962, 132.0)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(11.06, 11.54, 14.92)
+renk = Color(0.480, 0.300, 0.260, 1)
+[node name="Dolgu_84" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.93827, 0, 0.34592, 0, 1, 0, -0.34592, 0, 0.93827, -106.0, 9.726, -184.0)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(7.52, 9.26, 7.48)
+renk = Color(0.700, 0.780, 0.680, 1)
+[node name="Dolgu_85" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.00356, 0, -0.99999, 0, 1, 0, 0.99999, 0, -0.00356, -124.0, 1.53, 220.0)
+ad = ""
+bolge = "docks"
+dolgu = true
+boyut = Vector3(11.77, 12.42, 9.68)
+renk = Color(0.420, 0.260, 0.200, 1)
+[node name="Dolgu_86" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99338, 0, -0.1149, 0, 1, 0, 0.1149, 0, 0.99338, -24.0, 1.875, -34.0)
+ad = ""
+bolge = "southside"
+dolgu = true
+boyut = Vector3(7.59, 15.74, 7.33)
+renk = Color(0.590, 0.360, 0.310, 1)
+[node name="Dolgu_87" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.17353, 0, -0.98483, 0, 1, 0, 0.98483, 0, -0.17353, 126.0, 1.789, -186.0)
+ad = ""
+bolge = "downtown"
+dolgu = true
+boyut = Vector3(19.41, 28.02, 10.00)
+renk = Color(0.500, 0.500, 0.520, 1)
+[node name="Dolgu_88" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.9944, 0, -0.10572, 0, 1, 0, 0.10572, 0, 0.9944, -120.0, 2.393, -42.0)
+ad = ""
+bolge = "southside"
+dolgu = true
+boyut = Vector3(9.05, 16.00, 9.02)
+renk = Color(0.590, 0.360, 0.310, 1)
+[node name="Dolgu_89" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, -0.0, 0, 1.0, -144.0, 2.221, -46.0)
+ad = ""
+bolge = "southside"
+dolgu = true
+boyut = Vector3(9.45, 16.08, 8.31)
+renk = Color(0.600, 0.340, 0.220, 1)
+[node name="Dolgu_90" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, 48.0, 1.962, 110.0)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(8.29, 18.34, 9.13)
+renk = Color(0.550, 0.520, 0.480, 1)
+[node name="Dolgu_91" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, -0.0, 0, 1.0, 30.0, 1.962, 110.0)
+ad = ""
+bolge = "flats"
+dolgu = true
+boyut = Vector3(8.69, 14.85, 7.28)
+renk = Color(0.620, 0.400, 0.300, 1)
+[node name="Dolgu_92" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.99998, 0, -0.0066, 0, 1, 0, 0.0066, 0, 0.99998, -116.0, 8.087, -190.0)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(7.59, 9.52, 7.85)
+renk = Color(0.660, 0.560, 0.440, 1)
+[node name="Dolgu_93" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.17648, 0, -0.9843, 0, 1, 0, 0.9843, 0, -0.17648, 142.0, 1.875, -210.0)
+ad = ""
+bolge = "downtown"
+dolgu = true
+boyut = Vector3(9.60, 24.14, 8.35)
+renk = Color(0.660, 0.600, 0.500, 1)
+[node name="Dolgu_94" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.0, 0, -1.0, 0, 1, 0, 1.0, 0, 0.0, -120.0, 5.24, -212.0)
+ad = ""
+bolge = "hilltop"
+dolgu = true
+boyut = Vector3(13.39, 13.35, 8.74)
+renk = Color(0.780, 0.740, 0.700, 1)
+[node name="Dolgu_95" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(0.21178, 0, -0.97732, 0, 1, 0, 0.97732, 0, 0.21178, -116.0, 2.134, -28.0)
+ad = ""
+bolge = "southside"
+dolgu = true
+boyut = Vector3(9.89, 15.91, 8.55)
+renk = Color(0.600, 0.340, 0.220, 1)
+[node name="Dolgu_96" parent="Binalar" instance=ExtResource("3_vwpxd")]
+transform = Transform3D(-0.17746, 0, -0.98413, 0, 1, 0, 0.98413, 0, -0.17746, 142.0, 1.789, -220.0)
+ad = ""
+bolge = "downtown"
+dolgu = true
+boyut = Vector3(7.77, 24.14, 7.05)
+renk = Color(0.500, 0.500, 0.520, 1)
 
 [editable path="Binalar/Hotel_Belmont_0"]
+
+

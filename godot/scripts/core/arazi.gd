@@ -12,9 +12,9 @@ extends Node3D
 @export var z0 := -258.0
 @export var genislik := 364.0
 @export var derinlik := 594.0
-@export var min_h := -6.0
-@export var max_h := 40.0
-@export var adim := 3.0            # mesh ızgara aralığı (metre)
+@export var min_h := -4.0
+@export var max_h := 18.0
+@export var adim := 2.0            # mesh ızgara aralığı (metre)
 @export var yenile := false:
 	set(v):
 		yenile = false
