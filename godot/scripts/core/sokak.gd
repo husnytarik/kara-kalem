@@ -65,6 +65,10 @@ func _ready() -> void:
 	bc.name = "BolgeCizgi"
 	add_child(bc)
 	bc.kur(oyun, harita, self)
+	var yy: Node3D = load("res://scripts/core/yayalar.gd").new()
+	yy.name = "Yayalar"
+	add_child(yy)
+	yy.kur(harita, oyuncu, oyun, kamera)
 	gruplar.yakinlasti.connect(_karsilasti)
 	gruplar.temas.connect(func(g): arayuz.karsilasma_ac(g))
 	arayuz = load("res://scripts/ui/arayuz.gd").new()
