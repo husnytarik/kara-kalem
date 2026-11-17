@@ -30,6 +30,8 @@ func _draw() -> void:
 	var alan := Rect2(KENAR, UST, boy.x - 2.0 * KENAR - 360.0, boy.y - UST - KENAR - 40.0)   # sağ panelin soluna kadar
 	var renk := Color("e0b24a")
 	var font := ThemeDB.fallback_font
+	if sokak.oyuncu.iceride >= 0:
+		return
 	var yazi := "Ev · %d m" % int(mesafe)
 	if sokak.gruplar.guvenli_mi():
 		yazi = "Ev · GÜVENLİ BÖLGE"

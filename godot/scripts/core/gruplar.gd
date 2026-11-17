@@ -230,6 +230,8 @@ func dagit(g: Dictionary) -> void:
 	_sil(g)
 
 func guvenli_mi() -> bool:
+	if oyuncu.iceride >= 0:
+		return true   # bir binanın içindesin: kimse göremez
 	if oyun._ev < 0:
 		return false
 	var e: Vector3 = harita.yerler[oyun._ev]["pos"]

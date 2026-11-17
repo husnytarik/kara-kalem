@@ -42,6 +42,7 @@ func kur(o: Node, s: Node) -> void:
 	oyun = o
 	sokak = s
 	_ust_cubuk()
+	_amac_paneli()
 	_sag_panel()
 	_diyalog_kur()
 	_log = VBoxContainer.new()
@@ -100,6 +101,67 @@ func _bar(ebeveyn: Node, ad: String, deger: float, renk: Color, yazi: String = "
 
 func _ayrac(ebeveyn: Node) -> void:
 	ebeveyn.add_child(HSeparator.new())
+
+var _amac_kutu: PanelContainer
+var _amac_baslik: Label
+var _amac_yazi: Label
+var _baski_yazi: Label
+
+# Sol üstte: şimdiki hedef (içine çeker) + yaklaşan yükümlülükler (ayakta kalma baskısı).
+func _amac_paneli() -> void:
+	_amac_kutu = PanelContainer.new()
+	_amac_kutu.add_theme_stylebox_override("panel", _stil())
+	_amac_kutu.theme = Tema.tema()
+	_amac_kutu.position = Vector2(8, 172)
+	_amac_kutu.custom_minimum_size = Vector2(360, 0)
+	_amac_kutu.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_amac_kutu)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 2)
+	_amac_kutu.add_child(v)
+	_amac_baslik = _lbl(v, "", 14, RENK["altin"])
+	_amac_yazi = _lbl(v, "", 15)
+	_baski_yazi = _lbl(v, "", 14, RENK["soluk"])
+
+func _amac_guncelle() -> void:
+	var baslik := "HEDEF"
+	var yazi := ""
+	var haracli := 0
+	var sahip := 0
+	for i in oyun.isy:
+		if oyun.isy[i]["sahip"]:
+			sahip += 1
+		elif oyun.isy[i]["haracli"]:
+			haracli += 1
+	var bolgeler: int = oyun.oyuncu_bolgeleri().size()
+	if oyun.adamlar.is_empty():
+		yazi = "Önce bir adam tut: A tuşu (Adamlar). Tek başına esnafı sıkıştıramazsın."
+	elif haracli + sahip == 0:
+		yazi = "Bir esnafa git, paneli aç ve adamınla haraç bağla. Gelir oradan başlar."
+	elif bolgeler == 0:
+		yazi = "Nüfuzunu büyüt: haraç bağladıkça mahalle senin olur. Haraçlı iş: %d" % (haracli + sahip)
+	else:
+		yazi = "%d bölge senin. Rakip ailelere karşı büyü: Hedefler panelinde zafer yollarına bak." % bolgeler
+	if oyun.arama >= 60.0:
+		baslik = "TEHLİKE"
+		yazi = "Polis dosyan kabarık (%d). Ortalıkta görünme, rüşvet ver ya da evine gir." % int(oyun.arama)
+	_amac_baslik.text = baslik
+	_amac_yazi.text = yazi
+	# yükümlülükler
+	var d: Dictionary = oyun.tarih()
+	var kalan: int = oyun.DAYS_PER_MONTH - int(d["ay_gun"]) + 1
+	var borc := 0.0
+	if oyun.borc.get("ana", 0.0) > 0.0:
+		borc = oyun.borc["taksit"]
+	var kira: float = float(oyun.ozet.get("kira", 0)) + oyun.kira_borc
+	var toplam := borc + kira
+	if toplam <= 0.0:
+		_baski_yazi.text = "Ay sonuna %d gün." % kalan
+		_baski_yazi.add_theme_color_override("font_color", RENK["soluk"])
+	else:
+		var yeter: bool = oyun.temiz >= toplam
+		_baski_yazi.text = "Ay sonuna %d gün · ödenecek %s (taksit %s + kira %s)%s" % [kalan, oyun.para(toplam), oyun.para(borc), oyun.para(kira), "" if yeter else " — PARA YETMİYOR" ]
+		_baski_yazi.add_theme_color_override("font_color", RENK["good"] if yeter else (RENK["bad"] if kalan <= 3 else RENK["warn"]))
 
 func _ust_cubuk() -> void:
 	var pc := PanelContainer.new()
@@ -253,6 +315,8 @@ func bolgede_mi(id: String) -> bool:
 	return oyun.harita.bolge_at(sokak.oyuncu.global_position) == id
 
 func kapat() -> void:
+	if _mod == "bina" and sokak.oyuncu.iceride >= 0:
+		sokak.oyuncu.cik()   # paneli kapatmak = binadan çıkmak
 	_mod = ""
 	_sag.visible = false
 
@@ -285,6 +349,7 @@ func _process(_d: float) -> void:
 			var l := _lbl(_log, "%s  %s" % [oyun.saat_yazi(e["t"]), e["metin"]], 15, RENK[e["tur"]])
 			l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
 			l.add_theme_constant_override("outline_size", 6)
+	_amac_guncelle()
 	_son_kontrol()
 	if _mod != "":
 		_yenile(false)
@@ -297,7 +362,7 @@ func _imza() -> String:
 			var i: int = _hedef
 			var y: Dictionary = oyun.harita.yerler[i]
 			var gs: Array = oyun.gorevler.filter(func(g): return g["hedef"] == i).map(func(g): return [g["adam"], g["gorev"], (g["bitis"] - oyun.t) / 60])
-			return str([oyun.ziyaret.get(i, []).size(), sokak.gorus.bina_gorunur(i), oyun.t / 60, oyun.isy.get(i), oyun.kontrol(i), oyun.bolge[y["bolge"]]["inf"], oyun.bos_adamlar().map(func(a): return a["id"]), gs, oyun.temiz, oyun.kirli, _sonuc, yakin_bina(i), oyun.vardiya])
+			return str([oyun.ziyaret.get(i, []).size(), sokak.gorus.bina_gorunur(i), oyun.t / 60, oyun.isy.get(i), oyun.kontrol(i), oyun.bolge[y["bolge"]]["inf"], oyun.bos_adamlar().map(func(a): return a["id"]), gs, oyun.temiz, oyun.kirli, _sonuc, yakin_bina(i), oyun.vardiya, sokak.oyuncu.iceride])
 		"bolge":
 			return str([oyun.bolge[_hedef], oyun.erisim(_hedef), oyun.temiz, oyun.kirli, oyun.adamlar.size(), oyun.tarih()["gun"], _sonuc, bolgede_mi(_hedef)])
 		"adamlar":
@@ -340,6 +405,16 @@ func _yenile(zorla: bool) -> void:
 		"grup": _grup_paneli()
 	_kapat_dugmesi()
 
+# İçerideyken: haritada görünmezsin, kimse sana bulaşamaz. Ev ise dinlenip zaman geçirebilirsin.
+func _ic_bolumu(i: int) -> void:
+	_ayrac(_ic)
+	_lbl(_ic, "İçeridesin — haritada görünmüyorsun.", 16, RENK["good"])
+	if i == oyun._ev:
+		_lbl(_ic, "Evin güvenli: kimse bulaşamaz. Dinlenirken zaman akar, ama borç ve kira beklemez.", 14, RENK["soluk"])
+		_btn(_ic, "1 saat bekle", func(): oyun.bekle(60); _yenile(true))
+		_btn(_ic, "Sabaha kadar uyu (07:00)", func(): oyun.uyu(); _yenile(true))
+	_btn(_ic, "Dışarı çık", kapat)
+
 func _kapat_dugmesi() -> void:
 	_ayrac(_ic)
 	_btn(_ic, "Kapat", kapat)
@@ -356,6 +431,8 @@ func _bina_paneli() -> void:
 	_lbl(_ic, y["ad"], 24, RENK["altin"] if y["ozel"] else Color.WHITE)
 	_lbl(_ic, "%s · %s" % [oyun.harita.bolgeler[bid]["ad"], oyun.tur_ad(i)], 15, RENK["soluk"])
 	_btn(_ic, "Bölge bilgisi", bolge_ac.bind(bid))
+	if sokak.oyuncu.iceride == i:
+		_ic_bolumu(i)
 	_ayrac(_ic)
 	if not oyun.isy.has(i):
 		if y["ozel"]:

@@ -58,10 +58,24 @@ func _renk(c: Color, ismesiz: bool) -> StandardMaterial3D:
 	return m
 
 var kilitli := false   # çalışırken yürüyemezsin
+var iceride := -1      # bir binanın içindeysen bina indeksi (haritada görünmezsin)
+
+func gir(i: int) -> void:
+	iceride = i
+	_yol = PackedVector3Array()
+	visible = false
+
+func cik() -> void:
+	if iceride < 0:
+		return
+	global_position = harita.serbest_nokta(harita.yerler[iceride]["pos"])
+	iceride = -1
+	visible = true
 
 func git(hedef: Vector3) -> bool:
 	if kilitli:
 		return false
+	cik()
 	var y: PackedVector3Array = harita.yol_bul(global_position, hedef)
 	if y.size() < 2:
 		return false

@@ -830,6 +830,17 @@ func ilerle(delta: float) -> void:
 				_ay()
 	degisti.emit()
 
+# Zamanı ileri sar (evde bekleme/uyku). Olaylar normal işler.
+func bekle(dakika: int) -> void:
+	ilerle(float(dakika) / DK_SN)
+
+func uyu() -> void:
+	var gun_dk := t % DAY
+	var hedef := 7 * 60
+	var dk := hedef - gun_dk if gun_dk < hedef else DAY - gun_dk + hedef
+	bekle(dk)
+	kayit("Sabaha kadar uyudun.", "info")
+
 func _saat() -> void:
 	if not vardiya.is_empty() and t >= vardiya["bitis"]:
 		temiz += vardiya["ucret"]

@@ -200,6 +200,9 @@ func _ready() -> void:
 			print("baskin sonrasi arama ", oyun.arama, " kurulu ", oyun.pol["kurulu"])
 			print(oyun.polis.rusvet(300.0)["msg"])
 			arayuz.polis_ac()
+		elif a == "--gir-testi":
+			oyuncu.gir(oyun._ev)
+			arayuz.bina_ac(oyun._ev)
 		elif a == "--gerg-testi":
 			var gk: RefCounted = oyun.gerginlik
 			gk.ekle("marchetti", "obrien", 6.0, "test")
@@ -355,9 +358,14 @@ func _unhandled_input(e: InputEvent) -> void:
 		var n := k.project_ray_normal(e.position)
 		var i: int = harita.yer_isinla(o, n)
 		if i >= 0:
-			oyuncu.git(harita.yerler[i]["pos"])   # binaya tıkla: önüne git ve paneli aç
-			arayuz.bina_ac(i)
+			if oyuncu.iceride == i:
+				arayuz.bina_ac(i)
+			else:
+				oyuncu.git(harita.yerler[i]["pos"])   # binaya tıkla: önüne git, varınca içeri gir
+				_gir_bina = i
+				arayuz.bina_ac(i)
 		else:
+			_gir_bina = -1
 			var nokta = harita.arazi_isinla(o, n)
 			if nokta != null:
 				oyuncu.git(nokta)
@@ -370,6 +378,7 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_H:
 				if oyun._ev >= 0:
 					oyuncu.git(harita.serbest_nokta(oyun.harita.yerler[oyun._ev]["pos"]))
+					_gir_bina = oyun._ev
 			KEY_B: arayuz._bolge_dugmesi()
 			KEY_A: arayuz.adamlar_ac()
 			KEY_D: arayuz.defter_ac()
@@ -379,14 +388,23 @@ func _unhandled_input(e: InputEvent) -> void:
 				gorus._gorunurluk()
 			KEY_K: arayuz.aile_ac()
 			KEY_ESCAPE:
-				if arayuz._sag.visible:
+				if oyuncu.iceride >= 0:
+					oyuncu.cik()
+					arayuz.kapat()
+				elif arayuz._sag.visible:
 					arayuz.kapat()
 				else:
 					_duraklat_menu()
 			KEY_F6: kaydet()
 			KEY_F9: yukle()
 
+var _gir_bina := -1
+
 func _process(delta: float) -> void:
+	if _gir_bina >= 0 and oyuncu.iceride < 0 and arayuz.yakin_bina(_gir_bina):
+		oyuncu.gir(_gir_bina)
+		arayuz.bina_ac(_gir_bina)
+		_gir_bina = -1
 	_fps.text = "%d FPS" % Engine.get_frames_per_second()
 	# Hızlı oynatmada fizik adımı sayısı time_scale ile çarpılır; adım sıklığını düşürerek gerçek adım/sn'yi 60'ta tut.
 	var tps := clampi(roundi(60.0 / maxf(Engine.time_scale, 1.0)), 15, 60)
@@ -425,6 +443,7 @@ func _process(delta: float) -> void:
 		_hi = harita.yer_isinla(k.project_ray_origin(fp), k.project_ray_normal(fp))
 	var gh: Dictionary = _gh
 	var i: int = _hi
+	_oy_etiket.visible = oyuncu.iceride < 0
 	_oy_etiket.text = "%s · %d kişi" % [oyun.profil.get("ad", "Sen"), 1 + oyun.adamlar.size()]
 	oyuncu.kilitli = not oyun.vardiya.is_empty()
 	if not gh.is_empty():
