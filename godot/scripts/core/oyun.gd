@@ -191,7 +191,7 @@ func kur(h: Node3D) -> void:
 	yol_k = load("res://scripts/core/yol.gd").new(self)
 	yol = yol_k.yeni()
 	kart_k = load("res://scripts/core/kartlar.gd").new(self)
-	yol["bekleyen"] = "yol_sec"
+	yol["bekleyen"] = "tefeci"
 	_aileleri_kur()
 	_profil_uygula()
 

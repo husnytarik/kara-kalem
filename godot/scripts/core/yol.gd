@@ -137,7 +137,6 @@ func _donem_degis() -> void:
 func ozet_satiri() -> String:
 	var a := ana()
 	var d := donem()
-	var s: String = "Yol: %s" % (AD[a] if a != "" else "belirsiz")
-	if a != "":
-		s += " (%d)" % int(puan(a))
-	return "%s · %s" % [s, d["ad"]]
+	var t := {"": "henüz belli değil", "kanun": "düzgün biri olarak tanınıyorsun", "golge": "izini belli etmeyen biri olarak tanınıyorsun",
+		"korku": "korkulan biri olarak tanınıyorsun", "kulis": "iş bitiren, bağlantılı biri olarak tanınıyorsun"}
+	return "Şehirde %s · %s" % [t[a], d["ad"]]

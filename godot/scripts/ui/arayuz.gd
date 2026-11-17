@@ -1017,8 +1017,9 @@ func _kart_ciz() -> void:
 		for sec in K.secenekler(_kart_id):
 			var i := n
 			var b := _btn(_dlg_ic, sec["ad"], func(): _kart_sec(i), not sec["can"])
-			b.tooltip_text = sec["ipucu"]
-			var h := _lbl(_dlg_ic, sec["ipucu"], 13, RENK["soluk"])
+			var ip: String = _etiket_temizle(sec["ipucu"])
+			b.tooltip_text = ip
+			var h := _lbl(_dlg_ic, ip, 13, RENK["soluk"])
 			h.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			n += 1
 	else:
@@ -1026,6 +1027,12 @@ func _kart_ciz() -> void:
 		m.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_btn(_dlg_ic, "Tamam", _diyalog_kapat)
 	_dlg.visible = true
+
+# Karakter rol yapsın: yol puanları gösterilmez, yalnız somut sonuçlar kalır.
+func _etiket_temizle(t: String) -> String:
+	var rx := RegEx.new()
+	rx.compile("\\s*(Yasal|Gölge|Korku|Kulis) [+−]\\d+[.,]?")
+	return rx.sub(t, "", true).strip_edges().trim_suffix(",")
 
 func _kart_sec(i: int) -> void:
 	_kart_sonuc = oyun.kart_k.uygula(_kart_id, i)

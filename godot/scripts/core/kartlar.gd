@@ -8,7 +8,6 @@ var Y: RefCounted
 
 # id -> [başlık, ağırlık, bekleme(gün), tek sefer]
 const KARTLAR := {
-	"yol_sec": ["Yolunu seç", 0, 0, true],
 	"dolan": ["Dolan kapıda", 10, 12, false],
 	"esnaf": ["Esnaf şikâyeti", 8, 10, false],
 	"ihale": ["Belediye ihalesi", 7, 15, false],
