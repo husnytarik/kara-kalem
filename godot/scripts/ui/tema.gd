@@ -3,19 +3,30 @@ extends RefCounted
 
 const OLCEK := 0.85   # tüm yazı boyutları bununla çarpılır (arayüzü küçültmek için düşür)
 
-const ARKA := Color(0.09, 0.10, 0.12, 0.93)
-const ARKA2 := Color(0.13, 0.14, 0.16, 0.95)
-const KENAR := Color(0.24, 0.26, 0.29)
-const YAZI := Color("d9dbde")
-const SOLUK := Color("8e939b")
-const VURGU := Color("c4ad83")   # tek vurgu: yumuşak kum rengi
-const IYI := Color("8fb596")
-const KOTU := Color("c98080")
-const UYARI := Color("c9a86e")
-const BILGI := Color("b4b9c0")
-const DUGME := Color(0.15, 0.16, 0.18)
-const DUGME_UZERI := Color(0.21, 0.22, 0.25)
-const DUGME_BASILI := Color(0.30, 0.29, 0.26)
+const ARKA := Color(0.105, 0.075, 0.052, 0.94)    # koyu deri/kahve
+const ARKA2 := Color(0.15, 0.108, 0.075, 0.96)
+const KENAR := Color(0.40, 0.29, 0.15)                # pirinç kenar
+const YAZI := Color("e6d9bd")                         # krem
+const SOLUK := Color("a8977a")
+const VURGU := Color("e0a93a")                        # altın
+const IYI := Color("74c260")
+const KOTU := Color("e0513a")
+const UYARI := Color("e6a52e")
+const BILGI := Color("9dbbdc")
+const DUGME := Color(0.16, 0.115, 0.078)
+const DUGME_UZERI := Color(0.24, 0.17, 0.10)
+const DUGME_BASILI := Color(0.33, 0.23, 0.10)
+const KAGIT := Color("d8c39a")                        # eski kâğıt (karar kartı)
+const KAGIT_YAZI := Color("2b1d10")
+const KAGIT_KENAR := Color("7a5a30")
+
+static var _yazi_tipi: Font
+static func yazi_tipi() -> Font:
+	if _yazi_tipi == null:
+		var f := SystemFont.new()
+		f.font_names = PackedStringArray(["Georgia", "Cambria", "Palatino Linotype", "Times New Roman"])
+		_yazi_tipi = f
+	return _yazi_tipi
 
 static func boyut(n: int) -> int:
 	return maxi(10, int(round(n * OLCEK)))
@@ -24,15 +35,22 @@ static func stil(arka: Color = ARKA, kenar: Color = KENAR, marj: int = 10, yuvar
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = arka
 	sb.border_color = kenar
-	sb.set_border_width_all(1)
-	sb.set_corner_radius_all(yuvarlak)
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(mini(yuvarlak, 3))
 	sb.set_content_margin_all(marj)
+	sb.shadow_color = Color(0, 0, 0, 0.45)
+	sb.shadow_size = 4
+	return sb
+
+static func kagit_stil() -> StyleBoxFlat:
+	var sb := stil(KAGIT, KAGIT_KENAR, 14, 2)
+	sb.set_border_width_all(3)
 	return sb
 
 static func dugme_stil(arka: Color, kenar: Color = KENAR) -> StyleBoxFlat:
 	var sb := stil(arka, kenar, 6, 3)
-	sb.content_margin_left = 12
-	sb.content_margin_right = 12
+	sb.content_margin_left = 7
+	sb.content_margin_right = 7
 	return sb
 
 static var _tema: Theme
@@ -42,6 +60,7 @@ static func tema() -> Theme:
 	if _tema != null:
 		return _tema
 	var t := Theme.new()
+	t.default_font = yazi_tipi()
 	t.default_font_size = boyut(16)
 	t.set_color("font_color", "Label", YAZI)
 	for tip in ["Button", "OptionButton"]:
@@ -56,8 +75,8 @@ static func tema() -> Theme:
 		t.set_color("font_hover_color", tip, Color.WHITE)
 		t.set_color("font_pressed_color", tip, VURGU)
 		t.set_color("font_disabled_color", tip, Color(1, 1, 1, 0.25))
-	var fill := stil(Color(0.55, 0.56, 0.6), Color(0, 0, 0, 0), 0, 2)
-	var bg := stil(Color(1, 1, 1, 0.08), Color(0, 0, 0, 0), 0, 2)
+	var fill := stil(VURGU, Color(0, 0, 0, 0), 0, 2)
+	var bg := stil(Color(0, 0, 0, 0.55), KENAR, 0, 2)
 	t.set_stylebox("fill", "ProgressBar", fill)
 	t.set_stylebox("background", "ProgressBar", bg)
 	t.set_font_size("font_size", "ProgressBar", boyut(13))

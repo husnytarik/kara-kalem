@@ -113,7 +113,7 @@ func _amac_paneli() -> void:
 	_amac_kutu = PanelContainer.new()
 	_amac_kutu.add_theme_stylebox_override("panel", _stil())
 	_amac_kutu.theme = Tema.tema()
-	_amac_kutu.position = Vector2(8, 172)
+	_amac_kutu.position = Vector2(8, 100)
 	_amac_kutu.custom_minimum_size = Vector2(360, 0)
 	_amac_kutu.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_amac_kutu)
@@ -123,7 +123,55 @@ func _amac_paneli() -> void:
 	_amac_baslik = _lbl(v, "", 14, RENK["altin"])
 	_amac_yazi = _lbl(v, "", 15)
 	_baski_yazi = _lbl(v, "", 14, RENK["soluk"])
-	_ihtiyac_yazi = _lbl(v, "", 14, RENK["soluk"])
+	_ihtiyac_yazi = Label.new()   # eski satır: artık üstteki çubuklarda
+	_ihtiyac_cubugu()
+
+var _ihc: Dictionary = {}
+var _ihc_hasta: Label
+
+# Üst çubuğun altında: açlık / yorgunluk / stres / sıkıntı / hasta / ün çubukları.
+func _ihtiyac_cubugu() -> void:
+	var pc := PanelContainer.new()
+	pc.add_theme_stylebox_override("panel", Tema.stil(Tema.ARKA, Tema.KENAR, 5, 2))
+	pc.theme = Tema.tema()
+	pc.position = Vector2(8, 58)
+	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(pc)
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 14)
+	pc.add_child(h)
+	for e in [["aclik", "Açlık", Tema.IYI], ["yorgun", "Yorgunluk", Tema.UYARI], ["stres", "Stres", Tema.KOTU], ["sikinti", "Sıkıntı", Tema.BILGI], ["un", "Ünün", Tema.VURGU]]:
+		var c := HBoxContainer.new()
+		c.add_theme_constant_override("separation", 5)
+		h.add_child(c)
+		var l := _lbl(c, e[1], 14, Tema.YAZI)
+		l.autowrap_mode = TextServer.AUTOWRAP_OFF
+		l.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		var p := ProgressBar.new()
+		p.min_value = 0
+		p.max_value = 100
+		p.show_percentage = false
+		p.custom_minimum_size = Vector2(80, 10)
+		p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var f := StyleBoxFlat.new()
+		f.bg_color = e[2]
+		p.add_theme_stylebox_override("fill", f)
+		c.add_child(p)
+		_ihc[e[0]] = [p, f]
+	_ihc_hasta = _lbl(h, "✚ HASTA", 14, Tema.KOTU)
+	_ihc_hasta.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_ihc_hasta.visible = false
+
+func _ihtiyac_guncelle() -> void:
+	var k: Dictionary = oyun.kis
+	var v := {"aclik": float(k["aclik"]), "yorgun": float(k["yorgun"]), "stres": float(k["stres"]), "sikinti": float(k["sikinti"]), "un": float(oyun.kis_k.taninma())}
+	for a in v:
+		var p: ProgressBar = _ihc[a][0]
+		p.value = v[a]
+		var f: StyleBoxFlat = _ihc[a][1]
+		if a != "un" and a != "sikinti":
+			f.bg_color = Tema.IYI if v[a] < 40.0 else (Tema.UYARI if v[a] < 70.0 else Tema.KOTU)
+	_ihc_hasta.visible = oyun.kis_k.hasta_mi()
 
 func _amac_guncelle() -> void:
 	var baslik := "HEDEF"
@@ -156,6 +204,7 @@ func _amac_guncelle() -> void:
 " + oyun.yol_k.ozet_satiri()
 	_amac_yazi.text = yazi
 	var k: Dictionary = oyun.kis
+	_ihtiyac_guncelle()
 	_ihtiyac_yazi.text = "Açlık %d · Yorgun %d · Stres %d · Sıkıntı %d%s · Ünün %d" % [int(k["aclik"]), int(k["yorgun"]), int(k["stres"]), int(k["sikinti"]), " · HASTA" if oyun.kis_k.hasta_mi() else "", int(oyun.kis_k.taninma())]
 	_ihtiyac_yazi.add_theme_color_override("font_color", RENK["bad"] if not ac.is_empty() else RENK["soluk"])
 	# yükümlülükler
@@ -204,7 +253,7 @@ func _ust_cubuk() -> void:
 	h.add_child(bosluk)
 	for hv in [["⏸", 0.0], ["×1", 1.0], ["×2", 2.0], ["×4", 4.0]]:
 		_btn(h, hv[0], sokak.hiz_ayarla.bind(hv[1]))
-	_btn(h, "Bölge", _bolge_dugmesi)
+	_btn(h, "Bölgeler", _bolge_dugmesi)
 	_btn(h, "Adamlar", adamlar_ac)
 	_btn(h, "Aileler", aile_ac)
 	_btn(h, "Defter", defter_ac)
@@ -962,6 +1011,8 @@ func _diyalog_ciz() -> void:
 	for c in _dlg_ic.get_children():
 		c.queue_free()
 	var g := _dlg_g
+	_dlg.add_theme_stylebox_override("panel", _stil(Color(0.07, 0.05, 0.035, 0.97)))
+	_dlg.custom_minimum_size = Vector2(440, 0)
 	var renk: Color = sokak.gruplar._renk(g)
 	_lbl(_dlg_ic, _kars.baslik(g), 24, renk.lerp(Color.WHITE, 0.4))
 	_lbl(_dlg_ic, _kars.giris(g), 16)
@@ -1023,9 +1074,12 @@ func _kart_ciz() -> void:
 	for c in _dlg_ic.get_children():
 		c.queue_free()
 	var K: RefCounted = oyun.kart_k
-	_lbl(_dlg_ic, "KARAR · " + K.baslik(_kart_id), 24, RENK["altin"])
-	_lbl(_dlg_ic, K.metin(_kart_id), 16).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_ayrac(_dlg_ic)
+	var kw: Color = Tema.KAGIT_YAZI
+	_dlg.add_theme_stylebox_override("panel", Tema.kagit_stil())
+	_dlg.custom_minimum_size = Vector2(520, 0)
+	var bsl := _lbl(_dlg_ic, K.baslik(_kart_id), 26, kw)
+	bsl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_lbl(_dlg_ic, K.metin(_kart_id), 17, kw)
 	if _kart_sonuc.is_empty():
 		var n := 0
 		for sec in K.secenekler(_kart_id):
@@ -1033,11 +1087,11 @@ func _kart_ciz() -> void:
 			var b := _btn(_dlg_ic, sec["ad"], func(): _kart_sec(i), not sec["can"])
 			var ip: String = _etiket_temizle(sec["ipucu"])
 			b.tooltip_text = ip
-			var h := _lbl(_dlg_ic, ip, 13, RENK["soluk"])
+			var h := _lbl(_dlg_ic, ip, 13, Color("5a4630"))
 			h.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			n += 1
 	else:
-		var m := _lbl(_dlg_ic, _kart_sonuc["metin"], 17, RENK[_kart_sonuc["tur"]])
+		var m := _lbl(_dlg_ic, _kart_sonuc["metin"], 17, kw)
 		m.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_btn(_dlg_ic, "Tamam", _diyalog_kapat)
 	_dlg.visible = true

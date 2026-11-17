@@ -200,6 +200,8 @@ func _ready() -> void:
 			print("baskin sonrasi arama ", oyun.arama, " kurulu ", oyun.pol["kurulu"])
 			print(oyun.polis.rusvet(300.0)["msg"])
 			arayuz.polis_ac()
+		elif a.begins_with("--ekran="):
+			_ekran_cek(a.substr(8))
 		elif a == "--kart-testi":
 			var kk: RefCounted = oyun.kart_k
 			for id in kk.KARTLAR:
@@ -663,3 +665,17 @@ func _isletme_testi(ekran: bool) -> void:
 	if ekran:
 		oyun.isy[sec]["personel"][0]["supheli"] = 80
 		arayuz.bina_ac(sec)
+
+# Test: --ekran=yol.png[,ben|bina] -> 7 sn sonra oyun görüntüsünü kaydeder ve kapanır (isteğe bağlı panel açar).
+func _ekran_cek(arg: String) -> void:
+	var p := arg.split(",")
+	await get_tree().create_timer(7.0, true, false, true).timeout
+	if p.size() > 1:
+		if p[1] == "ben":
+			arayuz.ben_ac()
+		elif p[1] == "bina":
+			oyun.temiz = 500.0
+			arayuz.bina_ac(97)
+		await get_tree().create_timer(1.5, true, false, true).timeout
+	get_viewport().get_texture().get_image().save_png(p[0])
+	get_tree().quit()
