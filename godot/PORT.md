@@ -27,7 +27,7 @@ Durum: `[x]` Godot'ta var · `[~]` kısmen/farklı biçimde var · `[ ]` yok.
 - [x] **Aileler arası gerginlik/savaş + ev güvenli bölgesi** (gerginlik.gd, test `--gerg-testi`): haraç/nüfuz kemirme gerginlik biriktirir, eşikte 2 aylık savaş; çalıştığın bölgenin ailesi seni korur, düşmanları seni onun adamı sayıp kovalar; evin 45 m çevresinde kimse bulaşmaz
 - [ ] **Ahit / Karaca ailesi**, Harbor Trust (kredi/hisse)
 ### Faz D — dünya olayları
-- [ ] **Kararlar (kartlar)**: devriye, kavga, yangın, komşu, tefeci, yılbaşı, terfi, Karaca teklifi/baskısı, arama emri, pusu...
+- [x] **Karar kartları + yükseliş yolları** (yol.gd, kartlar.gd): 4 yol (Yasal/Gölge/Korku/Kulis), 11 kart, dönemler (reform/skandal/çete/refah/baskı) dengeleri değiştirir. Kalan kartlar: devriye, kavga, yangın, komşu, yılbaşı, terfi, Karaca, arama emri, pusu.
 - [ ] **Şehir olayları, hava, haber** (sehir.js): sokak kartları, bölge işaretleri
 - [ ] **Pusu** (savas.js pusuKur/pusuCoz): düşman bölgede yolda pusu
 

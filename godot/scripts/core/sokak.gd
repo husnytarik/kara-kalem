@@ -200,6 +200,25 @@ func _ready() -> void:
 			print("baskin sonrasi arama ", oyun.arama, " kurulu ", oyun.pol["kurulu"])
 			print(oyun.polis.rusvet(300.0)["msg"])
 			arayuz.polis_ac()
+		elif a == "--kart-testi":
+			var kk: RefCounted = oyun.kart_k
+			for id in kk.KARTLAR:
+				if kk.KARTLAR[id][1] == 0 and id != "yol_sec":
+					continue
+				kk.hazirla(id)
+				var ns: int = kk.secenekler(id).size()
+				for n2 in ns:
+					oyun.temiz = 1000.0
+					oyun.kirli = 1000.0
+					oyun.arama = 50.0
+					oyun.borc["ana"] = 500.0
+					var rr: Dictionary = kk._coz(id, n2)
+					print(id, " ", n2, " -> ", rr["metin"])
+			print("yol: ", oyun.yol["puan"], " ", oyun.yol_k.ozet_satiri())
+			oyun.t += 25 * 1440
+			oyun.yol_k.gun()
+			print("donem: ", oyun.yol["donem"], " bekleyen: ", oyun.yol["bekleyen"])
+			get_tree().quit()
 		elif a == "--gir-testi":
 			oyuncu.gir(oyun._ev)
 			arayuz.bina_ac(oyun._ev)

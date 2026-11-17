@@ -150,6 +150,9 @@ var akl: Dictionary = {}        # aklama durumu (aklama.gd)
 var aklama_k: RefCounted
 var gerg: Dictionary = {}       # aileler arası gerginlik/savaş (gerginlik.gd)
 var gerginlik: RefCounted
+var yol: Dictionary = {}        # yükseliş yolları + dönem (yol.gd)
+var yol_k: RefCounted
+var kart_k: RefCounted
 var pol: Dictionary = {}        # polis/bodrum durumu (polis.gd)
 var polis: RefCounted
 var _kesir := 0.0
@@ -185,6 +188,10 @@ func kur(h: Node3D) -> void:
 	gerginlik = load("res://scripts/core/gerginlik.gd").new(self)
 	polis = load("res://scripts/core/polis.gd").new(self)
 	pol = polis.yeni()
+	yol_k = load("res://scripts/core/yol.gd").new(self)
+	yol = yol_k.yeni()
+	kart_k = load("res://scripts/core/kartlar.gd").new(self)
+	yol["bekleyen"] = "yol_sec"
 	_aileleri_kur()
 	_profil_uygula()
 
@@ -683,7 +690,7 @@ func _coz(g: Dictionary) -> void:
 		var rakip := hk if hk != "" and hk != "oyuncu" else ""
 		var need: int = T["direnc"] * 10
 		var e := etki(b, bid)
-		var pw := clampf(0.38 + (beceri(adam) - need) / 60.0 + 0.15 * e["k"] + 0.1 * e["s"] - (0.05 if b["huzur"] > 80 else 0.0), 0.08, 0.95)
+		var pw := clampf(0.38 + (beceri(adam) - need) / 60.0 + 0.15 * e["k"] + 0.1 * e["s"] - (0.05 if b["huzur"] > 80 else 0.0) + yol_k.harac_sans(), 0.08, 0.95)
 		if rng.randf() < pw:
 			r["haracli"] = true
 			r["birikim"] = 0.0
@@ -860,7 +867,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -897,6 +904,7 @@ func durum_yukle(d: Dictionary) -> void:
 	akl = d.get("akl", aklama_k.yeni())
 	pol = d.get("pol", polis.yeni())
 	gerg = d.get("gerg", {})
+	yol = d.get("yol", yol_k.yeni())
 	degisti.emit()
 
 # ---------- günlük rastgele olaylar ----------
@@ -949,16 +957,17 @@ func _gun() -> void:
 	_olay()
 	meslek.gun()
 	polis.gun()
+	yol_k.gun()
 	isl.gunluk()
 	for i in isy:
 		var r: Dictionary = isy[i]
 		var w := haftalik(i)
 		if r["sahip"]:
-			yasal(w * 1.5 / 7.0 * isl.carpan(i))
+			yasal(w * 1.5 / 7.0 * isl.carpan(i) * yol_k.yasal_carpan())
 			continue
 		if not r["haracli"]:
 			continue
-		r["birikim"] = minf(w * 3.0, r["birikim"] + w / 7.0)
+		r["birikim"] = minf(w * 3.0, r["birikim"] + w / 7.0 * yol_k.harac_carpan())
 		var bid: String = harita.yerler[i]["bolge"]
 		var hk := hakim_of(bid)
 		if hk != "" and hk != "oyuncu" and t >= r["korumaBitis"] and rng.randf() < 0.012:

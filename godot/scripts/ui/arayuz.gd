@@ -146,6 +146,8 @@ func _amac_guncelle() -> void:
 		baslik = "TEHLİKE"
 		yazi = "Polis dosyan kabarık (%d). Ortalıkta görünme, rüşvet ver ya da evine gir." % int(oyun.arama)
 	_amac_baslik.text = baslik
+	yazi += "
+" + oyun.yol_k.ozet_satiri()
 	_amac_yazi.text = yazi
 	# yükümlülükler
 	var d: Dictionary = oyun.tarih()
@@ -350,6 +352,7 @@ func _process(_d: float) -> void:
 			l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
 			l.add_theme_constant_override("outline_size", 6)
 	_amac_guncelle()
+	_kart_bekle()
 	_son_kontrol()
 	if _mod != "":
 		_yenile(false)
@@ -979,3 +982,51 @@ func _diyalog_kapat() -> void:
 	modal = false
 	_dlg.visible = false
 	sokak.modal_duraklat(false)
+
+# ---------- karar kartları ----------
+var _kart_id := ""
+var _kart_sonuc := {}
+
+func _kart_bekle() -> void:
+	if modal or oyun.yol["bekleyen"] == "":
+		return
+	var arg := OS.get_cmdline_user_args()
+	if arg.size() > 0 and not arg.has("--kart-goster"):
+		return
+	kart_ac(oyun.yol["bekleyen"])
+
+func kart_ac(id: String) -> void:
+	if modal:
+		return
+	modal = true
+	_kart_id = id
+	_kart_sonuc = {}
+	oyun.kart_k.hazirla(id)
+	sokak.modal_duraklat(true)
+	_kart_ciz()
+
+func _kart_ciz() -> void:
+	for c in _dlg_ic.get_children():
+		c.queue_free()
+	var K: RefCounted = oyun.kart_k
+	_lbl(_dlg_ic, "KARAR · " + K.baslik(_kart_id), 24, RENK["altin"])
+	_lbl(_dlg_ic, K.metin(_kart_id), 16).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_ayrac(_dlg_ic)
+	if _kart_sonuc.is_empty():
+		var n := 0
+		for sec in K.secenekler(_kart_id):
+			var i := n
+			var b := _btn(_dlg_ic, sec["ad"], func(): _kart_sec(i), not sec["can"])
+			b.tooltip_text = sec["ipucu"]
+			var h := _lbl(_dlg_ic, sec["ipucu"], 13, RENK["soluk"])
+			h.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			n += 1
+	else:
+		var m := _lbl(_dlg_ic, _kart_sonuc["metin"], 17, RENK[_kart_sonuc["tur"]])
+		m.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_btn(_dlg_ic, "Tamam", _diyalog_kapat)
+	_dlg.visible = true
+
+func _kart_sec(i: int) -> void:
+	_kart_sonuc = oyun.kart_k.uygula(_kart_id, i)
+	_kart_ciz()
