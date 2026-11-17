@@ -4,6 +4,8 @@ extends CanvasLayer
 # font boyutlarını değiştirmen yeter. Veri tarafı oyun.gd'dedir; burada kural yok, yalnızca gösterim.
 
 const Tema := preload("res://scripts/ui/tema.gd")
+const Portre := preload("res://scripts/ui/portre.gd")
+const Minimap := preload("res://scripts/ui/minimap.gd")
 const RENK := {
 	"good": Tema.IYI, "bad": Tema.KOTU, "warn": Tema.UYARI, "info": Tema.BILGI,
 	"altin": Tema.VURGU, "soluk": Tema.SOLUK,
@@ -45,6 +47,15 @@ func kur(o: Node, s: Node) -> void:
 	_amac_paneli()
 	_sag_panel()
 	_diyalog_kur()
+	var mm := Minimap.new()
+	mm.kur(oyun, sokak)
+	mm.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	mm.offset_left = 8
+	mm.offset_right = 158
+	mm.offset_top = -190
+	mm.offset_bottom = -40
+	mm.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(mm)
 	_log = VBoxContainer.new()
 	_log.position = Vector2(12, 470)
 	_log.custom_minimum_size = Vector2(520, 0)
@@ -99,6 +110,35 @@ func _bar(ebeveyn: Node, ad: String, deger: float, renk: Color, yazi: String = "
 	v.custom_minimum_size = Vector2(44, 0)
 	v.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
+func _portre(ebeveyn: Node, ad: String, boy: Vector2 = Vector2(56, 64)) -> Control:
+	var p := Portre.new()
+	p.custom_minimum_size = boy
+	p.renk = Color.from_hsv(float(ad.hash() % 360) / 360.0, 0.35, 0.65)
+	ebeveyn.add_child(p)
+	return p
+
+# Panel başlığı: altın serif başlık + altında ince çizgi.
+func _baslik(ebeveyn: Node, metin: String, alt: String = "") -> void:
+	var l := _lbl(ebeveyn, metin, 26, RENK["altin"])
+	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	l.add_theme_constant_override("outline_size", 3)
+	if alt != "":
+		_lbl(ebeveyn, alt, 15, RENK["soluk"])
+	_ayrac(ebeveyn)
+
+# Koyu çerçeveli iç kutu (görseldeki "Eylemler" / "Adam Arayanlar" gibi).
+func _kutu(ebeveyn: Node, baslik: String = "") -> VBoxContainer:
+	var pc := PanelContainer.new()
+	pc.add_theme_stylebox_override("panel", Tema.stil(Color(0.06, 0.045, 0.03, 0.9), Tema.KENAR, 8, 2))
+	pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ebeveyn.add_child(pc)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 4)
+	pc.add_child(v)
+	if baslik != "":
+		_lbl(v, baslik, 17, RENK["altin"])
+	return v
+
 func _ayrac(ebeveyn: Node) -> void:
 	ebeveyn.add_child(HSeparator.new())
 
@@ -111,18 +151,18 @@ var _ihtiyac_yazi: Label
 # Sol üstte: şimdiki hedef (içine çeker) + yaklaşan yükümlülükler (ayakta kalma baskısı).
 func _amac_paneli() -> void:
 	_amac_kutu = PanelContainer.new()
-	_amac_kutu.add_theme_stylebox_override("panel", _stil())
+	_amac_kutu.add_theme_stylebox_override("panel", Tema.kagit_stil())
 	_amac_kutu.theme = Tema.tema()
 	_amac_kutu.position = Vector2(8, 100)
-	_amac_kutu.custom_minimum_size = Vector2(360, 0)
+	_amac_kutu.custom_minimum_size = Vector2(300, 0)
 	_amac_kutu.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_amac_kutu)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 2)
 	_amac_kutu.add_child(v)
-	_amac_baslik = _lbl(v, "", 14, RENK["altin"])
-	_amac_yazi = _lbl(v, "", 15)
-	_baski_yazi = _lbl(v, "", 14, RENK["soluk"])
+	_amac_baslik = _lbl(v, "", 15, Color("8a5a10"))
+	_amac_yazi = _lbl(v, "", 15, Tema.KAGIT_YAZI)
+	_baski_yazi = _lbl(v, "", 14, Color("5a4630"))
 	_ihtiyac_yazi = Label.new()   # eski satır: artık üstteki çubuklarda
 	_ihtiyac_cubugu()
 
@@ -144,14 +184,15 @@ func _ihtiyac_cubugu() -> void:
 		var c := HBoxContainer.new()
 		c.add_theme_constant_override("separation", 5)
 		h.add_child(c)
-		var l := _lbl(c, e[1], 14, Tema.YAZI)
+		var l := _lbl(c, "● " + e[1], 15, Tema.YAZI)
+		l.add_theme_color_override("font_color", Tema.YAZI)
 		l.autowrap_mode = TextServer.AUTOWRAP_OFF
 		l.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		var p := ProgressBar.new()
 		p.min_value = 0
 		p.max_value = 100
 		p.show_percentage = false
-		p.custom_minimum_size = Vector2(80, 10)
+		p.custom_minimum_size = Vector2(90, 14)
 		p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		var f := StyleBoxFlat.new()
 		f.bg_color = e[2]
@@ -217,11 +258,22 @@ func _amac_guncelle() -> void:
 	var toplam := borc + kira
 	if toplam <= 0.0:
 		_baski_yazi.text = "Ay sonuna %d gün." % kalan
-		_baski_yazi.add_theme_color_override("font_color", RENK["soluk"])
+		_baski_yazi.add_theme_color_override("font_color", Color("5a4630"))
 	else:
 		var yeter: bool = oyun.temiz >= toplam
 		_baski_yazi.text = "Ay sonuna %d gün · ödenecek %s (taksit %s + kira %s)%s" % [kalan, oyun.para(toplam), oyun.para(borc), oyun.para(kira), "" if yeter else " — PARA YETMİYOR" ]
-		_baski_yazi.add_theme_color_override("font_color", RENK["good"] if yeter else (RENK["bad"] if kalan <= 3 else RENK["warn"]))
+		_baski_yazi.add_theme_color_override("font_color", Color("2f6b2a") if yeter else (Color("9a2a1a") if kalan <= 3 else Color("8a5a10")))
+
+var _un: Label
+
+func _hap(h: Node, sembol: String, renk: Color) -> Label:
+	var pc := PanelContainer.new()
+	pc.add_theme_stylebox_override("panel", Tema.stil(Color(0.05, 0.035, 0.025, 0.95), Tema.KENAR, 4, 10))
+	h.add_child(pc)
+	var l := _lbl(pc, sembol, 20, renk)
+	l.autowrap_mode = TextServer.AUTOWRAP_OFF
+	l.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	return l
 
 func _ust_cubuk() -> void:
 	var pc := PanelContainer.new()
@@ -233,35 +285,40 @@ func _ust_cubuk() -> void:
 	pc.theme = Tema.tema()
 	add_child(pc)
 	var h := HBoxContainer.new()
-	h.add_theme_constant_override("separation", 5)
+	h.add_theme_constant_override("separation", 6)
 	pc.add_child(h)
 	var sol := VBoxContainer.new()
+	sol.add_theme_constant_override("separation", 0)
 	h.add_child(sol)
-	_tarih = _lbl(sol, "", 15, RENK["soluk"])
+	_tarih = _lbl(sol, "", 14, RENK["soluk"])
 	_saat = _lbl(sol, "", 20, RENK["altin"])
-	_temiz = _lbl(h, "", 20, Tema.IYI)
-	_kirli = _lbl(h, "", 20, Tema.KOTU)
-	_ekip = _lbl(h, "", 18)
-	_arama = _lbl(h, "", 18)
-	_durum = _lbl(h, "", 18, RENK["warn"])
-	for l in [_tarih, _saat, _temiz, _kirli, _ekip, _arama, _durum]:
+	for l in [_tarih, _saat]:
+		l.autowrap_mode = TextServer.AUTOWRAP_OFF
+		l.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	for hv in [["II", 0.0], ["▶", 1.0], ["×2", 2.0], ["×4", 4.0]]:
+		_btn(h, hv[0], sokak.hiz_ayarla.bind(hv[1]))
+	_temiz = _hap(h, "", Tema.VURGU)
+	_kirli = _hap(h, "", Tema.KOTU)
+	_un = _hap(h, "", Tema.VURGU)
+	_ekip = _lbl(h, "", 16)
+	_arama = _lbl(h, "", 16)
+	_durum = _lbl(h, "", 16, RENK["warn"])
+	for l in [_ekip, _arama, _durum]:
 		l.autowrap_mode = TextServer.AUTOWRAP_OFF
 		l.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var bosluk := Control.new()
 	bosluk.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(bosluk)
-	for hv in [["⏸", 0.0], ["×1", 1.0], ["×2", 2.0], ["×4", 4.0]]:
-		_btn(h, hv[0], sokak.hiz_ayarla.bind(hv[1]))
-	_btn(h, "Bölgeler", _bolge_dugmesi)
-	_btn(h, "Adamlar", adamlar_ac)
+	_btn(h, "Ben", ben_ac)
 	_btn(h, "Aileler", aile_ac)
+	_btn(h, "Adamlar", adamlar_ac)
+	_btn(h, "Bölgeler", _bolge_dugmesi)
 	_btn(h, "Defter", defter_ac)
 	_btn(h, "Hedefler", zafer_ac)
 	_btn(h, "Garaj", garaj_ac)
 	_btn(h, "İş", meslek_ac)
 	_btn(h, "Polis", polis_ac)
-	_btn(h, "Ben", ben_ac)
 	for c in h.get_children():
 		if c is Button:
 			c.add_theme_font_size_override("font_size", Tema.boyut(14))
@@ -391,8 +448,9 @@ func _process(_d: float) -> void:
 	var d: Dictionary = oyun.tarih()
 	_tarih.text = "%s · %s" % [oyun.tarih_yazi(), oyun.mevsim()]
 	_saat.text = oyun.saat_yazi()
-	_temiz.text = "Temiz %s" % oyun.para(oyun.temiz)
-	_kirli.text = "Kirli %s" % oyun.para(oyun.kirli)
+	_temiz.text = "● %s" % oyun.para(oyun.temiz)
+	_kirli.text = "▮ %s" % oyun.para(oyun.kirli)
+	_un.text = "♛ Ün: %d" % int(oyun.kis_k.taninma())
 	_ekip.text = "Ekip %d/%d" % [oyun.adamlar.size(), oyun.EKIP_MAX]
 	_arama.text = "Arama %d" % int(oyun.arama)
 	_arama.add_theme_color_override("font_color", RENK["bad"] if oyun.arama >= 30.0 else (RENK["warn"] if oyun.arama >= 10.0 else RENK["soluk"]))
@@ -456,6 +514,7 @@ func _yenile(zorla: bool) -> void:
 	for c in _ic.get_children():
 		c.queue_free()
 	_sag.visible = true
+	_sag.offset_left = -(540 if _mod in ["ben", "aile", "adamlar"] else (500 if _mod == "bina" and sokak.oyuncu.iceride >= 0 else 360))
 	match _mod:
 		"bina": _bina_paneli()
 		"bolge": _bolge_paneli()
@@ -679,31 +738,68 @@ func _bolge_paneli() -> void:
 
 # ---------- adam paneli ----------
 func _adam_paneli() -> void:
-	_lbl(_ic, "Adamlar", 24, RENK["altin"])
-	_lbl(_ic, "%d / %d adam · ayda $%d kişi başı" % [oyun.adamlar.size(), oyun.EKIP_MAX, oyun.EKIP_MAAS], 15, RENK["soluk"])
-	_lbl(_ic, "Adam bulmak için bir bara, bilardo salonuna, boks salonuna ya da derneğe git, içeri gir. Geceleri daha çok kişi çıkar.", 14, RENK["warn"]).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_ayrac(_ic)
+	_baslik(_ic, "Adamlar", "%d / %d adam · ayda $%d kişi başı" % [oyun.adamlar.size(), oyun.EKIP_MAX, oyun.EKIP_MAAS])
+	var ipucu := _lbl(_ic, "Adamlarını barlarda, bilardo salonlarında, boks salonlarında ve derneklerde bulabilirsin. Geceleri daha çok kişi çıkar.", 14, RENK["warn"])
+	ipucu.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if oyun.adamlar.is_empty():
 		_lbl(_ic, "Ekibin boş. Adam olmadan haraç bağlayamazsın.", 15, RENK["warn"])
 	for a in oyun.adamlar:
-		_lbl(_ic, "%s  ·  beceri %d" % [a["ad"], oyun.beceri(a)], 18)
-		_bar(_ic, "Yumruk", a["yumruk"], Color("b08f6c"))
-		_bar(_ic, "Bıçak", a["bicak"], Color("a67070"))
-		_bar(_ic, "Zekâ", a["zeka"], Color("7f95ab"))
+		var kv := _kutu(_ic)
+		var h := HBoxContainer.new()
+		h.add_theme_constant_override("separation", 10)
+		kv.add_child(h)
+		_portre(h, a["ad"])
+		var v := VBoxContainer.new()
+		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		h.add_child(v)
+		_lbl(v, "%s  ·  beceri %d" % [a["ad"], oyun.beceri(a)], 18)
+		_bar(v, "Yumruk", a["yumruk"], Color("b08f6c"))
+		_bar(v, "Bıçak", a["bicak"], Color("a67070"))
+		_bar(v, "Zekâ", a["zeka"], Color("7f95ab"))
+		_bar(v, "Sadakat", a.get("sadakat", 60), Tema.VURGU)
 		var durum := "Boşta"
 		if a["gorev"] == "tutuklu":
 			durum = "Karakolda"
 		elif a["gorev"] != "":
 			durum = "Görevde: " + oyun.GOREVLER[a["gorev"]]["ad"]
-		_lbl(_ic, durum, 15, RENK["warn"] if a["gorev"] != "" else RENK["good"])
+		_lbl(v, "Görev: " + durum, 15, RENK["warn"] if a["gorev"] != "" else RENK["good"])
 		var id: int = a["id"]
-		_btn(_ic, "Çıkar", func(): _sonuc_goster(oyun.adam_cikar(id)), a["gorev"] != "")
-		_ayrac(_ic)
+		_btn(v, "Çıkar", func(): _sonuc_goster(oyun.adam_cikar(id)), a["gorev"] != "")
 	_sonuc_satiri()
 
 # ---------- aileler (hiyerarşi) ----------
 func _aile_paneli() -> void:
-	_lbl(_ic, "Aileler", 24, RENK["altin"])
+	_baslik(_ic, "Aileler")
+	var kartlar := HBoxContainer.new()
+	kartlar.add_theme_constant_override("separation", 6)
+	_ic.add_child(kartlar)
+	var simge := {"marchetti": "♛", "obrien": "☘", "tammany": "✦"}
+	for f in oyun.NPC:
+		var fd: Dictionary = oyun.FAK[f]
+		var v := _kutu(kartlar)
+		var sm := _lbl(v, simge[f], 28, fd["renk"])
+		sm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var ad := _lbl(v, fd["ad"], 15, Tema.YAZI)
+		ad.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_lbl(v, "Güç: %d" % int(oyun.kudret(f)), 15, Tema.VURGU)
+		var g: float = clampf(oyun.gerginlik.gerginlik("oyuncu", f), 0.0, 100.0)
+		_lbl(v, "Gerginlik:", 14, Tema.YAZI)
+		var gp := ProgressBar.new()
+		gp.max_value = 100
+		gp.value = g
+		gp.show_percentage = false
+		gp.custom_minimum_size = Vector2(0, 12)
+		var gf := StyleBoxFlat.new()
+		gf.bg_color = Tema.IYI if g < 35.0 else (Tema.UYARI if g < 65.0 else Tema.KOTU)
+		gp.add_theme_stylebox_override("fill", gf)
+		v.add_child(gp)
+		var sv: bool = oyun.gerginlik.savasta("oyuncu", f)
+		_lbl(v, "Savaş: " + ("Evet" if sv else "Hayır"), 14, Tema.KOTU if sv else Tema.SOLUK)
+		var bs := 0
+		for id in oyun.bolge:
+			if oyun.hakim_of(id) == f:
+				bs += 1
+		_lbl(v, "Bölge: %d" % bs, 14, Tema.SOLUK)
 	for f in oyun.NPC:
 		var fd: Dictionary = oyun.FAK[f]
 		_ayrac(_ic)
@@ -1126,58 +1222,114 @@ func _ihtiyac_bar(ad: String, deger: float) -> void:
 func _ben_paneli() -> void:
 	var K: RefCounted = oyun.kis_k
 	var k: Dictionary = oyun.kis
-	_lbl(_ic, oyun.profil.get("ad", "Sen"), 24, RENK["altin"])
-	_lbl(_ic, "Ünün %d / 100 · Form %%%d" % [int(K.taninma()), int(K.form() * 100.0)], 15, RENK["soluk"])
+	_baslik(_ic, "Ben")
+	var ust := HBoxContainer.new()
+	ust.add_theme_constant_override("separation", 12)
+	_ic.add_child(ust)
+	var ad: String = oyun.profil.get("ad", "Sen")
+	_portre(ust, ad, Vector2(110, 130))
+	var kim := VBoxContainer.new()
+	kim.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ust.add_child(kim)
+	_lbl(kim, ad, 26, Tema.VURGU)
+	_lbl(kim, "Ünün: %d · Form: %%%d" % [int(K.taninma()), int(K.form() * 100.0)], 16, Tema.YAZI)
 	if K.hasta_mi():
-		_lbl(_ic, "%s: güçsüzsün. Evde yat ya da ilaç al." % k["hasta_ad"], 15, RENK["bad"])
-	_ayrac(_ic)
-	_lbl(_ic, "Durum", 17)
-	_ihtiyac_bar("Açlık", k["aclik"])
-	_ihtiyac_bar("Yorgunluk", k["yorgun"])
-	_ihtiyac_bar("Stres", k["stres"])
-	_ihtiyac_bar("Sıkıntı", k["sikinti"])
-	_ayrac(_ic)
-	_lbl(_ic, "Temel", 17)
+		_lbl(kim, "%s: güçsüzsün. Evde yat ya da ilaç al." % k["hasta_ad"], 15, RENK["bad"])
 	var st: Dictionary = oyun.ozet["stat"]
-	_lbl(_ic, "Güç %d · Nişan %d · Zekâ %d · Karizma %d" % [st["guc"], st["nisan"], st["zeka"], st["karizma"]], 15, RENK["soluk"])
-	_ayrac(_ic)
-	_lbl(_ic, "Huylar (kararlarınla büyür, kullanmazsan solar)", 17)
+	_bar(kim, "Güç", st["guc"] * 10.0, Color("b08f6c"), str(st["guc"]))
+	_bar(kim, "Nişan", st["nisan"] * 10.0, Color("a67070"), str(st["nisan"]))
+	_bar(kim, "Zekâ", st["zeka"] * 10.0, Color("7f95ab"), str(st["zeka"]))
+	_bar(kim, "Karizma", st["karizma"] * 10.0, Tema.VURGU, str(st["karizma"]))
+	var iki := HBoxContainer.new()
+	iki.add_theme_constant_override("separation", 8)
+	_ic.add_child(iki)
+	var sol := _kutu(iki, "Durum")
+	_ihtiyac_bar_to(sol, "Açlık", k["aclik"])
+	_ihtiyac_bar_to(sol, "Yorgunluk", k["yorgun"])
+	_ihtiyac_bar_to(sol, "Stres", k["stres"])
+	_ihtiyac_bar_to(sol, "Sıkıntı", k["sikinti"])
+	var sag := _kutu(iki, "Huylar")
 	var l: Array = K.oz_liste()
 	if l.is_empty():
-		_lbl(_ic, "Henüz belirgin bir huyun yok.", 14, RENK["soluk"])
+		_lbl(sag, "Henüz belirgin bir huyun yok.", 14, RENK["soluk"])
 	for e in l:
 		var o: Dictionary = K.OZ[e[0]]
-		_bar(_ic, o["ad"], e[1], RENK["altin"])
-		var a := _lbl(_ic, o["ac"], 13, RENK["soluk"])
+		_bar(sag, o["ad"], e[1], RENK["altin"])
+		var a := _lbl(sag, o["ac"], 13, RENK["soluk"])
 		a.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_ayrac(_ic)
-	_lbl(_ic, "Duruşun", 17)
+	var dur := _kutu(_ic, "Duruşun")
 	var y: RefCounted = oyun.yol_k
 	for yl in y.YOLLAR:
-		_bar(_ic, y.AD[yl], y.puan(yl), RENK["info"])
+		_bar(dur, y.AD[yl], y.puan(yl), RENK["info"])
+	var ozet := _lbl(_ic, y.ozet_satiri(), 15, Tema.VURGU)
+	ozet.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_sonuc_satiri()
+
+func _ihtiyac_bar_to(hedef: Node, ad: String, deger: float) -> void:
+	var renk := RENK["good"]
+	if deger >= 75.0:
+		renk = RENK["bad"]
+	elif deger >= 50.0:
+		renk = RENK["warn"]
+	_bar(hedef, ad, deger, renk)
+
+func _efekt_yazi(d: Dictionary) -> String:
+	var ad := {"aclik": "Açlık", "yorgun": "Yorgunluk", "stres": "Stres", "sikinti": "Sıkıntı", "hasta": "Hastalık"}
+	var p: Array = []
+	for a in d:
+		if ad.has(a) and absf(d[a]) >= 10.0:
+			p.append("%s %s%%%d" % [ad[a], "−" if d[a] < 0 else "+", int(absf(d[a]))])
+	return ", ".join(p)
 
 func _kisisel_bolumu(i: int) -> void:
 	var K: RefCounted = oyun.kis_k
 	var l: Array = K.eylemler(i)
 	if not l.is_empty():
-		_ayrac(_ic)
-		_lbl(_ic, "Burada yapabileceklerin", 16, RENK["altin"])
+		var kv := _kutu(_ic, "Eylemler")
+		var g := GridContainer.new()
+		g.columns = 4
+		g.add_theme_constant_override("h_separation", 10)
+		g.add_theme_constant_override("v_separation", 2)
+		kv.add_child(g)
 		for id in l:
 			var e: Dictionary = K.EYLEM[id]
-			var b := _btn(_ic, "%s  ($%d)" % [e["ad"], int(e["ucret"])], func(): _sonuc_goster(K.yap(id)))
-			b.tooltip_text = "%d dk sürer." % e["dk"]
+			var b := Button.new()
+			b.text = e["ad"]
+			b.flat = true
+			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			b.focus_mode = Control.FOCUS_NONE
+			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			b.add_theme_font_size_override("font_size", Tema.boyut(15))
+			b.pressed.connect(func(): _sonuc_goster(K.yap(id)))
+			g.add_child(b)
+			var u := _lbl(g, "$%d" % int(e["ucret"]), 14, Tema.VURGU)
+			u.size_flags_horizontal = Control.SIZE_FILL
+			var dk := _lbl(g, "%d dk" % int(e["dk"]), 14, Tema.SOLUK)
+			dk.size_flags_horizontal = Control.SIZE_FILL
+			var ef := _lbl(g, _efekt_yazi(e["d"]), 13, Tema.IYI)
+			ef.size_flags_horizontal = Control.SIZE_FILL
+			for lb in [u, dk, ef]:
+				lb.autowrap_mode = TextServer.AUTOWRAP_OFF
 	if oyun.pazar_k.site_mi(i):
-		_ayrac(_ic)
-		_lbl(_ic, "Adam arayanlar", 16, RENK["altin"])
+		var kv := _kutu(_ic, "Adam Arayanlar")
 		var adaylar: Array = oyun.pazar_k.liste(i)
 		if adaylar.is_empty():
-			_lbl(_ic, "Şimdi kimse yok. Gece ya da başka bir gün gel.", 14, RENK["soluk"])
+			_lbl(kv, "Şimdi kimse yok. Gece ya da başka bir gün gel.", 14, RENK["soluk"])
 		var n := 0
 		for c in adaylar:
 			var idx := n
-			var m := "%s · beceri %d · sadakat %d" % [c["ad"], int((c["yumruk"] * 0.5 + c["bicak"] * 0.3 + c["zeka"] * 0.2)), c["sadakat"]]
-			var b := _btn(_ic, "%s  ($%d kirli)" % [m, int(c["fiyat"])], func(): _sonuc_goster(oyun.pazar_k.tut(i, idx)), oyun.adamlar.size() >= oyun.EKIP_MAX)
-			b.tooltip_text = c["not"]
+			var h := HBoxContainer.new()
+			h.add_theme_constant_override("separation", 8)
+			kv.add_child(h)
+			_portre(h, c["ad"], Vector2(48, 56))
+			var v := VBoxContainer.new()
+			v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			h.add_child(v)
+			_lbl(v, c["ad"], 16)
+			_lbl(v, "Yumruk: %d · Sadakat: %d" % [c["yumruk"], c["sadakat"]], 13, Tema.SOLUK)
+			_lbl(v, c["not"], 12, Tema.SOLUK)
+			var b := _btn(h, "Tut
+$%d" % int(c["fiyat"]), func(): _sonuc_goster(oyun.pazar_k.tut(i, idx)), oyun.adamlar.size() >= oyun.EKIP_MAX)
+			b.tooltip_text = "Kirli para ile tutulur. Beceri %d" % int((c["yumruk"] * 0.5 + c["bicak"] * 0.3 + c["zeka"] * 0.2))
 			n += 1
 	_sonuc_satiri()

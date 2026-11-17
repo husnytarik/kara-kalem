@@ -673,6 +673,15 @@ func _ekran_cek(arg: String) -> void:
 	if p.size() > 1:
 		if p[1] == "ben":
 			arayuz.ben_ac()
+		elif p[1] == "adam":
+			oyun.adamlar.append({"id": 91, "ad": "Joe Moretti", "yumruk": 70, "bicak": 55, "zeka": 60, "gorev": "", "silah": "bicak", "sadakat": 75})
+			arayuz.adamlar_ac()
+		elif p[1] == "aile":
+			arayuz.aile_ac()
+		elif p[1] == "bar":
+			oyun.temiz = 500.0
+			oyuncu.gir(97)
+			arayuz.bina_ac(97)
 		elif p[1] == "bina":
 			oyun.temiz = 500.0
 			arayuz.bina_ac(97)
