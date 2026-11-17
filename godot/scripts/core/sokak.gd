@@ -153,6 +153,22 @@ func _ready() -> void:
 			print("yakit ", oyun.arac["yakit"])
 			print(oyun.arac_k.benzin_al()["msg"])
 			arayuz.garaj_ac()
+		elif a == "--meslek-testi":
+			var K: RefCounted = oyun.meslek
+			print("kabul taksi southside: ", K.kabul("taksi", "southside"))
+			print(K.is_gir("taksi", "southside")["msg"])
+			for i in 30:
+				oyun.meslek.gun()
+			print("beceri ", oyun.mes["beceri"]["taksi"], " yurume x", K.yurume_carpan())
+			oyun.temiz = 5000.0
+			print(K.isletme_al("taksi")["msg"], " x", K.yurume_carpan(), " gelir ", K.isletme_gelir("taksi"))
+			oyun.temiz = 0.0
+			for i in 3:
+				oyun.borc_k.ay()
+			print("borc ", oyun.borc, " son=", oyun.son)
+			oyun.son = {}
+			oyun.temiz = 2000.0
+			arayuz.meslek_ac()
 		elif a == "--zafer-testi":
 			var n := 0
 			for k in oyun.isy:

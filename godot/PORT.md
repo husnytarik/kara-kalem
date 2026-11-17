@@ -14,8 +14,8 @@ Durum: `[x]` Godot'ta var · `[~]` kısmen/farklı biçimde var · `[ ]` yok.
 ### Faz A — oyunun amacı ve temel sistemler
 - [x] **Zafer yolları** (zafer.js): dürüst iş (4 sahip, $12k temiz, dosya ≤15, 0 haraç, ekip ≤2, 2 ay), belediye başkanlığı (2 bölge, kampanya fonu $6000, yıllık seçim, oy oranı), hâkimiyet (5 bölge, 2 ay). Oyun sonu ekranı.
 - [x] **Araba** (arac.js): Ford/Buick/Packard, yakıt, arıza, bakım gideri, "kolaylık", hız ve pusu çarpanı; garaj paneli (arac.gd, Garaj paneli, harita_oyuncu hız/yakıt; test: `--arac-testi`). Pusu çarpanı `pusu_carpan()` hazır, pusu sistemi Faz D'de
-- [ ] **Meslekler** (meslek.js): taksi/hamal/berber/katip; kabul puanı, beceri (xp), maaş, işletme satın alma, perk'ler
-- [ ] **Borç / tefeci**: $6000 borç, aylık taksit, 3 taksit kaçırılırsa oyun biter; kredi (liman) ve hisse
+- [x] **Meslekler** (meslek.js → meslek.gd, "İş" paneli, test `--meslek-testi`): kabul puanı, beceri, günlük maaş, kovulma, işletme, perk'ler (yürüme hızı bağlı; pusu/aklama/berber kancaları: pusu_carpan, aklama_ucret/kapasite hazır, Faz B/D'de bağlanacak)
+- [x] **Borç / tefeci** (borc.gd, yalnız "yerli" başlangıç): $3000 borç (web: 6000), aylık $300 taksit, %1 faiz, 3 kaçırılırsa oyun biter, erken ödeme ("İş" paneli). Kredi (liman) ve hisse Faz C'de (Harbor Trust)
 ### Faz B — yasa ve para
 - [ ] **Polis dosyası/izi**: dosya, aşama (Temiz/Gözetim/Soruşturma/Arama emri), baskın, rüşvet, dedektif Dolan
 - [ ] **Bodrum içki imalatı**: kazan, gizli oda, hacim, stok, iz; meyhane talebi/rakip Duffy

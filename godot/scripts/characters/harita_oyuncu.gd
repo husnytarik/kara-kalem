@@ -73,7 +73,7 @@ func git(hedef: Vector3) -> bool:
 	return true
 
 func _process(delta: float) -> void:
-	var kalan: float = hiz * delta * (oyun.arac_k.hiz_carpan() if oyun != null else 1.0)
+	var kalan: float = hiz * delta * (oyun.arac_k.hiz_carpan() * oyun.meslek.yurume_carpan() if oyun != null else 1.0)
 	var once := global_position
 	while kalan > 0.0 and _yol.size() > 0:
 		var p := _yol[0]

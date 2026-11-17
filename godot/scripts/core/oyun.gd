@@ -142,6 +142,10 @@ var profil: Dictionary = {}     # menüden gelen karakter: {ad, yas, koken, aile
 var ozet: Dictionary = {}       # profil.gd ozet(): statlar, hp, ücret çarpanı...
 var vardiya: Dictionary = {}    # çalışıyorsan: {bina, bitis, ucret}
 var kira_borc := 0.0
+var mes: Dictionary = {}        # meslek durumu (meslek.gd)
+var meslek: RefCounted
+var borc: Dictionary = {}       # babanın tefeci borcu {ana, taksit, kacirilan}
+var borc_k: RefCounted
 var _kesir := 0.0
 
 func kur(h: Node3D) -> void:
@@ -166,6 +170,10 @@ func kur(h: Node3D) -> void:
 	isl = load("res://scripts/core/isletme.gd").new(self)
 	zafer = load("res://scripts/core/zafer.gd").new(self)
 	arac_k = load("res://scripts/core/arac.gd").new(self)
+	meslek = load("res://scripts/core/meslek.gd").new(self)
+	mes = meslek.yeni()
+	borc_k = load("res://scripts/core/borc.gd").new(self)
+	borc = borc_k.yeni()
 	_aileleri_kur()
 	_profil_uygula()
 
@@ -184,7 +192,9 @@ func _profil_uygula() -> void:
 				break
 	match profil["koken"]:
 		"yerli":
+			borc_k.baslat()
 			kayit("%s: Southside'da doğdun. Önce adam tut, sonra esnafa git." % profil["ad"], "info")
+			kayit("Baban öldü; geriye %s tefeci borcu kaldı (aylık %s taksit, 3 kaçırırsan biter)." % [para(borc["ana"]), para(borc["taksit"])], "warn")
 		"aile":
 			var f: String = profil["aile"]
 			var a: Dictionary = P.AILELER[f]
@@ -828,7 +838,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -860,6 +870,8 @@ func durum_yukle(d: Dictionary) -> void:
 	zf = d.get("zf", {"kampanya": 0.0, "durust_ay": 0, "hakim_ay": 0})
 	son = d.get("son", {})
 	arac = d.get("arac", {"tip": "", "yakit": 0.0, "kullan": false, "ariza": 0, "yol": 0.0})
+	mes = d.get("mes", meslek.yeni())
+	borc = d.get("borc", borc_k.yeni())
 	degisti.emit()
 
 # ---------- günlük rastgele olaylar ----------
@@ -905,6 +917,7 @@ func _olay() -> void:
 
 func _gun() -> void:
 	_olay()
+	meslek.gun()
 	isl.gunluk()
 	for i in isy:
 		var r: Dictionary = isy[i]
@@ -926,6 +939,8 @@ func _gun() -> void:
 
 func _ay() -> void:
 	isl.ay()
+	meslek.ay()
+	borc_k.ay()
 	var kira: float = ozet.get("kira", 0)
 	if kira > 0.0:
 		var borc := kira + kira_borc
