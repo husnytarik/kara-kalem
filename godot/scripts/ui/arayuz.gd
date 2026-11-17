@@ -111,7 +111,7 @@ func _ust_cubuk() -> void:
 	pc.theme = Tema.tema()
 	add_child(pc)
 	var h := HBoxContainer.new()
-	h.add_theme_constant_override("separation", 8)
+	h.add_theme_constant_override("separation", 5)
 	pc.add_child(h)
 	var sol := VBoxContainer.new()
 	h.add_child(sol)
@@ -138,6 +138,10 @@ func _ust_cubuk() -> void:
 	_btn(h, "Hedefler", zafer_ac)
 	_btn(h, "Garaj", garaj_ac)
 	_btn(h, "İş", meslek_ac)
+	_btn(h, "Polis", polis_ac)
+	for c in h.get_children():
+		if c is Button:
+			c.add_theme_font_size_override("font_size", Tema.boyut(14))
 
 func _sag_panel() -> void:
 	_sag = PanelContainer.new()
@@ -198,6 +202,13 @@ func zafer_ac() -> void:
 		kapat()
 		return
 	_mod = "zafer"
+	_yenile(true)
+
+func polis_ac() -> void:
+	if _mod == "polis":
+		kapat()
+		return
+	_mod = "polis"
 	_yenile(true)
 
 func meslek_ac() -> void:
@@ -296,6 +307,8 @@ func _imza() -> String:
 			return str([g["kisi"], g["durum"], g["ev"], sokak.gruplar.liste.has(g), yakin_grup(g), sokak.takip_id])
 		"defter":
 			return str(oyun.defter.size())
+		"polis":
+			return str([oyun.pol, oyun.arama, oyun.temiz, oyun.kirli, _sonuc])
 		"meslek":
 			return str([oyun.mes, oyun.borc, oyun.akl, oyun.temiz, _sonuc, _oyuncu_bolge(), oyun.arama])
 		"garaj":
@@ -322,6 +335,7 @@ func _yenile(zorla: bool) -> void:
 		"zafer": _zafer_paneli()
 		"garaj": _garaj_paneli()
 		"meslek": _meslek_paneli()
+		"polis": _polis_paneli()
 		"aile": _aile_paneli()
 		"grup": _grup_paneli()
 	_kapat_dugmesi()
@@ -585,6 +599,49 @@ func _defter_paneli() -> void:
 	for k in range(n - 1, maxi(-1, n - 41), -1):
 		var e: Dictionary = oyun.defter[k]
 		_lbl(_ic, "%s %s" % [oyun.saat_yazi(e["t"]), e["metin"]], 14, RENK[e["tur"]])
+
+# ---------- polis / bodrum ----------
+func _polis_paneli() -> void:
+	var P: RefCounted = oyun.polis
+	var p: Dictionary = oyun.pol
+	_lbl(_ic, "Polis ve bodrum", 24, RENK["altin"])
+	_bar(_ic, "Dosya", oyun.arama, Color("a86a6a"), "%d · %s" % [int(oyun.arama), P.asama_ad()])
+	_lbl(_ic, "Dosya 100'e çıkarsa dava açılır. 75'te arama emri: baskın gelir. Kanıt girmeyen her gün dosya biraz erir.", 13, RENK["soluk"])
+	var dl := ""
+	for x in P.dikkat_satirlari():
+		dl += "%s %+d · " % [x[0], int(x[1])]
+	_lbl(_ic, "Polis dikkati %d  (%s)" % [int(P.dikkat()), dl.trim_suffix(" · ")], 13, RENK["info"])
+	if p["baskin"] != 0:
+		_lbl(_ic, "Baskın yaklaşıyor: ~%d sa sonra." % maxi(1, int(ceil((p["baskin"] - oyun.t) / 60.0))), 15, RENK["bad"])
+	_ayrac(_ic)
+	_lbl(_ic, "Dedektif Dolan", 17, RENK["altin"])
+	var rh := HBoxContainer.new()
+	_ic.add_child(rh)
+	for m in [100, 300, 600]:
+		var e: Dictionary = P.rusvet_tahmin(float(m))
+		_btn(rh, "$%d · %%%d" % [m, int(round(e["p"] * 100.0))], func(): _sonuc_goster(P.rusvet(float(m))))
+	_lbl(_ic, "Rüşvet: tutar · kabul ihtimali. Kabul edilirse dosya erir. Aylığa bağlarsan dikkat −15 olur ve baskını önceden haber verir.", 13, RENK["soluk"])
+	_btn(_ic, "Aylığı kes" if p["aylik"] else "Aylığa bağla ($%d/ay)" % P.AYLIK_DOLAN, func(): _sonuc_goster(P.aylik_ver(not p["aylik"])))
+	_ayrac(_ic)
+	_lbl(_ic, "Bodrum imalathanesi", 17, RENK["altin"])
+	if not p["kurulu"]:
+		_lbl(_ic, "Kaçak içki: yüksek kâr, ama iz bırakır. Üretimi ekibinden bir adam yürütür.", 13, RENK["soluk"])
+		_btn(_ic, "İmalathane kur (%s kirli)" % oyun.para(P.KUR_FIYAT), func(): _sonuc_goster(P.kur()))
+	else:
+		_lbl(_ic, "Stok %d şişe · hacim %d/gün · gizlilik %.2f · iz %d · günlük yakalanma %%%d" % [int(p["stok"]), p["hacim"], P.gizlilik(), int(p["iz"]), int(round(p["p"] * 100.0))], 14)
+		_lbl(_ic, "Toplam satış: %s kirli" % oyun.para(p["satis"]), 13, RENK["soluk"])
+		var hh := HBoxContainer.new()
+		_ic.add_child(hh)
+		for v in [0, 20, 40, 60]:
+			_btn(hh, "%d" % v, func(): _sonuc_goster(P.hacim_ayarla(v)), p["hacim"] == v)
+		var ah := HBoxContainer.new()
+		_ic.add_child(ah)
+		if not p["gizli"]:
+			_btn(ah, "Gizli oda %s" % oyun.para(P.GIZLI_ODA), func(): _sonuc_goster(P.gizli_oda()))
+		_btn(ah, "Malı sakla (3 gün)", func(): _sonuc_goster(P.sakla()), oyun.t < p["saklanma"])
+		if oyun.t < p["saklanma"]:
+			_lbl(_ic, "Mal saklı: üretim/satış durdu.", 14, RENK["warn"])
+	_sonuc_satiri()
 
 # ---------- meslek / borç ----------
 func _oyuncu_bolge() -> String:

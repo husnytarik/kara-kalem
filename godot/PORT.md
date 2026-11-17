@@ -17,8 +17,8 @@ Durum: `[x]` Godot'ta var · `[~]` kısmen/farklı biçimde var · `[ ]` yok.
 - [x] **Meslekler** (meslek.js → meslek.gd, "İş" paneli, test `--meslek-testi`): kabul puanı, beceri, günlük maaş, kovulma, işletme, perk'ler (yürüme hızı bağlı; pusu/aklama/berber kancaları: pusu_carpan, aklama_ucret/kapasite hazır, Faz B/D'de bağlanacak)
 - [x] **Borç / tefeci** (borc.gd, yalnız "yerli" başlangıç): $3000 borç (web: 6000), aylık $300 taksit, %1 faiz, 3 kaçırılırsa oyun biter, erken ödeme ("İş" paneli). Kredi (liman) ve hisse Faz C'de (Harbor Trust)
 ### Faz B — yasa ve para
-- [ ] **Polis dosyası/izi**: dosya, aşama (Temiz/Gözetim/Soruşturma/Arama emri), baskın, rüşvet, dedektif Dolan
-- [ ] **Bodrum içki imalatı**: kazan, gizli oda, hacim, stok, iz; meyhane talebi/rakip Duffy
+- [x] **Polis dosyası/izi** (polis.gd, "Polis" paneli, test `--polis-testi`): dosya = `oyun.arama`; aşamalar, polis dikkati, günlük yakalanma (iz×dikkat), dosya 100 = dava (yenilgi), arama emri 75'te baskın, rüşvet ve Dolan aylığı. Eski saatlik −0.5 arama azalması web gibi günlük −0.4'e (kanıt girmeyen gün) çevrildi
+- [x] **Bodrum içki imalatı** (polis.gd): imalathane, gizli oda, hacim, stok, iz, mal saklama, baskında el koyma. Satış günlük talep × mevsim × işyeri sayısı (Godot'ta meyhane yok; rakip Duffy ve usta karakteri yok, ekipten bir adam yeter)
 - [x] **Aklama + maliye şüphesi, çamaşırhane, vergi** (aklama.gd, "İş" paneli): kapasite = yasal ciro×%30 (çamaşırhane %50, katip avantajı), %20 kesinti, şüphe 50'de müfettiş ($300 + arama +10). Oda kirası zaten vardı. Yasal gelir `oyun.yasal()` ile toplanır
 ### Faz C — toplum
 - [ ] **Ün sistemi** (social.js): Tanınırlık/İyilik/Korku × halk/yeraltı/polis, cephe/gölge, sızıntı; lakap (Ağa/Reis/Baba/Kıyı Başı/Sendika Başkanı), Güç Puanı

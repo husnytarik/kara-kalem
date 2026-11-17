@@ -148,6 +148,8 @@ var borc: Dictionary = {}       # babanın tefeci borcu {ana, taksit, kacirilan}
 var borc_k: RefCounted
 var akl: Dictionary = {}        # aklama durumu (aklama.gd)
 var aklama_k: RefCounted
+var pol: Dictionary = {}        # polis/bodrum durumu (polis.gd)
+var polis: RefCounted
 var _kesir := 0.0
 
 func kur(h: Node3D) -> void:
@@ -178,6 +180,8 @@ func kur(h: Node3D) -> void:
 	borc = borc_k.yeni()
 	aklama_k = load("res://scripts/core/aklama.gd").new(self)
 	akl = aklama_k.yeni()
+	polis = load("res://scripts/core/polis.gd").new(self)
+	pol = polis.yeni()
 	_aileleri_kur()
 	_profil_uygula()
 
@@ -823,7 +827,6 @@ func ilerle(delta: float) -> void:
 	degisti.emit()
 
 func _saat() -> void:
-	arama = maxf(0.0, arama - 0.5)
 	if not vardiya.is_empty() and t >= vardiya["bitis"]:
 		temiz += vardiya["ucret"]
 		kayit("Vardiya bitti: %s kazandın (%s)." % [para(vardiya["ucret"]), harita.yerler[vardiya["bina"]]["ad"]], "good")
@@ -842,7 +845,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -877,6 +880,7 @@ func durum_yukle(d: Dictionary) -> void:
 	mes = d.get("mes", meslek.yeni())
 	borc = d.get("borc", borc_k.yeni())
 	akl = d.get("akl", aklama_k.yeni())
+	pol = d.get("pol", polis.yeni())
 	degisti.emit()
 
 # ---------- günlük rastgele olaylar ----------
@@ -928,6 +932,7 @@ func yasal(x: float) -> void:
 func _gun() -> void:
 	_olay()
 	meslek.gun()
+	polis.gun()
 	isl.gunluk()
 	for i in isy:
 		var r: Dictionary = isy[i]
@@ -951,6 +956,7 @@ func _ay() -> void:
 	isl.ay()
 	meslek.ay()
 	aklama_k.ay()
+	polis.ay()
 	borc_k.ay()
 	var kira: float = ozet.get("kira", 0)
 	if kira > 0.0:

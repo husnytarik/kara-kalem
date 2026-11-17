@@ -176,6 +176,25 @@ func _ready() -> void:
 			oyun.aklama_k.ay()
 			print("akl ", oyun.akl, " temiz ", oyun.temiz, " kirli ", oyun.kirli)
 			arayuz.meslek_ac()
+		elif a == "--polis-testi":
+			oyun.kirli = 3000.0
+			oyun.temiz = 1000.0
+			oyun.adam_tut()
+			print("adamlar ", oyun.adamlar.size())
+			print(oyun.polis.kur()["msg"], oyun.polis.hacim_ayarla(60)["ok"])
+			for i in 40:
+				oyun.polis.gun()
+				if oyun.arama >= 75:
+					break
+			print("gun ", oyun.t, " arama ", oyun.arama, " pol ", oyun.pol)
+			oyun.arama = 80.0
+			oyun.polis.gun()
+			print("baskin planli ", oyun.pol["baskin"], " t ", oyun.t)
+			oyun.t += 4 * 1440
+			oyun.polis.gun()
+			print("baskin sonrasi arama ", oyun.arama, " kurulu ", oyun.pol["kurulu"])
+			print(oyun.polis.rusvet(300.0)["msg"])
+			arayuz.polis_ac()
 		elif a == "--zafer-testi":
 			var n := 0
 			for k in oyun.isy:
