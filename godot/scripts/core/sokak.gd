@@ -219,6 +219,31 @@ func _ready() -> void:
 			oyun.yol_k.gun()
 			print("donem: ", oyun.yol["donem"], " bekleyen: ", oyun.yol["bekleyen"])
 			get_tree().quit()
+		elif a == "--kisisel-testi":
+			var K: RefCounted = oyun.kis_k
+			print("baslangic taninma ", K.taninma(), " fark ", K.fark_edildi(), " oz ", K.oz_liste())
+			oyun.bekle(60 * 30)
+			print("30 saat sonra: ", oyun.kis["aclik"], " ", oyun.kis["yorgun"], " ", oyun.kis["stres"], " ", oyun.kis["sikinti"], " form ", K.form(), " acil ", K.acil())
+			var diner := -1
+			var bar := -1
+			for i in oyun.harita.yerler.size():
+				var ad: String = String(oyun.harita.yerler[i]["ad"]).to_lower()
+				if diner < 0 and ad.contains("diner"):
+					diner = i
+				if bar < 0 and oyun.pazar_k.site_mi(i):
+					bar = i
+			print("diner ", diner, " eylemler ", K.eylemler(diner), " bar ", bar, " eylemler ", K.eylemler(bar))
+			print(K.yap("yemek"))
+			print("yemekten sonra aclik ", oyun.kis["aclik"])
+			print("adaylar: ", oyun.pazar_k.liste(bar))
+			oyun.kirli = 500.0
+			print(oyun.pazar_k.tut(bar, 0), " ekip ", oyun.adamlar.size())
+			for n in 6:
+				K.yap("sohbet")
+			print("oz: ", K.oz_liste(), " cevre ", K.oz("cevre"))
+			oyun.uyu()
+			print("uyku sonrasi yorgun ", oyun.kis["yorgun"], " saat ", oyun.saat_yazi())
+			get_tree().quit()
 		elif a == "--gir-testi":
 			oyuncu.gir(oyun._ev)
 			arayuz.bina_ac(oyun._ev)
@@ -463,6 +488,7 @@ func _process(delta: float) -> void:
 	var gh: Dictionary = _gh
 	var i: int = _hi
 	_oy_etiket.visible = oyuncu.iceride < 0
+	oyun.ic_mekan = oyuncu.iceride
 	_oy_etiket.text = "%s · %d kişi" % [oyun.profil.get("ad", "Sen"), 1 + oyun.adamlar.size()]
 	oyuncu.kilitli = not oyun.vardiya.is_empty()
 	if not gh.is_empty():

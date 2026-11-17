@@ -153,6 +153,11 @@ var gerginlik: RefCounted
 var yol: Dictionary = {}        # yükseliş yolları + dönem (yol.gd)
 var yol_k: RefCounted
 var kart_k: RefCounted
+var kis: Dictionary = {}        # kişisel durum: açlık/yorgunluk/stres/sıkıntı/özellikler (kisisel.gd)
+var kis_k: RefCounted
+var pazar: Dictionary = {}      # adam bulma mekânlarının günlük adayları (pazar.gd)
+var pazar_k: RefCounted
+var ic_mekan := -1              # oyuncunun içinde olduğu bina (sokak.gd günceller)
 var pol: Dictionary = {}        # polis/bodrum durumu (polis.gd)
 var polis: RefCounted
 var _kesir := 0.0
@@ -192,8 +197,12 @@ func kur(h: Node3D) -> void:
 	yol = yol_k.yeni()
 	kart_k = load("res://scripts/core/kartlar.gd").new(self)
 	yol["bekleyen"] = "tefeci"
+	kis_k = load("res://scripts/core/kisisel.gd").new(self)
+	kis = kis_k.yeni()
+	pazar_k = load("res://scripts/core/pazar.gd").new(self)
 	_aileleri_kur()
 	_profil_uygula()
+	kis_k.baslat()
 
 # Karakter seçimini oyun durumuna işler: para, ev, tanınırlık, aile bağı.
 func _profil_uygula() -> void:
@@ -521,10 +530,10 @@ func adam_bul(id: int) -> Dictionary:
 
 # Çatışmadaki gücün: sen + boştaki adamlar (becerisine göre).
 func guc() -> float:
-	var p: float = ozet.get("guc_carpan", 1.0)
+	var p: float = ozet.get("guc_carpan", 1.0) * (1.0 + 0.2 * kis_k.oz("dovus"))
 	for a in bos_adamlar():
 		p += 1.0 + beceri(a) / 60.0
-	return p
+	return p * kis_k.form()
 
 func yarala(a: Dictionary, gun: int) -> void:
 	a["gorev"] = "tutuklu"
@@ -690,7 +699,7 @@ func _coz(g: Dictionary) -> void:
 		var rakip := hk if hk != "" and hk != "oyuncu" else ""
 		var need: int = T["direnc"] * 10
 		var e := etki(b, bid)
-		var pw := clampf(0.38 + (beceri(adam) - need) / 60.0 + 0.15 * e["k"] + 0.1 * e["s"] - (0.05 if b["huzur"] > 80 else 0.0) + yol_k.harac_sans(), 0.08, 0.95)
+		var pw: float = clampf(0.38 + (beceri(adam) - need) / 60.0 + 0.15 * e["k"] + 0.1 * e["s"] - (0.05 if b["huzur"] > 80 else 0.0) + yol_k.harac_sans(), 0.08, 0.95) * kis_k.form()
 		if rng.randf() < pw:
 			r["haracli"] = true
 			r["birikim"] = 0.0
@@ -845,10 +854,14 @@ func uyu() -> void:
 	var gun_dk := t % DAY
 	var hedef := 7 * 60
 	var dk := hedef - gun_dk if gun_dk < hedef else DAY - gun_dk + hedef
+	kis_k.uyku_baslat()
 	bekle(dk)
+	kis_k.uyku_bitti()
 	kayit("Sabaha kadar uyudun.", "info")
 
 func _saat() -> void:
+	kis_k.saat()
+	kis_k.tan_kontrol()
 	if not vardiya.is_empty() and t >= vardiya["bitis"]:
 		temiz += vardiya["ucret"]
 		kayit("Vardiya bitti: %s kazandın (%s)." % [para(vardiya["ucret"]), harita.yerler[vardiya["bina"]]["ad"]], "good")
@@ -867,7 +880,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol, "kis": kis, "pazar": pazar}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -905,6 +918,9 @@ func durum_yukle(d: Dictionary) -> void:
 	pol = d.get("pol", polis.yeni())
 	gerg = d.get("gerg", {})
 	yol = d.get("yol", yol_k.yeni())
+	kis = d.get("kis", kis_k.yeni())
+	pazar = d.get("pazar", {})
+	kis_k._son_t = t
 	degisti.emit()
 
 # ---------- günlük rastgele olaylar ----------

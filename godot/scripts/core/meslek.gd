@@ -131,6 +131,8 @@ func gun() -> void:
 		M["is"] = {}
 		return
 	oyun.yasal(maas_gun(j, bid))
+	oyun.kis_k.oz_ekle({"taksi": "taksici_dostu", "hamal": "dayanikli", "berber": "mahalleli", "katip": "hesapci"}[j], 1.2)
+	oyun.kis_k.degis("yorgun", 6.0)
 	M["is"]["gun"] += 1
 	var xp: float = M["beceri"][j]
 	M["beceri"][j] = minf(100.0, xp + 1.2 * (1.0 - xp / 115.0))

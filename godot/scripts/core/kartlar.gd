@@ -20,6 +20,20 @@ const KARTLAR := {
 	"secim": ["Belediye seçimi", 5, 30, false],
 }
 
+# Seçimlerin karaktere işlediği huylar: "kartid+seçenek" -> {özellik: artış}
+const OZ_SEC := {
+	"dolan0": {"dilbaz": 3, "polis_dostu": 2}, "dolan1": {"gizli": 3}, "dolan2": {"sert_bakis": 3, "sinirli": 1}, "dolan3": {"mahalleli": 2, "vicdanli": 1},
+	"esnaf0": {"sert_bakis": 3, "kavgaci": 1}, "esnaf1": {"gizli": 3, "acimasiz": 1}, "esnaf2": {"mahalleli": 3, "vicdanli": 1}, "esnaf3": {"dilbaz": 3, "cilveli": 1},
+	"ihale0": {"hesapci": 3}, "ihale1": {"dilbaz": 3, "polis_dostu": 1}, "ihale2": {"acimasiz": 2, "sert_bakis": 2},
+	"tefeci0": {"hesapci": 2}, "tefeci1": {"dilbaz": 3, "cilveli": 2}, "tefeci2": {"sert_bakis": 3, "acimasiz": 2},
+	"muhbir0": {"muhbir_agi": 3, "polis_dostu": 1}, "muhbir1": {"gizli": 3, "dilbaz": 1}, "muhbir2": {"acimasiz": 3, "sert_bakis": 2},
+	"gazeteci0": {"cilveli": 3, "mahalleli": 1}, "gazeteci1": {"dilbaz": 2, "polis_dostu": 1}, "gazeteci2": {"gizli": 2, "muhbir_agi": 1}, "gazeteci3": {"sert_bakis": 3},
+	"senlik0": {"comert": 4, "mahalleli": 2}, "senlik1": {"cimri": 2, "sert_bakis": 2}, "senlik2": {"gizli": 2, "cimri": 2}, "senlik3": {"dilbaz": 2, "polis_dostu": 1},
+	"ittifak0": {"cilveli": 3, "dilbaz": 1}, "ittifak1": {"sert_bakis": 3, "sinirli": 1}, "ittifak2": {"gizli": 2, "korkak": 2},
+	"baskin0": {"gizli": 3, "korkak": 1}, "baskin1": {"polis_dostu": 3, "dilbaz": 2}, "baskin2": {"hesapci": 2, "mahalleli": 1}, "baskin3": {"kavgaci": 3, "sinirli": 2},
+	"secim0": {"mahalleli": 2, "vicdanli": 2}, "secim1": {"dilbaz": 3, "polis_dostu": 2}, "secim2": {"acimasiz": 3, "sinirli": 2},
+}
+
 var _bolge := ""      # kartın ilgili bölgesi
 var _aile := ""       # kartın ilgili ailesi
 
@@ -207,6 +221,15 @@ func secenekler(id: String) -> Array:
 func uygula(id: String, n: int) -> Dictionary:
 	var y: Dictionary = oyun.yol
 	var r: Dictionary = _coz(id, n)
+	var K: RefCounted = oyun.kis_k
+	var oz: Dictionary = OZ_SEC.get(id + str(n), {})
+	for o in oz:
+		K.oz_ekle(o, oz[o])
+	K.degis("sikinti", -12.0)
+	match r["tur"]:
+		"bad": K.stres_ekle(7.0)
+		"warn": K.stres_ekle(3.0)
+		"good": K.degis("stres", -3.0)
 	y["bekleyen"] = ""
 	y["cool"][id] = oyun.t + KARTLAR[id][2] * oyun.DAY
 	if KARTLAR[id][3]:

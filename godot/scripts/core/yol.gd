@@ -71,18 +71,18 @@ func ana() -> String:
 
 # --- oyuna bağlanan çarpanlar ---
 func yasal_carpan() -> float:
-	return 1.0 + 0.15 * etki("kanun")
+	return 1.0 + 0.15 * etki("kanun") + 0.2 * oyun.kis_k.oz("yasal")
 
 func harac_carpan() -> float:
-	return 1.0 + 0.2 * etki("korku")
+	return 1.0 + 0.2 * etki("korku") + 0.2 * oyun.kis_k.oz("korku")
 
 # Haraçta direnç: korku yolu esnafın karşı koymasını azaltır (başarı olasılığı bonusu)
 func harac_sans() -> float:
-	return 0.06 * etki("korku") + 0.03 * etki("kanun")
+	return 0.06 * etki("korku") + 0.03 * etki("kanun") + 0.12 * oyun.kis_k.oz("harac")
 
 # Polis dosyası artışı çarpanı (gölge azaltır, korku artırır, reform dönemi artırır)
 func arama_carpan() -> float:
-	var c := 1.0 - 0.15 * etki("golge") + 0.12 * float(seviye("korku"))
+	var c: float = 1.0 - 0.15 * etki("golge") + 0.12 * float(seviye("korku")) - 0.4 * oyun.kis_k.oz("gizli")
 	if oyun.yol["donem"] == "reform":
 		c += 0.25
 	if oyun.yol["donem"] == "baski":
@@ -91,7 +91,7 @@ func arama_carpan() -> float:
 
 # Rüşvet maliyeti çarpanı
 func rusvet_carpan() -> float:
-	return clampf(1.0 - 0.15 * etki("kulis"), 0.5, 1.6)
+	return clampf(1.0 - 0.15 * etki("kulis") - 0.3 * oyun.kis_k.oz("rusvet"), 0.4, 1.6)
 
 # --- zaman ---
 func gun() -> void:

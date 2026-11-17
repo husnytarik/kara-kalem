@@ -24,6 +24,7 @@ var _sayac := 0
 var takip_id := 0          # oyuncunun kovaladığı grup
 var _esitle_sure := 0.0
 var _gorus_sure := 0.0
+var _npc_sure := 0.0
 var _temas := {}   # grup id -> oyuncunun yakınında mı (tekrar uyarı vermesin)
 
 func kur(h: Node3D, o: Node, p: Node3D) -> void:
@@ -210,10 +211,68 @@ func _process(delta: float) -> void:
 		if g["gorunen"] != g["kisi"]:
 			_kisileri_yenile(g)
 		(g["etiket"] as Label3D).text = etiket_yazi(g)
+	_npc_sure += delta
+	if _npc_sure > 2.5:
+		_npc_sure = 0.0
+		_npc_etkilesim()
 	_gorus_sure += delta
 	if _gorus_sure > 0.4:
 		_gorus_sure = 0.0
 		_karsilasma()
+
+# ---------- NPC'ler arası: aileler birbirine saldırır, polis yasadışı ekipleri sıkıştırır ----------
+func _yakin_mi(g: Dictionary) -> bool:
+	return (g["pos"] as Vector3).distance_to(oyuncu.global_position) < 90.0
+
+func _npc_etkilesim() -> void:
+	var rak: Array = liste.filter(func(g): return g["tur"] == "rakip")
+	var pol: Array = liste.filter(func(g): return g["tur"] == "polis")
+	for i in rak.size():
+		for j in range(i + 1, rak.size()):
+			var a: Dictionary = rak[i]
+			var b: Dictionary = rak[j]
+			if a["fak"] == b["fak"]:
+				continue
+			if (a["pos"] as Vector3).distance_to(b["pos"]) > 18.0:
+				continue
+			var gp: float = oyun.gerginlik.gerginlik(a["fak"], b["fak"])
+			var savas: bool = oyun.gerginlik.savasta(a["fak"], b["fak"])
+			var p: float = 0.1 + 0.03 * gp + (0.5 if savas else 0.0)
+			if rng.randf() < p:
+				_npc_catisma(a, b)
+	for pl in pol:
+		for r in rak:
+			if (pl["pos"] as Vector3).distance_to(r["pos"]) > 26.0:
+				continue
+			if pl["mod"] == "" and (pl["yol"] as PackedVector3Array).size() == 0:
+				_git(pl, r["pos"])
+			if (pl["pos"] as Vector3).distance_to(r["pos"]) < 12.0 and rng.randf() < 0.22:
+				_polis_baskin(pl, r)
+
+func _npc_catisma(a: Dictionary, b: Dictionary) -> void:
+	var ga: float = a["kisi"] * rng.randf_range(0.7, 1.3)
+	var gb: float = b["kisi"] * rng.randf_range(0.7, 1.3)
+	var kazan: Dictionary = a if ga >= gb else b
+	var kaybeden: Dictionary = b if ga >= gb else a
+	var kayip: int = 1 + rng.randi() % 2
+	kaybeden["kisi"] = maxi(1, kaybeden["kisi"] - kayip)
+	if rng.randf() < 0.4:
+		kazan["kisi"] = maxi(1, kazan["kisi"] - 1)
+	for g in [a, b]:
+		g["bekle"] = 3.0
+		g["yol"] = PackedVector3Array()
+		g["durum"] = "Çatışıyor"
+	oyun.gerginlik.ekle(a["fak"], b["fak"], 1.2, "sokak çatışması")
+	if _yakin_mi(a):
+		oyun.kayit("%s ve %s adamları çatıştı: %s üstün geldi." % [oyun.hakim_ad(a["fak"]), oyun.hakim_ad(b["fak"]), oyun.hakim_ad(kazan["fak"])], "warn")
+
+func _polis_baskin(pl: Dictionary, r: Dictionary) -> void:
+	r["kisi"] = maxi(1, r["kisi"] - 1)
+	r["bekle"] = 3.0
+	r["yol"] = PackedVector3Array()
+	r["durum"] = "Polisle çatışıyor"
+	if _yakin_mi(r):
+		oyun.kayit("%s, %s adamlarından birini yakaladı." % [pl["ad"], oyun.hakim_ad(r["fak"])], "info")
 
 func serbest_birak(g: Dictionary, dakika: int) -> void:
 	g["serbest"] = oyun.t + dakika
@@ -267,6 +326,8 @@ func _ai(g: Dictionary, delta: float) -> void:
 				pass   # çalıştığın bölgenin ailesi: seni kollar, bulaşmaz
 			elif oyun.gerginlik.dusman_mi(g["fak"]):
 				g["mod"] = "kovala"   # savaşta ya da ev sahibinin düşmanı: gücüne bakmadan üstüne gelir
+			elif not oyun.kis_k.fark_edildi():
+				pass   # henüz kimse değilsin: aileler seni umursamaz, haraç istemeye gelmez
 			else:
 				g["mod"] = "kovala" if g["kisi"] >= 0.8 * oyun.guc() else "kac"
 		elif g["mod"] != "" and d > 120.0:

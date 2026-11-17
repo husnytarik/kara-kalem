@@ -32,3 +32,5 @@ Durum: `[x]` Godot'ta var · `[~]` kısmen/farklı biçimde var · `[ ]` yok.
 - [ ] **Pusu** (savas.js pusuKur/pusuCoz): düşman bölgede yolda pusu
 
 Kural: her faz sonunda JS testlerinin (`prototype/test/*.mjs`) sayıları Godot'ta aynı çıkmalı (bkz. `denge_testi.gd`).
+
+- Kişisel durum: açlık/yorgunluk/stres/sıkıntı/hastalık (kisisel.gd), 24 huy (gelişir/geriler, kartlar ve mesleklerle beslenir), tanınırlık eşiği (haraç istekleri ünle başlar), adam pazarı (pazar.gd: bar/bilardo/boks/dernek), NPC-NPC çatışma ve polisin rakip grupları kovalaması (gruplar.gd).

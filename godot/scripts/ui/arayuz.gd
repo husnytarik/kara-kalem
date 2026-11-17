@@ -106,6 +106,7 @@ var _amac_kutu: PanelContainer
 var _amac_baslik: Label
 var _amac_yazi: Label
 var _baski_yazi: Label
+var _ihtiyac_yazi: Label
 
 # Sol üstte: şimdiki hedef (içine çeker) + yaklaşan yükümlülükler (ayakta kalma baskısı).
 func _amac_paneli() -> void:
@@ -122,6 +123,7 @@ func _amac_paneli() -> void:
 	_amac_baslik = _lbl(v, "", 14, RENK["altin"])
 	_amac_yazi = _lbl(v, "", 15)
 	_baski_yazi = _lbl(v, "", 14, RENK["soluk"])
+	_ihtiyac_yazi = _lbl(v, "", 14, RENK["soluk"])
 
 func _amac_guncelle() -> void:
 	var baslik := "HEDEF"
@@ -145,10 +147,17 @@ func _amac_guncelle() -> void:
 	if oyun.arama >= 60.0:
 		baslik = "TEHLİKE"
 		yazi = "Polis dosyan kabarık (%d). Ortalıkta görünme, rüşvet ver ya da evine gir." % int(oyun.arama)
+	var ac: Dictionary = oyun.kis_k.acil()
+	if not ac.is_empty() and oyun.arama < 60.0:
+		baslik = "İHTİYAÇ"
+		yazi = ac["mesaj"]
 	_amac_baslik.text = baslik
 	yazi += "
 " + oyun.yol_k.ozet_satiri()
 	_amac_yazi.text = yazi
+	var k: Dictionary = oyun.kis
+	_ihtiyac_yazi.text = "Açlık %d · Yorgun %d · Stres %d · Sıkıntı %d%s · Ünün %d" % [int(k["aclik"]), int(k["yorgun"]), int(k["stres"]), int(k["sikinti"]), " · HASTA" if oyun.kis_k.hasta_mi() else "", int(oyun.kis_k.taninma())]
+	_ihtiyac_yazi.add_theme_color_override("font_color", RENK["bad"] if not ac.is_empty() else RENK["soluk"])
 	# yükümlülükler
 	var d: Dictionary = oyun.tarih()
 	var kalan: int = oyun.DAYS_PER_MONTH - int(d["ay_gun"]) + 1
@@ -203,6 +212,7 @@ func _ust_cubuk() -> void:
 	_btn(h, "Garaj", garaj_ac)
 	_btn(h, "İş", meslek_ac)
 	_btn(h, "Polis", polis_ac)
+	_btn(h, "Ben", ben_ac)
 	for c in h.get_children():
 		if c is Button:
 			c.add_theme_font_size_override("font_size", Tema.boyut(14))
@@ -365,7 +375,7 @@ func _imza() -> String:
 			var i: int = _hedef
 			var y: Dictionary = oyun.harita.yerler[i]
 			var gs: Array = oyun.gorevler.filter(func(g): return g["hedef"] == i).map(func(g): return [g["adam"], g["gorev"], (g["bitis"] - oyun.t) / 60])
-			return str([oyun.ziyaret.get(i, []).size(), sokak.gorus.bina_gorunur(i), oyun.t / 60, oyun.isy.get(i), oyun.kontrol(i), oyun.bolge[y["bolge"]]["inf"], oyun.bos_adamlar().map(func(a): return a["id"]), gs, oyun.temiz, oyun.kirli, _sonuc, yakin_bina(i), oyun.vardiya, sokak.oyuncu.iceride])
+			return str([oyun.ziyaret.get(i, []).size(), sokak.gorus.bina_gorunur(i), oyun.t / 60, oyun.isy.get(i), oyun.kontrol(i), oyun.bolge[y["bolge"]]["inf"], oyun.bos_adamlar().map(func(a): return a["id"]), gs, oyun.temiz, oyun.kirli, _sonuc, yakin_bina(i), oyun.vardiya, sokak.oyuncu.iceride, oyun.kis, oyun.pazar.get(i)])
 		"bolge":
 			return str([oyun.bolge[_hedef], oyun.erisim(_hedef), oyun.temiz, oyun.kirli, oyun.adamlar.size(), oyun.tarih()["gun"], _sonuc, bolgede_mi(_hedef)])
 		"adamlar":
@@ -373,6 +383,8 @@ func _imza() -> String:
 		"grup":
 			var g: Dictionary = _hedef
 			return str([g["kisi"], g["durum"], g["ev"], sokak.gruplar.liste.has(g), yakin_grup(g), sokak.takip_id])
+		"ben":
+			return str([oyun.kis, oyun.kis_k.taninma(), oyun.yol["puan"]])
 		"defter":
 			return str(oyun.defter.size())
 		"polis":
@@ -406,6 +418,7 @@ func _yenile(zorla: bool) -> void:
 		"polis": _polis_paneli()
 		"aile": _aile_paneli()
 		"grup": _grup_paneli()
+		"ben": _ben_paneli()
 	_kapat_dugmesi()
 
 # İçerideyken: haritada görünmezsin, kimse sana bulaşamaz. Ev ise dinlenip zaman geçirebilirsin.
@@ -436,6 +449,7 @@ func _bina_paneli() -> void:
 	_btn(_ic, "Bölge bilgisi", bolge_ac.bind(bid))
 	if sokak.oyuncu.iceride == i:
 		_ic_bolumu(i)
+		_kisisel_bolumu(i)
 	_ayrac(_ic)
 	if not oyun.isy.has(i):
 		if y["ozel"]:
@@ -618,7 +632,7 @@ func _bolge_paneli() -> void:
 func _adam_paneli() -> void:
 	_lbl(_ic, "Adamlar", 24, RENK["altin"])
 	_lbl(_ic, "%d / %d adam · ayda $%d kişi başı" % [oyun.adamlar.size(), oyun.EKIP_MAX, oyun.EKIP_MAAS], 15, RENK["soluk"])
-	_btn(_ic, "Adam tut  ($%d kirli)" % oyun.EKIP_FIYAT, func(): _sonuc_goster(oyun.adam_tut(), "Adam tuttun."))
+	_lbl(_ic, "Adam bulmak için bir bara, bilardo salonuna, boks salonuna ya da derneğe git, içeri gir. Geceleri daha çok kişi çıkar.", 14, RENK["warn"]).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_ayrac(_ic)
 	if oyun.adamlar.is_empty():
 		_lbl(_ic, "Ekibin boş. Adam olmadan haraç bağlayamazsın.", 15, RENK["warn"])
@@ -1037,3 +1051,79 @@ func _etiket_temizle(t: String) -> String:
 func _kart_sec(i: int) -> void:
 	_kart_sonuc = oyun.kart_k.uygula(_kart_id, i)
 	_kart_ciz()
+
+# ---------- kişisel: eylemler, adam bulma, karakter paneli ----------
+func ben_ac() -> void:
+	if _mod == "ben":
+		kapat()
+		return
+	_mod = "ben"
+	_sonuc = ""
+	_yenile(true)
+
+func _ihtiyac_bar(ad: String, deger: float) -> void:
+	var renk := RENK["good"]
+	if deger >= 75.0:
+		renk = RENK["bad"]
+	elif deger >= 50.0:
+		renk = RENK["warn"]
+	_bar(_ic, ad, deger, renk)
+
+func _ben_paneli() -> void:
+	var K: RefCounted = oyun.kis_k
+	var k: Dictionary = oyun.kis
+	_lbl(_ic, oyun.profil.get("ad", "Sen"), 24, RENK["altin"])
+	_lbl(_ic, "Ünün %d / 100 · Form %%%d" % [int(K.taninma()), int(K.form() * 100.0)], 15, RENK["soluk"])
+	if K.hasta_mi():
+		_lbl(_ic, "%s: güçsüzsün. Evde yat ya da ilaç al." % k["hasta_ad"], 15, RENK["bad"])
+	_ayrac(_ic)
+	_lbl(_ic, "Durum", 17)
+	_ihtiyac_bar("Açlık", k["aclik"])
+	_ihtiyac_bar("Yorgunluk", k["yorgun"])
+	_ihtiyac_bar("Stres", k["stres"])
+	_ihtiyac_bar("Sıkıntı", k["sikinti"])
+	_ayrac(_ic)
+	_lbl(_ic, "Temel", 17)
+	var st: Dictionary = oyun.ozet["stat"]
+	_lbl(_ic, "Güç %d · Nişan %d · Zekâ %d · Karizma %d" % [st["guc"], st["nisan"], st["zeka"], st["karizma"]], 15, RENK["soluk"])
+	_ayrac(_ic)
+	_lbl(_ic, "Huylar (kararlarınla büyür, kullanmazsan solar)", 17)
+	var l: Array = K.oz_liste()
+	if l.is_empty():
+		_lbl(_ic, "Henüz belirgin bir huyun yok.", 14, RENK["soluk"])
+	for e in l:
+		var o: Dictionary = K.OZ[e[0]]
+		_bar(_ic, o["ad"], e[1], RENK["altin"])
+		var a := _lbl(_ic, o["ac"], 13, RENK["soluk"])
+		a.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_ayrac(_ic)
+	_lbl(_ic, "Duruşun", 17)
+	var y: RefCounted = oyun.yol_k
+	for yl in y.YOLLAR:
+		_bar(_ic, y.AD[yl], y.puan(yl), RENK["info"])
+	_sonuc_satiri()
+
+func _kisisel_bolumu(i: int) -> void:
+	var K: RefCounted = oyun.kis_k
+	var l: Array = K.eylemler(i)
+	if not l.is_empty():
+		_ayrac(_ic)
+		_lbl(_ic, "Burada yapabileceklerin", 16, RENK["altin"])
+		for id in l:
+			var e: Dictionary = K.EYLEM[id]
+			var b := _btn(_ic, "%s  ($%d)" % [e["ad"], int(e["ucret"])], func(): _sonuc_goster(K.yap(id)))
+			b.tooltip_text = "%d dk sürer." % e["dk"]
+	if oyun.pazar_k.site_mi(i):
+		_ayrac(_ic)
+		_lbl(_ic, "Adam arayanlar", 16, RENK["altin"])
+		var adaylar: Array = oyun.pazar_k.liste(i)
+		if adaylar.is_empty():
+			_lbl(_ic, "Şimdi kimse yok. Gece ya da başka bir gün gel.", 14, RENK["soluk"])
+		var n := 0
+		for c in adaylar:
+			var idx := n
+			var m := "%s · beceri %d · sadakat %d" % [c["ad"], int((c["yumruk"] * 0.5 + c["bicak"] * 0.3 + c["zeka"] * 0.2)), c["sadakat"]]
+			var b := _btn(_ic, "%s  ($%d kirli)" % [m, int(c["fiyat"])], func(): _sonuc_goster(oyun.pazar_k.tut(i, idx)), oyun.adamlar.size() >= oyun.EKIP_MAX)
+			b.tooltip_text = c["not"]
+			n += 1
+	_sonuc_satiri()
