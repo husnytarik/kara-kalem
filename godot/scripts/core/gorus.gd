@@ -29,7 +29,10 @@ var _tex: ImageTexture
 var _mi: MeshInstance3D
 var _sure := 0.0
 var _kutular: Array = []
+var _faz := 0
 var _bu_tur := {}
+var _d := PackedByteArray()      # doku verisi (RG8), kalıcı: yalnızca değişen hücreler yazılır
+var _isli: PackedInt32Array = PackedInt32Array()   # bu turda görünen hücreler
 var _icerde := {}           # "grupid:bina" -> true
 
 func kur(h: Node3D, o: Node, s: Node) -> void:
@@ -43,6 +46,7 @@ func kur(h: Node3D, o: Node, s: Node) -> void:
 	_h = int(ceil(a.derinlik / HUCRE))
 	kesif.resize(_w * _h)
 	gorunen.resize(_w * _h)
+	_d.resize(_w * _h * 2)
 	_img = Image.create(_w, _h, false, Image.FORMAT_RG8)
 	_tex = ImageTexture.create_from_image(_img)
 	var sh := Shader.new()
@@ -142,26 +146,31 @@ func _kaynaklar() -> Array:
 			s.append([y["pos"], R_SAHIP if r["sahip"] else R_HARAC, y["aabb"]])
 	return s
 
+func _doku_kur() -> void:
+	for n in _w * _h:
+		_d[n * 2] = 255 if kesif[n] == 1 else 0
+		_d[n * 2 + 1] = 0
+
 func guncelle() -> void:
-	gorunen.fill(0)
+	for n in _isli:   # önceki turun görünen hücrelerini söndür (keşif kalır)
+		gorunen[n] = 0
+		_d[n * 2 + 1] = 0
+	_isli.clear()
 	_bu_tur.clear()
 	for k in _kaynaklar():
 		_isin_yay(k[0], k[1], k[2])
-	var d := PackedByteArray()
-	d.resize(_w * _h * 2)
-	for n in _w * _h:
-		if gorunen[n] == 1:
-			kesif[n] = 1
-		d[n * 2] = 255 if kesif[n] == 1 else 0
-		d[n * 2 + 1] = 255 if gorunen[n] == 1 else 0
-	_img.set_data(_w, _h, false, Image.FORMAT_RG8, d)
+	_img.set_data(_w, _h, false, Image.FORMAT_RG8, _d)
 	_tex.update(_img)
 	_mi.visible = acik
 
 func _isaretle(p: Vector3) -> void:
 	var k := _idx(p)
-	if k >= 0:
+	if k >= 0 and gorunen[k] == 0:
 		gorunen[k] = 1
+		kesif[k] = 1
+		_d[k * 2] = 255
+		_d[k * 2 + 1] = 255
+		_isli.append(k)
 
 # Görüş bir binanın duvarına çarptıysa binanın tamamı (cephe + çatı) görünür sayılır.
 func _bina_isaretle(p: Vector3) -> void:
@@ -230,14 +239,16 @@ func _gorunurluk() -> void:
 			n._etiket.visible = kesfedildi(n.global_position)
 
 func _hareket_kaydi() -> void:
-	for i in oyun.harita.yerler.size():
+	# Binaların dörtte biri her turda taranır (takılmayı önlemek için); her bina ~1 sn'de bir güncellenir.
+	_faz = (_faz + 1) % 4
+	for i in range(_faz, oyun.harita.yerler.size(), 4):
 		var y: Dictionary = harita.yerler[i]
 		if y["ozel"] and not oyun.isy.has(i):
 			continue
 		var gor := bina_gorunur(i)
 		var ab: AABB = (y["aabb"] as AABB).grow(IN_MESAFE)
 		for g in sokak.gruplar.liste:
-			var key := "%d:%d" % [g["id"], i]
+			var key: int = int(g["id"]) * 100000 + i
 			var p: Vector3 = g["pos"]
 			var icerde := ab.has_point(Vector3(p.x, ab.position.y + ab.size.y * 0.5, p.z))
 			if icerde and not _icerde.has(key):
@@ -303,4 +314,5 @@ func durum_al() -> Dictionary:
 func durum_yukle(d: Dictionary) -> void:
 	if d.has("kesif") and d["kesif"].size() == kesif.size():
 		kesif = d["kesif"]
+	_doku_kur()
 	guncelle()
