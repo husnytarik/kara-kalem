@@ -93,11 +93,16 @@ func _ready() -> void:
 	_ipucu.modulate = Color("d6c49c")
 	hud.add_child(_ipucu)
 	var yardim := Label.new()
-	yardim.text = "Sol tık: git/bina seç · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · V: sis aç/kapa · 1/2/3: hız · B: bölge · A: adamlar · D: defter · F6: kaydet · F9: yükle"
+	yardim.text = "Sol tık: git/bina seç · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · V: sis aç/kapa · 1/2/3: hız · B: bölge · A: adamlar · D: defter · H: eve git · F6: kaydet · F9: yükle"
 	yardim.position = Vector2(14, 700)
 	yardim.add_theme_font_size_override("font_size", 12)
 	yardim.modulate = Color(1, 1, 1, 0.5)
 	hud.add_child(yardim)
+	var ev_is := Control.new()
+	ev_is.set_script(load("res://scripts/ui/ev_isaret.gd"))
+	ev_is.oyun = oyun
+	ev_is.sokak = self
+	hud.add_child(ev_is)
 	add_child(hud)
 	Engine.time_scale = _hiz
 	var PR := load("res://scripts/core/profil.gd")
@@ -348,6 +353,9 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_1: hiz_ayarla(1.0)
 			KEY_2: hiz_ayarla(2.0)
 			KEY_3: hiz_ayarla(4.0)
+			KEY_H:
+				if oyun._ev >= 0:
+					oyuncu.git(harita.serbest_nokta(oyun.harita.yerler[oyun._ev]["pos"]))
 			KEY_B: arayuz._bolge_dugmesi()
 			KEY_A: arayuz.adamlar_ac()
 			KEY_D: arayuz.defter_ac()
