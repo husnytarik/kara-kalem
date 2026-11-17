@@ -9,6 +9,7 @@ signal temas(g: Dictionary)        # yetiştik / yakalandık: karşılaşma diya
 const GORUS := 14.0        # bu mesafede "karşılaşma" sayılır (m)
 const TEMAS := 7.0         # kovalama bu mesafede yetişme sayılır (m)
 const GORUS_AV := 45.0     # rakip/polis seni bu mesafeden fark eder (m)
+const GUVENLI := 45.0      # evin çevresinde bu yarıçapta kimse sana bulaşamaz (m)
 const SECIM := 5.0         # tıklama/üzerine gelme yarıçapı (m)
 const SIVIL_AD := ["Esnaf", "İşçiler", "Pazarcılar", "Denizciler", "Komşular", "Yolcular", "Çocuklar", "Tüccar"]
 const POLIS_AD := ["Devriye", "Karakol Ekibi", "Bekçiler"]
@@ -228,6 +229,12 @@ func dagit(g: Dictionary) -> void:
 		takip_id = 0
 	_sil(g)
 
+func guvenli_mi() -> bool:
+	if oyun._ev < 0:
+		return false
+	var e: Vector3 = harita.yerler[oyun._ev]["pos"]
+	return Vector2(e.x, e.z).distance_to(Vector2(oyuncu.global_position.x, oyuncu.global_position.z)) < GUVENLI
+
 func _ai(g: Dictionary, delta: float) -> void:
 	if g["tur"] == "sivil":
 		return
@@ -237,6 +244,11 @@ func _ai(g: Dictionary, delta: float) -> void:
 	g["ai"] = 0.7
 	var d: float = (g["pos"] as Vector3).distance_to(oyuncu.global_position)
 	var serbest: bool = oyun.t < g["serbest"]
+	if guvenli_mi() and g["tur"] != "sivil":
+		if g["mod"] != "":
+			g["mod"] = ""
+			g["yol"] = PackedVector3Array()
+		return
 	if serbest:
 		if g["mod"] == "kovala":
 			g["mod"] = ""
@@ -249,7 +261,12 @@ func _ai(g: Dictionary, delta: float) -> void:
 			g["mod"] = ""
 	elif g["tur"] == "rakip":
 		if g["mod"] == "" and d < GORUS_AV:
-			g["mod"] = "kovala" if g["kisi"] >= 0.8 * oyun.guc() else "kac"
+			if oyun.gerginlik.dost_mu(g["fak"]):
+				pass   # çalıştığın bölgenin ailesi: seni kollar, bulaşmaz
+			elif oyun.gerginlik.dusman_mi(g["fak"]):
+				g["mod"] = "kovala"   # savaşta ya da ev sahibinin düşmanı: gücüne bakmadan üstüne gelir
+			else:
+				g["mod"] = "kovala" if g["kisi"] >= 0.8 * oyun.guc() else "kac"
 		elif g["mod"] != "" and d > 120.0:
 			g["mod"] = ""
 	match g["mod"]:
@@ -348,6 +365,8 @@ func _hedef_sec(g: Dictionary) -> void:
 
 # ---------- karşılaşma ----------
 func _karsilasma() -> void:
+	if guvenli_mi():
+		return
 	# yedek: yeni "temas" için önce en yakın uygun grubu bul
 	for g in liste.duplicate():
 		var uz: float = (g["pos"] as Vector3).distance_to(oyuncu.global_position)

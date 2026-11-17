@@ -148,6 +148,8 @@ var borc: Dictionary = {}       # babanın tefeci borcu {ana, taksit, kacirilan}
 var borc_k: RefCounted
 var akl: Dictionary = {}        # aklama durumu (aklama.gd)
 var aklama_k: RefCounted
+var gerg: Dictionary = {}       # aileler arası gerginlik/savaş (gerginlik.gd)
+var gerginlik: RefCounted
 var pol: Dictionary = {}        # polis/bodrum durumu (polis.gd)
 var polis: RefCounted
 var _kesir := 0.0
@@ -180,6 +182,7 @@ func kur(h: Node3D) -> void:
 	borc = borc_k.yeni()
 	aklama_k = load("res://scripts/core/aklama.gd").new(self)
 	akl = aklama_k.yeni()
+	gerginlik = load("res://scripts/core/gerginlik.gd").new(self)
 	polis = load("res://scripts/core/polis.gd").new(self)
 	pol = polis.yeni()
 	_aileleri_kur()
@@ -694,6 +697,7 @@ func _coz(g: Dictionary) -> void:
 				b["sev"] = clampf(b["sev"] - 5, 0, 100)
 			if rakip != "":
 				ofke[rakip] = minf(60.0, ofke[rakip] + 6.0)
+				gerginlik.ekle("oyuncu", rakip, 4.0, "%s'ın esnafından haraç aldın" % hakim_ad(rakip))
 			kayit("%s: %s haraç bağladı. Haftalık ~%s.%s" % [ad, adam["ad"], para(haftalik(i)), extra], "good")
 		else:
 			b["sev"] = clampf(b["sev"] - 1, 0, 100)
@@ -845,7 +849,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -881,6 +885,7 @@ func durum_yukle(d: Dictionary) -> void:
 	borc = d.get("borc", borc_k.yeni())
 	akl = d.get("akl", aklama_k.yeni())
 	pol = d.get("pol", polis.yeni())
+	gerg = d.get("gerg", {})
 	degisti.emit()
 
 # ---------- günlük rastgele olaylar ----------
@@ -958,6 +963,7 @@ func _ay() -> void:
 	aklama_k.ay()
 	polis.ay()
 	borc_k.ay()
+	gerginlik.ay()
 	var kira: float = ozet.get("kira", 0)
 	if kira > 0.0:
 		var borc := kira + kira_borc
@@ -1071,6 +1077,7 @@ func _ay() -> void:
 		var hed_ad: String = harita.bolgeler[hedef_id]["ad"]
 		if hk != "":
 			kayit("%s, %s'in %s'daki hâkimiyetini zorluyor." % [hakim_ad(f), hakim_ad(hk), hed_ad], "warn" if hk == "oyuncu" else "info")
+			gerginlik.ekle(f, hk, 3.0 + kazan / 4.0, "%s'da esnafa haraç" % hed_ad)
 		else:
 			kayit("%s sahipsiz %s'a el attı." % [hakim_ad(f), hed_ad], "info")
 	for f in NPC:

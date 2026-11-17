@@ -31,6 +31,9 @@ func _draw() -> void:
 	var renk := Color("e0b24a")
 	var font := ThemeDB.fallback_font
 	var yazi := "Ev · %d m" % int(mesafe)
+	if sokak.gruplar.guvenli_mi():
+		yazi = "Ev · GÜVENLİ BÖLGE"
+		renk = Color("6fcf7a")
 	if not arkada and alan.has_point(p):
 		var s := 1.0 + 0.08 * sin(_zaman * 4.0)
 		# ev simgesi: çatı + gövde

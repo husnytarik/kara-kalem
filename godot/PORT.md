@@ -24,6 +24,7 @@ Durum: `[x]` Godot'ta var · `[~]` kısmen/farklı biçimde var · `[ ]` yok.
 - [ ] **Ün sistemi** (social.js): Tanınırlık/İyilik/Korku × halk/yeraltı/polis, cephe/gölge, sızıntı; lakap (Ağa/Reis/Baba/Kıyı Başı/Sendika Başkanı), Güç Puanı
 - [ ] **Kara Defter**: hedef, neden, ağırlık, tazminat/kapatma yolları, vendetta
 - [ ] **Bağlar/kişiler**: 15 karakter, özellikler (traits), görüş/sadakat, stres, yaş ve ölüm
+- [x] **Aileler arası gerginlik/savaş + ev güvenli bölgesi** (gerginlik.gd, test `--gerg-testi`): haraç/nüfuz kemirme gerginlik biriktirir, eşikte 2 aylık savaş; çalıştığın bölgenin ailesi seni korur, düşmanları seni onun adamı sayıp kovalar; evin 45 m çevresinde kimse bulaşmaz
 - [ ] **Ahit / Karaca ailesi**, Harbor Trust (kredi/hisse)
 ### Faz D — dünya olayları
 - [ ] **Kararlar (kartlar)**: devriye, kavga, yangın, komşu, tefeci, yılbaşı, terfi, Karaca teklifi/baskısı, arama emri, pusu...

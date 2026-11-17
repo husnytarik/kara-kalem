@@ -200,6 +200,20 @@ func _ready() -> void:
 			print("baskin sonrasi arama ", oyun.arama, " kurulu ", oyun.pol["kurulu"])
 			print(oyun.polis.rusvet(300.0)["msg"])
 			arayuz.polis_ac()
+		elif a == "--gerg-testi":
+			var gk: RefCounted = oyun.gerginlik
+			gk.ekle("marchetti", "obrien", 6.0, "test")
+			print("savasta (esik alti): ", gk.savasta("marchetti", "obrien"))
+			gk.ekle("obrien", "marchetti", 5.0, "test")
+			print("savasta: ", gk.savasta("marchetti", "obrien"), " puan ", gk.gerginlik("marchetti", "obrien"))
+			var ci: int = oyun.isy.keys()[0]
+			oyun.vardiya = {"bina": ci, "bitis": oyun.t + 480, "ucret": 10}
+			var hb: String = oyun.harita.yerler[ci]["bolge"]
+			print("is bolgesi ", gk.is_bolgesi(), " hakim ", oyun.hakim_of(hb), " ev sahibi ", gk.ev_sahibi())
+			oyun.t += 21 * 1440
+			gk.ay()
+			print("21 gun sonra savasta: ", gk.savasta("marchetti", "obrien"))
+			print("guvenli (evde): ", gruplar.guvenli_mi())
 		elif a == "--zafer-testi":
 			var n := 0
 			for k in oyun.isy:
