@@ -146,6 +146,8 @@ var mes: Dictionary = {}        # meslek durumu (meslek.gd)
 var meslek: RefCounted
 var borc: Dictionary = {}       # babanın tefeci borcu {ana, taksit, kacirilan}
 var borc_k: RefCounted
+var akl: Dictionary = {}        # aklama durumu (aklama.gd)
+var aklama_k: RefCounted
 var _kesir := 0.0
 
 func kur(h: Node3D) -> void:
@@ -174,6 +176,8 @@ func kur(h: Node3D) -> void:
 	mes = meslek.yeni()
 	borc_k = load("res://scripts/core/borc.gd").new(self)
 	borc = borc_k.yeni()
+	aklama_k = load("res://scripts/core/aklama.gd").new(self)
+	akl = aklama_k.yeni()
 	_aileleri_kur()
 	_profil_uygula()
 
@@ -838,7 +842,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -872,6 +876,7 @@ func durum_yukle(d: Dictionary) -> void:
 	arac = d.get("arac", {"tip": "", "yakit": 0.0, "kullan": false, "ariza": 0, "yol": 0.0})
 	mes = d.get("mes", meslek.yeni())
 	borc = d.get("borc", borc_k.yeni())
+	akl = d.get("akl", aklama_k.yeni())
 	degisti.emit()
 
 # ---------- günlük rastgele olaylar ----------
@@ -915,6 +920,11 @@ func _olay() -> void:
 			b["sev"] = minf(100.0, b["sev"] + 2.0)
 			kayit("%s'da mahalle şenliği: huzur ve sevgi arttı." % bad, "good")
 
+# Yasal (vergiye tabi, aklamaya esas) temiz gelir
+func yasal(x: float) -> void:
+	temiz += x
+	akl["yasal"] += x
+
 func _gun() -> void:
 	_olay()
 	meslek.gun()
@@ -923,7 +933,7 @@ func _gun() -> void:
 		var r: Dictionary = isy[i]
 		var w := haftalik(i)
 		if r["sahip"]:
-			temiz += w * 1.5 / 7.0 * isl.carpan(i)
+			yasal(w * 1.5 / 7.0 * isl.carpan(i))
 			continue
 		if not r["haracli"]:
 			continue
@@ -935,11 +945,12 @@ func _gun() -> void:
 			r["birikim"] = 0.0
 			kayit("%s: %s adamları esnafı geri aldı; haracı artık onlara ödüyor." % [harita.yerler[i]["ad"], hakim_ad(hk)], "bad")
 	if profil.get("koken", "yerli") == "yerli":
-		temiz += 40.0 + rng.randf() * 20.0   # Murphy's Tavern günlük geliri (şimdilik sabit; meyhane sistemi sonra)
+		yasal(40.0 + rng.randf() * 20.0)   # Murphy's Tavern günlük geliri (şimdilik sabit; meyhane sistemi sonra)
 
 func _ay() -> void:
 	isl.ay()
 	meslek.ay()
+	aklama_k.ay()
 	borc_k.ay()
 	var kira: float = ozet.get("kira", 0)
 	if kira > 0.0:

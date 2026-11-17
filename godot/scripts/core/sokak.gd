@@ -168,6 +168,13 @@ func _ready() -> void:
 			print("borc ", oyun.borc, " son=", oyun.son)
 			oyun.son = {}
 			oyun.temiz = 2000.0
+			oyun.temiz = 3000.0
+			oyun.kirli = 2000.0
+			oyun.yasal(1000.0)
+			print("plan ", oyun.aklama_k.plan(), " camasir ", oyun.aklama_k.camasir_al()["ok"])
+			oyun.akl["yuzde"] = 150
+			oyun.aklama_k.ay()
+			print("akl ", oyun.akl, " temiz ", oyun.temiz, " kirli ", oyun.kirli)
 			arayuz.meslek_ac()
 		elif a == "--zafer-testi":
 			var n := 0

@@ -19,7 +19,7 @@ Durum: `[x]` Godot'ta var · `[~]` kısmen/farklı biçimde var · `[ ]` yok.
 ### Faz B — yasa ve para
 - [ ] **Polis dosyası/izi**: dosya, aşama (Temiz/Gözetim/Soruşturma/Arama emri), baskın, rüşvet, dedektif Dolan
 - [ ] **Bodrum içki imalatı**: kazan, gizli oda, hacim, stok, iz; meyhane talebi/rakip Duffy
-- [ ] **Aklama + maliye şüphesi**; çamaşırhane; vergi/kira
+- [x] **Aklama + maliye şüphesi, çamaşırhane, vergi** (aklama.gd, "İş" paneli): kapasite = yasal ciro×%30 (çamaşırhane %50, katip avantajı), %20 kesinti, şüphe 50'de müfettiş ($300 + arama +10). Oda kirası zaten vardı. Yasal gelir `oyun.yasal()` ile toplanır
 ### Faz C — toplum
 - [ ] **Ün sistemi** (social.js): Tanınırlık/İyilik/Korku × halk/yeraltı/polis, cephe/gölge, sızıntı; lakap (Ağa/Reis/Baba/Kıyı Başı/Sendika Başkanı), Güç Puanı
 - [ ] **Kara Defter**: hedef, neden, ağırlık, tazminat/kapatma yolları, vendetta

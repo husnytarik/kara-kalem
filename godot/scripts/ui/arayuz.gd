@@ -297,7 +297,7 @@ func _imza() -> String:
 		"defter":
 			return str(oyun.defter.size())
 		"meslek":
-			return str([oyun.mes, oyun.borc, oyun.temiz, _sonuc, _oyuncu_bolge(), oyun.arama])
+			return str([oyun.mes, oyun.borc, oyun.akl, oyun.temiz, _sonuc, _oyuncu_bolge(), oyun.arama])
 		"garaj":
 			return str([oyun.arac, oyun.temiz, oyun.kirli, _sonuc, oyun.t / 60])
 		"zafer":
@@ -609,6 +609,21 @@ func _meslek_paneli() -> void:
 		var j: String = M["is"]["j"]
 		_lbl(_ic, "Çalıştığın iş: %s (%s) · günlük ~%s" % [K.MESLEKLER[j]["ad"], oyun.harita.bolgeler[M["is"]["b"]]["ad"], oyun.para(K.maas_gun(j, M["is"]["b"]))], 16, RENK["good"])
 		_btn(_ic, "İşten ayrıl", func(): _sonuc_goster(K.is_birak()))
+	_ayrac(_ic)
+	var A: RefCounted = oyun.aklama_k
+	var pl: Dictionary = A.plan()
+	_lbl(_ic, "Aklama ve maliye", 17, RENK["altin"])
+	_lbl(_ic, "Kirli para ay sonunda yasal cironun bir kısmı kadar temize çevrilir (kesinti %%%d). Fazlası Mali Şüphe'yi artırır; şüphe 50'yi geçerse müfettiş gelir." % int(round(pl["ucret"] * 100.0)), 13, RENK["soluk"])
+	_lbl(_ic, "Bu ay yasal ciro %s · kapasite ~%s · Mali Şüphe %d/50" % [oyun.para(oyun.akl["yasal"]), oyun.para(pl["kap"]), int(oyun.akl["suphe"])], 14, RENK["warn"] if oyun.akl["suphe"] > 25.0 else RENK["info"])
+	var ah := HBoxContainer.new()
+	_ic.add_child(ah)
+	for y in [0, 50, 100, 150]:
+		_btn(ah, "%%%d" % y, func(): A.yuzde_ayarla(y), oyun.akl["yuzde"] == y)
+	_lbl(ah, "Aklanan: kapasitenin %%%d'i" % oyun.akl["yuzde"], 14)
+	if oyun.akl["camasir"]:
+		_lbl(_ic, "✔ Çamaşırhane senin (kapasiteyi artırır).", 14, RENK["good"])
+	else:
+		_btn(_ic, "Çamaşırhane al (%s)" % oyun.para(A.CAMASIR_FIYAT), func(): _sonuc_goster(A.camasir_al()), oyun.temiz < A.CAMASIR_FIYAT)
 	for j in K.MESLEKLER:
 		var m: Dictionary = K.MESLEKLER[j]
 		_ayrac(_ic)

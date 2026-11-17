@@ -130,7 +130,7 @@ func gun() -> void:
 		oyun.kayit("%s işinden kovuldun: %s (puan %d)." % [m["ad"], "mahalle senden korkuyor" if b["tan"] > 30.0 and b["kor"] > 35.0 else "bölge sana sırt çevirdi", k["puan"]], "bad")
 		M["is"] = {}
 		return
-	oyun.temiz += maas_gun(j, bid)
+	oyun.yasal(maas_gun(j, bid))
 	M["is"]["gun"] += 1
 	var xp: float = M["beceri"][j]
 	M["beceri"][j] = minf(100.0, xp + 1.2 * (1.0 - xp / 115.0))
@@ -143,7 +143,7 @@ func ay() -> void:
 	var adlar: Array = []
 	for j in M["isletme"]:
 		var g := isletme_gelir(j)
-		oyun.temiz += g
+		oyun.yasal(g)
 		top += g
 		adlar.append(MESLEKLER[j]["isletme"])
 		if j == "berber":
