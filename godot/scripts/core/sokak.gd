@@ -132,6 +132,8 @@ func _ready() -> void:
 		elif a.begins_with("--isin="):   # doğrulama: oyuncuyu doğrudan oraya koy
 			var q := a.substr(7).split(",")
 			oyuncu.global_position = Vector3(float(q[0]), harita.yuk(float(q[0]), float(q[1])), float(q[1]))
+		elif a.begins_with("--saat="):
+			oyun.t = float(a.substr(7)) * 60.0
 		elif a.begins_with("--mesafe="):
 			kamera.mesafe = float(a.substr(9))
 		elif a == "--sissiz":
@@ -479,6 +481,7 @@ func _process(delta: float) -> void:
 	var id: String = harita.bolge_at(oyuncu.global_position)
 	_etiket.text = harita.bolgeler[id]["ad"] if id != "" else "Yollar"
 	# kalite: uzaktan bakarken SSAO ve gölge gereksiz (ve pahalı)
+	_atmosfer()
 	var uz: float = kamera.mesafe
 	_env.ssao_enabled = uz < 160.0
 	_gunes.shadow_enabled = uz < 260.0
@@ -617,6 +620,15 @@ func _cevre() -> void:
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.ssao_enabled = true
+	env.fog_enabled = true
+	env.fog_density = 0.0004
+	env.glow_enabled = true
+	env.glow_intensity = 0.8
+	env.glow_bloom = 0.12
+	env.glow_hdr_threshold = 0.9
+	env.adjustment_enabled = true
+	env.adjustment_saturation = 1.15
+	env.adjustment_contrast = 1.08
 	_env = env
 	var we := WorldEnvironment.new()
 	we.environment = env
@@ -627,6 +639,46 @@ func _cevre() -> void:
 	sun.directional_shadow_max_distance = 400.0
 	_gunes = sun
 	add_child(sun)
+
+# Günün saatine göre gökyüzü/ışık/sis rengi: şafak turuncu, öğle soluk, akşam kızıl, gece lacivert + sıcak lamba parıltısı.
+const _ANAHTAR := [
+	# saat, gökyüzü üstü, ufuk, güneş rengi, güneş gücü, sis, ortam gücü
+	[0.0, Color("0b1226"), Color("1b2440"), Color("6f86c8"), 0.25, Color("141c33"), 0.55],
+	[5.0, Color("1c2a4a"), Color("7a5a5a"), Color("ffb070"), 0.5, Color("5a4a56"), 0.6],
+	[7.0, Color("5d86b8"), Color("e6b98a"), Color("ffd2a0"), 1.0, Color("b9a58f"), 0.8],
+	[12.0, Color("5f93c9"), Color("c9d6dc"), Color("fff0d8"), 1.25, Color("b7c3c8"), 0.95],
+	[17.0, Color("486a99"), Color("e69a62"), Color("ffb060"), 1.0, Color("c08f6a"), 0.8],
+	[19.5, Color("1e2748"), Color("a24f3c"), Color("ff7a48"), 0.5, Color("5a3a40"), 0.6],
+	[21.5, Color("0b1226"), Color("1b2440"), Color("6f86c8"), 0.25, Color("141c33"), 0.55],
+	[24.0, Color("0b1226"), Color("1b2440"), Color("6f86c8"), 0.25, Color("141c33"), 0.55],
+]
+var _atm_sure := 0.0
+
+func _atmosfer() -> void:
+	if oyun == null:
+		return
+	var h: float = fmod(float(oyun.t), float(oyun.DAY)) / 60.0
+	var a: Array = _ANAHTAR[0]
+	var b: Array = _ANAHTAR[1]
+	for i in _ANAHTAR.size() - 1:
+		if h >= _ANAHTAR[i][0] and h <= _ANAHTAR[i + 1][0]:
+			a = _ANAHTAR[i]
+			b = _ANAHTAR[i + 1]
+			break
+	var k: float = (h - float(a[0])) / maxf(0.001, float(b[0]) - float(a[0]))
+	var sky: ProceduralSkyMaterial = _env.sky.sky_material
+	var ust: Color = (a[1] as Color).lerp(b[1], k)
+	var ufuk: Color = (a[2] as Color).lerp(b[2], k)
+	sky.sky_top_color = ust
+	sky.sky_horizon_color = ufuk
+	sky.ground_horizon_color = ufuk
+	sky.ground_bottom_color = ust.darkened(0.5)
+	_gunes.light_color = (a[3] as Color).lerp(b[3], k)
+	_gunes.light_energy = lerpf(float(a[4]), float(b[4]), k)
+	_env.fog_light_color = (a[5] as Color).lerp(b[5], k)
+	_env.ambient_light_energy = lerpf(float(a[6]), float(b[6]), k)
+	# güneş alçak: sabah/akşam uzun gölge
+	_gunes.rotation_degrees.x = -lerpf(25.0, 60.0, clampf(float(_gunes.light_energy) / 1.25, 0.0, 1.0))
 
 func _aile_testi() -> void:
 	for f in oyun.NPC:
