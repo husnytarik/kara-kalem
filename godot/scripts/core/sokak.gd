@@ -677,6 +677,12 @@ func _atmosfer() -> void:
 	_gunes.light_energy = lerpf(float(a[4]), float(b[4]), k)
 	_env.fog_light_color = (a[5] as Color).lerp(b[5], k)
 	_env.ambient_light_energy = lerpf(float(a[6]), float(b[6]), k)
+	# gece lamba havuzları: güneş zayıfladıkça belirir
+	var gece: float = clampf((0.8 - float(_gunes.light_energy)) / 0.55, 0.0, 1.0)
+	if harita.has_meta("lamba_mat"):
+		var lm: Array = harita.get_meta("lamba_mat")
+		(lm[0] as StandardMaterial3D).albedo_color = Color(1, 1, 1, gece * 0.28)
+		(lm[1] as StandardMaterial3D).albedo_color = Color(1, 1, 1, gece * 0.6)
 	# güneş alçak: sabah/akşam uzun gölge
 	_gunes.rotation_degrees.x = -lerpf(25.0, 60.0, clampf(float(_gunes.light_energy) / 1.25, 0.0, 1.0))
 

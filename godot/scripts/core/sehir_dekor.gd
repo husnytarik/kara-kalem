@@ -32,6 +32,7 @@ func _ready() -> void:
 	kafa.radius = 0.55
 	kafa.height = 1.1
 	_coklu(kafa, d.get("lamba", []), 6.3, Color(1.0, 0.85, 0.5), true)
+	_isik_havuzlari(d.get("lamba", []))
 	var govde := CylinderMesh.new()
 	govde.top_radius = 0.22
 	govde.bottom_radius = 0.3
@@ -41,6 +42,52 @@ func _ready() -> void:
 	tepe.radius = 2.4
 	tepe.height = 4.4
 	_coklu(tepe, d.get("agac", []), 4.6, Color(0.2, 0.38, 0.18), false)
+
+# Gece lamba altında sıcak ışık havuzu + lamba başında hale (additive, MultiMesh). Parlaklık sokak.gd _atmosfer'den meta ile ayarlanır.
+func _isik_havuzlari(noktalar: Array) -> void:
+	var gr := Gradient.new()
+	gr.offsets = PackedFloat32Array([0.0, 0.45, 1.0])
+	gr.colors = PackedColorArray([Color(1, 0.8, 0.45, 1), Color(1, 0.65, 0.3, 0.25), Color(1, 0.6, 0.25, 0.0)])
+	var tx := GradientTexture2D.new()
+	tx.gradient = gr
+	tx.fill = GradientTexture2D.FILL_RADIAL
+	tx.fill_from = Vector2(0.5, 0.5)
+	tx.fill_to = Vector2(1.0, 0.5)
+	tx.width = 128
+	tx.height = 128
+	var havuz := PlaneMesh.new()
+	havuz.size = Vector2(16, 16)
+	var hale := QuadMesh.new()
+	hale.size = Vector2(5, 5)
+	var mats: Array = []
+	for tur in 2:
+		var m := StandardMaterial3D.new()
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		m.albedo_texture = tx
+		m.albedo_color = Color(1, 1, 1, 0)
+		m.cull_mode = BaseMaterial3D.CULL_DISABLED
+		if tur == 1:
+			m.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+			m.no_depth_test = false
+		mats.append(m)
+		var mesh: Mesh = havuz if tur == 0 else hale
+		mesh.surface_set_material(0, m)
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = mesh
+		mm.instance_count = noktalar.size()
+		for k in noktalar.size():
+			var x: float = noktalar[k][0]
+			var z: float = noktalar[k][1]
+			var y: float = harita.yuk(x, z, false) + (0.25 if tur == 0 else 6.3)
+			mm.set_instance_transform(k, Transform3D(Basis.IDENTITY, Vector3(x, y, z)))
+		var mi := MultiMeshInstance3D.new()
+		mi.multimesh = mm
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi)
+	harita.set_meta("lamba_mat", mats)
 
 func _coklu(mesh: Mesh, noktalar: Array, yuk: float, renk: Color, isik: bool) -> void:
 	var m := StandardMaterial3D.new()
