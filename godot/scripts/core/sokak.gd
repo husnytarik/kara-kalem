@@ -61,6 +61,10 @@ func _ready() -> void:
 	gorus.name = "Gorus"
 	add_child(gorus)
 	gorus.kur(harita, oyun, self)
+	var bc: Node3D = load("res://scripts/core/bolge_cizgi.gd").new()
+	bc.name = "BolgeCizgi"
+	add_child(bc)
+	bc.kur(oyun, harita, self)
 	gruplar.yakinlasti.connect(_karsilasti)
 	gruplar.temas.connect(func(g): arayuz.karsilasma_ac(g))
 	arayuz = load("res://scripts/ui/arayuz.gd").new()

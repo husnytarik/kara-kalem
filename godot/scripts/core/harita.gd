@@ -36,16 +36,6 @@ func _ready() -> void:
 		var m := n as MeshInstance3D
 		_iskeleler.append(m.global_transform * m.mesh.get_aabb())
 	_izgara_kur()
-	for id in bolgeler:
-		var l := Label3D.new()
-		l.text = bolgeler[id]["ad"]
-		l.font_size = 220
-		l.pixel_size = 0.05
-		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		l.outline_size = 40
-		l.position = merkez(id) + Vector3(0, 80, 0)
-		l.visibility_range_begin = 170.0   # yalnızca uzaktan görünür
-		add_child(l)
 
 func _bolgeleri_oku() -> void:
 	var f := FileAccess.open("res://data/bolgeler.json", FileAccess.READ)

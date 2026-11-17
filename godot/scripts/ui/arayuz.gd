@@ -65,7 +65,17 @@ func kur(o: Node, s: Node) -> void:
 func _stil(arka: Color = Tema.ARKA) -> StyleBoxFlat:
 	return Tema.stil(arka)
 
+var _kagit_mod := false   # true iken paneller kâğıt üstünde: açık renkler koyu mürekkebe çevrilir
+
+func _murekkep(c: Color) -> Color:
+	if not _kagit_mod:
+		return c
+	if c.s < 0.18:
+		return Tema.KAGIT_YAZI if c.v > 0.62 else Color("5a4630")
+	return Color.from_hsv(c.h, minf(1.0, c.s * 1.1), 0.42)
+
 func _lbl(ebeveyn: Node, metin: String, boyut: int = 16, renk: Color = Color.WHITE) -> Label:
+	renk = _murekkep(renk)
 	var l := Label.new()
 	l.text = metin
 	l.add_theme_font_size_override("font_size", Tema.boyut(boyut))
@@ -102,7 +112,7 @@ func _bar(ebeveyn: Node, ad: String, deger: float, renk: Color, yazi: String = "
 	f.bg_color = renk
 	p.add_theme_stylebox_override("fill", f)
 	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(1, 1, 1, 0.08)
+	bg.bg_color = Color(0, 0, 0, 0.2) if _kagit_mod else Color(1, 1, 1, 0.08)
 	p.add_theme_stylebox_override("background", bg)
 	h.add_child(p)
 	var v := _lbl(h, yazi if yazi != "" else str(int(round(deger))), 14, RENK["soluk"])
@@ -120,8 +130,9 @@ func _portre(ebeveyn: Node, ad: String, boy: Vector2 = Vector2(56, 64)) -> Contr
 # Panel başlığı: altın serif başlık + altında ince çizgi.
 func _baslik(ebeveyn: Node, metin: String, alt: String = "") -> void:
 	var l := _lbl(ebeveyn, metin, 26, RENK["altin"])
-	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
-	l.add_theme_constant_override("outline_size", 3)
+	if not _kagit_mod:
+		l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+		l.add_theme_constant_override("outline_size", 3)
 	if alt != "":
 		_lbl(ebeveyn, alt, 15, RENK["soluk"])
 	_ayrac(ebeveyn)
@@ -129,7 +140,10 @@ func _baslik(ebeveyn: Node, metin: String, alt: String = "") -> void:
 # Koyu çerçeveli iç kutu (görseldeki "Eylemler" / "Adam Arayanlar" gibi).
 func _kutu(ebeveyn: Node, baslik: String = "") -> VBoxContainer:
 	var pc := PanelContainer.new()
-	pc.add_theme_stylebox_override("panel", Tema.stil(Color(0.06, 0.045, 0.03, 0.9), Tema.KENAR, 8, 2))
+	if _kagit_mod:
+		pc.add_theme_stylebox_override("panel", Tema.stil(Color(0.55, 0.42, 0.24, 0.16), Tema.KAGIT_KENAR, 8, 2))
+	else:
+		pc.add_theme_stylebox_override("panel", Tema.stil(Color(0.06, 0.045, 0.03, 0.9), Tema.KENAR, 8, 2))
 	pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	ebeveyn.add_child(pc)
 	var v := VBoxContainer.new()
@@ -325,14 +339,14 @@ func _ust_cubuk() -> void:
 
 func _sag_panel() -> void:
 	_sag = PanelContainer.new()
-	_sag.add_theme_stylebox_override("panel", _stil())
+	_sag.add_theme_stylebox_override("panel", Tema.kagit_panel())
 	_sag.set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
 	_sag.offset_left = -340
 	_sag.offset_right = -8
 	_sag.offset_top = 66
 	_sag.offset_bottom = -40
 	_sag.visible = false
-	_sag.theme = Tema.tema()
+	_sag.theme = Tema.tema_kagit()
 	add_child(_sag)
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -514,6 +528,7 @@ func _yenile(zorla: bool) -> void:
 	for c in _ic.get_children():
 		c.queue_free()
 	_sag.visible = true
+	_kagit_mod = true
 	_sag.offset_left = -(540 if _mod in ["ben", "aile", "adamlar"] else (500 if _mod == "bina" and sokak.oyuncu.iceride >= 0 else 360))
 	match _mod:
 		"bina": _bina_paneli()
@@ -528,6 +543,7 @@ func _yenile(zorla: bool) -> void:
 		"grup": _grup_paneli()
 		"ben": _ben_paneli()
 	_kapat_dugmesi()
+	_kagit_mod = false
 
 # İçerideyken: haritada görünmezsin, kimse sana bulaşamaz. Ev ise dinlenip zaman geçirebilirsin.
 func _ic_bolumu(i: int) -> void:
@@ -1300,6 +1316,8 @@ func _kisisel_bolumu(i: int) -> void:
 			b.focus_mode = Control.FOCUS_NONE
 			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			b.add_theme_font_size_override("font_size", Tema.boyut(15))
+			b.add_theme_color_override("font_color", Tema.KAGIT_YAZI)
+			b.add_theme_color_override("font_hover_color", Color("8a5a10"))
 			b.pressed.connect(func(): _sonuc_goster(K.yap(id)))
 			g.add_child(b)
 			var u := _lbl(g, "$%d" % int(e["ucret"]), 14, Tema.VURGU)

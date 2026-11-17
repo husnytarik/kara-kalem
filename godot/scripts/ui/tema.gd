@@ -84,3 +84,53 @@ static func tema() -> Theme:
 	(t.get_stylebox("separator", "HSeparator") as StyleBoxLine).color = KENAR
 	t.set_constant("separation", "HSeparator", 6)
 	return t
+
+# ---------- eski kâğıt dokusu (kod ile üretilir, resim dosyası gerekmez) ----------
+static var _kagit_onb := {}
+
+# w×h kâğıt: gürültülü zemin, yanık kenar, koyu çerçeve + içte ince altın çizgi. tint: zemin rengi.
+static func kagit_tex(w: int, h: int, tint: Color = KAGIT, kenar: Color = Color("2b1b0c")) -> ImageTexture:
+	var anahtar := "%d_%d_%s_%s" % [w, h, tint.to_html(), kenar.to_html()]
+	if _kagit_onb.has(anahtar):
+		return _kagit_onb[anahtar]
+	var n := FastNoiseLite.new()
+	n.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	n.frequency = 0.035
+	n.fractal_octaves = 3
+	var n2 := FastNoiseLite.new()
+	n2.noise_type = FastNoiseLite.TYPE_CELLULAR
+	n2.frequency = 0.5
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	for y in h:
+		for x in w:
+			var d := mini(mini(x, y), mini(w - 1 - x, h - 1 - y))
+			var v: float = 0.92 + 0.10 * n.get_noise_2d(x, y) + 0.03 * n2.get_noise_2d(x, y)
+			var c := Color(tint.r * v, tint.g * v, tint.b * v, 1.0)
+			if d < 14:
+				c = c.darkened(0.38 * (1.0 - d / 14.0))
+			if d < 3:
+				c = kenar
+			elif d == 4 or d == 5:
+				c = Color(0.88, 0.66, 0.23, 0.9).lerp(c, 0.35)   # ince altın çizgi
+			img.set_pixel(x, y, c)
+	var t := ImageTexture.create_from_image(img)
+	_kagit_onb[anahtar] = t
+	return t
+
+static func kagit_panel() -> StyleBoxTexture:
+	var sb := StyleBoxTexture.new()
+	sb.texture = kagit_tex(192, 192)
+	sb.set_texture_margin_all(14)
+	sb.set_content_margin_all(18)
+	return sb
+
+static var _tema_kagit: Theme
+# Kâğıt üstündeki panellerin teması: yazılar koyu mürekkep.
+static func tema_kagit() -> Theme:
+	if _tema_kagit != null:
+		return _tema_kagit
+	var t: Theme = tema().duplicate()
+	t.set_color("font_color", "Label", KAGIT_YAZI)
+	t.set_color("font_color", "CheckBox", KAGIT_YAZI)
+	_tema_kagit = t
+	return t
