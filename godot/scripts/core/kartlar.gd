@@ -58,7 +58,7 @@ func uygun(id: String) -> bool:
 		"esnaf":
 			return not oyun.isy.keys().filter(func(i): return oyun.isy[i]["haracli"] or oyun.isy[i]["sahip"]).is_empty()
 		"ihale":
-			return oyun.temiz >= 60.0
+			return oyun.temiz >= 60.0 and not Y.sicil_kirli()
 		"tefeci":
 			return oyun.borc.get("ana", 0.0) > 0.0
 		"muhbir":

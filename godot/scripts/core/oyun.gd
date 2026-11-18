@@ -668,6 +668,8 @@ func satin_al(i: int) -> Dictionary:
 		return hata("Bu bölgede henüz ayağın yok.")
 	if r["sahip"]:
 		return hata("Zaten senin.")
+	if r["tur"] in ["luks", "resmi"] and yol_k.sicil_kirli() and yol_k.puan("kanun") < 20.0:
+		return hata("Ruhsat çıkmıyor: sicilin kirli, kimse bu işe imza atmaz. Önce yasal yolda itibar kazan.")
 	var f := fiyat(i)
 	if not harcama(f, "temiz"):
 		return hata("Temiz para yetmiyor (%s)." % para(f))
@@ -990,8 +992,6 @@ func _gun() -> void:
 			r["haracli"] = false
 			r["birikim"] = 0.0
 			kayit("%s: %s adamları esnafı geri aldı; haracı artık onlara ödüyor." % [harita.yerler[i]["ad"], hakim_ad(hk)], "bad")
-	if profil.get("koken", "yerli") == "yerli":
-		yasal(40.0 + rng.randf() * 20.0)   # Murphy's Tavern günlük geliri (şimdilik sabit; meyhane sistemi sonra)
 
 func _ay() -> void:
 	isl.ay()

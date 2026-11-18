@@ -282,6 +282,7 @@ func savas_bitir(g: Dictionary, s: Dictionary) -> Dictionary:
 			var k := _para_orani(0.3)
 			gruplar.serbest_birak(g, 1440)
 			oyun.kayit("%s çatışması: kaybettin, $%d gitti." % [ad, k], "bad")
+			oyun.kis_k.yara_ekle(15.0 + rng.randf() * 15.0)
 			return _r("Çatışmayı kaybettin. Cebinden $%d gitti.%s" % [k, yazi], "bad")
 	var k2 := _para_orani(0.12)
 	gruplar.serbest_birak(g, 180)
@@ -322,6 +323,7 @@ func _carpis(g: Dictionary, ceza: float, giris_yazi: String) -> Dictionary:
 	metin2 += _yaralanma(0.45)
 	gruplar.serbest_birak(g, 1440)
 	oyun.kayit("%s çatışması: kaybettin, $%d gitti." % [ad, kayip], "bad")
+	oyun.kis_k.yara_ekle(15.0 + rng.randf() * 15.0)
 	return _r(metin2, "bad")
 
 func _yaralanma(sans: float) -> String:

@@ -7,7 +7,7 @@ static var yukle_basta := false            # ana menüden "Devam Et" ile açıld
 
 const KOKENLER := {
 	"yerli": {"ad": "Southside'lı", "ikon": "🏠",
-		"ozet": "Bu mahallede doğdun. Herkes seni tanır, birkaç dostun ve küçük bir birikimin var. Meyhane geliri sana kalır.",
+		"ozet": "Bu mahallede doğdun. Herkes seni tanır, birkaç dostun ve küçük bir birikimin var. Ama baban ölünce geriye yalnızca borç kaldı; her şeyi kendin kazanacaksın.",
 		"temiz": 1500.0, "kirli": 0.0, "kira": 0, "konum": "Southside, evinin önü", "ev": "Home"},
 	"aile": {"ad": "Bir ailenin adamı", "ikon": "🤝",
 		"ozet": "Bir ailenin soldatosu olarak başlarsın. Aile semtinde sözün geçer, aylık pay alırsın; ama patronların da seni izler.",

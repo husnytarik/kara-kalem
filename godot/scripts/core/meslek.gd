@@ -3,19 +3,19 @@ extends RefCounted
 # Tanınırlık ve korku işe kabulü etkiler; bazı işler korkuyu sever, bazıları yüzünü saklamanı ister.
 
 const MESLEKLER := {
-	"taksi": {"ad": "Taksi şoförü", "isletme": "Taksi filosu", "maas": 9, "fiyat": 1800, "ciro": 0.07,
+	"taksi": {"ad": "Taksi şoförü", "isletme": "Taksi filosu", "maas": 27, "fiyat": 1800, "ciro": 0.07,
 		"sevW": 0.6, "korW": 0.0, "tanC": 0.55, "taban": 60,
 		"ac": "Şehrin sokaklarını ezbere öğrenirsin. Tecrübeyle yürüyüş hızın artar. Korkulan ve adı kötüye çıkmış şoförü kimse çağırmaz.",
 		"perk": "Yürüyüş hızı (en çok +%40)"},
-	"hamal": {"ad": "Liman hamalı", "isletme": "Nakliye şirketi", "maas": 8, "fiyat": 1600, "ciro": 0.07,
+	"hamal": {"ad": "Liman hamalı", "isletme": "Nakliye şirketi", "maas": 24, "fiyat": 1600, "ciro": 0.07,
 		"sevW": 0.1, "korW": 0.8, "tanC": 0.1, "taban": 62,
 		"ac": "Sendika adamlarıyla omuz omuza çalışırsın. Korkulan adam rahat iş bulur. Tecrübeyle yolda pusuya düşmen zorlaşır.",
 		"perk": "Pusu riski (en çok −%25)"},
-	"berber": {"ad": "Berber çırağı", "isletme": "Berber salonu", "maas": 7, "fiyat": 1200, "ciro": 0.08,
+	"berber": {"ad": "Berber çırağı", "isletme": "Berber salonu", "maas": 21, "fiyat": 1200, "ciro": 0.08,
 		"sevW": 0.9, "korW": -0.3, "tanC": 0.2, "taban": 60,
 		"ac": "Mahallenin dedikodusu koltuğundan akar. Sevilen adam burada tutunur. Tecrübeyle halkın sevgisi artar.",
 		"perk": "Halk sevgisi (ayda +3)"},
-	"katip": {"ad": "Defter katibi", "isletme": "Muhasebe bürosu", "maas": 10, "fiyat": 2000, "ciro": 0.06,
+	"katip": {"ad": "Defter katibi", "isletme": "Muhasebe bürosu", "maas": 30, "fiyat": 2000, "ciro": 0.06,
 		"sevW": 0.3, "korW": -0.2, "tanC": 0.6, "taban": 62,
 		"ac": "Rakamlarla uğraşırsın. Temiz isim ister. Tecrübeyle aklama ücreti düşer, kapasite büyür.",
 		"perk": "Aklama (−%30 ücret, +%40 kapasite)"},
@@ -42,6 +42,7 @@ func kabul(j: String, bid: String) -> Dictionary:
 	var iyi: float = 12.0 * (b["tan"] / 100.0) * (b["sev"] / 100.0)
 	var referans := 4.0 if b["tan"] < 10.0 else 0.0
 	var puan: float = m["taban"] + 0.3 * oyun.mes["beceri"][j] + 35.0 * e["s"] * m["sevW"] + 30.0 * e["k"] * m["korW"] - m["tanC"] * kotu + iyi - referans
+	puan -= maxf(0.0, oyun.yol_k.kotu() - 25.0) * 0.8   # sicili kirli olana iş vermezler
 	return {"puan": int(round(puan)), "esik": 50, "ok": puan >= 50.0}
 
 func tecrube(j: String) -> float:

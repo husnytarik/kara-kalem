@@ -31,8 +31,18 @@ func yeni() -> Dictionary:
 	return {"puan": {"kanun": 0.0, "golge": 0.0, "korku": 0.0, "kulis": 0.0},
 		"donem": "sakin", "bitis": 20 * 1440, "cool": {}, "once": {}, "bekleyen": "", "son_kart": -99999, "secti": false}
 
+# Kötü yolun ağırlığı (0..100): gölge ya da korkunun yüksek olanı
+func kotu() -> float:
+	return maxf(puan("golge"), puan("korku"))
+
+# Sicil: kötü yolda yürüyen birine temiz kapılar kapanır
+func sicil_kirli() -> bool:
+	return kotu() >= 50.0
+
 func ekle(yol: String, d: float) -> void:
 	var p: Dictionary = oyun.yol["puan"]
+	if yol == "kanun" and d > 0.0:
+		d *= clampf(1.0 - 0.7 * kotu() / 100.0, 0.3, 1.0)   # kötü yoldan iyiye dönmek zor
 	p[yol] = clampf(p[yol] + d, 0.0, 100.0)
 
 func puan(yol: String) -> float:
@@ -106,6 +116,13 @@ func gun() -> void:
 		ekle("kulis", -0.3)
 	if oyun.yol["donem"] == "cete" and seviye("kanun") >= 1:
 		ekle("kanun", -0.2)
+	# iyi kalmaya çalışana kötü yol çeker; kötü yoldaki iyiliği kolay unutulur
+	var kan: float = puan("kanun")
+	if kan >= 15.0:
+		if oyun.rng.randf() < 0.04 + 0.0012 * kan:
+			_ayartma(kan)
+	if kotu() >= 50.0:
+		ekle("kanun", -0.15)
 	if oyun.t >= y["bitis"]:
 		_donem_degis()
 	# kart çekimi
@@ -117,6 +134,29 @@ func gun() -> void:
 
 func ay() -> void:
 	pass
+
+# Dürüst kalmanın bedeli: ya cebinden ödersin ya da gölgeye bulaşırsın.
+func _ayartma(kan: float) -> void:
+	var rn: int = oyun.rng.randi() % 4
+	var bedel: float = minf(oyun.temiz * (0.04 + oyun.rng.randf() * 0.04), 400.0)
+	match rn:
+		0:
+			oyun.kayit("Bir müfettiş 'kolaylık' istedi; ödemeden iş yürümüyor. Gölgeye bulaştın.", "warn")
+			ekle("golge", 4.0)
+			ekle("kanun", -2.0)
+		1:
+			oyun.kayit("Tefeci çevresi dükkânına 'koruma' dayattı. Dürüst kalmak pahalı: $%d gitti." % int(bedel), "bad")
+			oyun.harcama(bedel, "temiz")
+			ekle("korku", 2.0)
+		2:
+			oyun.kayit("Rakip esnaf seni ihbar etti; temize çıkmak için rüşvet verdin ($%d)." % int(bedel), "warn")
+			oyun.harcama(bedel, "temiz")
+			ekle("golge", 3.0)
+			ekle("kanun", -1.5)
+		_:
+			oyun.kayit("Sokakta herkes sert olanı dinliyor; nazik kalmak seni zayıf gösterdi. Ağırlığın düştü.", "warn")
+			ekle("kanun", -3.0)
+			ekle("korku", 1.5)
 
 func _donem_degis() -> void:
 	var y: Dictionary = oyun.yol

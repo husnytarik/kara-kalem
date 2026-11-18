@@ -27,6 +27,8 @@ static func calistir(o: Node, mod: String, gun: int) -> void:
 		bina_bolge[b].append(i)
 	print("BASLA ", mod, " | ", ozet(o))
 	for d in gun:
+		if mod != "bos":
+			_bakim(o)
 		if mod == "bot":
 			_bot(o, bina_bolge)
 		elif mod == "iyi":
@@ -47,6 +49,20 @@ static func calistir(o: Node, mod: String, gun: int) -> void:
 		if sayac.has(e["tur"]):
 			sayac[e["tur"]] += 1
 	print("defter olay sayilari: ", sayac)
+	son_kayitlar(o, 30)
+
+# Basit bakım: günde bir yemek, gerekirse uyku, hastaysa ilaç.
+static func _bakim(o: Node) -> void:
+	var k: Dictionary = o.kis
+	if k["aclik"] > 40.0:
+		o.harcama(6.0, "temiz")
+		k["aclik"] = 10.0
+	if k["yorgun"] > 45.0:
+		k["yorgun"] = 15.0
+	if k["stres"] > 60.0:
+		k["stres"] = 30.0
+	if o.kis_k.hasta_mi():
+		o.kis_k.yap("ilac")
 
 static func _bot(o: Node, bb: Dictionary) -> void:
 	while o.adamlar.size() < 4 and o.kirli >= 100:
@@ -115,3 +131,7 @@ static func _kotu(o: Node, bb: Dictionary) -> void:
 				o.gorev_ver(i, "topla")
 			elif k != "haraci" and k != "sahip":
 				o.gorev_ver(i, "haraclan")
+
+static func son_kayitlar(o: Node, n: int) -> void:
+	for e in o.defter.slice(maxi(0, o.defter.size() - n)):
+		print("  ", o.saat_yazi(e["t"]), " ", e["tur"], " ", e["metin"])

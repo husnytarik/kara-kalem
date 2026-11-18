@@ -42,12 +42,14 @@ func durum() -> Dictionary:
 		{"k": "Polis dosyası (arama)", "v": "%d / en çok 15" % int(oyun.arama), "ok": oyun.arama <= 15.0},
 		{"k": "Haraç bağlı yer", "v": "%d / 0" % harac_sayisi(), "ok": harac_sayisi() == 0},
 		{"k": "Ekip", "v": "%d / en çok 2" % oyun.adamlar.size(), "ok": oyun.adamlar.size() <= 2},
+		{"k": "Temiz sicil (gölge/korku)", "v": "%d / en çok 30" % int(oyun.yol_k.kotu()), "ok": oyun.yol_k.kotu() <= 30.0},
 	]
 	var baskan := [
 		{"k": "Hakim olduğun bölge", "v": "%d / en az 2" % n, "ok": n >= 2},
 		{"k": "Seçim", "v": "her yıl 12. ay (%s)" % ("açık" if d["yil"] >= 2 else "2. yıldan sonra"), "ok": d["yil"] >= 2},
 		{"k": "Kampanya fonu", "v": "%s / %s" % [oyun.para(oyun.zf["kampanya"]), oyun.para(KAMPANYA_HEDEF)], "ok": oyun.zf["kampanya"] >= KAMPANYA_HEDEF},
 		{"k": "Tahmini oy", "v": "%%%d / %%50" % int(round(oy_orani())), "ok": oy_orani() >= 50.0},
+		{"k": "Sicil (gölge/korku)", "v": "%d / en çok 50" % int(oyun.yol_k.kotu()), "ok": oyun.yol_k.kotu() < 50.0},
 	]
 	var hakim := [{"k": "Hakim olduğun bölge", "v": "%d / 5" % n, "ok": n >= 5}]
 	return {"durust": durust, "baskan": baskan, "hakim": hakim}

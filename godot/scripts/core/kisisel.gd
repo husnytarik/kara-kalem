@@ -44,7 +44,7 @@ const EYLEM := {
 	"sinema": {"ad": "Bir film izle", "ucret": 8.0, "dk": 120, "d": {"sikinti": -45.0, "stres": -10.0}, "oz": {}},
 	"dua": {"ad": "Sessizce otur / dua et", "ucret": 0.0, "dk": 45, "d": {"stres": -22.0}, "oz": {"vicdanli": 1.0}},
 	"idman": {"ad": "Antrenman yap", "ucret": 5.0, "dk": 90, "d": {"stres": -15.0, "sikinti": -15.0, "yorgun": 12.0, "aclik": 8.0}, "oz": {"kavgaci": 1.6, "saglikli": 0.4}},
-	"ilac": {"ad": "İlaç al (grip, hastalık)", "ucret": 35.0, "dk": 20, "d": {}, "oz": {}},
+	"ilac": {"ad": "İlaç al (hastalık, yara)", "ucret": 45.0, "dk": 20, "d": {}, "oz": {}},
 	"dinlen": {"ad": "Biraz uzan", "ucret": 0.0, "dk": 60, "d": {"yorgun": -12.0, "stres": -8.0}, "oz": {}},
 }
 
@@ -56,7 +56,7 @@ func _init(o: Node) -> void:
 	oyun = o
 
 func yeni() -> Dictionary:
-	return {"aclik": 10.0, "yorgun": 10.0, "stres": 10.0, "sikinti": 10.0, "hasta": 0, "hasta_ad": "",
+	return {"aclik": 10.0, "yorgun": 10.0, "stres": 10.0, "sikinti": 10.0, "hasta": 0, "hasta_ad": "", "agir": 0.0, "yara": 0.0,
 		"oz": {}, "uyuyor": false, "uyari": {}, "gece_say": 0.0}
 
 # Karakter seçimlerinden başlangıç özellikleri.
@@ -142,6 +142,17 @@ func stres_ekle(d: float) -> void:
 		d *= clampf(1.0 - 0.5 * oz("stres"), 0.4, 1.8)
 	degis("stres", d)
 
+# Yaralanma: iyileşmeyi yavaşlatır, hastalık riskini artırır.
+func yara_ekle(x: float) -> void:
+	oyun.kis["yara"] = clampf(oyun.kis.get("yara", 0.0) + x, 0.0, 100.0)
+	oyun.kayit("Yaralandın; dinlenmezsen hastalığa açık olursun.", "bad")
+
+# 0..1.5: ihtiyaçların ve yaranın bedene bindirdiği yük
+func yuk() -> float:
+	var k: Dictionary = oyun.kis
+	var p: float = maxf(0.0, k["aclik"] - 55.0) + maxf(0.0, k["yorgun"] - 55.0) + maxf(0.0, k["stres"] - 65.0) * 0.7 + k.get("yara", 0.0) * 0.5
+	return clampf(p / 100.0, 0.0, 1.5)
+
 func hasta_mi() -> bool:
 	return oyun.t < oyun.kis["hasta"]
 
@@ -154,12 +165,16 @@ func form() -> float:
 	c += maxf(0.0, k["stres"] - 70.0) * 0.004
 	c += maxf(0.0, k["sikinti"] - 80.0) * 0.002
 	if hasta_mi():
-		c += 0.2
+		c += 0.2 + k.get("agir", 0.0) * 0.002
+	c += k.get("yara", 0.0) * 0.002
 	return clampf(1.0 - c, 0.55, 1.0)
 
 # Her oyun saatinde çağrılır (oyun.gd _saat).
 func saat() -> void:
 	var k: Dictionary = oyun.kis
+	if not k.has("agir"):
+		k["agir"] = 0.0
+		k["yara"] = 0.0
 	if oyun.t - _son_t < 30:
 		return
 	var dk: float = float(oyun.t - _son_t)
@@ -215,28 +230,47 @@ func saat() -> void:
 			k["gece_say"] = 0.0
 			oz_ekle("gece_kusu", 1.0)
 	# hastalık
-	if hasta_mi():
+	# yara: dinlenince ve tok/dinçken iyileşir
+	if k.get("yara", 0.0) > 0.0:
+		var iy: float = 0.35
 		if uyuyor or ic:
-			k["hasta"] -= int(dk * 0.5)   # dinlenmek iyileştirir
+			iy = 1.1
+		if k["aclik"] > 85.0 or k["yorgun"] > 90.0:
+			iy = 0.0
+		k["yara"] = maxf(0.0, k["yara"] - iy * sa * clampf(1.0 + 0.4 * oz("saglik"), 0.6, 1.5))
+	var yuk_d: float = yuk()
+	if hasta_mi():
+		var dinlen: bool = uyuyor or ic
+		# iyileşme hızı: dinlenmeyle artar, ihtiyaç yükü ve yara ile düşer
+		var hiz: float = (0.5 if dinlen else 0.0) * clampf(1.0 - yuk_d * 0.9, 0.1, 1.0)
+		k["hasta"] -= int(dk * hiz)
+		# hastalığın ağırlığı: yük bindikçe ve dinlenilmedikçe artar, rahat ortamda azalır
+		var da: float = (0.1 + yuk_d * 0.55) * (0.2 if dinlen and yuk_d < 0.5 else 1.0) - (1.0 if dinlen and yuk_d < 0.4 else 0.0)
+		k["agir"] = clampf(k["agir"] + da * sa, 0.0, 100.0)
+		if k["agir"] >= 60.0 and not k["uyari"].get("agir", false):
+			k["uyari"]["agir"] = true
+			oyun.kayit("%s ağırlaştı! Hemen eve git, karnını doyur, ilaç al; yoksa ölebilirsin." % k["hasta_ad"], "bad")
+		if k["agir"] >= 100.0 and oyun.son.is_empty():
+			oyun.son = {"tur": "yenilgi", "metin": "%s seni yendi. Kendine bakmadın; bedenin dayanamadı. Southside sessizce bir adam eksildi." % k["hasta_ad"]}
+		if oyun.t >= k["hasta"] and k["agir"] >= 50.0:
+			k["hasta"] = oyun.t + int(0.5 * oyun.DAY)   # geçmedi, uzadı
 	elif k["hasta_ad"] != "":
 		k["hasta_ad"] = ""
+		k["agir"] = 0.0
+		k["uyari"]["agir"] = false
 		oyun.kayit("Hastalığın geçti.", "good")
 	else:
-		var risk := 0.0
-		if k["yorgun"] > 80.0:
-			risk += 0.012
-		if k["aclik"] > 85.0:
-			risk += 0.01
-		if k["stres"] > 85.0:
-			risk += 0.012
+		# risk ihtiyaçlarla sürekli artar (eşik altında da küçük)
+		var risk: float = (maxf(0.0, k["yorgun"] - 50.0) * 0.00055 + maxf(0.0, k["aclik"] - 55.0) * 0.0006 + maxf(0.0, k["stres"] - 55.0) * 0.0005 + k.get("yara", 0.0) * 0.0004)
 		if oyun.mevsim() == "Kış":
-			risk += 0.004
+			risk += 0.003
 		risk *= clampf(1.0 - 0.8 * oz("saglik"), 0.3, 2.0) * sa
 		if risk > 0.0 and oyun.rng.randf() < risk:
 			var ad: String = ["Grip", "Zatürre", "Ateş", "Mide hastalığı"][oyun.rng.randi() % 4]
 			k["hasta"] = oyun.t + int((2.0 + oyun.rng.randf() * 3.0) * oyun.DAY)
 			k["hasta_ad"] = ad
-			oyun.kayit("%s oldun. Dinlenmezsen güçsüz kalırsın (evde yat ya da ilaç al)." % ad, "bad")
+			k["agir"] = 15.0 + yuk_d * 25.0
+			oyun.kayit("%s oldun. Evde yat, karnını doyur ya da ilaç al; kendine bakmazsan ağırlaşır." % ad, "bad")
 	# uyarılar
 	_uyar("aclik", 70.0, "Karnın zil çalıyor. Bir lokantaya ya da eve git.", "bad")
 	_uyar("yorgun", 75.0, "Gözlerin kapanıyor. Eve dönüp uyu.", "bad")
@@ -319,9 +353,14 @@ func yap(id: String) -> Dictionary:
 	if ucret > 0.0:
 		oyun.harcama(ucret, "kirli")
 	if id == "ilac":
-		oyun.kis["hasta"] = 0
-		oyun.kis["hasta_ad"] = ""
-		oyun.kayit("İlaç aldın; hastalığın geçiyor.", "good")
+		if hasta_mi():
+			oyun.kis["agir"] = maxf(0.0, oyun.kis["agir"] - 55.0)
+			oyun.kis["hasta"] -= int(1.5 * oyun.DAY)
+			oyun.kis["yara"] = maxf(0.0, oyun.kis.get("yara", 0.0) - 15.0)
+			oyun.kayit("İlaç aldın; hastalık geriliyor (dinlenmeyi ihmal etme).", "good")
+		else:
+			oyun.kis["yara"] = maxf(0.0, oyun.kis.get("yara", 0.0) - 25.0)
+			oyun.kayit("İlaç aldın; yaraların sarıldı.", "good")
 	for a in e["d"]:
 		var dv: float = e["d"][a]
 		if a == "stres" and dv > 0.0:

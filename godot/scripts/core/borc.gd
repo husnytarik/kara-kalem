@@ -3,8 +3,8 @@ extends RefCounted
 # Üç taksit üst üste ödenmezse oyun biter. Sadece "yerli" (Murphy's Tavern) başlangıcında vardır.
 
 const FAIZ := 0.01
-const ANA := 3000.0
-const TAKSIT := 300.0
+const ANA := 2400.0
+const TAKSIT := 150.0
 
 var oyun: Node
 
