@@ -32,6 +32,8 @@ var _arama: Label
 var _sag: PanelContainer
 var _ic: VBoxContainer
 var _log: VBoxContainer
+var _log_panel: PanelContainer
+var _log_acik := false
 var _log_n := -1
 var modal := false           # karşılaşma diyaloğu açıkken true
 var _kars: RefCounted
@@ -68,13 +70,32 @@ func kur(o: Node, s: Node) -> void:
 	rp.offset_right = 0
 	rp.offset_bottom = 0
 	add_child(rp)
+	_log_panel = PanelContainer.new()
+	var lsb := StyleBoxFlat.new()
+	lsb.bg_color = Color(0.06, 0.045, 0.03, 0.55)
+	lsb.set_corner_radius_all(4)
+	lsb.content_margin_left = 8
+	lsb.content_margin_right = 8
+	lsb.content_margin_top = 3
+	lsb.content_margin_bottom = 3
+	_log_panel.add_theme_stylebox_override("panel", lsb)
+	_log_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	_log_panel.offset_left = 205
+	_log_panel.offset_bottom = -34
+	_log_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_log_panel.custom_minimum_size = Vector2(420, 0)
+	_log_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_log_panel.tooltip_text = "Tıkla: eski haberleri aç/kapa"
+	_log_panel.gui_input.connect(func(e: InputEvent) -> void:
+		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+			_log_acik = not _log_acik
+			_log_n = -1
+			_log_panel.accept_event())
+	add_child(_log_panel)
 	_log = VBoxContainer.new()
-	_log.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	_log.offset_left = 205
-	_log.offset_bottom = -40
-	_log.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	_log.custom_minimum_size = Vector2(520, 0)
-	add_child(_log)
+	_log.add_theme_constant_override("separation", 0)
+	_log.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_log_panel.add_child(_log)
 
 # ---------- kurulum ----------
 func _stil(arka: Color = Tema.ARKA) -> StyleBoxFlat:
@@ -180,35 +201,47 @@ var _ihtiyac_yazi: Label
 # Sol üstte: şimdiki hedef (içine çeker) + yaklaşan yükümlülükler (ayakta kalma baskısı).
 func _amac_paneli() -> void:
 	_amac_kutu = PanelContainer.new()
-	_amac_kutu.add_theme_stylebox_override("panel", Tema.kagit_stil())
+	var asb := StyleBoxFlat.new()
+	asb.bg_color = Color(0.06, 0.045, 0.03, 0.55)
+	asb.set_corner_radius_all(4)
+	asb.content_margin_left = 8
+	asb.content_margin_right = 8
+	asb.content_margin_top = 4
+	asb.content_margin_bottom = 4
+	_amac_kutu.add_theme_stylebox_override("panel", asb)
 	_amac_kutu.theme = Tema.tema()
-	_amac_kutu.position = Vector2(8, 150)
-	_amac_kutu.custom_minimum_size = Vector2(300, 0)
-	_amac_kutu.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_amac_kutu.position = Vector2(8, 148)
+	_amac_kutu.custom_minimum_size = Vector2(250, 0)
+	_amac_kutu.mouse_filter = Control.MOUSE_FILTER_STOP
+	_amac_kutu.tooltip_text = "Tıkla: ayrıntıyı aç/kapa"
+	_amac_kutu.gui_input.connect(func(e: InputEvent) -> void:
+		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+			_amac_acik = not _amac_acik
+			_amac_kutu.accept_event())
 	add_child(_amac_kutu)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 2)
 	_amac_kutu.add_child(v)
-	_amac_baslik = _lbl(v, "", 15, Color("8a5a10"))
-	_amac_yazi = _lbl(v, "", 15, Tema.KAGIT_YAZI)
-	_baski_yazi = _lbl(v, "", 14, Color("5a4630"))
+	_amac_baslik = _lbl(v, "", 12, Color("e0b050"))
+	_amac_yazi = _lbl(v, "", 13, Color("e8dcc0"))
+	_baski_yazi = _lbl(v, "", 12, Color("b8a888"))
+	for q in [_amac_baslik, _amac_yazi, _baski_yazi]:
+		q.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_ihtiyac_yazi = Label.new()   # eski satır: artık üstteki çubuklarda
-	_ihtiyac_cubugu()
 
+var _amac_acik := false
 var _ihc: Dictionary = {}
 var _ihc_hasta: Label
 
 # Üst çubuğun altında: açlık / yorgunluk / stres / sıkıntı / hasta / ün çubukları.
-func _ihtiyac_cubugu() -> void:
-	var pc := PanelContainer.new()
-	pc.add_theme_stylebox_override("panel", Tema.stil(Tema.ARKA, Tema.KENAR, 5, 2))
-	pc.theme = Tema.tema()
-	pc.position = Vector2(130, 92)
-	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(pc)
+func _ihtiyac_cubugu(v: VBoxContainer) -> void:
+	var kr := ColorRect.new()
+	kr.color = Color(0.17, 0.11, 0.06, 0.6)
+	kr.custom_minimum_size = Vector2(0, 2)
+	v.add_child(kr)
 	var h := HBoxContainer.new()
-	h.add_theme_constant_override("separation", 14)
-	pc.add_child(h)
+	h.add_theme_constant_override("separation", 12)
+	v.add_child(h)
 	for hv in [["II", 0.0], ["▶", 1.0], ["×2", 2.0], ["×4", 4.0]]:
 		var hb := _btn(h, hv[0], sokak.hiz_ayarla.bind(hv[1]))
 		hb.add_theme_font_size_override("font_size", Tema.boyut(14))
@@ -216,15 +249,15 @@ func _ihtiyac_cubugu() -> void:
 		var c := HBoxContainer.new()
 		c.add_theme_constant_override("separation", 5)
 		h.add_child(c)
-		var l := _lbl(c, "● " + e[1], 15, Tema.YAZI)
-		l.add_theme_color_override("font_color", Tema.YAZI)
+		var l := _lbl(c, "● " + e[1], 14, Tema.KAGIT_YAZI)
+		l.add_theme_color_override("font_color", Tema.KAGIT_YAZI)
 		l.autowrap_mode = TextServer.AUTOWRAP_OFF
 		l.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		var p := ProgressBar.new()
 		p.min_value = 0
 		p.max_value = 100
 		p.show_percentage = false
-		p.custom_minimum_size = Vector2(90, 14)
+		p.custom_minimum_size = Vector2(64, 12)
 		p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		var f := StyleBoxFlat.new()
 		f.bg_color = e[2]
@@ -273,9 +306,11 @@ func _amac_guncelle() -> void:
 		baslik = "İHTİYAÇ"
 		yazi = ac["mesaj"]
 	_amac_baslik.text = baslik
-	yazi += "
+	if _amac_acik:
+		yazi += "
 " + oyun.yol_k.ozet_satiri()
 	_amac_yazi.text = yazi
+	_baski_yazi.visible = _amac_acik
 	var k: Dictionary = oyun.kis
 	_ihtiyac_guncelle()
 	_ihtiyac_yazi.text = "Açlık %d · Yorgun %d · Stres %d · Sıkıntı %d%s · Ünün %d" % [int(k["aclik"]), int(k["yorgun"]), int(k["stres"]), int(k["sikinti"]), " · HASTA" if oyun.kis_k.hasta_mi() else "", int(oyun.kis_k.taninma())]
@@ -290,11 +325,11 @@ func _amac_guncelle() -> void:
 	var toplam := borc + kira
 	if toplam <= 0.0:
 		_baski_yazi.text = "Ay sonuna %d gün." % kalan
-		_baski_yazi.add_theme_color_override("font_color", Color("5a4630"))
+		_baski_yazi.add_theme_color_override("font_color", Color("b8a888"))
 	else:
 		var yeter: bool = oyun.temiz >= toplam
 		_baski_yazi.text = "Ay sonuna %d gün · ödenecek %s (taksit %s + kira %s)%s" % [kalan, oyun.para(toplam), oyun.para(borc), oyun.para(kira), "" if yeter else " — PARA YETMİYOR" ]
-		_baski_yazi.add_theme_color_override("font_color", Color("2f6b2a") if yeter else (Color("9a2a1a") if kalan <= 3 else Color("8a5a10")))
+		_baski_yazi.add_theme_color_override("font_color", Color("8fd08a") if yeter else (Color("ff8a70") if kalan <= 3 else Color("e0b050")))
 
 var _un: Label
 var _konum: Label
@@ -319,7 +354,11 @@ func _ust_cubuk() -> void:
 	add_child(pc)
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 16)
-	pc.add_child(h)
+	var gv := VBoxContainer.new()
+	gv.add_theme_constant_override("separation", 4)
+	pc.add_child(gv)
+	gv.add_child(h)
+	_ihtiyac_cubugu(gv)
 	var sol := VBoxContainer.new()
 	sol.add_theme_constant_override("separation", 0)
 	h.add_child(sol)
@@ -342,6 +381,9 @@ func _ust_cubuk() -> void:
 	_konum.add_theme_color_override("font_color", Color("6a1f10"))
 	_konum.autowrap_mode = TextServer.AUTOWRAP_OFF
 	sol.add_child(_konum)
+	var bosluk := Control.new()
+	bosluk.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(bosluk)
 	var dik := ColorRect.new()
 	dik.color = Color(0.17, 0.11, 0.06, 0.6)
 	dik.custom_minimum_size = Vector2(2, 0)
@@ -509,11 +551,14 @@ func _process(_d: float) -> void:
 		_log_n = oyun.defter.size()
 		for c in _log.get_children():
 			c.queue_free()
-		var son: Array = oyun.defter.slice(maxi(0, _log_n - 5))
+		var son: Array = oyun.defter.slice(maxi(0, _log_n - (8 if _log_acik else 1)))
 		for e in son:
-			var l := _lbl(_log, "%s  %s" % [oyun.saat_yazi(e["t"]), e["metin"]], 15, RENK[e["tur"]])
-			l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
-			l.add_theme_constant_override("outline_size", 6)
+			var l := _lbl(_log, "%s  %s" % [oyun.saat_yazi(e["t"]), e["metin"]], 13, RENK[e["tur"]])
+			l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			l.custom_minimum_size = Vector2(404, 0)
+		if not _log_acik and _log_n > 1:
+			var ip := _lbl(_log, "▴ %d haber daha · tıkla" % (_log_n - 1), 11, RENK["soluk"])
+			ip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_amac_guncelle()
 	_kart_bekle()
 	_son_kontrol()
