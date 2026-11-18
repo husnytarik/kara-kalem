@@ -1,6 +1,6 @@
 extends Node3D
 # Ana sahne: haritayı, oyun kurallarını (oyun.gd) ve 2D arayüzü (arayuz.gd) bir araya getirir.
-# Sol tık: git (binaya tıklarsan paneli de açılır). Boşluk: duraklat. 1/2/3: hız. B: bölge. T: adamlar. F: defter.
+# Sol tık: git (binaya tıklarsan önüne gider, varınca panel açılır). Sağ tık: bina bilgisi. Boşluk: duraklat. 1/2/3: hız. B: bölge. T: adamlar. F: defter.
 
 var harita: Node3D
 var oyun: Node
@@ -101,7 +101,7 @@ func _ready() -> void:
 	_ipucu.modulate = Color("d6c49c")
 	hud.add_child(_ipucu)
 	var yardim := Label.new()
-	yardim.text = "Sol tık: git/bina seç · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · V: sis aç/kapa · 1/2/3: hız · B: bölge · T: adamlar · F: defter · H: eve git · F6: kaydet · F9: yükle"
+	yardim.text = "Sol tık: git/binaya gir · Sağ tık: bina bilgisi · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · V: sis aç/kapa · 1/2/3: hız · B: bölge · T: adamlar · F: defter · H: eve git · F6: kaydet · F9: yükle"
 	yardim.position = Vector2(205, 700)
 	yardim.add_theme_font_size_override("font_size", 12)
 	yardim.modulate = Color(1, 1, 1, 0.5)
@@ -419,12 +419,20 @@ func _unhandled_input(e: InputEvent) -> void:
 			else:
 				oyuncu.git(harita.yerler[i]["pos"])   # binaya tıkla: önüne git, varınca içeri gir
 				_gir_bina = i
-				arayuz.bina_ac(i)
 		else:
 			_gir_bina = -1
 			var nokta = harita.arazi_isinla(o, n)
 			if nokta != null:
 				oyuncu.git(nokta)
+	elif e is InputEventMouseButton and e.button_index == MOUSE_BUTTON_RIGHT:
+		# sağ tık (sürüklemeden): binanın bilgilerini aç; sürükleme kamerayı döndürür
+		if e.pressed:
+			_sag_basla = e.position
+		elif e.position.distance_to(_sag_basla) < 6.0:
+			var k2: Camera3D = kamera.kamera()
+			var i2: int = harita.yer_isinla(k2.project_ray_origin(e.position), k2.project_ray_normal(e.position))
+			if i2 >= 0:
+				arayuz.bina_ac(i2)
 	elif e is InputEventKey and e.pressed and not e.echo:
 		match e.keycode:
 			KEY_SPACE: Engine.time_scale = 0.0 if Engine.time_scale > 0.0 else _hiz
@@ -455,6 +463,7 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_F9: yukle()
 
 var _gir_bina := -1
+var _sag_basla := Vector2.ZERO
 
 func _process(delta: float) -> void:
 	if _gir_bina >= 0 and oyuncu.iceride < 0 and arayuz.yakin_bina(_gir_bina):
