@@ -644,6 +644,19 @@ func _ic_bolumu(i: int) -> void:
 		_lbl(_ic, "Evin güvenli: kimse bulaşamaz. Dinlenirken zaman akar, ama borç ve kira beklemez.", 14, RENK["soluk"])
 		_btn(_ic, "1 saat bekle", func(): oyun.bekle(60); _yenile(true))
 		_btn(_ic, "Sabaha kadar uyu (07:00)", func(): oyun.uyu(); _yenile(true))
+	elif oyun.pazar_k.konak_mi(i):
+		var ucret := 20.0
+		_lbl(_ic, "Oda tuttun: odan kapalı, kimse bulaşamaz. Ev bilinen adrestir; aranıyorsan burada yatmak daha güvenli. Gecelik $%d." % int(ucret), 14, RENK["soluk"])
+		_btn(_ic, "1 saat bekle", func(): oyun.bekle(60); _yenile(true))
+		_btn(_ic, "Sabaha kadar kal (07:00) — $%d" % int(ucret), func():
+			if oyun.harcama(ucret, "kirli"):
+				oyun.uyu()
+			else:
+				_sonuc_goster(oyun.hata("Oda parası yok."))
+			_yenile(true))
+		if oyun.isler_k.pusu_var(i):
+			_lbl(_ic, "Pusu kurdun: hedef bu civarda görünebilir.", 14, RENK["warn"])
+			_btn(_ic, "Pencere başında bekle (2 saat)", func(): _sonuc_goster(oyun.isler_k.pusu_bekle(i)))
 	_btn(_ic, "Dışarı çık", kapat)
 
 func _kapat_dugmesi() -> void:
@@ -1441,4 +1454,30 @@ func _kisisel_bolumu(i: int) -> void:
 $%d" % int(c["fiyat"]), func(): _sonuc_goster(oyun.pazar_k.tut(i, idx)), oyun.adamlar.size() >= oyun.EKIP_MAX)
 			b.tooltip_text = "Kirli para ile tutulur. Beceri %d" % int((c["yumruk"] * 0.5 + c["bicak"] * 0.3 + c["zeka"] * 0.2))
 			n += 1
+		var jv := _kutu(_ic, "Kirli İşler (ün %d)" % int(oyun.kis_k.taninma()))
+		var teklifler: Array = oyun.isler_k.liste(i)
+		if teklifler.is_empty():
+			_lbl(jv, "Bugün iş yok.", 14, RENK["soluk"])
+		var m := 0
+		for j in teklifler:
+			var jdx := m
+			var T: Dictionary = oyun.isler_k.TURLER[j["id"]]
+			var jh := HBoxContainer.new()
+			jh.add_theme_constant_override("separation", 8)
+			jv.add_child(jh)
+			var jvb := VBoxContainer.new()
+			jvb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			jh.add_child(jvb)
+			_lbl(jvb, oyun.isler_k.baslik(j), 16)
+			_lbl(jvb, "%s · %d adam · %s · ~%d sa" % [oyun.isler_k.risk_yazi(j), T["kisi"], j["veren"], int(T["sure"] / 60.0)], 12, Tema.SOLUK)
+			var jt := _lbl(jvb, T["ac"], 12, Tema.SOLUK)
+			jt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			jt.custom_minimum_size = Vector2(280, 0)
+			var jb := _btn(jh, "Al
+$%d" % int(j["para"]), func(): _sonuc_goster(oyun.isler_k.kabul(i, jdx)), oyun.bos_adamlar().size() < T["kisi"])
+			if j.get("pusu", -1) >= 0:
+				var pb := _btn(jv, "Pusuya yat: %s (kendin, +%%25)" % oyun.harita.yerler[j["pusu"]]["ad"], func(): _sonuc_goster(oyun.isler_k.pusu_kur(i, jdx)))
+				pb.tooltip_text = "Hedef o otelde kalıyor olabilir. Orada oda tutup bekle; adam gerekmez, risk sende."
+			jb.tooltip_text = "Boşta en az %d adam gerekir. Başarısızlıkta polis dosyası kabarır, adamlar yaralanabilir." % T["kisi"]
+			m += 1
 	_sonuc_satiri()

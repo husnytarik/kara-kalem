@@ -157,6 +157,8 @@ var kis: Dictionary = {}        # kişisel durum: açlık/yorgunluk/stres/sıkı
 var kis_k: RefCounted
 var pazar: Dictionary = {}      # adam bulma mekânlarının günlük adayları (pazar.gd)
 var pazar_k: RefCounted
+var isler: Dictionary = {}     # kirli işler: günlük teklif tahtası ve sayaçlar (isler.gd)
+var isler_k: RefCounted
 var ic_mekan := -1              # oyuncunun içinde olduğu bina (sokak.gd günceller)
 var pol: Dictionary = {}        # polis/bodrum durumu (polis.gd)
 var polis: RefCounted
@@ -200,6 +202,8 @@ func kur(h: Node3D) -> void:
 	kis_k = load("res://scripts/core/kisisel.gd").new(self)
 	kis = kis_k.yeni()
 	pazar_k = load("res://scripts/core/pazar.gd").new(self)
+	isler_k = load("res://scripts/core/isler.gd").new(self)
+	isler = isler_k.yeni()
 	_aileleri_kur()
 	_profil_uygula()
 	kis_k.baslat()
@@ -856,10 +860,26 @@ func uyu() -> void:
 	var gun_dk := t % DAY
 	var hedef := 7 * 60
 	var dk := hedef - gun_dk if gun_dk < hedef else DAY - gun_dk + hedef
+	var yer := ic_mekan
 	kis_k.uyku_baslat()
 	bekle(dk)
 	kis_k.uyku_bitti()
 	kayit("Sabaha kadar uyudun.", "info")
+	_gece_baskini(yer)
+
+# Aranıyorsan evin bilinen adrestir: gece baskını riski. Otelde (rastgele oda) çok daha güvendesin.
+func _gece_baskini(yer: int) -> void:
+	if arama < 55.0 or yer < 0 or not son.is_empty():
+		return
+	var evde: bool = yer == _ev
+	var sans: float = (arama - 50.0) / 110.0 if evde else maxf(0.0, (arama - 85.0) / 300.0)
+	if rng.randf() >= sans:
+		return
+	var ceza := minf(300.0, kirli * 0.4 + temiz * 0.1)
+	harcama(ceza, "kirli")
+	kis_k.stres_ekle(25.0)
+	arama = minf(100.0, arama + 4.0)
+	kayit("Polis sabaha karşı %s baskın yaptı! Seni yakalayamadılar ama $%d götürdüler. %s" % ["evine" if evde else "otel odana", int(ceza), "Aranıyorsan evde yatma: otele geç." if evde else ""], "bad")
 
 func _saat() -> void:
 	kis_k.saat()
@@ -876,13 +896,15 @@ func _saat() -> void:
 				if not a.is_empty():
 					a["gorev"] = ""
 					kayit(("%s iyileşti." if g.get("yarali", false) else "%s karakoldan çıktı.") % a["ad"], "info")
+			elif g["gorev"] == "sozlesme":
+				isler_k.coz(g)
 			else:
 				_coz(g)
 
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol, "kis": kis, "pazar": pazar}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -922,6 +944,7 @@ func durum_yukle(d: Dictionary) -> void:
 	yol = d.get("yol", yol_k.yeni())
 	kis = d.get("kis", kis_k.yeni())
 	pazar = d.get("pazar", {})
+	isler = d.get("isler", isler_k.yeni())
 	kis_k._son_t = t
 	degisti.emit()
 

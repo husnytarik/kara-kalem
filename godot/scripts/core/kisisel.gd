@@ -182,7 +182,7 @@ func saat() -> void:
 	var sa := dk / 60.0
 	var d: Dictionary = oyun.tarih()
 	var gece: bool = d["saat"] >= 22 or d["saat"] < 6
-	var ic: bool = oyun.ic_mekan == oyun._ev and oyun._ev >= 0
+	var ic: bool = (oyun.ic_mekan == oyun._ev and oyun._ev >= 0) or (oyun.ic_mekan >= 0 and oyun.pazar_k.konak_mi(oyun.ic_mekan))
 	var dis_ic: bool = oyun.ic_mekan >= 0
 	var dayan: float = clampf(1.0 - 0.45 * oz("dayan"), 0.55, 1.5)
 	var uyuyor: bool = k["uyuyor"]
@@ -408,6 +408,7 @@ func taninma() -> float:
 	top += 2.5 * oyun.adamlar.size()
 	top += 0.25 * oyun.arama
 	top += 0.15 * oyun.yol_k.puan("korku")
+	top += minf(15.0, 0.6 * float(oyun.isler.get("tamam", 0)))   # yaptığın kirli işler
 	return clampf(top, 0.0, 100.0)
 
 const ESIK_TAN := 28.0       # rakip aileler seni bu tanınırlıktan sonra umursar

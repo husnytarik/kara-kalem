@@ -14,6 +14,16 @@ func site_mi(i: int) -> bool:
 	var ad := String(oyun.harita.yerler[i]["ad"]).to_lower()
 	return ad.contains("bar") or ad.contains("tavern") or ad.contains("pool") or ad.contains("boxing") or ad.contains("social hall") or ad.contains("sailors")
 
+const KONAK := ["hotel", "boarding", "tenement", "mansion", "inn", "pension", "lodging"]
+
+# Konaklanabilen yer (otel, pansiyon, apartman odası)
+func konak_mi(i: int) -> bool:
+	var ad := String(oyun.harita.yerler[i]["ad"]).to_lower()
+	for k in KONAK:
+		if ad.contains(k):
+			return true
+	return false
+
 func _gece() -> bool:
 	var s: int = oyun.tarih()["saat"]
 	return s >= 20 or s < 4

@@ -35,6 +35,19 @@ static func calistir(o: Node, mod: String, gun: int) -> void:
 			_iyi(o)
 		elif mod == "kotu":
 			_kotu(o, bina_bolge)
+			_isler(o)
+		elif mod == "isci":
+			if d == 0:
+				o.kirli = 900.0
+			while o.adamlar.size() < 5 and o.kirli >= 100:
+				o.adam_tut()
+			for a in o.adamlar:
+				if a["silah"] != "tabanca" and o.kirli > 200:
+					o.silah_ver(a["id"], "tabanca")
+			for id in o.bolge:
+				if o.erisim(id) and d % 7 == 0:
+					o.bolge_is(id, "gozdagi")
+			_isler(o)
 		if not o.son.is_empty():
 			print("OYUN BITTI gun ", o.t / 1440, ": ", o.son)
 			break
@@ -135,3 +148,16 @@ static func _kotu(o: Node, bb: Dictionary) -> void:
 static func son_kayitlar(o: Node, n: int) -> void:
 	for e in o.defter.slice(maxi(0, o.defter.size() - n)):
 		print("  ", o.saat_yazi(e["t"]), " ", e["tur"], " ", e["metin"])
+
+# Kirli iş botu: kulüp/bar tahtalarından işleri alır.
+static func _isler(o: Node) -> void:
+	if o.bos_adamlar().is_empty():
+		return
+	for i in o.harita.yerler.size():
+		if not o.pazar_k.site_mi(i) or not o.erisim(o.harita.yerler[i]["bolge"]):
+			continue
+		var l: Array = o.isler_k.liste(i)
+		for idx in range(l.size() - 1, -1, -1):
+			if o.bos_adamlar().is_empty():
+				return
+			o.isler_k.kabul(i, idx)
