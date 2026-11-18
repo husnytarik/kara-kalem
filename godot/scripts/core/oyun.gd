@@ -887,6 +887,8 @@ func _saat() -> void:
 	if not vardiya.is_empty() and t >= vardiya["bitis"]:
 		temiz += vardiya["ucret"]
 		kayit("Vardiya bitti: %s kazandın (%s)." % [para(vardiya["ucret"]), harita.yerler[vardiya["bina"]]["ad"]], "good")
+		if vardiya.get("meslek", false):
+			meslek.mesai_bitti()
 		vardiya = {}
 	for g in gorevler.duplicate():
 		if t >= g["bitis"]:

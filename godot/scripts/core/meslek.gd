@@ -77,8 +77,67 @@ func aklama_kapasite() -> float:
 func calisiyor() -> bool:
 	return not oyun.mes["is"].is_empty()
 
+# --- dönemsel gerçekçilik ---
+const TUR_MESLEK := {"esnaf": "berber", "eglence": "taksi", "luks": "katip", "atolye": "hamal", "depo": "hamal", "konut": "katip"}
+const MEVSIM_CARPAN := {
+	"taksi": [1.0, 1.15, 1.0, 0.9], "hamal": [1.0, 0.95, 1.1, 1.15],
+	"berber": [1.05, 1.0, 0.95, 0.9], "katip": [1.0, 0.9, 1.1, 1.15]}   # ilkbahar, yaz, sonbahar, kış
+const TATILLER := [[1, 1, "Yılbaşı"], [10, 1, "Hasat Bayramı"]]   # ay_yil, ay_gun
+
+func pazar_mi() -> bool:
+	return (oyun.tarih()["gun"] % 7) == 6
+
+func tatil_adi() -> String:
+	var d: Dictionary = oyun.tarih()
+	for h in TATILLER:
+		if d["ay_yil"] == h[0] and d["ay_gun"] == h[1]:
+			return h[2]
+	if pazar_mi():
+		return "Pazar"
+	return ""
+
+# Ekonomi dalgası: kriz / refah, ±%12
+func ekonomi() -> float:
+	return 1.0 + 0.12 * sin(float(oyun.tarih()["ay"]) * 0.52)
+
+func donem_carpan(j: String) -> float:
+	var ms: int = (int(oyun.tarih()["ay"]) % 12) / 3
+	return MEVSIM_CARPAN[j][ms] * ekonomi()
+
+func donem_yazi() -> String:
+	var e := ekonomi()
+	return "%s · %s" % [oyun.mevsim(), "ekonomi canlı" if e > 1.06 else "ekonomi durgun" if e < 0.94 else "ekonomi normal"]
+
+# --- gazete ilanları: her gün değişir ---
+var _ilan_gun := -1
+var _ilan: Array = []
+
+func ilanlar() -> Array:
+	var g: int = oyun.tarih()["gun"]
+	if g == _ilan_gun:
+		return _ilan
+	_ilan_gun = g
+	_ilan = []
+	var rng := RandomNumberGenerator.new()
+	rng.seed = g * 7919 + 13
+	var adaylar: Array = []
+	for i in oyun.isy:
+		var r: Dictionary = oyun.isy[i]
+		if r["sahip"] or not TUR_MESLEK.has(r["tur"]):
+			continue
+		adaylar.append(i)
+	adaylar.sort()
+	for n in 6:
+		if adaylar.is_empty():
+			break
+		var i: int = adaylar[rng.randi() % adaylar.size()]
+		adaylar.erase(i)
+		var j: String = TUR_MESLEK[oyun.isy[i]["tur"]]
+		_ilan.append({"j": j, "bina": i, "bolge": oyun.harita.yerler[i]["bolge"], "carpan": snappedf(rng.randf_range(0.85, 1.3), 0.05)})
+	return _ilan
+
 # --- eylemler ---
-func is_gir(j: String, bid: String) -> Dictionary:
+func is_gir(j: String, bid: String, bina: int = -1, carpan: float = 1.0) -> Dictionary:
 	var M: Dictionary = oyun.mes
 	if not MESLEKLER.has(j):
 		return oyun.hata("Böyle bir meslek yok.")
@@ -91,9 +150,50 @@ func is_gir(j: String, bid: String) -> Dictionary:
 		var b: Dictionary = oyun.bolge[bid]
 		var neden := "Mahalle senden korkuyor; kimse başına iş açmak istemiyor." if b["tan"] > 30.0 and b["kor"] > 35.0 else "Bölge sana güvenmiyor."
 		return oyun.hata("%s olarak seni almadılar (puan %d/%d). %s" % [MESLEKLER[j]["ad"], k["puan"], k["esik"], neden])
-	M["is"] = {"j": j, "b": bid, "gun": 0}
-	oyun.kayit("%s olarak işe girdin (%s). Günlük ~%s temiz." % [MESLEKLER[j]["ad"], oyun.harita.bolgeler[bid]["ad"], oyun.para(maas_gun(j, bid))], "good")
+	var gn: int = oyun.tarih()["gun"]
+	M["is"] = {"j": j, "b": bid, "gun": 0, "bina": bina, "carpan": carpan, "son": gn}
+	var yer := " (%s)" % oyun.harita.yerler[bina]["ad"] if bina >= 0 else ""
+	oyun.kayit("%s olarak işe girdin%s. Her gün iş yerine gidip mesai yapmalısın; ücret mesai bitince orada ödenir (~%s/mesai)." % [MESLEKLER[j]["ad"], yer, oyun.para(mesai_ucret())], "good")
 	return oyun.tamam()
+
+func mesai_ucret() -> int:
+	var I: Dictionary = oyun.mes["is"]
+	if I.is_empty():
+		return 0
+	return int(round(maas_gun(I["j"], I["b"]) * I.get("carpan", 1.0) * donem_carpan(I["j"])))
+
+# İş yerinde mesaiyi başlat (arayüz yakınlığı denetler)
+func mesai_baslat(i: int) -> Dictionary:
+	var I: Dictionary = oyun.mes["is"]
+	if I.is_empty() or I.get("bina", -1) != i:
+		return oyun.hata("Burası senin iş yerin değil.")
+	if not oyun.vardiya.is_empty():
+		return oyun.hata("Zaten çalışıyorsun.")
+	var th := tatil_adi()
+	if th != "":
+		return oyun.hata("Bugün %s: iş yeri kapalı." % th)
+	var sa: int = oyun.tarih()["saat"]
+	if sa < 7 or sa > 16:
+		return oyun.hata("Mesai 07:00–16:00 arası başlar.")
+	oyun.vardiya = {"bina": i, "bitis": oyun.t + oyun.VARDIYA_DK, "ucret": mesai_ucret(), "meslek": true}
+	oyun.kayit("%s mesaisi başladı (8 saat, %s)." % [MESLEKLER[I["j"]]["ad"], oyun.para(oyun.vardiya["ucret"])], "info")
+	return oyun.tamam("Mesaiye başladın. Ücret bitince burada ödenir.")
+
+# Mesai bitti: ücret ödenmiş olur; beceri ve yorgunluk güncellenir
+func mesai_bitti() -> void:
+	var M: Dictionary = oyun.mes
+	if M["is"].is_empty():
+		return
+	var j: String = M["is"]["j"]
+	var m: Dictionary = MESLEKLER[j]
+	M["is"]["son"] = oyun.tarih()["gun"]
+	M["is"]["gun"] += 1
+	oyun.kis_k.oz_ekle({"taksi": "taksici_dostu", "hamal": "dayanikli", "berber": "mahalleli", "katip": "hesapci"}[j], 1.2)
+	oyun.kis_k.degis("yorgun", 6.0)
+	var xp: float = M["beceri"][j]
+	M["beceri"][j] = minf(100.0, xp + 1.2 * (1.0 - xp / 115.0))
+	if seviye(M["beceri"][j]) > seviye(xp):
+		oyun.kayit("%s işinde \"%s\" oldun." % [m["ad"], BECERI_AD[seviye(M["beceri"][j])]], "good")
 
 func is_birak() -> Dictionary:
 	if not calisiyor():
@@ -114,7 +214,7 @@ func isletme_al(j: String) -> Dictionary:
 	if not oyun.harcama(float(m["fiyat"]), "temiz"):
 		return oyun.hata("Temiz para yetmiyor (%s)." % oyun.para(m["fiyat"]))
 	M["isletme"][j] = {"t": oyun.t}
-	oyun.kayit("%s satın aldın (%s). Tecrüben (%%%d) gelirini ve avantajını belirler." % [m["isletme"], oyun.para(m["fiyat"]), int(M["beceri"][j])], "good")
+	oyun.kayit("%s satın aldın (%s). Gelir her ay doğrudan kasana girer; tecrüben (%%%d) ve mevsim belirler." % [m["isletme"], oyun.para(m["fiyat"]), int(M["beceri"][j])], "good")
 	return oyun.tamam()
 
 # --- zaman ---
@@ -131,21 +231,19 @@ func gun() -> void:
 		oyun.kayit("%s işinden kovuldun: %s (puan %d)." % [m["ad"], "mahalle senden korkuyor" if b["tan"] > 30.0 and b["kor"] > 35.0 else "bölge sana sırt çevirdi", k["puan"]], "bad")
 		M["is"] = {}
 		return
-	oyun.yasal(maas_gun(j, bid))
-	oyun.kis_k.oz_ekle({"taksi": "taksici_dostu", "hamal": "dayanikli", "berber": "mahalleli", "katip": "hesapci"}[j], 1.2)
-	oyun.kis_k.degis("yorgun", 6.0)
-	M["is"]["gun"] += 1
-	var xp: float = M["beceri"][j]
-	M["beceri"][j] = minf(100.0, xp + 1.2 * (1.0 - xp / 115.0))
-	if seviye(M["beceri"][j]) > seviye(xp):
-		oyun.kayit("%s işinde \"%s\" oldun." % [m["ad"], BECERI_AD[seviye(M["beceri"][j])]], "good")
+	var yok: int = oyun.tarih()["gun"] - int(M["is"].get("son", 0))
+	if yok == 4:
+		oyun.kayit("%s patronu: \"4 gündür ortada yoksun. Yarın gelmezsen işin biter.\"" % m["ad"], "warn")
+	elif yok >= 5:
+		oyun.kayit("%s işinden devamsızlıktan kovuldun." % m["ad"], "bad")
+		M["is"] = {}
 
 func ay() -> void:
 	var M: Dictionary = oyun.mes
 	var top := 0
 	var adlar: Array = []
 	for j in M["isletme"]:
-		var g := isletme_gelir(j)
+		var g := int(round(isletme_gelir(j) * donem_carpan(j)))
 		oyun.yasal(g)
 		top += g
 		adlar.append(MESLEKLER[j]["isletme"])

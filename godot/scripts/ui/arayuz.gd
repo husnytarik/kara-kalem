@@ -727,7 +727,12 @@ func _bina_paneli() -> void:
 	for gk in ["haraclan", "topla", "koru"]:
 		_btn(_ic, "%s  (%d dk iş)" % [oyun.GOREVLER[gk]["ad"], oyun.GOREVLER[gk]["is"]], func(): _sonuc_goster(oyun.gorev_ver(i, gk, secili), "Adam yola çıktı."), not yakin)
 	_btn(_ic, "Satın al  (%s temiz)" % oyun.para(oyun.fiyat(i)), func(): _sonuc_goster(oyun.satin_al(i), "Satın aldın."), r["sahip"] or not yakin)
-	if not r["sahip"]:
+	var Mi: Dictionary = oyun.mes["is"]
+	if not Mi.is_empty() and Mi.get("bina", -1) == i and oyun.vardiya.is_empty():
+		_ayrac(_ic)
+		_lbl(_ic, "Senin iş yerin: %s · mesai ücreti %s (07–16 arası başla)" % [oyun.meslek.MESLEKLER[Mi["j"]]["ad"], oyun.para(oyun.meslek.mesai_ucret())], 15, RENK["good"])
+		_btn(_ic, "Mesaiye başla (8 saat)", func(): _sonuc_goster(oyun.meslek.mesai_baslat(i), "Mesaiye başladın."), not yakin)
+	elif not r["sahip"]:
 		_ayrac(_ic)
 		if oyun.vardiya.is_empty():
 			_btn(_ic, "Burada çalış  (8 saat · %s)" % oyun.para(oyun.ucret(i)), func(): _sonuc_goster(oyun.calis(i), "Mesaiye başladın."), not yakin)
@@ -1023,8 +1028,23 @@ func _meslek_paneli() -> void:
 		_lbl(_ic, "İşsizsin. Bulunduğun bölge: %s. Düz iş temiz gelir, tecrübe ve meşru bir yüz verir." % (oyun.harita.bolgeler[bid]["ad"] if bid != "" else "—"), 14, RENK["soluk"])
 	else:
 		var j: String = M["is"]["j"]
-		_lbl(_ic, "Çalıştığın iş: %s (%s) · günlük ~%s" % [K.MESLEKLER[j]["ad"], oyun.harita.bolgeler[M["is"]["b"]]["ad"], oyun.para(K.maas_gun(j, M["is"]["b"]))], 16, RENK["good"])
+		var iy: String = oyun.harita.yerler[M["is"]["bina"]]["ad"] if M["is"].get("bina", -1) >= 0 else "?"
+		var yokg: int = oyun.tarih()["gun"] - int(M["is"].get("son", 0))
+		_lbl(_ic, "Çalıştığın iş: %s · iş yeri: %s (%s)" % [K.MESLEKLER[j]["ad"], iy, oyun.harita.bolgeler[M["is"]["b"]]["ad"]], 16, RENK["good"])
+		_lbl(_ic, "Mesai başına ~%s, iş yerinde mesai bitince ödenir. Son mesai: %d gün önce." % [oyun.para(K.mesai_ucret()), yokg], 14, RENK["warn"] if yokg >= 3 else RENK["info"])
 		_btn(_ic, "İşten ayrıl", func(): _sonuc_goster(K.is_birak()))
+	_ayrac(_ic)
+	var th: String = K.tatil_adi()
+	_lbl(_ic, "GAZETE · İş İlanları — %s%s" % [oyun.tarih_yazi(), (" · " + th) if th != "" else ""], 18, RENK["altin"])
+	_lbl(_ic, "%s. İlanlar her gün değişir; işe girince ilandaki iş yerine gidip mesai yapmalısın." % K.donem_yazi(), 13, RENK["soluk"])
+	for ad in K.ilanlar():
+		var aj: String = ad["j"]
+		var k2: Dictionary = K.kabul(aj, ad["bolge"])
+		var ah2 := HBoxContainer.new()
+		_ic.add_child(ah2)
+		var mu: int = int(round(K.maas_gun(aj, ad["bolge"]) * ad["carpan"] * K.donem_carpan(aj)))
+		_lbl(ah2, "%s · %s (%s) · mesai ~%s " % [K.MESLEKLER[aj]["ad"], oyun.harita.yerler[ad["bina"]]["ad"], oyun.harita.bolgeler[ad["bolge"]]["ad"], oyun.para(mu)], 14)
+		_btn(ah2, "Başvur (%d/%d)" % [k2["puan"], k2["esik"]], func(): _sonuc_goster(K.is_gir(aj, ad["bolge"], ad["bina"], ad["carpan"])), not M["is"].is_empty())
 	_ayrac(_ic)
 	var A: RefCounted = oyun.aklama_k
 	var pl: Dictionary = A.plan()
@@ -1048,11 +1068,8 @@ func _meslek_paneli() -> void:
 		_lbl(_ic, "%s Avantaj: %s." % [m["ac"], m["perk"]], 13, RENK["soluk"])
 		var h := HBoxContainer.new()
 		_ic.add_child(h)
-		if bid != "" and M["is"].is_empty():
-			var k: Dictionary = K.kabul(j, bid)
-			_btn(h, "İşe gir (kabul %d/%d)" % [k["puan"], k["esik"]], func(): _sonuc_goster(K.is_gir(j, bid)))
 		if M["isletme"].has(j):
-			_lbl(h, "✔ %s senin · ay geliri %s" % [m["isletme"], oyun.para(K.isletme_gelir(j))], 14, RENK["good"])
+			_lbl(h, "✔ %s senin · ay geliri ~%s (doğrudan kasana)" % [m["isletme"], oyun.para(int(K.isletme_gelir(j) * K.donem_carpan(j)))], 14, RENK["good"])
 		else:
 			_btn(h, "%s al (%s)" % [m["isletme"], oyun.para(m["fiyat"])], func(): _sonuc_goster(K.isletme_al(j)), xp < 20.0 or oyun.temiz < m["fiyat"])
 	_sonuc_satiri()

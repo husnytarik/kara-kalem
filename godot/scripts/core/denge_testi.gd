@@ -106,9 +106,12 @@ static func _bot(o: Node, bb: Dictionary) -> void:
 # Dürüst yol: işe gir, becerini geliştir, işletme al, meşru yer satın al, mahalleye hediye ver. Haraç/adam yok.
 static func _iyi(o: Node) -> void:
 	if not o.meslek.calisiyor() and o.mes["isletme"].is_empty():
-		for b in o.bolge:
-			if o.meslek.is_gir("berber", b)["ok"] if o.meslek.is_gir("berber", b).has("ok") else false:
+		for ad in o.meslek.ilanlar():
+			if o.meslek.is_gir(ad["j"], ad["bolge"], ad["bina"], ad["carpan"]).get("ok", false):
 				break
+	elif o.meslek.calisiyor() and o.vardiya.is_empty():
+		o.t = o.t - o.t % 1440 + 7 * 60
+		o.meslek.mesai_baslat(o.mes["is"]["bina"])
 	for j in o.meslek.MESLEKLER:
 		if o.mes["beceri"][j] >= 20.0 and not o.mes["isletme"].has(j) and o.temiz > o.meslek.MESLEKLER[j]["fiyat"] + 500:
 			o.meslek.isletme_al(j)
