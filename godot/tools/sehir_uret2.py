@@ -595,3 +595,9 @@ if len(pj):
         agac.append([round(float(X0 + pi[k] / S), 1), round(float(Z0 + pj[k] / S), 1)])
 SOKAK.write_text(json.dumps({"lamba": lamba, "agac": agac, "iskele": guverte}), encoding="utf-8")
 print("yol:", len(yollar), "lamba:", len(lamba), "agac:", len(agac), "köprü/iskele:", len(guverte), "park px:", int(park.sum()))
+
+# ---------------- yol ağı (arabalar ve yayalar için) ----------------
+(KOK / "data/yol_ag.json").write_text(json.dumps(
+    [{"pts": [[round(float(x), 1), round(float(z), 1)] for x, z in y["pts"]], "w": y["w"], "sinif": y["sinif"]}
+     for y in yollar if y["sinif"] != "ray"]), encoding="utf-8")
+print("yol_ag.json yazildi")
