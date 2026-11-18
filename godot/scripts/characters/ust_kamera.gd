@@ -1,6 +1,6 @@
 extends Node3D
 # Mount & Blade tarzı harita kamerası: yukarıdan, karakteri takip eder.
-# Sağ tık sürükle: döndür/eğ · Tekerlek: yakınlaş · WASD/ok: kaydır · C: karakteri ortala
+# Sağ tık sürükle: döndür/eğ · Tekerlek: yakınlaş · WASD/ok: kamerayı serbest kaydır (olduğu yerde kalır) · C: karakteri ortala
 
 const MAKS_MESAFE := 300.0   # en uzak yakınlaşma (eskiden 800)
 
@@ -8,6 +8,8 @@ var hedef: Node3D
 var mesafe := 110.0
 var _pitch := -1.0
 var _kayma := Vector3.ZERO
+var _serbest := false          # WASD ile kaydırınca kamera olduğu yerde kalır
+var _sabit := Vector3.ZERO     # serbest modda kamera odağı
 var _kam: Camera3D
 var _son := 0
 var _poz := Vector3.ZERO      # yumuşatılmış kamera odağı
@@ -37,6 +39,7 @@ func _unhandled_input(e: InputEvent) -> void:
 			mesafe = minf(MAKS_MESAFE, mesafe * 1.1)
 	elif e is InputEventKey and e.pressed and e.keycode == KEY_C:
 		_kayma = Vector3.ZERO
+		_serbest = false
 
 func _process(_d: float) -> void:
 	var simdi := Time.get_ticks_usec()
@@ -48,10 +51,14 @@ func _process(_d: float) -> void:
 	if Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT): g.x -= 1
 	if Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT): g.x += 1
 	if g != Vector3.ZERO:
-		_kayma += g.normalized().rotated(Vector3.UP, rotation.y) * mesafe * 0.9 * dt
-		_kayma = _kayma.limit_length(400.0)
+		if not _serbest:
+			_serbest = true
+			_sabit = _poz if _poz_hazir else (hedef.global_position if hedef else Vector3.ZERO)
+		_sabit += g.normalized().rotated(Vector3.UP, rotation.y) * mesafe * 0.9 * dt
+		_sabit.x = clampf(_sabit.x, -1500.0, 1500.0)
+		_sabit.z = clampf(_sabit.z, -1500.0, 1500.0)
 	if hedef:
-		var amac := hedef.global_position + _kayma
+		var amac := _sabit if _serbest else hedef.global_position + _kayma
 		if not _poz_hazir or _poz.distance_to(amac) > 300.0:   # ilk kare / ışınlanma: atlama
 			_poz = amac
 			_mes = mesafe

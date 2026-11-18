@@ -411,6 +411,40 @@ func tarih_yazi() -> String:
 func mevsim() -> String:
 	return ["İlkbahar", "Yaz", "Sonbahar", "Kış"][(tarih()["ay"] % 12) / 3]
 
+# Hava: güne ve mevsime göre deterministik. tur: "acik" | "bulutlu" | "yagmur" | "kar"; orttu 0..1, yog 0..1 (saate göre)
+func _hash(x: float) -> float:
+	return fposmod(sin(x * 12.9898) * 43758.5453, 1.0)
+
+var hava_zorla := ""   # test
+
+func hava() -> Dictionary:
+	if hava_zorla != "":
+		return {"tur": hava_zorla, "orttu": 0.9 if hava_zorla != "acik" else 0.25, "yog": 1.0 if hava_zorla in ["yagmur", "kar"] else 0.0}
+	var d := tarih()
+	var ms: int = (int(d["ay"]) % 12) / 3
+	var blok: int = int(d["gun"]) / 2   # hava birkaç gün sürer
+	var r := _hash(float(blok) + 0.37)
+	var tur := "acik"
+	var orttu := 0.12 + 0.2 * _hash(float(blok) + 5.1)
+	var yagis: float = [0.25, 0.1, 0.32, 0.0][ms]
+	var kar: float = [0.0, 0.0, 0.05, 0.4][ms]
+	if r < kar:
+		tur = "kar"
+		orttu = 0.85
+	elif r < kar + yagis:
+		tur = "yagmur"
+		orttu = 0.9
+	elif r < kar + yagis + 0.3:
+		tur = "bulutlu"
+		orttu = 0.6
+	var saat: float = float(d["saat"]) + float(d["dk"]) / 60.0
+	var bas: float = 4.0 + 12.0 * _hash(float(d["gun"]) + 9.7)
+	var yog := 0.0
+	if tur == "yagmur" or tur == "kar":
+		yog = clampf(1.0 - absf(saat - (bas + 4.0)) / 5.0, 0.0, 1.0) if _hash(float(blok) + 2.2) > 0.0 else 0.0
+		yog = clampf(yog * 1.6, 0.0, 1.0)
+	return {"tur": tur, "orttu": orttu, "yog": yog}
+
 # ---------- bölge okuma ----------
 func hakim_of(id: String) -> String:
 	var inf: Dictionary = bolge[id]["inf"]

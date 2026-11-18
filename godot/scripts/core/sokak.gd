@@ -44,6 +44,7 @@ func _ready() -> void:
 	kamera.set_script(load("res://scripts/characters/ust_kamera.gd"))
 	add_child(kamera)
 	kamera.hedef = oyuncu
+	_hava_kur()
 	_oy_etiket = Label3D.new()
 	_oy_etiket.font_size = 40
 	_oy_etiket.pixel_size = 0.07
@@ -142,6 +143,10 @@ func _ready() -> void:
 			oyuncu.global_position = Vector3(float(q[0]), harita.yuk(float(q[0]), float(q[1])), float(q[1]))
 		elif a.begins_with("--saat="):
 			oyun.t = float(a.substr(7)) * 60.0
+		elif a.begins_with("--hava="):
+			oyun.hava_zorla = a.substr(7)
+			_orttu_g = 0.9
+			_yog_g = 1.0
 		elif a.begins_with("--mesafe="):
 			kamera.mesafe = float(a.substr(9))
 		elif a == "--sissiz":
@@ -508,6 +513,7 @@ func _process(delta: float) -> void:
 	var id: String = harita.bolge_at(oyuncu.global_position)
 	_etiket.text = harita.bolgeler[id]["ad"] if id != "" else "Yollar"
 	# kalite: uzaktan bakarken SSAO ve gölge gereksiz (ve pahalı)
+	_hava_guncelle(delta)
 	_atmosfer()
 	var uz: float = kamera.mesafe
 	_env.ssao_enabled = uz < 160.0
@@ -637,14 +643,120 @@ func _diyalog_testi(tur: String) -> void:
 			arayuz.karsilasma_ac(g)
 			return
 
+const GOKYUZU_SHADER := """
+shader_type sky;
+uniform vec3 ust : source_color = vec3(0.3, 0.5, 0.8);
+uniform vec3 ufuk : source_color = vec3(0.8, 0.85, 0.9);
+uniform vec3 bulut : source_color = vec3(1.0);
+uniform float orttu = 0.4;
+uniform float koyu = 0.0;
+uniform vec2 kayma = vec2(0.0);
+float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float n(vec2 p){ vec2 i = floor(p); vec2 f = fract(p); f = f * f * (3.0 - 2.0 * f);
+	return mix(mix(h(i), h(i + vec2(1.0, 0.0)), f.x), mix(h(i + vec2(0.0, 1.0)), h(i + vec2(1.0, 1.0)), f.x), f.y); }
+float fbm(vec2 p){ float v = 0.0; float a = 0.5; for (int i = 0; i < 5; i++) { v += a * n(p); p = p * 2.03 + vec2(7.1, 3.3); a *= 0.5; } return v; }
+void sky() {
+	vec3 d = EYEDIR;
+	float y = d.y;
+	vec3 col = mix(ufuk, ust, smoothstep(0.0, 0.55, y));
+	if (y < 0.0) col = mix(ufuk, ufuk * 0.45, clamp(-y * 3.0, 0.0, 1.0));
+	if (y > 0.0) {
+		vec2 uv = d.xz / (y + 0.22) * 1.3 + kayma;
+		float c = fbm(uv);
+		float esik = 1.0 - orttu;
+		float m = smoothstep(esik - 0.05, esik + 0.28, c);
+		m *= smoothstep(0.0, 0.16, y);
+		vec3 bc = bulut * (1.0 - koyu * 0.6);
+		float alt = smoothstep(esik, esik + 0.4, c);
+		bc = mix(bc, bc * 0.62, alt * (0.35 + koyu * 0.5));
+		col = mix(col, bc, m * 0.92);
+	}
+	COLOR = col;
+}
+""";
+
+var _hava_yag: GPUParticles3D
+var _hava_tur := ""
+var _bulut_x := 0.0
+var _orttu_g := 0.4
+var _yog_g := 0.0
+
+func _hava_kur() -> void:
+	_hava_yag = GPUParticles3D.new()
+	_hava_yag.amount = 4000
+	_hava_yag.lifetime = 1.3
+	_hava_yag.visibility_aabb = AABB(Vector3(-120, -80, -120), Vector3(240, 160, 240))
+	_hava_yag.local_coords = false
+	_hava_yag.emitting = false
+	var pm := ParticleProcessMaterial.new()
+	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	pm.emission_box_extents = Vector3(70, 1, 70)
+	pm.direction = Vector3(0.12, -1, 0.05)
+	pm.spread = 3.0
+	pm.initial_velocity_min = 55.0
+	pm.initial_velocity_max = 70.0
+	pm.gravity = Vector3.ZERO
+	_hava_yag.process_material = pm
+	var q := QuadMesh.new()
+	q.size = Vector2(0.07, 1.6)
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(0.75, 0.82, 0.95, 0.5)
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	q.material = mat
+	_hava_yag.draw_pass_1 = q
+	kamera.add_child(_hava_yag)
+	_hava_yag.top_level = true
+
+func _hava_guncelle(dt: float) -> void:
+	var hv: Dictionary = oyun.hava()
+	_orttu_g = lerpf(_orttu_g, float(hv["orttu"]), 1.0 - exp(-0.4 * dt))
+	_yog_g = lerpf(_yog_g, float(hv["yog"]), 1.0 - exp(-0.6 * dt))
+	_bulut_x += dt * 0.004
+	var sky: ShaderMaterial = _env.sky.sky_material
+	sky.set_shader_parameter("orttu", _orttu_g)
+	sky.set_shader_parameter("koyu", clampf(_orttu_g - 0.4, 0.0, 1.0) * (1.0 if hv["tur"] != "bulutlu" else 0.5) + _yog_g * 0.3)
+	sky.set_shader_parameter("kayma", Vector2(_bulut_x, _bulut_x * 0.3))
+	var tur: String = hv["tur"]
+	var yagiyor: bool = (tur == "yagmur" or tur == "kar") and _yog_g > 0.05
+	if _hava_yag != null:
+		if tur != _hava_tur:
+			_hava_tur = tur
+			var pm: ParticleProcessMaterial = _hava_yag.process_material
+			var q: QuadMesh = _hava_yag.draw_pass_1
+			if tur == "kar":
+				pm.initial_velocity_min = 5.0
+				pm.initial_velocity_max = 9.0
+				pm.direction = Vector3(0.1, -1, 0.1)
+				pm.spread = 25.0
+				q.size = Vector2(0.28, 0.28)
+				_hava_yag.lifetime = 9.0
+				_hava_yag.amount = 5000
+			else:
+				pm.initial_velocity_min = 55.0
+				pm.initial_velocity_max = 70.0
+				pm.direction = Vector3(0.12, -1, 0.05)
+				pm.spread = 3.0
+				q.size = Vector2(0.07, 1.6)
+				_hava_yag.lifetime = 1.3
+				_hava_yag.amount = 4000
+		_hava_yag.emitting = yagiyor and kamera.mesafe < 220.0
+		_hava_yag.global_position = kamera.global_position + Vector3(0, 70 if tur == "yagmur" else 60, 0)
+		_hava_yag.amount_ratio = clampf(_yog_g, 0.1, 1.0)
+
 func _cevre() -> void:
-	var sky := ProceduralSkyMaterial.new()
+	var sky := ShaderMaterial.new()
+	var sh := Shader.new()
+	sh.code = GOKYUZU_SHADER
+	sky.shader = sh
 	var s := Sky.new()
+	s.radiance_size = Sky.RADIANCE_SIZE_64
 	s.sky_material = sky
 	var env := Environment.new()
 	env.background_mode = Environment.BG_SKY
 	env.sky = s
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.ssao_enabled = true
 	env.fog_enabled = true
@@ -693,16 +805,22 @@ func _atmosfer() -> void:
 			b = _ANAHTAR[i + 1]
 			break
 	var k: float = (h - float(a[0])) / maxf(0.001, float(b[0]) - float(a[0]))
-	var sky: ProceduralSkyMaterial = _env.sky.sky_material
+	var sky: ShaderMaterial = _env.sky.sky_material
 	var ust: Color = (a[1] as Color).lerp(b[1], k)
 	var ufuk: Color = (a[2] as Color).lerp(b[2], k)
-	sky.sky_top_color = ust
-	sky.sky_horizon_color = ufuk
-	sky.ground_horizon_color = ufuk
-	sky.ground_bottom_color = ust.darkened(0.5)
+	var kapali: float = clampf((_orttu_g - 0.4) / 0.5, 0.0, 1.0)   # bulutlu/yağışlı: gök gri, güneş zayıf
+	var gri: Color = Color(0.5, 0.54, 0.6) * clampf(float(a[4]) * 0.6 + 0.15, 0.2, 0.9)
+	ust = ust.lerp(gri.lerp(ust, 0.25), kapali * 0.75)
+	ufuk = ufuk.lerp(gri.lerp(ufuk, 0.3), kapali * 0.75)
+	sky.set_shader_parameter("ust", ust)
+	sky.set_shader_parameter("ufuk", ufuk)
+	var gunes_g: float = lerpf(float(a[4]), float(b[4]), k)
+	sky.set_shader_parameter("bulut", Color(0.25, 0.27, 0.32).lerp(Color(1.0, 0.97, 0.94), clampf(gunes_g / 1.1, 0.0, 1.0)).lerp(ufuk, 0.25))
 	_gunes.light_color = (a[3] as Color).lerp(b[3], k)
-	_gunes.light_energy = lerpf(float(a[4]), float(b[4]), k)
-	_env.fog_light_color = (a[5] as Color).lerp(b[5], k)
+	_gunes.light_energy = gunes_g * (1.0 - 0.6 * kapali)
+	_env.fog_light_color = ((a[5] as Color).lerp(b[5], k)).lerp(ufuk, kapali * 0.5)
+	_env.fog_density = 0.0004 + 0.0009 * _yog_g
+	_env.ambient_light_color = ust.lerp(ufuk, 0.5)
 	_env.ambient_light_energy = lerpf(float(a[6]), float(b[6]), k)
 	# gece lamba havuzları: güneş zayıfladıkça belirir
 	var gece: float = clampf((0.8 - float(_gunes.light_energy)) / 0.55, 0.0, 1.0)
