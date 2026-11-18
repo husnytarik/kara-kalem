@@ -5,7 +5,8 @@ extends CanvasLayer
 
 const Tema := preload("res://scripts/ui/tema.gd")
 const Portre := preload("res://scripts/ui/portre.gd")
-const Minimap := preload("res://scripts/ui/minimap.gd")
+const CepSaati := preload("res://scripts/ui/cep_saati.gd")
+const Pie := preload("res://scripts/ui/pie_menu.gd")
 const RENK := {
 	"good": Tema.IYI, "bad": Tema.KOTU, "warn": Tema.UYARI, "info": Tema.BILGI,
 	"altin": Tema.VURGU, "soluk": Tema.SOLUK,
@@ -47,17 +48,31 @@ func kur(o: Node, s: Node) -> void:
 	_amac_paneli()
 	_sag_panel()
 	_diyalog_kur()
-	var mm := Minimap.new()
-	mm.kur(oyun, sokak)
-	mm.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	mm.offset_left = 8
-	mm.offset_right = 158
-	mm.offset_top = -190
-	mm.offset_bottom = -40
-	mm.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(mm)
+	var saat := CepSaati.new()
+	saat.kur(oyun)
+	saat.position = Vector2(6, 4)
+	add_child(saat)
+	var sp := Pie.new()
+	sp.kur(true, [["♟", "Ben", ben_ac], ["⚒", "İş", meslek_ac], ["⚙", "Garaj", garaj_ac], ["★", "Hedefler", zafer_ac]])
+	sp.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	sp.offset_left = 0
+	sp.offset_top = -Pie.BOY
+	sp.offset_right = Pie.BOY
+	sp.offset_bottom = 0
+	add_child(sp)
+	var rp := Pie.new()
+	rp.kur(false, [["♜", "Aileler", aile_ac], ["♞", "Adamlar", adamlar_ac], ["⚑", "Bölgeler", _bolge_dugmesi], ["⚖", "Polis", polis_ac], ["✎", "Defter", defter_ac]])
+	rp.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	rp.offset_left = -Pie.BOY
+	rp.offset_top = -Pie.BOY
+	rp.offset_right = 0
+	rp.offset_bottom = 0
+	add_child(rp)
 	_log = VBoxContainer.new()
-	_log.position = Vector2(12, 470)
+	_log.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	_log.offset_left = 205
+	_log.offset_bottom = -40
+	_log.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_log.custom_minimum_size = Vector2(520, 0)
 	add_child(_log)
 
@@ -167,7 +182,7 @@ func _amac_paneli() -> void:
 	_amac_kutu = PanelContainer.new()
 	_amac_kutu.add_theme_stylebox_override("panel", Tema.kagit_stil())
 	_amac_kutu.theme = Tema.tema()
-	_amac_kutu.position = Vector2(8, 100)
+	_amac_kutu.position = Vector2(8, 150)
 	_amac_kutu.custom_minimum_size = Vector2(300, 0)
 	_amac_kutu.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_amac_kutu)
@@ -188,12 +203,15 @@ func _ihtiyac_cubugu() -> void:
 	var pc := PanelContainer.new()
 	pc.add_theme_stylebox_override("panel", Tema.stil(Tema.ARKA, Tema.KENAR, 5, 2))
 	pc.theme = Tema.tema()
-	pc.position = Vector2(8, 58)
+	pc.position = Vector2(130, 92)
 	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(pc)
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 14)
 	pc.add_child(h)
+	for hv in [["II", 0.0], ["▶", 1.0], ["×2", 2.0], ["×4", 4.0]]:
+		var hb := _btn(h, hv[0], sokak.hiz_ayarla.bind(hv[1]))
+		hb.add_theme_font_size_override("font_size", Tema.boyut(14))
 	for e in [["aclik", "Açlık", Tema.IYI], ["yorgun", "Yorgunluk", Tema.UYARI], ["stres", "Stres", Tema.KOTU], ["sikinti", "Sıkıntı", Tema.BILGI], ["un", "Ünün", Tema.VURGU]]:
 		var c := HBoxContainer.new()
 		c.add_theme_constant_override("separation", 5)
@@ -279,6 +297,7 @@ func _amac_guncelle() -> void:
 		_baski_yazi.add_theme_color_override("font_color", Color("2f6b2a") if yeter else (Color("9a2a1a") if kalan <= 3 else Color("8a5a10")))
 
 var _un: Label
+var _konum: Label
 
 func _hap(h: Node, sembol: String, renk: Color) -> Label:
 	var pc := PanelContainer.new()
@@ -290,52 +309,63 @@ func _hap(h: Node, sembol: String, renk: Color) -> Label:
 	return l
 
 func _ust_cubuk() -> void:
+	# gazete başlığı: kâğıt zemin, büyük tarih, altında konum; sağında para/ün/ekip rozetleri
+	_saat = Label.new()   # saat artık cep saatinde; metin yine de tutulur
 	var pc := PanelContainer.new()
-	pc.add_theme_stylebox_override("panel", _stil())
-	pc.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	pc.offset_left = 8
-	pc.offset_right = -8
-	pc.offset_top = 6
-	pc.theme = Tema.tema()
+	pc.add_theme_stylebox_override("panel", Tema.kagit_panel())
+	pc.position = Vector2(130, 8)
+	pc.theme = Tema.tema_kagit()
+	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(pc)
 	var h := HBoxContainer.new()
-	h.add_theme_constant_override("separation", 6)
+	h.add_theme_constant_override("separation", 16)
 	pc.add_child(h)
 	var sol := VBoxContainer.new()
 	sol.add_theme_constant_override("separation", 0)
 	h.add_child(sol)
-	_tarih = _lbl(sol, "", 14, RENK["soluk"])
-	_saat = _lbl(sol, "", 20, RENK["altin"])
-	for l in [_tarih, _saat]:
-		l.autowrap_mode = TextServer.AUTOWRAP_OFF
-		l.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	for hv in [["II", 0.0], ["▶", 1.0], ["×2", 2.0], ["×4", 4.0]]:
-		_btn(h, hv[0], sokak.hiz_ayarla.bind(hv[1]))
-	_temiz = _hap(h, "", Tema.VURGU)
-	_kirli = _hap(h, "", Tema.KOTU)
-	_un = _hap(h, "", Tema.VURGU)
-	_ekip = _lbl(h, "", 16)
-	_arama = _lbl(h, "", 16)
-	_durum = _lbl(h, "", 16, RENK["warn"])
+	var kicker := Label.new()
+	kicker.text = "✦  KARA KALEM  ·  GÜNLÜK GAZETE  ✦"
+	kicker.add_theme_font_size_override("font_size", Tema.boyut(11))
+	kicker.add_theme_color_override("font_color", Color("7a5a30"))
+	sol.add_child(kicker)
+	_tarih = Label.new()
+	_tarih.add_theme_font_size_override("font_size", Tema.boyut(26))
+	_tarih.add_theme_color_override("font_color", Tema.KAGIT_YAZI)
+	_tarih.autowrap_mode = TextServer.AUTOWRAP_OFF
+	sol.add_child(_tarih)
+	var kural := ColorRect.new()
+	kural.color = Color(0.17, 0.11, 0.06, 0.75)
+	kural.custom_minimum_size = Vector2(0, 2)
+	sol.add_child(kural)
+	_konum = Label.new()
+	_konum.add_theme_font_size_override("font_size", Tema.boyut(16))
+	_konum.add_theme_color_override("font_color", Color("6a1f10"))
+	_konum.autowrap_mode = TextServer.AUTOWRAP_OFF
+	sol.add_child(_konum)
+	var dik := ColorRect.new()
+	dik.color = Color(0.17, 0.11, 0.06, 0.6)
+	dik.custom_minimum_size = Vector2(2, 0)
+	h.add_child(dik)
+	var sag := VBoxContainer.new()
+	sag.add_theme_constant_override("separation", 4)
+	sag.alignment = BoxContainer.ALIGNMENT_CENTER
+	h.add_child(sag)
+	var r1 := HBoxContainer.new()
+	r1.add_theme_constant_override("separation", 6)
+	sag.add_child(r1)
+	_temiz = _hap(r1, "", Tema.VURGU)
+	_kirli = _hap(r1, "", Tema.KOTU)
+	_un = _hap(r1, "", Tema.VURGU)
+	var r2 := HBoxContainer.new()
+	r2.add_theme_constant_override("separation", 12)
+	sag.add_child(r2)
+	_ekip = _lbl(r2, "", 15, Tema.KAGIT_YAZI)
+	_arama = _lbl(r2, "", 15, Tema.KAGIT_YAZI)
+	_durum = _lbl(r2, "", 15, Color("8a2a10"))
 	for l in [_ekip, _arama, _durum]:
 		l.autowrap_mode = TextServer.AUTOWRAP_OFF
 		l.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var bosluk := Control.new()
-	bosluk.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	h.add_child(bosluk)
-	_btn(h, "Ben", ben_ac)
-	_btn(h, "Aileler", aile_ac)
-	_btn(h, "Adamlar", adamlar_ac)
-	_btn(h, "Bölgeler", _bolge_dugmesi)
-	_btn(h, "Defter", defter_ac)
-	_btn(h, "Hedefler", zafer_ac)
-	_btn(h, "Garaj", garaj_ac)
-	_btn(h, "İş", meslek_ac)
-	_btn(h, "Polis", polis_ac)
-	for c in h.get_children():
-		if c is Button:
-			c.add_theme_font_size_override("font_size", Tema.boyut(14))
 
 func _sag_panel() -> void:
 	_sag = PanelContainer.new()
@@ -344,7 +374,7 @@ func _sag_panel() -> void:
 	_sag.offset_left = -340
 	_sag.offset_right = -8
 	_sag.offset_top = 66
-	_sag.offset_bottom = -40
+	_sag.offset_bottom = -200
 	_sag.visible = false
 	_sag.theme = Tema.tema_kagit()
 	add_child(_sag)
@@ -460,14 +490,16 @@ func _sonuc_goster(r: Dictionary, tamam_yazi: String = "Tamam.") -> void:
 # ---------- döngü ----------
 func _process(_d: float) -> void:
 	var d: Dictionary = oyun.tarih()
-	_tarih.text = "%s · %s" % [oyun.tarih_yazi(), oyun.mevsim()]
+	_tarih.text = oyun.tarih_yazi().to_upper()
+	_konum.text = "⚑ %s  ·  %s" % [sokak._etiket.text, oyun.mevsim()]
+	sokak._etiket.visible = false
 	_saat.text = oyun.saat_yazi()
 	_temiz.text = "● %s" % oyun.para(oyun.temiz)
 	_kirli.text = "▮ %s" % oyun.para(oyun.kirli)
 	_un.text = "♛ Ün: %d" % int(oyun.kis_k.taninma())
 	_ekip.text = "Ekip %d/%d" % [oyun.adamlar.size(), oyun.EKIP_MAX]
 	_arama.text = "Arama %d" % int(oyun.arama)
-	_arama.add_theme_color_override("font_color", RENK["bad"] if oyun.arama >= 30.0 else (RENK["warn"] if oyun.arama >= 10.0 else RENK["soluk"]))
+	_arama.add_theme_color_override("font_color", Color("a02a10") if oyun.arama >= 30.0 else (Color("a86a10") if oyun.arama >= 10.0 else Color("5a4630")))
 	_arama.tooltip_text = "Polis seni arıyor: 30 ve üstünde devriyeler kovalar."
 	_arama.mouse_filter = Control.MOUSE_FILTER_PASS
 	_durum.text = "DURAKLATILDI" if Engine.time_scale == 0.0 else ""

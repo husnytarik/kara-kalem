@@ -94,7 +94,7 @@ func _ready() -> void:
 	_etiket.add_theme_constant_override("outline_size", 8)
 	hud.add_child(_etiket)
 	_ipucu = Label.new()
-	_ipucu.position = Vector2(14, 98)
+	_ipucu.position = Vector2(135, 126)
 	_ipucu.add_theme_font_size_override("font_size", 16)
 	_ipucu.add_theme_color_override("font_outline_color", Color.BLACK)
 	_ipucu.add_theme_constant_override("outline_size", 8)
@@ -102,7 +102,7 @@ func _ready() -> void:
 	hud.add_child(_ipucu)
 	var yardim := Label.new()
 	yardim.text = "Sol tık: git/bina seç · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · V: sis aç/kapa · 1/2/3: hız · B: bölge · T: adamlar · F: defter · H: eve git · F6: kaydet · F9: yükle"
-	yardim.position = Vector2(14, 700)
+	yardim.position = Vector2(205, 700)
 	yardim.add_theme_font_size_override("font_size", 12)
 	yardim.modulate = Color(1, 1, 1, 0.5)
 	hud.add_child(yardim)
@@ -748,6 +748,10 @@ func _ekran_cek(arg: String) -> void:
 			oyun.temiz = 500.0
 			oyuncu.gir(97)
 			arayuz.bina_ac(97)
+		elif p[1] == "pie":
+			for c in arayuz.get_children():
+				if c.has_method("hepsini_ac"):
+					c.hepsini_ac()
 		elif p[1] == "bina":
 			oyun.temiz = 500.0
 			arayuz.bina_ac(97)
