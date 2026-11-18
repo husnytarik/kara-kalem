@@ -32,6 +32,7 @@ func kur(o: Node, h: Node, ka: Node) -> void:
 	harita = h
 	kamera = ka
 	_pazar = Pazar.new(oyun)
+	_kagit_kur()
 	var by: Dictionary = {}
 	for n in get_tree().get_nodes_in_group("bina"):
 		if not n.dolgu:
@@ -88,8 +89,9 @@ func _rozet(renk: Color) -> ImageTexture:
 
 func _oge_kur(i: int, n: Node3D) -> void:
 	var y: Dictionary = harita.yerler[i]
-	if n.get("_etiket") != null:
-		(n._etiket as Label3D).visible = false
+	for c in n.get_children():
+		if c is Label3D:
+			(c as Label3D).visible = false
 	var kok := Node3D.new()
 	kok.position = n.global_position + Vector3(0, n.boyut.y + 4.0, 0)
 	add_child(kok)
@@ -112,37 +114,17 @@ func _oge_kur(i: int, n: Node3D) -> void:
 	gl.no_depth_test = true
 	gl.render_priority = 4
 	simge.add_child(gl)
-	# kâğıt şerit
 	var ad: String = y["ad"]
-	var sz: Vector2 = ThemeDB.fallback_font.get_string_size(ad, HORIZONTAL_ALIGNMENT_LEFT, -1, 56)
-	var gw: float = sz.x * 0.03 + 3.0
-	var gh := 3.0
-	var k := 4.0
-	var sr := Sprite3D.new()
-	sr.texture = Tema.kagit_tex(int(gw / (0.03 * k)), int(gh / (0.03 * k)), Tema.KAGIT, Color("2b1b0c"))
-	sr.pixel_size = 0.03 * k
-	sr.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	sr.no_depth_test = true
-	sr.shaded = false
-	sr.render_priority = 1
-	sr.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
-	var sl := Label3D.new()
-	sl.font_size = 56
-	sl.pixel_size = 0.03
-	sl.outline_size = 0
-	sl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	sl.no_depth_test = true
-	sl.render_priority = 2
-	sl.modulate = Tema.KAGIT_YAZI
-	sl.text = ad
-	for q in [sr, sl]:
-		q.visibility_range_end = 120.0
-		kok.add_child(q)
-	_ogeler.append({"i": i, "kok": kok, "simge": simge, "sp": sp, "gl": gl, "sr": sr, "kat": ""})
+	_ogeler.append({"i": i, "kok": kok, "simge": simge, "sp": sp, "gl": gl, "ad": ad, "kat": ""})
 
 func _guncelle() -> void:
+	var gr: Node = get_parent().get("gorus")
 	for o in _ogeler:
 		var kat := kategori(o["i"])
+		var hep: bool = kat == "ev" or kat == "gelir"
+		var gor: bool = hep or gr == null or gr.kesfedildi(harita.yerler[o["i"]]["pos"])
+		(o["kok"] as Node3D).visible = gor
+		o["gor"] = gor
 		if kat == o["kat"]:
 			continue
 		o["kat"] = kat
@@ -151,12 +133,94 @@ func _guncelle() -> void:
 		var gl: Label3D = o["gl"]
 		gl.text = d[0]
 		gl.modulate = d[1].lerp(Color.WHITE, 0.35)
-		var hep: bool = kat == "ev" or kat == "gelir"
 		var uz: float = 0.0 if hep else 420.0
 		(o["sp"] as Sprite3D).visibility_range_end = uz
 		gl.visibility_range_end = uz
 
+var _k_kutu: Control
+var _k_ic: Control
+var _k_yazi: Label
+var _k_tw: Tween
+var _k_oge := -1
+var _k_w := 0.0
+
+func _kagit_kur() -> void:
+	var cl := CanvasLayer.new()
+	cl.layer = 5
+	add_child(cl)
+	_k_kutu = Control.new()
+	_k_kutu.clip_contents = true
+	_k_kutu.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_k_kutu.visible = false
+	cl.add_child(_k_kutu)
+	_k_ic = Panel.new()
+	_k_ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_k_kutu.add_child(_k_ic)
+	_k_yazi = Label.new()
+	_k_yazi.add_theme_font_override("font", Tema.yazi_tipi())
+	_k_yazi.add_theme_font_size_override("font_size", 14)
+	_k_yazi.add_theme_color_override("font_color", Tema.KAGIT_YAZI)
+	_k_yazi.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_k_yazi.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_k_yazi.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_k_ic.add_child(_k_yazi)
+
+func _k_goster(oge: int) -> void:
+	if oge == _k_oge:
+		return
+	_k_oge = oge
+	if _k_tw != null:
+		_k_tw.kill()
+	if oge < 0:
+		_k_kutu.visible = false
+		return
+	var ad: String = _ogeler[oge]["ad"]
+	var ts: Vector2 = Tema.yazi_tipi().get_string_size(ad, HORIZONTAL_ALIGNMENT_LEFT, -1, 14)
+	_k_w = ts.x + 26.0
+	var sb := StyleBoxTexture.new()
+	sb.texture = Tema.kagit_tex(int(_k_w / 2.0), 11, Tema.KAGIT, Color("2b1b0c"))
+	_k_ic.add_theme_stylebox_override("panel", sb)
+	_k_ic.size = Vector2(_k_w, 22)
+	_k_yazi.text = ad
+	_k_yazi.size = Vector2(_k_w, 22)
+	_k_kutu.size = Vector2(0, 22)
+	_k_kutu.visible = true
+	_k_tw = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_k_tw.tween_property(_k_kutu, "size:x", _k_w, 0.2)
+
+func _fare_tara() -> void:
+	var cam: Camera3D = get_viewport().get_camera_3d()
+	if cam == null:
+		return
+	var fare: Vector2 = get_viewport().get_mouse_position()
+	for a in OS.get_cmdline_user_args():   # test: --fare=x,y
+		if a.begins_with("--fare="):
+			var f: PackedStringArray = a.substr(7).split(",")
+			fare = Vector2(float(f[0]), float(f[1]))
+	var en := -1
+	var en_d := 22.0 * 22.0
+	for k in _ogeler.size():
+		var o: Dictionary = _ogeler[k]
+		if not o.get("gor", true):
+			continue
+		var sp: Sprite3D = o["sp"]
+		var w: Vector3 = sp.global_position
+		if cam.is_position_behind(w):
+			continue
+		if sp.visibility_range_end > 0.0 and cam.global_position.distance_to(w) > sp.visibility_range_end:
+			continue
+		var q: Vector2 = cam.unproject_position(w)
+		var d: float = q.distance_squared_to(fare)
+		if d < en_d:
+			en_d = d
+			en = k
+	_k_goster(en)
+	if en >= 0:
+		var q2: Vector2 = cam.unproject_position((_ogeler[en]["sp"] as Sprite3D).global_position)
+		_k_kutu.position = q2 + Vector2(16, -11)
+
 func _process(dt: float) -> void:
+	_fare_tara()
 	_sure += dt
 	if _sure > 1.0:
 		_sure = 0.0

@@ -236,7 +236,7 @@ func _gorunurluk() -> void:
 		(g["dugum"] as Node3D).visible = gorunur(g["pos"])
 	for n in get_tree().get_nodes_in_group("bina"):
 		if n._etiket != null:
-			n._etiket.visible = kesfedildi(n.global_position)
+			n._etiket.visible = false   # isimler artik bina_simge.gd (hover kagidi)
 
 func _hareket_kaydi() -> void:
 	# Binaların dörtte biri her turda taranır (takılmayı önlemek için); her bina ~1 sn'de bir güncellenir.

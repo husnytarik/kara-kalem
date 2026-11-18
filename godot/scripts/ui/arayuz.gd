@@ -245,12 +245,24 @@ func _ihtiyac_cubugu(v: Control) -> void:
 	v.add_child(h)
 	for hv in [["II", 0.0], ["▶", 1.0], ["×2", 2.0], ["×4", 4.0]]:
 		var hb := _btn(h, hv[0], sokak.hiz_ayarla.bind(hv[1]))
-		hb.add_theme_font_size_override("font_size", Tema.boyut(14))
+		hb.add_theme_font_size_override("font_size", Tema.boyut(11))
+		hb.custom_minimum_size = Vector2(24, 18)
+		for dn in ["normal", "hover", "pressed", "focus"]:
+			var bs := StyleBoxFlat.new()
+			bs.bg_color = Color(0.1, 0.07, 0.04, 0.9 if dn != "hover" else 1.0)
+			bs.border_color = Color("c9972c")
+			bs.set_border_width_all(1)
+			bs.set_corner_radius_all(3)
+			bs.content_margin_left = 4
+			bs.content_margin_right = 4
+			bs.content_margin_top = 0
+			bs.content_margin_bottom = 0
+			hb.add_theme_stylebox_override(dn, bs)
 	for e in [["aclik", "Açlık", Tema.IYI], ["yorgun", "Yorgunluk", Tema.UYARI], ["stres", "Stres", Tema.KOTU], ["sikinti", "Sıkıntı", Tema.BILGI], ["un", "Ünün", Tema.VURGU]]:
 		var c := HBoxContainer.new()
 		c.add_theme_constant_override("separation", 5)
 		h.add_child(c)
-		var l := _lbl(c, "● " + e[1], 13, Tema.KAGIT_YAZI)
+		var l := _lbl(c, "● " + e[1], 11, Tema.KAGIT_YAZI)
 		l.add_theme_color_override("font_color", Tema.KAGIT_YAZI)
 		l.autowrap_mode = TextServer.AUTOWRAP_OFF
 		l.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
@@ -258,7 +270,7 @@ func _ihtiyac_cubugu(v: Control) -> void:
 		p.min_value = 0
 		p.max_value = 100
 		p.show_percentage = false
-		p.custom_minimum_size = Vector2(46, 10)
+		p.custom_minimum_size = Vector2(40, 8)
 		p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		var f := StyleBoxFlat.new()
 		f.bg_color = e[2]
@@ -337,9 +349,9 @@ var _konum: Label
 
 func _hap(h: Node, sembol: String, renk: Color) -> Label:
 	var pc := PanelContainer.new()
-	pc.add_theme_stylebox_override("panel", Tema.stil(Color(0.05, 0.035, 0.025, 0.95), Tema.KENAR, 4, 10))
+	pc.add_theme_stylebox_override("panel", Tema.stil(Color(0.05, 0.035, 0.025, 0.95), Tema.KENAR, 4, 6))
 	h.add_child(pc)
-	var l := _lbl(pc, sembol, 16, renk)
+	var l := _lbl(pc, sembol, 13, renk)
 	l.autowrap_mode = TextServer.AUTOWRAP_OFF
 	l.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	return l
@@ -348,7 +360,12 @@ func _ust_cubuk() -> void:
 	# gazete başlığı: kâğıt zemin, büyük tarih, altında konum; sağında para/ün/ekip rozetleri
 	_saat = Label.new()   # saat artık cep saatinde; metin yine de tutulur
 	var pc := PanelContainer.new()
-	pc.add_theme_stylebox_override("panel", Tema.kagit_panel())
+	var ps: StyleBoxTexture = Tema.kagit_panel()
+	ps.set_content_margin(SIDE_TOP, 3)
+	ps.set_content_margin(SIDE_BOTTOM, 3)
+	ps.set_content_margin(SIDE_LEFT, 12)
+	ps.set_content_margin(SIDE_RIGHT, 12)
+	pc.add_theme_stylebox_override("panel", ps)
 	pc.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	pc.offset_left = 130
 	pc.offset_right = -8
@@ -363,7 +380,7 @@ func _ust_cubuk() -> void:
 	sol.add_theme_constant_override("separation", 0)
 	h.add_child(sol)
 	_tarih = Label.new()
-	_tarih.add_theme_font_size_override("font_size", Tema.boyut(20))
+	_tarih.add_theme_font_size_override("font_size", Tema.boyut(16))
 	_tarih.add_theme_color_override("font_color", Tema.KAGIT_YAZI)
 	_tarih.autowrap_mode = TextServer.AUTOWRAP_OFF
 	sol.add_child(_tarih)
@@ -371,9 +388,9 @@ func _ust_cubuk() -> void:
 	kural.color = Color(0.17, 0.11, 0.06, 0.75)
 	kural.custom_minimum_size = Vector2(0, 2)
 	sol.add_child(kural)
-	sol.custom_minimum_size = Vector2(190, 0)
+	sol.custom_minimum_size = Vector2(150, 0)
 	_konum = Label.new()
-	_konum.add_theme_font_size_override("font_size", Tema.boyut(13))
+	_konum.add_theme_font_size_override("font_size", Tema.boyut(11))
 	_konum.add_theme_color_override("font_color", Color("6a1f10"))
 	_konum.autowrap_mode = TextServer.AUTOWRAP_OFF
 	sol.add_child(_konum)
@@ -386,11 +403,11 @@ func _ust_cubuk() -> void:
 	dik.custom_minimum_size = Vector2(2, 0)
 	h.add_child(dik)
 	var sag := VBoxContainer.new()
-	sag.add_theme_constant_override("separation", 4)
+	sag.add_theme_constant_override("separation", 1)
 	sag.alignment = BoxContainer.ALIGNMENT_CENTER
 	h.add_child(sag)
 	var r1 := HBoxContainer.new()
-	r1.add_theme_constant_override("separation", 6)
+	r1.add_theme_constant_override("separation", 4)
 	sag.add_child(r1)
 	_temiz = _hap(r1, "", Tema.VURGU)
 	_kirli = _hap(r1, "", Tema.KOTU)
@@ -398,9 +415,9 @@ func _ust_cubuk() -> void:
 	var r2 := HBoxContainer.new()
 	r2.add_theme_constant_override("separation", 12)
 	sag.add_child(r2)
-	_ekip = _lbl(r2, "", 15, Tema.KAGIT_YAZI)
-	_arama = _lbl(r2, "", 15, Tema.KAGIT_YAZI)
-	_durum = _lbl(r2, "", 15, Color("8a2a10"))
+	_ekip = _lbl(r2, "", 12, Tema.KAGIT_YAZI)
+	_arama = _lbl(r2, "", 12, Tema.KAGIT_YAZI)
+	_durum = _lbl(r2, "", 12, Color("8a2a10"))
 	for l in [_ekip, _arama, _durum]:
 		l.autowrap_mode = TextServer.AUTOWRAP_OFF
 		l.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
