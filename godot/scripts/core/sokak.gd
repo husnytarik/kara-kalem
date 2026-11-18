@@ -101,7 +101,7 @@ func _ready() -> void:
 	_ipucu.modulate = Color("d6c49c")
 	hud.add_child(_ipucu)
 	var yardim := Label.new()
-	yardim.text = "Sol tık: git/binaya gir · Sağ tık: bina bilgisi · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · V: sis aç/kapa · 1/2/3: hız · B: bölge · T: adamlar · F: defter · H: eve git · F6: kaydet · F9: yükle"
+	yardim.text = "Sol tık: git/binaya gir/kovala · Sağ tık: bina-adam bilgisi · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · V: sis aç/kapa · 1/2/3: hız · B: bölge · T: adamlar · F: defter · H: eve git · F6: kaydet · F9: yükle"
 	yardim.position = Vector2(205, 700)
 	yardim.add_theme_font_size_override("font_size", 12)
 	yardim.modulate = Color(1, 1, 1, 0.5)
@@ -412,6 +412,12 @@ func _unhandled_input(e: InputEvent) -> void:
 		var k: Camera3D = kamera.kamera()
 		var o := k.project_ray_origin(e.position)
 		var n := k.project_ray_normal(e.position)
+		var gt: Dictionary = gruplar.isinla(o, n)
+		if not gt.is_empty():
+			_gir_bina = -1
+			takip_ver(gt)   # gruba tıkla: kovala, yetişince karşılaşma diyaloğu açılır
+			return
+		takip_birak()
 		var i: int = harita.yer_isinla(o, n)
 		if i >= 0:
 			if oyuncu.iceride == i:
@@ -430,6 +436,10 @@ func _unhandled_input(e: InputEvent) -> void:
 			_sag_basla = e.position
 		elif e.position.distance_to(_sag_basla) < 6.0:
 			var k2: Camera3D = kamera.kamera()
+			var g2: Dictionary = gruplar.isinla(k2.project_ray_origin(e.position), k2.project_ray_normal(e.position))
+			if not g2.is_empty():
+				arayuz.grup_ac(g2)
+				return
 			var i2: int = harita.yer_isinla(k2.project_ray_origin(e.position), k2.project_ray_normal(e.position))
 			if i2 >= 0:
 				arayuz.bina_ac(i2)
