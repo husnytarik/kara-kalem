@@ -210,7 +210,7 @@ func _amac_paneli() -> void:
 	asb.content_margin_bottom = 4
 	_amac_kutu.add_theme_stylebox_override("panel", asb)
 	_amac_kutu.theme = Tema.tema()
-	_amac_kutu.position = Vector2(8, 148)
+	_amac_kutu.position = Vector2(8, 136)
 	_amac_kutu.custom_minimum_size = Vector2(250, 0)
 	_amac_kutu.mouse_filter = Control.MOUSE_FILTER_STOP
 	_amac_kutu.tooltip_text = "Tıkla: ayrıntıyı aç/kapa"
@@ -234,13 +234,14 @@ var _ihc: Dictionary = {}
 var _ihc_hasta: Label
 
 # Üst çubuğun altında: açlık / yorgunluk / stres / sıkıntı / hasta / ün çubukları.
-func _ihtiyac_cubugu(v: VBoxContainer) -> void:
+func _ihtiyac_cubugu(v: Control) -> void:
 	var kr := ColorRect.new()
 	kr.color = Color(0.17, 0.11, 0.06, 0.6)
-	kr.custom_minimum_size = Vector2(0, 2)
+	kr.custom_minimum_size = Vector2(2, 0)
 	v.add_child(kr)
 	var h := HBoxContainer.new()
-	h.add_theme_constant_override("separation", 12)
+	h.add_theme_constant_override("separation", 10)
+	h.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	v.add_child(h)
 	for hv in [["II", 0.0], ["▶", 1.0], ["×2", 2.0], ["×4", 4.0]]:
 		var hb := _btn(h, hv[0], sokak.hiz_ayarla.bind(hv[1]))
@@ -249,7 +250,7 @@ func _ihtiyac_cubugu(v: VBoxContainer) -> void:
 		var c := HBoxContainer.new()
 		c.add_theme_constant_override("separation", 5)
 		h.add_child(c)
-		var l := _lbl(c, "● " + e[1], 14, Tema.KAGIT_YAZI)
+		var l := _lbl(c, "● " + e[1], 13, Tema.KAGIT_YAZI)
 		l.add_theme_color_override("font_color", Tema.KAGIT_YAZI)
 		l.autowrap_mode = TextServer.AUTOWRAP_OFF
 		l.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
@@ -257,7 +258,7 @@ func _ihtiyac_cubugu(v: VBoxContainer) -> void:
 		p.min_value = 0
 		p.max_value = 100
 		p.show_percentage = false
-		p.custom_minimum_size = Vector2(64, 12)
+		p.custom_minimum_size = Vector2(46, 10)
 		p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		var f := StyleBoxFlat.new()
 		f.bg_color = e[2]
@@ -338,7 +339,7 @@ func _hap(h: Node, sembol: String, renk: Color) -> Label:
 	var pc := PanelContainer.new()
 	pc.add_theme_stylebox_override("panel", Tema.stil(Color(0.05, 0.035, 0.025, 0.95), Tema.KENAR, 4, 10))
 	h.add_child(pc)
-	var l := _lbl(pc, sembol, 20, renk)
+	var l := _lbl(pc, sembol, 16, renk)
 	l.autowrap_mode = TextServer.AUTOWRAP_OFF
 	l.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	return l
@@ -348,27 +349,21 @@ func _ust_cubuk() -> void:
 	_saat = Label.new()   # saat artık cep saatinde; metin yine de tutulur
 	var pc := PanelContainer.new()
 	pc.add_theme_stylebox_override("panel", Tema.kagit_panel())
-	pc.position = Vector2(130, 8)
+	pc.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	pc.offset_left = 130
+	pc.offset_right = -8
+	pc.offset_top = 6
 	pc.theme = Tema.tema_kagit()
 	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(pc)
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 16)
-	var gv := VBoxContainer.new()
-	gv.add_theme_constant_override("separation", 4)
-	pc.add_child(gv)
-	gv.add_child(h)
-	_ihtiyac_cubugu(gv)
+	pc.add_child(h)
 	var sol := VBoxContainer.new()
 	sol.add_theme_constant_override("separation", 0)
 	h.add_child(sol)
-	var kicker := Label.new()
-	kicker.text = "✦  KARA KALEM  ·  GÜNLÜK GAZETE  ✦"
-	kicker.add_theme_font_size_override("font_size", Tema.boyut(11))
-	kicker.add_theme_color_override("font_color", Color("7a5a30"))
-	sol.add_child(kicker)
 	_tarih = Label.new()
-	_tarih.add_theme_font_size_override("font_size", Tema.boyut(26))
+	_tarih.add_theme_font_size_override("font_size", Tema.boyut(20))
 	_tarih.add_theme_color_override("font_color", Tema.KAGIT_YAZI)
 	_tarih.autowrap_mode = TextServer.AUTOWRAP_OFF
 	sol.add_child(_tarih)
@@ -376,11 +371,13 @@ func _ust_cubuk() -> void:
 	kural.color = Color(0.17, 0.11, 0.06, 0.75)
 	kural.custom_minimum_size = Vector2(0, 2)
 	sol.add_child(kural)
+	sol.custom_minimum_size = Vector2(190, 0)
 	_konum = Label.new()
-	_konum.add_theme_font_size_override("font_size", Tema.boyut(16))
+	_konum.add_theme_font_size_override("font_size", Tema.boyut(13))
 	_konum.add_theme_color_override("font_color", Color("6a1f10"))
 	_konum.autowrap_mode = TextServer.AUTOWRAP_OFF
 	sol.add_child(_konum)
+	_ihtiyac_cubugu(h)
 	var bosluk := Control.new()
 	bosluk.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(bosluk)
