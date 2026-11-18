@@ -240,7 +240,7 @@ func _amac_guncelle() -> void:
 			haracli += 1
 	var bolgeler: int = oyun.oyuncu_bolgeleri().size()
 	if oyun.adamlar.is_empty():
-		yazi = "Önce bir adam tut: A tuşu (Adamlar). Tek başına esnafı sıkıştıramazsın."
+		yazi = "Önce bir adam tut: T tuşu (Adamlar). Tek başına esnafı sıkıştıramazsın."
 	elif haracli + sahip == 0:
 		yazi = "Bir esnafa git, paneli aç ve adamınla haraç bağla. Gelir oradan başlar."
 	elif bolgeler == 0:

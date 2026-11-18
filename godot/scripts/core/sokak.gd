@@ -1,6 +1,6 @@
 extends Node3D
 # Ana sahne: haritayı, oyun kurallarını (oyun.gd) ve 2D arayüzü (arayuz.gd) bir araya getirir.
-# Sol tık: git (binaya tıklarsan paneli de açılır). Boşluk: duraklat. 1/2/3: hız. B: bölge. A: adamlar. D: defter.
+# Sol tık: git (binaya tıklarsan paneli de açılır). Boşluk: duraklat. 1/2/3: hız. B: bölge. T: adamlar. F: defter.
 
 var harita: Node3D
 var oyun: Node
@@ -101,7 +101,7 @@ func _ready() -> void:
 	_ipucu.modulate = Color("d6c49c")
 	hud.add_child(_ipucu)
 	var yardim := Label.new()
-	yardim.text = "Sol tık: git/bina seç · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · V: sis aç/kapa · 1/2/3: hız · B: bölge · A: adamlar · D: defter · H: eve git · F6: kaydet · F9: yükle"
+	yardim.text = "Sol tık: git/bina seç · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · V: sis aç/kapa · 1/2/3: hız · B: bölge · T: adamlar · F: defter · H: eve git · F6: kaydet · F9: yükle"
 	yardim.position = Vector2(14, 700)
 	yardim.add_theme_font_size_override("font_size", 12)
 	yardim.modulate = Color(1, 1, 1, 0.5)
@@ -436,8 +436,8 @@ func _unhandled_input(e: InputEvent) -> void:
 					oyuncu.git(harita.serbest_nokta(oyun.harita.yerler[oyun._ev]["pos"]))
 					_gir_bina = oyun._ev
 			KEY_B: arayuz._bolge_dugmesi()
-			KEY_A: arayuz.adamlar_ac()
-			KEY_D: arayuz.defter_ac()
+			KEY_T: arayuz.adamlar_ac()
+			KEY_F: arayuz.defter_ac()
 			KEY_V:
 				gorus.acik = not gorus.acik
 				gorus.guncelle()
