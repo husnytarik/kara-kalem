@@ -466,6 +466,8 @@ func etki(b: Dictionary, id: String) -> Dictionary:
 	return {"s": clampf(KARAKTER[id]["sev"] * b["sev"] / 100.0, 0.0, 1.5), "k": clampf(KARAKTER[id]["kor"] * b["kor"] / 100.0, 0.0, 1.5)}
 
 func erisim(id: String) -> bool:
+	if _ev >= 0 and harita.yerler[_ev]["bolge"] == id:
+		return true   # yaşadığın bölgede her zaman iş yapabilirsin
 	if bolge[id]["inf"].get("oyuncu", 0.0) >= 15.0:
 		return true
 	for k in KOMSU[id]:
