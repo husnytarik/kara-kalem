@@ -951,10 +951,57 @@ func _aile_paneli() -> void:
 					var b: String = oyun.harita.bolge_at(g["pos"])
 					yer = "%s (%d kişi)" % [oyun.harita.bolgeler[b]["ad"] if b != "" else "yollarda", g["kisi"]]
 			var renk: Color = RENK["altin"] if u["rutbe"] == "don" else Color.WHITE
-			_lbl(_ic, "%s %s — %s · ilişki %+d" % ["♛" if u["rutbe"] == "don" else "•", oyun.uye_ad(u), yer, u["iliski"]], 14, renk)
+			var ur := HBoxContainer.new()
+			_ic.add_child(ur)
+			_lbl(ur, "%s %s — %s · ilişki %+d" % ["♛" if u["rutbe"] == "don" else "•", oyun.uye_ad(u), yer, u["iliski"]], 14, renk)
+			var uid_: int = u["uid"]
+			if not oyun.kara_k.kayit_var(uid_):
+				_btn(ur, "Deftere yaz", func(): _kd_secili = uid_; _yenile(true))
 		var oluler: Array = oyun.uyeler.filter(func(u): return u["fak"] == f and u["durum"] == "olu")
 		if not oluler.is_empty():
 			_lbl(_ic, "Ölenler: %s" % ", ".join(oluler.map(func(u): return oyun.uye_ad(u))), 13, RENK["soluk"])
+	_kara_defter_bolumu()
+
+var _kd_secili := 0
+var _kd_agirlik := 2
+
+func _kara_defter_bolumu() -> void:
+	_ayrac(_ic)
+	_lbl(_ic, "Kara Defter", 20, RENK["altin"])
+	_lbl(_ic, "Seni kıranların kaydı. Kayıt bedava ama kin seni yorar. Kapatmak: af (öfke düşer), tazminat (korkuna bağlı), hesaplaşma ($%d kirli, adam gerekir; hedef ölür, dosyan kabarır)." % int(oyun.kara_k.HESAP_BEDEL), 13, RENK["soluk"])
+	if _kd_secili > 0:
+		var h: Dictionary = oyun.uye(_kd_secili)
+		if h.is_empty() or h["durum"] != "aktif" or oyun.kara_k.kayit_var(_kd_secili):
+			_kd_secili = 0
+		else:
+			_lbl(_ic, "Deftere yazılacak: %s · ağırlık %d" % [oyun.uye_ad(h), _kd_agirlik], 15, Color.WHITE)
+			var ag := HBoxContainer.new()
+			_ic.add_child(ag)
+			for n in [1, 2, 3]:
+				var nn: int = n
+				_btn(ag, "Ağırlık %d" % n, func(): _kd_agirlik = nn; _yenile(true), _kd_agirlik == n)
+			var nh := HBoxContainer.new()
+			_ic.add_child(nh)
+			for nd in oyun.kara_k.NEDENLER:
+				var nds: String = nd
+				_btn(nh, nds, func():
+					var r: Dictionary = oyun.kara_k.ac(_kd_secili, nds, _kd_agirlik)
+					_kd_secili = 0
+					_sonuc_goster(r, "Deftere yazıldı."))
+	var liste: Array = oyun.kara["liste"]
+	if liste.is_empty():
+		_lbl(_ic, "Defter boş.", 14, RENK["soluk"])
+	for k in liste:
+		var u: Dictionary = oyun.uye(k["hedef"])
+		if u.is_empty():
+			continue
+		var kid: int = k["id"]
+		_lbl(_ic, "%s — %s · ağırlık %d · kin %d" % [oyun.uye_ad(u), k["neden"], k["agirlik"], int(k["kin"])], 14, Color.WHITE)
+		var br := HBoxContainer.new()
+		_ic.add_child(br)
+		_btn(br, "Affet", func(): _sonuc_goster(oyun.kara_k.kapat(kid, "af"), ""))
+		_btn(br, "Tazminat iste (%%%d)" % int(oyun.kara_k.tazminat_olasilik(k["agirlik"]) * 100.0), func(): _sonuc_goster(oyun.kara_k.kapat(kid, "tazminat"), ""))
+		_btn(br, "Hesaplaş ($%d kirli)" % int(oyun.kara_k.HESAP_BEDEL), func(): _sonuc_goster(oyun.kara_k.kapat(kid, "hesap"), ""), oyun.kirli < oyun.kara_k.HESAP_BEDEL or oyun.adamlar.is_empty())
 
 # ---------- defter ----------
 func _defter_paneli() -> void:

@@ -159,6 +159,8 @@ var pazar: Dictionary = {}      # adam bulma mekânlarının günlük adayları 
 var pazar_k: RefCounted
 var isler: Dictionary = {}     # kirli işler: günlük teklif tahtası ve sayaçlar (isler.gd)
 var isler_k: RefCounted
+var kara_k: RefCounted
+var kara: Dictionary = {"liste": [], "seq": 1}
 var ic_mekan := -1              # oyuncunun içinde olduğu bina (sokak.gd günceller)
 var pol: Dictionary = {}        # polis/bodrum durumu (polis.gd)
 var polis: RefCounted
@@ -204,6 +206,7 @@ func kur(h: Node3D) -> void:
 	pazar_k = load("res://scripts/core/pazar.gd").new(self)
 	isler_k = load("res://scripts/core/isler.gd").new(self)
 	isler = isler_k.yeni()
+	kara_k = load("res://scripts/core/kara.gd").new(self)
 	_aileleri_kur()
 	_profil_uygula()
 	kis_k.baslat()
@@ -940,7 +943,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler, "kara": kara}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -981,6 +984,7 @@ func durum_yukle(d: Dictionary) -> void:
 	kis = d.get("kis", kis_k.yeni())
 	pazar = d.get("pazar", {})
 	isler = d.get("isler", isler_k.yeni())
+	kara = d.get("kara", {"liste": [], "seq": 1})
 	kis_k._son_t = t
 	degisti.emit()
 
@@ -1036,6 +1040,7 @@ func _gun() -> void:
 	polis.gun()
 	yol_k.gun()
 	isl.gunluk()
+	kara_k.gun()
 	for i in isy:
 		var r: Dictionary = isy[i]
 		var w := haftalik(i)
@@ -1054,6 +1059,7 @@ func _gun() -> void:
 
 func _ay() -> void:
 	isl.ay()
+	kara_k.ay()
 	meslek.ay()
 	aklama_k.ay()
 	polis.ay()
