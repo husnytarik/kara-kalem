@@ -797,7 +797,12 @@ func _gorsel_anahtarlari() -> Array:
 		"bina":
 			var i: int = _hedef
 			var tur: String = oyun.isy[i]["tur"] if oyun.isy.has(i) else ("ozel" if oyun.harita.yerler[i]["ozel"] else "resmi")
-			return [G.slug(oyun.harita.yerler[i]["ad"]), tur, "bina"]
+			var ad_k: String = String(oyun.harita.yerler[i]["ad"]).to_lower()
+			var ozel: Array = [G.slug(oyun.harita.yerler[i]["ad"])]
+			for kv in [["church", "kilise"], ["chapel", "kilise"], ["cathedral", "kilise"], ["precinct", "polis"], ["airport", "havaalani"], ["airfield", "havaalani"]]:
+				if ad_k.contains(kv[0]):
+					ozel.append(kv[1])
+			return ozel + [tur, "bina"]
 		"bolge":
 			return ["bolge_" + str(_hedef), "bolge"]
 	return [_mod]
