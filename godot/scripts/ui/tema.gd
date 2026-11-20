@@ -114,6 +114,10 @@ static func kagit_tex(w: int, h: int, tint: Color = KAGIT, kenar: Color = Color(
 				c = kenar
 			elif d == 4 or d == 5:
 				c = Color(0.88, 0.66, 0.23, 0.9).lerp(c, 0.35)   # ince altın çizgi
+			var kx := mini(x, w - 1 - x)
+			var ky := mini(y, h - 1 - y)
+			if absi(kx - 11) + absi(ky - 11) <= 3:
+				c = Color(0.88, 0.66, 0.23)   # köşe baklavası
 			img.set_pixel(x, y, c)
 	var t := ImageTexture.create_from_image(img)
 	_kagit_onb[anahtar] = t
@@ -136,3 +140,58 @@ static func tema_kagit() -> Theme:
 	t.set_color("font_color", "CheckBox", KAGIT_YAZI)
 	_tema_kagit = t
 	return t
+
+# ---------- koyu deri çerçeve (üst çubuk, hedef kutusu, haber kutusu) ----------
+static var _koyu_onb := {}
+
+static func koyu_tex(w: int = 96, h: int = 96) -> ImageTexture:
+	var anahtar := "%d_%d" % [w, h]
+	if _koyu_onb.has(anahtar):
+		return _koyu_onb[anahtar]
+	var n := FastNoiseLite.new()
+	n.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	n.frequency = 0.06
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	var altin := Color(0.86, 0.64, 0.22)
+	var altin_k := Color(0.5, 0.36, 0.14)
+	for y in h:
+		for x in w:
+			var d := mini(mini(x, y), mini(w - 1 - x, h - 1 - y))
+			var v: float = 1.0 + 0.12 * n.get_noise_2d(x, y)
+			var c := Color(0.085 * v, 0.058 * v, 0.042 * v, 0.97)
+			if d < 1:
+				c = altin_k
+			elif d == 1:
+				c = altin
+			elif d == 2:
+				c = Color(0.02, 0.012, 0.008)
+			elif d == 3 or d == 4:
+				c = altin_k.lerp(altin, 0.4)
+			elif d == 5:
+				c = Color(0.02, 0.012, 0.008)
+			elif d == 6:
+				c = Color(0.3, 0.21, 0.09, 0.9)
+			var kx := mini(x, w - 1 - x)
+			var ky := mini(y, h - 1 - y)
+			if absi(kx - 10) + absi(ky - 10) <= 3:
+				c = altin
+			img.set_pixel(x, y, c)
+	var tx := ImageTexture.create_from_image(img)
+	_koyu_onb[anahtar] = tx
+	return tx
+
+static func koyu_panel(marj: int = 10) -> StyleBoxTexture:
+	var sb := StyleBoxTexture.new()
+	sb.texture = koyu_tex()
+	sb.set_texture_margin_all(14)
+	sb.set_content_margin_all(marj + 4)
+	return sb
+
+static func yuvarlak_stil(arka: Color, kenar: Color = Color("c9972c"), r: int = 16) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = arka
+	sb.border_color = kenar
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(r)
+	sb.set_content_margin_all(0)
+	return sb
