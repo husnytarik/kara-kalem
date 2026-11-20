@@ -896,6 +896,18 @@ func _ekran_cek(arg: String) -> void:
 		elif p[1] == "bina":
 			oyun.temiz = 500.0
 			arayuz.bina_ac(97)
+		elif p[1] == "meslek":
+			arayuz.meslek_ac()
+		elif p[1] == "polis":
+			arayuz.polis_ac()
+		elif p[1] == "garaj":
+			arayuz.garaj_ac()
+		elif p[1] == "defter":
+			arayuz.defter_ac()
+		elif p[1] == "zafer":
+			arayuz.zafer_ac()
+		elif p[1] == "bolge":
+			arayuz.bolge_ac("southside")
 		await get_tree().create_timer(1.5, true, false, true).timeout
 	get_viewport().get_texture().get_image().save_png(p[0])
 	get_tree().quit()

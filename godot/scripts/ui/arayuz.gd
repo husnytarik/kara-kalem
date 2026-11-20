@@ -41,6 +41,7 @@ var _dlg: PanelContainer
 var _dlg_ic: VBoxContainer
 var _dlg_g: Dictionary = {}
 var _dlg_sonuc: Dictionary = {}
+const PANEL_GENISLIK := 480   # tüm sağ paneller aynı genişlikte
 const YAKIN := 16.0          # bir binayla/grupla işlem için gereken en büyük uzaklık (m)
 
 func kur(o: Node, s: Node) -> void:
@@ -127,6 +128,15 @@ func _btn(ebeveyn: Node, metin: String, fn: Callable, pasif: bool = false) -> Bu
 	b.focus_mode = Control.FOCUS_NONE   # Boşluk tuşu düğmeye basmasın
 	b.disabled = pasif
 	b.pressed.connect(fn)
+	if _kagit_mod:
+		b.custom_minimum_size = Vector2(0, 32)
+		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		# etiketle aynı satırdaysa dar kalır (örn. "Deftere yaz", "Başvur")
+		if ebeveyn is HBoxContainer and ebeveyn.get_child_count() > 0 and ebeveyn.get_child(0) is Label:
+			b.size_flags_horizontal = Control.SIZE_SHRINK_END
+			b.autowrap_mode = TextServer.AUTOWRAP_OFF
 	ebeveyn.add_child(b)
 	return b
 
@@ -172,6 +182,13 @@ func _baslik(ebeveyn: Node, metin: String, alt: String = "") -> void:
 	if alt != "":
 		_lbl(ebeveyn, alt, 15, RENK["soluk"])
 	_ayrac(ebeveyn)
+
+# Panel içi bölüm başlığı: altın, orta boy; üstünde kısa boşluk.
+func _bolum(ebeveyn: Node, metin: String) -> Label:
+	var bosluk := Control.new()
+	bosluk.custom_minimum_size = Vector2(0, 4)
+	ebeveyn.add_child(bosluk)
+	return _lbl(ebeveyn, metin, 18, RENK["altin"])
 
 # Koyu çerçeveli iç kutu (görseldeki "Eylemler" / "Adam Arayanlar" gibi).
 func _kutu(ebeveyn: Node, baslik: String = "") -> VBoxContainer:
@@ -427,7 +444,7 @@ func _sag_panel() -> void:
 	_sag = PanelContainer.new()
 	_sag.add_theme_stylebox_override("panel", Tema.kagit_panel())
 	_sag.set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
-	_sag.offset_left = -340
+	_sag.offset_left = -(PANEL_GENISLIK + 8)
 	_sag.offset_right = -8
 	_sag.offset_top = 66
 	_sag.offset_bottom = -200
@@ -620,7 +637,7 @@ func _yenile(zorla: bool) -> void:
 		c.queue_free()
 	_sag.visible = true
 	_kagit_mod = true
-	_sag.offset_left = -(540 if _mod in ["ben", "aile", "adamlar"] else (500 if _mod == "bina" and sokak.oyuncu.iceride >= 0 else 360))
+	_sag.offset_left = -(PANEL_GENISLIK + 8)
 	match _mod:
 		"bina": _bina_paneli()
 		"bolge": _bolge_paneli()
@@ -672,7 +689,7 @@ func _bina_paneli() -> void:
 	var i: int = _hedef
 	var y: Dictionary = oyun.harita.yerler[i]
 	var bid: String = y["bolge"]
-	_lbl(_ic, y["ad"], 24, RENK["altin"] if y["ozel"] else Color.WHITE)
+	_baslik(_ic, y["ad"])
 	_lbl(_ic, "%s · %s" % [oyun.harita.bolgeler[bid]["ad"], oyun.tur_ad(i)], 15, RENK["soluk"])
 	_btn(_ic, "Bölge bilgisi", bolge_ac.bind(bid))
 	if sokak.oyuncu.iceride == i:
@@ -750,7 +767,7 @@ func _bina_paneli() -> void:
 func _hareket_bolumu(i: int) -> void:
 	var g: Node3D = sokak.gorus
 	_ayrac(_ic)
-	_lbl(_ic, "Görüş ve hareket", 18, RENK["altin"])
+	_bolum(_ic, "Görüş ve hareket")
 	var log: Array = oyun.ziyaret.get(i, [])
 	if g.bina_gorunur(i):
 		var n: Dictionary = g.nufus(i)
@@ -774,7 +791,7 @@ func _hareket_bolumu(i: int) -> void:
 func _isletme_bolumu(i: int, r: Dictionary) -> void:
 	var isl = oyun.isl
 	_ayrac(_ic)
-	_lbl(_ic, "İşletme · gelir %s" % isl.gelir_yazi(i), 18, RENK["altin"])
+	_bolum(_ic, "İşletme · gelir %s" % isl.gelir_yazi(i))
 	_bar(_ic, "İtibar", r["itibar"], Color("a89870"))
 	if isl.olay_var(r):
 		_lbl(_ic, "Durum: %s (%d gün kaldı)" % [r["olay"]["ad"], r["olay"]["bitis"] - oyun.t / oyun.DAY], 15, RENK["warn"])
@@ -819,14 +836,14 @@ func _bolge_paneli() -> void:
 	var id: String = _hedef
 	var b: Dictionary = oyun.bolge[id]
 	var hk: String = oyun.hakim_of(id)
-	_lbl(_ic, oyun.harita.bolgeler[id]["ad"], 24, RENK["altin"])
+	_baslik(_ic, oyun.harita.bolgeler[id]["ad"])
 	_lbl(_ic, oyun.ACIKLAMA[id], 15, RENK["soluk"])
 	_lbl(_ic, oyun.KARAKTER[id]["ac"], 15, RENK["soluk"])
 	_ayrac(_ic)
 	_lbl(_ic, "Hakim: %s" % oyun.hakim_ad(hk), 18, oyun.FAK[hk]["renk"] if hk != "" else Color.WHITE)
 	if hk != "oyuncu":
 		_lbl(_ic, "Hakim olmak için +%.1f nüfuz gerekir." % oyun.hakim_icin_kalan(id), 15, RENK["soluk"])
-	_lbl(_ic, "Nüfuz", 16, RENK["altin"])
+	_bolum(_ic, "Nüfuz")
 	var sirali: Array = b["inf"].keys()
 	sirali.sort_custom(func(a, c): return b["inf"][a] > b["inf"][c])
 	for f in sirali:
@@ -841,7 +858,7 @@ func _bolge_paneli() -> void:
 	if not oyun.erisim(id):
 		_lbl(_ic, "Buraya girmek için önce komşu bir bölgeye hakim ol.", 15, RENK["warn"])
 	else:
-		_lbl(_ic, "Bölge işleri", 16, RENK["altin"])
+		_bolum(_ic, "Bölge işleri")
 		var ici := bolgede_mi(id)
 		if not ici:
 			_lbl(_ic, "Bölge işleri için bu bölgede olmalısın.", 15, RENK["warn"])
@@ -850,7 +867,7 @@ func _bolge_paneli() -> void:
 			_btn(_ic, "%s  (%s)" % [oyun.IS_AD[tur], oyun.IS_BEDEL[tur]], func(): _sonuc_goster(oyun.bolge_is(id, tur)), not ici)
 	if hk == "oyuncu":
 		_ayrac(_ic)
-		_lbl(_ic, "Yönetim", 16, RENK["altin"])
+		_bolum(_ic, "Yönetim")
 		_btn(_ic, "Yatırım yap  ($400 temiz)", func(): _sonuc_goster(oyun.bolge_yatirim(id)), not bolgede_mi(id))
 		var ob := OptionButton.new()
 		ob.focus_mode = Control.FOCUS_NONE
@@ -870,7 +887,7 @@ func _adam_paneli() -> void:
 		_lbl(_ic, "Ekibin boş. Adam olmadan haraç bağlayamazsın.", 15, RENK["warn"])
 	var sozl: Array = oyun.gorevler.filter(func(g): return g["gorev"] == "sozlesme")
 	if not sozl.is_empty():
-		_lbl(_ic, "Devam eden kirli işler", 18, RENK["altin"])
+		_bolum(_ic, "Devam eden kirli işler")
 		for g in sozl:
 			var jj: Dictionary = g["is"]
 			var ekip_ad: Array = []
@@ -900,7 +917,7 @@ func _adam_paneli() -> void:
 			durum = "Karakolda"
 		elif a["gorev"] != "":
 			durum = "Görevde: " + oyun.GOREVLER[a["gorev"]]["ad"]
-		_lbl(v, "Görev: " + durum, 15, RENK["warn"] if a["gorev"] != "" else RENK["good"])
+		_lbl(v, "Görev: " + durum, 15, Color(0.55, 0.3, 0.05) if a["gorev"] != "" else Color(0.15, 0.4, 0.15))
 		var id: int = a["id"]
 		_btn(v, "Çıkar", func(): _sonuc_goster(oyun.adam_cikar(id)), a["gorev"] != "")
 	_sonuc_satiri()
@@ -980,7 +997,7 @@ var _kd_agirlik := 2
 
 func _kara_defter_bolumu() -> void:
 	_ayrac(_ic)
-	_lbl(_ic, "Kara Defter", 20, RENK["altin"])
+	_bolum(_ic, "Kara Defter")
 	_lbl(_ic, "Seni kıranların kaydı. Kayıt bedava ama kin seni yorar. Kapatmak: af (öfke düşer), tazminat (korkuna bağlı), hesaplaşma ($%d kirli, adam gerekir; hedef ölür, dosyan kabarır)." % int(oyun.kara_k.HESAP_BEDEL), 13, RENK["soluk"])
 	if _kd_secili > 0:
 		var h: Dictionary = oyun.uye(_kd_secili)
@@ -1018,7 +1035,7 @@ func _kara_defter_bolumu() -> void:
 
 # ---------- defter ----------
 func _defter_paneli() -> void:
-	_lbl(_ic, "Defter", 24, RENK["altin"])
+	_baslik(_ic, "Defter")
 	var n: int = oyun.defter.size()
 	for k in range(n - 1, maxi(-1, n - 41), -1):
 		var e: Dictionary = oyun.defter[k]
@@ -1028,7 +1045,7 @@ func _defter_paneli() -> void:
 func _polis_paneli() -> void:
 	var P: RefCounted = oyun.polis
 	var p: Dictionary = oyun.pol
-	_lbl(_ic, "Polis ve bodrum", 24, RENK["altin"])
+	_baslik(_ic, "Polis ve bodrum")
 	_bar(_ic, "Dosya", oyun.arama, Color("a86a6a"), "%d · %s" % [int(oyun.arama), P.asama_ad()])
 	_lbl(_ic, "Dosya 100'e çıkarsa dava açılır. 75'te arama emri: baskın gelir. Kanıt girmeyen her gün dosya biraz erir.", 13, RENK["soluk"])
 	var dl := ""
@@ -1038,7 +1055,7 @@ func _polis_paneli() -> void:
 	if p["baskin"] != 0:
 		_lbl(_ic, "Baskın yaklaşıyor: ~%d sa sonra." % maxi(1, int(ceil((p["baskin"] - oyun.t) / 60.0))), 15, RENK["bad"])
 	_ayrac(_ic)
-	_lbl(_ic, "Dedektif Dolan", 17, RENK["altin"])
+	_bolum(_ic, "Dedektif Dolan")
 	var rh := HBoxContainer.new()
 	_ic.add_child(rh)
 	for m in [100, 300, 600]:
@@ -1047,7 +1064,7 @@ func _polis_paneli() -> void:
 	_lbl(_ic, "Rüşvet: tutar · kabul ihtimali. Kabul edilirse dosya erir. Aylığa bağlarsan dikkat −15 olur ve baskını önceden haber verir.", 13, RENK["soluk"])
 	_btn(_ic, "Aylığı kes" if p["aylik"] else "Aylığa bağla ($%d/ay)" % P.AYLIK_DOLAN, func(): _sonuc_goster(P.aylik_ver(not p["aylik"])))
 	_ayrac(_ic)
-	_lbl(_ic, "Bodrum imalathanesi", 17, RENK["altin"])
+	_bolum(_ic, "Bodrum imalathanesi")
 	if not p["kurulu"]:
 		_lbl(_ic, "Kaçak içki: yüksek kâr, ama iz bırakır. Üretimi ekibinden bir adam yürütür.", 13, RENK["soluk"])
 		_btn(_ic, "İmalathane kur (%s kirli)" % oyun.para(P.KUR_FIYAT), func(): _sonuc_goster(P.kur()))
@@ -1075,7 +1092,7 @@ func _meslek_paneli() -> void:
 	var K: RefCounted = oyun.meslek
 	var M: Dictionary = oyun.mes
 	var bid := _oyuncu_bolge()
-	_lbl(_ic, "Meslek ve borç", 24, RENK["altin"])
+	_baslik(_ic, "Meslek ve borç")
 	if oyun.borc_k.var_mi():
 		var b: Dictionary = oyun.borc
 		_lbl(_ic, "Tefeci borcu: %s · aylık taksit %s · kaçırılan %d/3" % [oyun.para(b["ana"]), oyun.para(b["taksit"]), b["kacirilan"]], 15, RENK["bad"] if b["kacirilan"] > 0 else RENK["warn"])
@@ -1095,7 +1112,7 @@ func _meslek_paneli() -> void:
 		_btn(_ic, "İşten ayrıl", func(): _sonuc_goster(K.is_birak()))
 	_ayrac(_ic)
 	var th: String = K.tatil_adi()
-	_lbl(_ic, "GAZETE · İş İlanları — %s%s" % [oyun.tarih_yazi(), (" · " + th) if th != "" else ""], 18, RENK["altin"])
+	_bolum(_ic, "GAZETE · İş İlanları — %s%s" % [oyun.tarih_yazi(), (" · " + th) if th != "" else ""])
 	_lbl(_ic, "%s. İlanlar her gün değişir; işe girince ilandaki iş yerine gidip mesai yapmalısın." % K.donem_yazi(), 13, RENK["soluk"])
 	for ad in K.ilanlar():
 		var aj: String = ad["j"]
@@ -1108,7 +1125,7 @@ func _meslek_paneli() -> void:
 	_ayrac(_ic)
 	var A: RefCounted = oyun.aklama_k
 	var pl: Dictionary = A.plan()
-	_lbl(_ic, "Aklama ve maliye", 17, RENK["altin"])
+	_bolum(_ic, "Aklama ve maliye")
 	_lbl(_ic, "Kirli para ay sonunda yasal cironun bir kısmı kadar temize çevrilir (kesinti %%%d). Fazlası Mali Şüphe'yi artırır; şüphe 50'yi geçerse müfettiş gelir." % int(round(pl["ucret"] * 100.0)), 13, RENK["soluk"])
 	_lbl(_ic, "Bu ay yasal ciro %s · kapasite ~%s · Mali Şüphe %d/50" % [oyun.para(oyun.akl["yasal"]), oyun.para(pl["kap"]), int(oyun.akl["suphe"])], 14, RENK["warn"] if oyun.akl["suphe"] > 25.0 else RENK["info"])
 	var ah := HBoxContainer.new()
@@ -1139,7 +1156,7 @@ func _garaj_paneli() -> void:
 	var K: RefCounted = oyun.arac_k
 	var Ar: Dictionary = K.ARACLAR
 	var a: Dictionary = oyun.arac
-	_lbl(_ic, "Garaj", 24, RENK["altin"])
+	_baslik(_ic, "Garaj")
 	if a["tip"] == "":
 		_lbl(_ic, "Araban yok. Araba yürümekten çok hızlıdır ama yakıt ve bakım ister; ekibin, paran ve bölgelerin büyüdükçe masrafı azalır.", 14, RENK["soluk"])
 		for tip in Ar:
@@ -1167,7 +1184,7 @@ func _garaj_paneli() -> void:
 
 # ---------- hedefler / zafer yolları ----------
 func _zafer_paneli() -> void:
-	_lbl(_ic, "Hedefler", 24, RENK["altin"])
+	_baslik(_ic, "Hedefler")
 	_lbl(_ic, "Üç zafer yolundan biri oyunu kazandırır. Koşullar ay sonunda kontrol edilir.", 14, RENK["soluk"])
 	var D: Dictionary = oyun.zafer.durum()
 	var yollar := [["durust", "Dürüst iş (2 ay üst üste)", oyun.zf["durust_ay"]], ["baskan", "Belediye başkanlığı (yıllık seçim, 12. ay)", -1], ["hakim", "Hâkimiyet (2 ay üst üste)", oyun.zf["hakim_ay"]]]
@@ -1176,7 +1193,7 @@ func _zafer_paneli() -> void:
 		var ad: String = y[1]
 		if y[2] >= 0:
 			ad += " · %d/2 ay" % y[2]
-		_lbl(_ic, ad, 17, RENK["altin"])
+		_bolum(_ic, ad)
 		for x in D[y[0]]:
 			var h := HBoxContainer.new()
 			_ic.add_child(h)
@@ -1184,7 +1201,7 @@ func _zafer_paneli() -> void:
 			var v := _lbl(h, x["v"], 15)
 			v.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_ayrac(_ic)
-	_lbl(_ic, "Seçim kampanyası", 17, RENK["altin"])
+	_bolum(_ic, "Seçim kampanyası")
 	_lbl(_ic, "Afiş, aşevi, miting: oy oranını yükseltir. Kazanamazsan para gider.", 14, RENK["soluk"])
 	var kh := HBoxContainer.new()
 	_ic.add_child(kh)

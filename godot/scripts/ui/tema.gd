@@ -83,6 +83,8 @@ static func tema() -> Theme:
 	t.set_stylebox("separator", "HSeparator", StyleBoxLine.new())
 	(t.get_stylebox("separator", "HSeparator") as StyleBoxLine).color = KENAR
 	t.set_constant("separation", "HSeparator", 6)
+	t.set_constant("separation", "HBoxContainer", 6)
+	t.set_constant("separation", "VBoxContainer", 6)
 	return t
 
 # ---------- eski kâğıt dokusu (kod ile üretilir, resim dosyası gerekmez) ----------
