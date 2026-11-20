@@ -30,6 +30,7 @@ var _ekip: Label
 var _durum: Label
 var _arama: Label
 var _sag: PanelContainer
+var _gorsel: Control   # panel arkası fotokopi görseli
 var _ic: VBoxContainer
 var _log: VBoxContainer
 var _log_panel: PanelContainer
@@ -64,54 +65,6 @@ class Madalyon extends Control:
 		draw_arc(c, r, 0.0, TAU, 56, Color(0.02, 0.012, 0.008), 6.0, true)
 		draw_arc(c, r, 0.0, TAU, 56, Color(0.86, 0.64, 0.22), 3.0, true)
 		draw_arc(c, r - 4.0, 0.0, TAU, 56, Color(0.5, 0.36, 0.14), 1.2, true)
-
-# Bölge/bina panelinin başındaki sepya şehir manzarası (köprü + gökdelenler).
-class Manzara extends Control:
-	func _init() -> void:
-		custom_minimum_size = Vector2(0, 92)
-		size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		mouse_filter = Control.MOUSE_FILTER_IGNORE
-	func _draw() -> void:
-		var w := size.x
-		var h := size.y
-		for i in 12:
-			var f := float(i) / 11.0
-			draw_rect(Rect2(0, h * i / 12.0, w, h / 12.0 + 1.0), Color(0.80, 0.70, 0.52).lerp(Color(0.92, 0.84, 0.66), f))
-		var r := RandomNumberGenerator.new()
-		r.seed = 9
-		var x := 0.0
-		while x < w:
-			var bw := r.randf_range(10.0, 26.0)
-			var bh := r.randf_range(0.25, 0.8) * h
-			var koyu := Color(0.42, 0.34, 0.26)
-			draw_rect(Rect2(x, h * 0.86 - bh, bw, bh), koyu)
-			if r.randf() < 0.5:
-				draw_rect(Rect2(x + bw * 0.2, h * 0.86 - bh - 8.0, bw * 0.6, 9.0), koyu)
-			x += bw + r.randf_range(0.0, 3.0)
-		var kol := Color(0.22, 0.17, 0.13)
-		var gy := h * 0.80
-		draw_rect(Rect2(w * 0.40, gy, w * 0.6, 3.0), kol)
-		for tx in [w * 0.58, w * 0.84]:
-			draw_rect(Rect2(tx - 8.0, h * 0.2, 4.0, gy - h * 0.2), kol)
-			draw_rect(Rect2(tx + 4.0, h * 0.2, 4.0, gy - h * 0.2), kol)
-			draw_arc(Vector2(tx, h * 0.38), 6.0, PI, TAU, 8, kol, 3.0)
-			draw_arc(Vector2(tx, h * 0.52), 6.0, PI, TAU, 8, kol, 3.0)
-		for seg in [[w * 0.40, w * 0.58], [w * 0.58, w * 0.84], [w * 0.84, w * 1.04]]:
-			var p0 := Vector2(seg[0], gy - 6.0)
-			var p1 := Vector2(seg[1], gy - 6.0)
-			if seg[0] > w * 0.5:
-				p0.y = h * 0.2
-			if seg[1] < w * 0.9:
-				p1.y = h * 0.2
-			var pts := PackedVector2Array()
-			for k in 17:
-				var u := float(k) / 16.0
-				var yy := lerpf(p0.y, p1.y, u) + sin(u * PI) * h * 0.22
-				pts.append(Vector2(lerpf(p0.x, p1.x, u), yy))
-				if k % 2 == 0:
-					draw_line(pts[k], Vector2(pts[k].x, gy), Color(0.22, 0.17, 0.13, 0.6), 1.0)
-			draw_polyline(pts, kol, 1.6)
-		draw_rect(Rect2(0, 0, w, h), Color(0.35, 0.22, 0.08), false, 2.0)
 
 const PANEL_GENISLIK := 420   # tüm sağ paneller aynı genişlikte
 const YAKIN := 16.0          # bir binayla/grupla işlem için gereken en büyük uzaklık (m)
@@ -610,6 +563,8 @@ func _sag_panel() -> void:
 	_sag.visible = false
 	_sag.theme = Tema.tema_kagit()
 	add_child(_sag)
+	_gorsel = load("res://scripts/ui/kagit_gorsel.gd").new()
+	_sag.add_child(_gorsel)
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_sag.add_child(sc)
@@ -811,6 +766,19 @@ func _yenile(zorla: bool) -> void:
 		"ben": _ben_paneli()
 	_kapat_dugmesi()
 	_kagit_mod = false
+	_gorsel.ayarla(_gorsel_anahtarlari())
+
+# Panel arkası görsel için dosya adı adayları (assets/ui/panel/).
+func _gorsel_anahtarlari() -> Array:
+	var G = load("res://scripts/ui/kagit_gorsel.gd")
+	match _mod:
+		"bina":
+			var i: int = _hedef
+			var tur: String = oyun.isy[i]["tur"] if oyun.isy.has(i) else ("ozel" if oyun.harita.yerler[i]["ozel"] else "resmi")
+			return [G.slug(oyun.harita.yerler[i]["ad"]), tur, "bina"]
+		"bolge":
+			return ["bolge_" + str(_hedef), "bolge"]
+	return [_mod]
 
 # İçerideyken: haritada görünmezsin, kimse sana bulaşamaz. Ev ise dinlenip zaman geçirebilirsin.
 func _ic_bolumu(i: int) -> void:
@@ -848,7 +816,6 @@ func _bina_paneli() -> void:
 	var i: int = _hedef
 	var y: Dictionary = oyun.harita.yerler[i]
 	var bid: String = y["bolge"]
-	_ic.add_child(Manzara.new())
 	_baslik(_ic, y["ad"])
 	_lbl(_ic, "%s · %s" % [oyun.harita.bolgeler[bid]["ad"], oyun.tur_ad(i)], 15, RENK["soluk"]).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_btn(_ic, "Bölge bilgisi", bolge_ac.bind(bid))
@@ -996,7 +963,6 @@ func _bolge_paneli() -> void:
 	var id: String = _hedef
 	var b: Dictionary = oyun.bolge[id]
 	var hk: String = oyun.hakim_of(id)
-	_ic.add_child(Manzara.new())
 	_baslik(_ic, oyun.harita.bolgeler[id]["ad"])
 	for ml in [_lbl(_ic, oyun.ACIKLAMA[id], 15, RENK["soluk"]), _lbl(_ic, oyun.KARAKTER[id]["ac"], 15, RENK["soluk"])]:
 		ml.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
