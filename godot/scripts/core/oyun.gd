@@ -76,6 +76,7 @@ const GOREVLER := {
 	"haraclan": {"ad": "Haraç bağla", "is": 60},
 	"topla": {"ad": "Haracı topla", "is": 25},
 	"koru": {"ad": "Koru", "is": 40},
+	"sozlesme": {"ad": "Kirli iş", "is": 0},
 }
 const IS_AD := {"himaye": "Esnafa himaye sat", "hediye": "Mahalleye ziyafet ver", "gozdagi": "Rakip adamları sindir"}
 const IS_BEDEL := {"himaye": "$120 kirli", "hediye": "$200 temiz", "gozdagi": "$150 kirli · ekipte adam gerekir"}

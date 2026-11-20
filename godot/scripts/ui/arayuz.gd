@@ -868,6 +868,19 @@ func _adam_paneli() -> void:
 	ipucu.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if oyun.adamlar.is_empty():
 		_lbl(_ic, "Ekibin boş. Adam olmadan haraç bağlayamazsın.", 15, RENK["warn"])
+	var sozl: Array = oyun.gorevler.filter(func(g): return g["gorev"] == "sozlesme")
+	if not sozl.is_empty():
+		_lbl(_ic, "Devam eden kirli işler", 18, RENK["altin"])
+		for g in sozl:
+			var jj: Dictionary = g["is"]
+			var ekip_ad: Array = []
+			for aid in g["adamlar"]:
+				ekip_ad.append(oyun.adam_bul(aid).get("ad", "?"))
+			var kl: int = maxi(1, int(ceil((g["bitis"] - oyun.t) / 60.0)))
+			var kv2 := _kutu(_ic)
+			_lbl(kv2, oyun.isler_k.baslik(jj), 16)
+			_lbl(kv2, "Ekip: %s · ~%d saat sonra döner · getirisi ~$%d" % [", ".join(ekip_ad), kl, int(jj["para"])], 13, RENK["warn"])
+		_ayrac(_ic)
 	for a in oyun.adamlar:
 		var kv := _kutu(_ic)
 		var h := HBoxContainer.new()
