@@ -201,7 +201,7 @@ func kur(h: Node3D) -> void:
 	yol_k = load("res://scripts/core/yol.gd").new(self)
 	yol = yol_k.yeni()
 	kart_k = load("res://scripts/core/kartlar.gd").new(self)
-	yol["bekleyen"] = "tefeci"
+	yol["sonraki"] = t + rng.randi_range(3, 8) * DAY   # ilk karar kartı rastgele bir günde gelir
 	kis_k = load("res://scripts/core/kisisel.gd").new(self)
 	kis = kis_k.yeni()
 	pazar_k = load("res://scripts/core/pazar.gd").new(self)

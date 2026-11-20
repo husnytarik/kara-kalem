@@ -18,7 +18,20 @@ const KARTLAR := {
 	"ittifak": ["Aile teklifi", 6, 20, false],
 	"baskin": ["Baskın ihbarı", 9, 14, false],
 	"secim": ["Belediye seçimi", 5, 30, false],
+	"cuzdan": ["Kaldırımda cüzdan", 9, 10, false],
+	"pazarci": ["Pazarcı teklifi", 9, 8, false],
+	"sevkiyat": ["Rakip sevkiyatı", 8, 14, false],
+	"adamlar": ["Adamlar pay istiyor", 8, 14, false],
 }
+
+# Kartın görüneceği oyuncu seviyesi aralığı [en az, en çok]. Seviye: 0 sokak, 1 haraççı, 2 kaptan (1 bölge),
+# 3 underboss (2-3 bölge), 4 don (4+ bölge).
+const SEVIYE := {
+	"dolan": [0, 4], "esnaf": [1, 4], "ihale": [1, 4], "tefeci": [0, 2], "muhbir": [1, 4], "gazeteci": [1, 4],
+	"senlik": [0, 3], "ittifak": [2, 4], "baskin": [1, 4], "secim": [2, 4],
+	"cuzdan": [0, 1], "pazarci": [0, 1], "sevkiyat": [2, 4], "adamlar": [2, 4],
+}
+const SEVIYE_AD := ["Sokak çocuğu", "Haraççı", "Kaptan", "Underboss", "Don"]
 
 # Seçimlerin karaktere işlediği huylar: "kartid+seçenek" -> {özellik: artış}
 const OZ_SEC := {
@@ -31,6 +44,10 @@ const OZ_SEC := {
 	"senlik0": {"comert": 4, "mahalleli": 2}, "senlik1": {"cimri": 2, "sert_bakis": 2}, "senlik2": {"gizli": 2, "cimri": 2}, "senlik3": {"dilbaz": 2, "polis_dostu": 1},
 	"ittifak0": {"cilveli": 3, "dilbaz": 1}, "ittifak1": {"sert_bakis": 3, "sinirli": 1}, "ittifak2": {"gizli": 2, "korkak": 2},
 	"baskin0": {"gizli": 3, "korkak": 1}, "baskin1": {"polis_dostu": 3, "dilbaz": 2}, "baskin2": {"hesapci": 2, "mahalleli": 1}, "baskin3": {"kavgaci": 3, "sinirli": 2},
+	"cuzdan0": {"vicdanli": 3, "mahalleli": 1}, "cuzdan1": {"gizli": 2, "cimri": 2}, "cuzdan2": {"sert_bakis": 3, "acimasiz": 1},
+	"pazarci0": {"mahalleli": 2, "hesapci": 1}, "pazarci1": {"sert_bakis": 2, "hesapci": 2}, "pazarci2": {"gizli": 1},
+	"sevkiyat0": {"kavgaci": 3, "sert_bakis": 2}, "sevkiyat1": {"hesapci": 3, "dilbaz": 1}, "sevkiyat2": {"dilbaz": 3, "cilveli": 1},
+	"adamlar0": {"comert": 3, "mahalleli": 1}, "adamlar1": {"sert_bakis": 3, "acimasiz": 1}, "adamlar2": {"dilbaz": 3, "cilveli": 1},
 	"secim0": {"mahalleli": 2, "vicdanli": 2}, "secim1": {"dilbaz": 3, "polis_dostu": 2}, "secim2": {"acimasiz": 3, "sinirli": 2},
 }
 
@@ -44,8 +61,34 @@ func _init(o: Node) -> void:
 func baslik(id: String) -> String:
 	return KARTLAR[id][0]
 
+# Oyuncunun statüsü: bölge sayısı, ekip ve servetle belirlenir.
+func seviye() -> int:
+	var nb: int = oyun.oyuncu_bolgeleri().size()
+	if nb >= 4:
+		return 4
+	if nb >= 2:
+		return 3
+	if nb == 1:
+		return 2
+	var servet: float = oyun.temiz + oyun.kirli
+	var haracli: int = oyun.isy.keys().filter(func(i): return oyun.isy[i]["haracli"] or oyun.isy[i]["sahip"]).size()
+	if oyun.adamlar.size() >= 2 or haracli >= 2 or servet >= 1500.0:
+		return 1
+	return 0
+
+func seviye_ad() -> String:
+	return SEVIYE_AD[seviye()]
+
+# Para miktarlarını statüye göre ölçekler: sokakta küçük, tepede büyük paralar döner.
+func _m(x: float) -> int:
+	return int(round(x * (1.0 + 0.6 * seviye())))
+
 func uygun(id: String) -> bool:
 	var y: Dictionary = oyun.yol
+	var sv: Array = SEVIYE.get(id, [0, 4])
+	var lv: int = seviye()
+	if lv < sv[0] or lv > sv[1]:
+		return false
 	if KARTLAR[id][1] == 0:
 		return false
 	if y["once"].has(id):
@@ -60,7 +103,7 @@ func uygun(id: String) -> bool:
 		"ihale":
 			return oyun.temiz >= 60.0 and not Y.sicil_kirli()
 		"tefeci":
-			return oyun.borc.get("ana", 0.0) > 0.0
+			return oyun.borc.get("ana", 0.0) > 0.0 and oyun.tarih()["gun"] >= 6
 		"muhbir":
 			return oyun.arama >= 15.0
 		"gazeteci":
@@ -75,7 +118,7 @@ func uygun(id: String) -> bool:
 
 # Ağırlıklı seçim; yola uygun kartlar biraz öne çıkar.
 func cek() -> String:
-	if oyun.rng.randf() > 0.55:
+	if oyun.rng.randf() > 0.75:
 		return ""
 	var adaylar: Array = []
 	var top := 0
@@ -126,7 +169,15 @@ func metin(id: String) -> String:
 		"gazeteci":
 			return "Bir gazeteci, Boston Evening'den, seni sorup duruyor. Kuzey Mahalle'de adını duymuş."
 		"senlik":
-			return "%s'da mahalle şenliği hazırlanıyor. Herkes bir şey bekliyor." % _bad(_bolge)
+			return "%s'nın muhtarı kapına geldi: yıllık mahalle şenliğinin parası çıkmıyormuş. \"Bu mahallede sözü geçen kimse, şenliği de o ayakta tutar.\" Şenlik mahallenin vitrini: kim para koyarsa mahalle onu sever." % _bad(_bolge)
+		"cuzdan":
+			return "Kaldırımda kalın bir cüzdan buldun. İçinde para ve üzerinde bir isim yazan kimlik var. Etrafta kimse yok."
+		"pazarci":
+			return "Köşedeki pazarcı seni kolluyor: \"Akşamları tezgâhıma göz kulak olsan, gelip geçen külhanbeyleri uzak durur. Sana bir şeyler veririm.\""
+		"sevkiyat":
+			return "%s'ın bir viski sevkiyatı senin bölgenin sınırından geçecekmiş. Haberi getiren çocuk saati de biliyor." % _fad()
+		"adamlar":
+			return "Adamların son işlerden sonra bir araya geldi: \"Patron, çalışıyoruz ama payımız hep aynı. Ya prim ya söz.\""
 		"ittifak":
 			return "%s'ın elçisi sana geldi: \"İki taraf da kan istemiyor. Bir anlaşma yapalım, ya da karşı çıkalım.\"" % _fad()
 		"baskin":
@@ -189,11 +240,40 @@ func secenekler(id: String) -> Array:
 				{"ad": "Korkut", "ipucu": "Korku +6, Dosya +8.", "can": true},
 			]
 		"senlik":
+			var b1: int = _m(60.0)
+			var b2: int = _m(40.0)
 			return [
-				{"ad": "Bağış yap ($60)", "ipucu": "Yasal +6. Bölgede sevgi +5, huzur +3.", "can": tm >= 60.0},
-				{"ad": "Esnaftan \"katkı\" topla", "ipucu": "+$80 kirli, Korku +6, sevgi −3.", "can": true},
-				{"ad": "Parayı kes", "ipucu": "+$50 kirli, Gölge +4. %30 yakalanırsın: Dosya +8.", "can": true},
-				{"ad": "Belediye üzerinden sponsor ($40)", "ipucu": "Kulis +6, sevgi +2.", "can": kt >= 40.0},
+				{"ad": "Masrafı üstlen ($%d)" % b1, "ipucu": "Şenliği sen finanse edersin. Yasal +6. Bölgede sevgi +5, huzur +3.", "can": tm >= b1},
+				{"ad": "Esnaftan zorla \"katkı\" al", "ipucu": "Şenlik adı altında esnaftan para sıkarsın: +$%d kirli, Korku +6, sevgi −3." % _m(80.0), "can": true},
+				{"ad": "Parayı kes", "ipucu": "Muhtarın topladığı parayı ele geçirirsin: +$%d kirli, Gölge +4. %%30 yakalanırsın: Dosya +8." % _m(50.0), "can": true},
+				{"ad": "Belediye sponsor olsun ($%d)" % b2, "ipucu": "Belediyeyi ikna edersin. Kulis +6, sevgi +2.", "can": kt >= b2},
+			]
+		"cuzdan":
+			return [
+				{"ad": "Sahibine götür", "ipucu": "Yasal +6. %60: sahibi bahşiş verir ($25 temiz).", "can": true},
+				{"ad": "Parayı al, cüzdanı at", "ipucu": "+$40 kirli. Gölge +4. Kimse bilmez.", "can": true},
+				{"ad": "Sahibini bul, para iste", "ipucu": "Korku +4. %55: +$70 kirli. Yoksa Dosya +3.", "can": true},
+			]
+		"pazarci":
+			return [
+				{"ad": "Kabul et", "ipucu": "Birkaç gün tezgâh başında beklersin: +$35 temiz. Yasal +4. Bölgede sevgi +2.", "can": true},
+				{"ad": "Daha fazlasını iste", "ipucu": "%55: +$70 kirli, Korku +4. Yoksa pazarcı küser: sevgi −2.", "can": true},
+				{"ad": "Reddet", "ipucu": "Hiçbir şey olmaz.", "can": true},
+			]
+		"sevkiyat":
+			var adam_var: bool = not oyun.adamlar.is_empty()
+			return [
+				{"ad": "Sevkiyatı bas (adam gerekir)", "ipucu": "%%60: +$%d kirli, Korku +8. %s ile gerginlik +6. Yoksa adamın yaralanır, Dosya +6." % [_m(150.0), _fad()], "can": adam_var},
+				{"ad": "Geçiş ücreti iste", "ipucu": "+$%d kirli. %s ile gerginlik +2." % [_m(80.0), _fad()], "can": true},
+				{"ad": "Aileyi uyar", "ipucu": "%s ile gerginlik −3. Kulis +6." % _fad(), "can": true},
+				{"ad": "Karışma", "ipucu": "Hiçbir şey olmaz.", "can": true},
+			]
+		"adamlar":
+			var prim: int = _m(40.0) * maxi(1, oyun.adamlar.size())
+			return [
+				{"ad": "Prim dağıt ($%d)" % prim, "ipucu": "Adamların sadakati +8. Kulis +2.", "can": kt >= prim},
+				{"ad": "Sert konuş", "ipucu": "Korku +6. Adamların sadakati −5.", "can": true},
+				{"ad": "Söz ver", "ipucu": "Sadakat +4. Bir dahaki işte pay artışı beklerler.", "can": true},
 			]
 		"ittifak":
 			return [
@@ -415,28 +495,105 @@ func _coz(id: String, n: int) -> Dictionary:
 		"senlik":
 			match n:
 				0:
-					oyun.harcama(60.0, "temiz")
+					oyun.harcama(float(_m(60.0)), "temiz")
 					Y.ekle("kanun", 6.0)
 					B["sev"] = minf(100.0, B["sev"] + 5.0)
 					B["huzur"] = minf(100.0, B["huzur"] + 3.0)
 					return _r("Şenlik coşkulu geçti. %s sevdi seni." % _bad(_bolge), "good")
 				1:
-					oyun.kirli += 80.0
+					oyun.kirli += float(_m(80.0))
 					Y.ekle("korku", 6.0)
 					B["sev"] = maxf(0.0, B["sev"] - 3.0)
-					return _r("Esnaf katkı verdi, ama dudak büktü. +$80 kirli.", "warn")
+					return _r("Esnaf \"katkı\" verdi, ama dudak büktü. +$%d kirli." % _m(80.0), "warn")
 				2:
-					oyun.kirli += 50.0
+					oyun.kirli += float(_m(50.0))
 					Y.ekle("golge", 4.0)
 					if _sans(0.3 - 0.1 * Y.etki("golge")):
 						_dosya(8.0)
 						return _r("Birisi parayı fark etti. Dosya +8.", "bad")
-					return _r("Kimse fark etmedi. +$50 kirli.", "good")
+					return _r("Kimse fark etmedi. +$%d kirli." % _m(50.0), "good")
 				_:
-					oyun.harcama(40.0, "kirli")
+					oyun.harcama(float(_m(40.0)), "kirli")
 					Y.ekle("kulis", 6.0)
 					B["sev"] = minf(100.0, B["sev"] + 2.0)
 					return _r("Belediye masrafı üstlendi, sen alkışı aldın.", "good")
+		"cuzdan":
+			match n:
+				0:
+					Y.ekle("kanun", 6.0)
+					if _sans(0.6):
+						oyun.yasal(25.0)
+						return _r("Sahibi minnettar kaldı, bahşiş verdi: +$25 temiz.", "good")
+					return _r("Cüzdanı teslim ettin. Teşekkür bile etmediler.", "info")
+				1:
+					oyun.kirli += 40.0
+					Y.ekle("golge", 4.0)
+					return _r("Parayı cebine attın. +$40 kirli.", "warn")
+				_:
+					Y.ekle("korku", 4.0)
+					if _sans(0.55):
+						oyun.kirli += 70.0
+						return _r("Sahibi korkup para verdi. +$70 kirli.", "good")
+					_dosya(3.0)
+					return _r("Sahibi bağırıp çağırdı, bir karakol ihbarı geldi. Dosya +3.", "bad")
+		"pazarci":
+			match n:
+				0:
+					oyun.yasal(35.0)
+					Y.ekle("kanun", 4.0)
+					B["sev"] = minf(100.0, B["sev"] + 2.0)
+					return _r("Birkaç akşam tezgâhı kolladın. +$35 temiz.", "good")
+				1:
+					if _sans(0.55):
+						oyun.kirli += 70.0
+						Y.ekle("korku", 4.0)
+						return _r("Pazarcı pazarlıktan sonra fazlasını verdi. +$70 kirli.", "good")
+					B["sev"] = maxf(0.0, B["sev"] - 2.0)
+					return _r("Pazarcı sana güvenmedi, işi başkasına verdi.", "bad")
+				_:
+					return _r("Reddettin.")
+		"sevkiyat":
+			match n:
+				0:
+					if oyun.adamlar.is_empty():
+						return _r("Ekibinde adam yok.", "bad")
+					var a: Dictionary = oyun.adamlar[oyun.rng.randi() % oyun.adamlar.size()]
+					oyun.gerginlik.ekle("oyuncu", _aile, 6.0, "sevkiyat baskını")
+					Y.ekle("korku", 8.0)
+					if _sans(0.6 + 0.1 * Y.etki("korku")):
+						oyun.kirli += float(_m(150.0))
+						return _r("Sevkiyat basıldı: +$%d kirli. %s kızgın." % [_m(150.0), _fad()], "good")
+					oyun.yarala(a, 2)
+					_dosya(6.0)
+					return _r("Sevkiyat korumalıydı. %s yaralandı, dosya kabardı." % a["ad"], "bad")
+				1:
+					oyun.kirli += float(_m(80.0))
+					oyun.gerginlik.ekle("oyuncu", _aile, 2.0, "geçiş ücreti")
+					return _r("Geçiş ücreti ödendi: +$%d kirli." % _m(80.0), "good")
+				2:
+					oyun.gerginlik.ekle("oyuncu", _aile, -3.0, "")
+					Y.ekle("kulis", 6.0)
+					return _r("%s uyarın için minnettar kaldı." % _fad(), "good")
+				_:
+					return _r("Karışmadın.")
+		"adamlar":
+			var prim: int = _m(40.0) * maxi(1, oyun.adamlar.size())
+			match n:
+				0:
+					oyun.harcama(float(prim), "kirli")
+					Y.ekle("kulis", 2.0)
+					for a in oyun.adamlar:
+						a["sadakat"] = minf(100.0, a.get("sadakat", 60) + 8)
+					return _r("Prim dağıtıldı. Adamlar seni daha çok sayıyor.", "good")
+				1:
+					Y.ekle("korku", 6.0)
+					for a in oyun.adamlar:
+						a["sadakat"] = maxf(0.0, a.get("sadakat", 60) - 5)
+					return _r("Adamlar sustu ama içlerinde bir şey kırıldı.", "warn")
+				_:
+					for a in oyun.adamlar:
+						a["sadakat"] = minf(100.0, a.get("sadakat", 60) + 4)
+					return _r("Söz verdin. Bir dahaki işte hatırlatacaklar.", "info")
 		"ittifak":
 			match n:
 				0:

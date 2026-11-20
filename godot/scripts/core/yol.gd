@@ -126,11 +126,15 @@ func gun() -> void:
 	if oyun.t >= y["bitis"]:
 		_donem_degis()
 	# kart çekimi
-	if y["bekleyen"] == "" and oyun.t - y["son_kart"] >= 2 * oyun.DAY:
+	if y["bekleyen"] == "" and oyun.t >= y.get("sonraki", 0):
 		var k: String = oyun.kart_k.cek()
 		if k != "":
 			y["bekleyen"] = k
 			y["son_kart"] = oyun.t
+			y["acilis"] = oyun.t + oyun.rng.randi_range(60, 1300)   # günün rastgele bir saatinde açılır
+			y["sonraki"] = oyun.t + oyun.rng.randi_range(2, 7 - mini(2, oyun.kart_k.seviye())) * oyun.DAY
+		else:
+			y["sonraki"] = oyun.t + oyun.rng.randi_range(1, 3) * oyun.DAY
 
 func ay() -> void:
 	pass

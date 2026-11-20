@@ -1346,7 +1346,7 @@ var _kart_id := ""
 var _kart_sonuc := {}
 
 func _kart_bekle() -> void:
-	if modal or oyun.yol["bekleyen"] == "":
+	if modal or oyun.yol["bekleyen"] == "" or oyun.t < oyun.yol.get("acilis", 0):
 		return
 	var arg := OS.get_cmdline_user_args()
 	if arg.size() > 0 and not arg.has("--kart-goster"):
