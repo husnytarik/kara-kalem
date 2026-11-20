@@ -266,7 +266,9 @@ func _koyu_kutu(ebeveyn: Node, marj: int = 6) -> PanelContainer:
 func _kutu(ebeveyn: Node, baslik: String = "") -> VBoxContainer:
 	var pc := PanelContainer.new()
 	if _kagit_mod:
-		pc.add_theme_stylebox_override("panel", Tema.stil(Color(0.55, 0.42, 0.24, 0.16), Tema.KAGIT_KENAR, 8, 2))
+		var ks := Tema.stil(Color(0.55, 0.42, 0.24, 0.16), Tema.KAGIT_KENAR, 8, 2)
+		ks.shadow_size = 0   # saydam dolgudan gölge sızmasın
+		pc.add_theme_stylebox_override("panel", ks)
 	else:
 		pc.add_theme_stylebox_override("panel", Tema.stil(Color(0.06, 0.045, 0.03, 0.9), Tema.KENAR, 8, 2))
 	pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
