@@ -381,6 +381,7 @@ func yap(id: String) -> Dictionary:
 		if oz("bilgi") > 0.1 and oyun.rng.randf() < 0.5 + oz("bilgi"):
 			oyun.arama = maxf(0.0, oyun.arama - 3.0)
 			oyun.kayit("Sohbette polisin ne düşündüğünü öğrendin: bir iki şeyi toparladın (dosya −3).", "good")
+	oyun.yet_k.eylem(id)
 	oyun.bekle(int(e["dk"]))
 	return oyun.tamam("%s (%d dk)." % [e["ad"], e["dk"]])
 

@@ -20,6 +20,10 @@ var oyuncu_mu := false
 var oto := true              # true: yapay zekâ yönetir
 var renk := Color.WHITE
 var mermi := 0
+var stok := -1               # yedek mermi (-1: sınırsız)
+var mermi_kullanilan := 0
+var atis_say := 0
+var oldurme := 0
 var olu := false
 var hedef: CharacterBody3D = null
 var girdi_yon := Vector3.ZERO
@@ -47,7 +51,8 @@ func kur(s: Node3D, v: Dictionary, poz: Vector3) -> void:
 	ad = v["ad"]
 	kimlik = v.get("id", 0)
 	silah_id = v["silah"]
-	sd = savas.oyun.SILAH[silah_id]
+	sd = v["sd"] if v.has("sd") else savas.oyun.SILAH[silah_id]
+	stok = int(v.get("stok", -1))
 	hp_max = v["hp"]
 	hp = hp_max
 	isabet = v.get("isabet", 0.5)
@@ -56,6 +61,9 @@ func kur(s: Node3D, v: Dictionary, poz: Vector3) -> void:
 	oto = not oyuncu_mu
 	renk = v["renk"]
 	mermi = sd["sarjor"]
+	if stok >= 0 and sd["sarjor"] > 0:
+		mermi = mini(int(sd["sarjor"]), stok)
+		stok -= mermi
 	collision_layer = 2
 	collision_mask = 1 | 2
 	var cs := CollisionShape3D.new()
@@ -120,7 +128,12 @@ func _physics_process(dt: float) -> void:
 	if _yeniden > 0.0:
 		_yeniden -= dt
 		if _yeniden <= 0.0:
-			mermi = sd["sarjor"]
+			if stok < 0:
+				mermi = sd["sarjor"]
+			else:
+				var top := mermi + stok
+				mermi = mini(int(sd["sarjor"]), top)
+				stok = top - mermi
 	if _flas > 0.0:
 		_flas -= dt
 		if _flas <= 0.0:
@@ -219,6 +232,8 @@ func oyuncu_ates(kaynak: Vector3, yon: Vector3) -> bool:
 			yeniden_doldur()
 			return false
 		mermi -= 1
+		mermi_kullanilan += 1
+	atis_say += 1
 	_atis = 1.0 / sd["hiz"]
 	var menzil: float = sd["menzil"]
 	var vurus := false
@@ -245,7 +260,7 @@ func oyuncu_ates(kaynak: Vector3, yon: Vector3) -> bool:
 	return true
 
 func yeniden_doldur() -> void:
-	if sd["sarjor"] > 0 and _yeniden <= 0.0 and mermi < sd["sarjor"]:
+	if sd["sarjor"] > 0 and _yeniden <= 0.0 and mermi < sd["sarjor"] and stok != 0:
 		_yeniden = sd["yenileme"]
 
 func yeniden_durumu() -> float:
@@ -256,6 +271,8 @@ func hasar(d: float, _kaynak: Node = null) -> void:
 	if olu:
 		return
 	hp -= d
+	if hp <= 0.0 and _kaynak != null and _kaynak.get("oyuncu_mu") == true and takim != _kaynak.takim:
+		_kaynak.oldurme += 1
 	_mat.albedo_color = Color.WHITE
 	_flas = 0.08
 	if hp <= 0.0:

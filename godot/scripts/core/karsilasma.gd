@@ -27,10 +27,22 @@ func giris(g: Dictionary) -> String:
 				ek = " Başlarında %s var (ilişki: %+d)." % [oyun.uye_ad(lu), lu["iliski"]]
 			return "%s yolunu kesti.%s Onlar %d kişi, senin tarafta %d kişi var." % [g["ad"], ek, g["kisi"], oyun.bos_adamlar().size() + 1]
 		"polis":
+			var ara := _ara(g)
+			if not oyun.sil_k.ust_bos(ara):
+				return "Polisler seni durdurup üstünü yokladı: %s buldular! (Arama seviyen %d)" % [oyun.sil_k.ust_yazi(ara), int(oyun.arama)]
 			if oyun.arama >= 30.0:
 				return "Polisler seni durdurdu: \"Aranan tipe benziyorsun.\" (Arama seviyen %d)" % int(oyun.arama)
 			return "Devriye polisleri bir an seni süzdü, ama suçlu bir şey görmediler."
 	return "%s ile konuşabilirsin." % g["ad"]
+
+# Devriye seni yoklarsa üstündeki yasa dışı silah/mermi bulunur (grup başına bir kez hesaplanır).
+func _ara(g: Dictionary) -> Dictionary:
+	if not g.has("ara"):
+		var r := {"bulundu": [], "mermi": 0}
+		if rng.randf() < 0.3 + oyun.arama / 150.0:
+			r = oyun.sil_k.ust_arama(rng)
+		g["ara"] = r
+	return g["ara"]
 
 func _kuvvet(g: Dictionary) -> float:
 	return g["kisi"] * (1.15 if g["tur"] == "polis" else 1.0)
@@ -50,7 +62,13 @@ func secenekler(g: Dictionary) -> Array:
 				s.append({"id": "teslim", "ad": "Teslim ol", "ipucu": "Paranın bir kısmını verirsin, canın yanmaz."})
 				s.append({"id": "saldir", "ad": "Saldır", "ipucu": "Çatışma: güçler karşılaştırılır."})
 		"polis":
-			if oyun.arama >= 30.0:
+			var ara := _ara(g)
+			if not oyun.sil_k.ust_bos(ara):
+				s.append({"id": "rusvet_ara", "ad": "Rüşvet ver ($%d)" % _ara_rusvet(ara), "ipucu": "Silahlar bulundu. Kabul ederlerse görmezden gelirler."})
+				s.append({"id": "kac", "ad": "Kaçmayı dene", "ipucu": "Yakalanırsan işler kötüleşir."})
+				s.append({"id": "teslim", "ad": "Teslim ol", "ipucu": "Silahlara el konur, para cezası."})
+				s.append({"id": "saldir", "ad": "Karşı koy", "ipucu": "Çatışma. Kazansan bile arama artar."})
+			elif oyun.arama >= 30.0:
 				s.append({"id": "rusvet", "ad": "Rüşvet ver ($%d)" % int(oyun.arama * 8), "ipucu": "Kirli para. Kabul ederlerse aramayı düşürür."})
 				s.append({"id": "kac", "ad": "Kaçmayı dene", "ipucu": "Yakalanırsan işler kötüleşir."})
 				s.append({"id": "teslim", "ad": "Teslim ol", "ipucu": "Para cezası ödersin, arama sıfırlanır."})
@@ -92,7 +110,7 @@ func uygula(g: Dictionary, id: String) -> Dictionary:
 			return _r("Parayı sayıp başlarını salladılar: \"Bu seferlik geç.\" Bir gün seni rahat bırakacaklar.", "warn")
 		"blof":
 			var oran: float = oyun.guc() / _kuvvet(g)
-			var p := clampf(0.2 + (oran - 1.0) * 0.35, 0.05, 0.85)
+			var p := clampf(0.2 + (oran - 1.0) * 0.35 + oyun.yet_k.etki("ikna") * 0.25 + oyun.yet_k.etki("korku") * 0.25 + oyun.sil_k.tan_bonus() * 0.01, 0.05, 0.9)
 			if rng.randf() < p:
 				gruplar.serbest_birak(g, 1440)
 				g["mod"] = "kac"
@@ -101,7 +119,7 @@ func uygula(g: Dictionary, id: String) -> Dictionary:
 				return _r("Kendinden emin konuştun. Birbirlerine baktılar ve gerilediler. Mahallede adın duyuldu.", "good")
 			return _carpis(g, 0.85, "Blöfün tutmadı, ilk yumruk onlardan geldi!")
 		"kac":
-			var p2 := clampf((0.45 if g["tur"] == "rakip" else 0.35) + (oyun.guc() / _kuvvet(g) - 1.0) * 0.1, 0.1, 0.8)
+			var p2 := clampf((0.45 if g["tur"] == "rakip" else 0.35) + (oyun.guc() / _kuvvet(g) - 1.0) * 0.1 + oyun.yet_k.etki("kacis") * 0.3, 0.1, 0.9)
 			if rng.randf() < p2:
 				gruplar.serbest_birak(g, 120)
 				oyun.kayit("%s'dan kaçtın." % g["ad"], "info")
@@ -110,11 +128,17 @@ func uygula(g: Dictionary, id: String) -> Dictionary:
 		"teslim":
 			if g["tur"] == "polis":
 				var ceza := int(60 + oyun.arama * 5)
+				var ek_yazi := ""
+				var ara_t := _ara(g)
+				if not oyun.sil_k.ust_bos(ara_t):
+					ceza += 40
+					oyun.sil_k.musadere(ara_t)
+					ek_yazi = " El konuldu: %s (geri almak için rüşvet gerekir)." % oyun.sil_k.ust_yazi(ara_t)
 				var odenen := _para_ode(ceza)
 				oyun.arama = 0.0
 				gruplar.serbest_birak(g, 720)
 				oyun.kayit("Polise teslim oldun, $%d ceza ödedin." % odenen, "bad")
-				return _r("Karakolda ifade verdin, $%d ceza ödedin. Dosyan kapandı (arama sıfırlandı)." % odenen, "bad")
+				return _r("Karakolda ifade verdin, $%d ceza ödedin. Dosyan kapandı (arama sıfırlandı).%s" % [odenen, ek_yazi], "bad")
 			var kayip := _para_orani(0.35)
 			gruplar.serbest_birak(g, 1440)
 			oyun.kayit("%s'a teslim oldun, $%d kaybettin." % [g["ad"], kayip], "bad")
@@ -126,6 +150,20 @@ func uygula(g: Dictionary, id: String) -> Dictionary:
 			_bolge_tan(g, 1.0)
 			oyun.kayit("%s'dan $%d koparttın." % [g["ad"], al], "good")
 			return _r("Cebindekileri çıkarttılar: $%d kirli para." % al, "good")
+		"rusvet_ara":
+			var ara2 := _ara(g)
+			var m3 := _ara_rusvet(ara2)
+			if not oyun.harcama(m3, "kirli"):
+				return _r("Yeterli kirli paran yok ($%d lazım)." % m3, "bad", false)
+			var pr := clampf(0.6 + oyun.yet_k.etki("rusvet") * 0.5 + oyun.kis_k.oz("rusvet") * 0.3 - oyun.arama / 200.0, 0.2, 0.92)
+			if rng.randf() < pr:
+				g["ara"] = {"bulundu": [], "mermi": 0}
+				gruplar.serbest_birak(g, 720)
+				oyun.arama += 3.0
+				oyun.kayit("Polis üstünde silah buldu; rüşvetle kapattın.", "warn")
+				return _r("Zarfı cebine attı: \"Üstünü bulmadım.\" Silahların cebinde kaldı.", "warn")
+			oyun.arama += 10.0
+			return _r("Rüşveti reddedip seni sıkıştırdılar! Para gitti, arama arttı.", "bad", false)
 		"rusvet":
 			var m2 := int(oyun.arama * 8)
 			if not oyun.harcama(m2, "kirli"):
@@ -177,6 +215,9 @@ func uygula(g: Dictionary, id: String) -> Dictionary:
 	return _r("...")
 
 # ---------- yardımcılar ----------
+func _ara_rusvet(ara: Dictionary) -> int:
+	return int(round((60.0 + 45.0 * ara["bulundu"].size() + (30.0 if ara["mermi"] > 0 else 0.0)) * (1.0 - 0.3 * oyun.yet_k.etki("pazarlik"))))
+
 func _bolge_tan(g: Dictionary, d: float) -> void:
 	var b: Dictionary = oyun.bolge[_bolge_id(g)]
 	b["tan"] = minf(100.0, b["tan"] + d)
@@ -203,7 +244,8 @@ func _para_orani(o: float) -> int:
 var otomatik := false   # true: eski otomatik çatışma (testler için)
 
 func savas_verisi(g: Dictionary, ceza: float) -> Dictionary:
-	var ekip: Array = [{"ad": "Sen", "silah": oyun.oyuncu_silah, "hp": oyun.ozet.get("hp", 100.0), "isabet": oyun.ozet.get("isabet", 0.5), "id": 0, "oyuncu": true}]
+	var sv: Dictionary = oyun.sil_k.savas_verisi()
+	var ekip: Array = [{"ad": "Sen", "silah": sv["silah"], "sd": sv["sd"], "stok": sv["stok"], "hp": oyun.ozet.get("hp", 100.0), "isabet": sv["isabet"], "id": 0, "oyuncu": true}]
 	for a in oyun.bos_adamlar():
 		ekip.append({"ad": a["ad"], "silah": a.get("silah", "bicak"), "hp": 60.0 + oyun.beceri(a) / 2.0,
 			"isabet": 0.45 + a["zeka"] / 250.0, "id": a["id"]})
@@ -235,15 +277,18 @@ func savas_verisi(g: Dictionary, ceza: float) -> Dictionary:
 		"dusman_ad": g["ad"], "dusman_renk": renk, "dezavantaj": clampf(ceza, 0.5, 1.0) if ceza < 1.0 else 1.0}
 
 func savas_bitir(g: Dictionary, s: Dictionary) -> Dictionary:
+	var sil_yazi: String = oyun.sil_k.savas_sonu(s, g)
 	var ad: String = g["ad"]
 	var olen: int = s["dusman_olu"]
 	g["kisi"] = maxi(0, g["kisi"] - olen)
-	var yazi := ""
+	var yazi: String = sil_yazi
 	var lu: Dictionary = oyun.uye(g["lider"]) if g.has("lider") else {}
 	if s.get("lider_olu", false) and not lu.is_empty():
 		var lad: String = oyun.uye_ad(lu)
 		oyun.uye_oldu(lu["uid"])
 		yazi += " %s yere serildi!" % lad
+		if s["sonuc"] == "zafer":
+			yazi += oyun.sil_k.ganimet_lider(lu)
 		_bolge_tan(g, 6.0 if lu["rutbe"] in ["don", "ikinci"] else 2.0)
 		if g["kisi"] > 0 and not g.has("don"):
 			gruplar.lider_ata(g)
@@ -264,6 +309,8 @@ func savas_bitir(g: Dictionary, s: Dictionary) -> Dictionary:
 	match s["sonuc"]:
 		"zafer":
 			var metin := "Çatışmayı kazandın: %d kişi yere serildi." % olen
+			if g["tur"] == "rakip" and not s.get("lider_olu", false):
+				metin += oyun.sil_k.ganimet_rastgele()
 			if g["tur"] == "rakip":
 				oyun.kirli += olen * 20
 				metin += " Ganimet: $%d kirli para." % (olen * 20)

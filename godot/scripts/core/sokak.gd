@@ -465,6 +465,8 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_B: arayuz._bolge_dugmesi()
 			KEY_T: arayuz.adamlar_ac()
 			KEY_F: arayuz.defter_ac()
+			KEY_G: arayuz.silah_ac()
+			KEY_Y: arayuz.yetenek_ac()
 			KEY_V:
 				gorus.acik = not gorus.acik
 				gorus.guncelle()
@@ -902,6 +904,13 @@ func _ekran_cek(arg: String) -> void:
 			arayuz.polis_ac()
 		elif p[1] == "garaj":
 			arayuz.garaj_ac()
+		elif p[1] == "silah":
+			oyun.sil_k.ver("tommy", "ganimet", "Vito'nun Tommy'si", "Vito Marchetti'yi yendiğinin kanıtı.", 30.0, "marchetti")
+			oyun.sil_k.al("pompali")
+			arayuz._sil_acik = 1
+			arayuz.silah_ac()
+		elif p[1] == "yetenek":
+			arayuz.yetenek_ac()
 		elif p[1] == "defter":
 			arayuz.defter_ac()
 		elif p[1] == "zafer":

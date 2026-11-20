@@ -121,7 +121,11 @@ var ofke := {"marchetti": 0.0, "obrien": 0.0, "tammany": 0.0}
 var adamlar: Array[Dictionary] = []   # {id, ad, yumruk, bicak, zeka, gorev}
 var gorevler: Array[Dictionary] = []  # {adam, hedef, gorev, basla, yol, bitis, yolu}
 var isy := {}                         # bina indeksi -> {tur, sahip, haracli, birikim, korumaBitis}
-var oyuncu_silah := "tabanca"
+var oyuncu_silah := "tabanca"   # elindeki silahın tipi (silahlik.gd senkronlar)
+var sil: Dictionary = {}        # silah envanteri (silahlik.gd)
+var sil_k: RefCounted
+var yet: Dictionary = {}        # beceri ağacı (yetenek.gd)
+var yet_k: RefCounted
 var uyeler: Array = []   # aile üyeleri: {uid, ad, fak, rutbe, durum: aktif|olu, iliski, ev}
 var _uid := 0
 var _pid := 0
@@ -211,6 +215,11 @@ func kur(h: Node3D) -> void:
 	_aileleri_kur()
 	_profil_uygula()
 	kis_k.baslat()
+	yet_k = load("res://scripts/core/yetenek.gd").new(self)
+	yet = yet_k.yeni()
+	yet_k.baslat()
+	sil_k = load("res://scripts/core/silahlik.gd").new(self)
+	sil_k.baslat()
 
 # Karakter seçimini oyun durumuna işler: para, ev, tanınırlık, aile bağı.
 func _profil_uygula() -> void:
@@ -585,6 +594,8 @@ func yarala(a: Dictionary, gun: int) -> void:
 
 # Silah ver: adam_id 0 = sen. Yeni silahın fiyatı kirli paradan düşer (eskisi geri satılmaz).
 func silah_ver(adam_id: int, silah: String) -> Dictionary:
+	if adam_id == 0:
+		return sil_k.al(silah)
 	var mevcut: String = oyuncu_silah if adam_id == 0 else adam_bul(adam_id).get("silah", "yumruk")
 	if mevcut == silah:
 		return hata("Zaten bu silahı taşıyor.")
@@ -946,7 +957,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler, "kara": kara}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler, "kara": kara, "sil": sil, "yet": yet}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -988,6 +999,13 @@ func durum_yukle(d: Dictionary) -> void:
 	pazar = d.get("pazar", {})
 	isler = d.get("isler", isler_k.yeni())
 	kara = d.get("kara", {"liste": [], "seq": 1})
+	yet = d.get("yet", yet_k.yeni())
+	if d.has("sil"):
+		sil = d["sil"]
+	else:
+		sil_k.migrate()
+	if not yet.has("p") or yet["p"].is_empty():
+		yet_k.baslat()
 	kis_k._son_t = t
 	degisti.emit()
 
@@ -1044,6 +1062,8 @@ func _gun() -> void:
 	yol_k.gun()
 	isl.gunluk()
 	kara_k.gun()
+	yet_k.gun()
+	sil_k.gun()
 	for i in isy:
 		var r: Dictionary = isy[i]
 		var w := haftalik(i)

@@ -83,7 +83,7 @@ func kur(o: Node, s: Node) -> void:
 	saat.position = Vector2(6, 4)
 	add_child(saat)
 	var sp := Pie.new()
-	sp.kur(true, [["♟", "Ben", ben_ac], ["⚒", "İş", meslek_ac], ["⚙", "Garaj", garaj_ac], ["★", "Hedefler", zafer_ac]])
+	sp.kur(true, [["♟", "Ben", ben_ac], ["⚒", "İş", meslek_ac], ["⚙", "Garaj", garaj_ac], ["★", "Hedefler", zafer_ac], ["⚔", "Silahlar", silah_ac], ["✦", "Beceri", yetenek_ac]])
 	sp.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	sp.offset_left = 0
 	sp.offset_top = -Pie.BOY
@@ -636,6 +636,20 @@ func garaj_ac() -> void:
 	_mod = "garaj"
 	_yenile(true)
 
+func silah_ac() -> void:
+	if _mod == "silah":
+		kapat()
+		return
+	_mod = "silah"
+	_yenile(true)
+
+func yetenek_ac() -> void:
+	if _mod == "yetenek":
+		kapat()
+		return
+	_mod = "yetenek"
+	_yenile(true)
+
 func defter_ac() -> void:
 	if _mod == "defter":
 		kapat()
@@ -730,6 +744,10 @@ func _imza() -> String:
 			return str([oyun.kis, oyun.kis_k.taninma(), oyun.yol["puan"]])
 		"defter":
 			return str(oyun.defter.size())
+		"silah":
+			return str([oyun.sil, oyun.sil_k.kusur("miyop"), oyun.kis.get("gozluk", false), oyun.temiz, oyun.kirli, _sonuc, _sil_acik, oyun.arac.get("tip", ""), oyun.t / 1440])
+		"yetenek":
+			return str([oyun.yet, _sonuc])
 		"polis":
 			return str([oyun.pol, oyun.arama, oyun.temiz, oyun.kirli, _sonuc])
 		"meslek":
@@ -764,6 +782,8 @@ func _yenile(zorla: bool) -> void:
 		"aile": _aile_paneli()
 		"grup": _grup_paneli()
 		"ben": _ben_paneli()
+		"silah": _silah_paneli()
+		"yetenek": _yetenek_paneli()
 	_kapat_dugmesi()
 	_kagit_mod = false
 	_gorsel.ayarla(_gorsel_anahtarlari())
@@ -1604,6 +1624,13 @@ func _ben_paneli() -> void:
 		_bar(dur, y.AD[yl], y.puan(yl), RENK["info"])
 	var ozet := _lbl(_ic, y.ozet_satiri(), 15, Tema.VURGU)
 	ozet.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	for kid in oyun.sil_k.KUSUR:
+		if oyun.sil_k.kusur(kid):
+			_lbl(_ic, "✘ %s: %s" % [oyun.sil_k.KUSUR[kid]["ad"], oyun.sil_k.KUSUR[kid]["ac"]], 13, RENK["bad"])
+	var kisa := HBoxContainer.new()
+	_ic.add_child(kisa)
+	_btn(kisa, "Silahlar", silah_ac)
+	_btn(kisa, "Beceri ağacı", yetenek_ac)
 	_sonuc_satiri()
 
 func _ihtiyac_bar_to(hedef: Node, ad: String, deger: float) -> void:
@@ -1701,4 +1728,170 @@ $%d" % int(j["para"]), func(): _sonuc_goster(oyun.isler_k.kabul(i, jdx)), oyun.b
 				pb.tooltip_text = "Hedef o otelde kalıyor olabilir. Orada oda tutup bekle; adam gerekmez, risk sende."
 			jb.tooltip_text = "Boşta en az %d adam gerekir. Başarısızlıkta polis dosyası kabarır, adamlar yaralanabilir." % T["kisi"]
 			m += 1
+	_sonuc_satiri()
+
+# ---------- silahlar ----------
+var _sil_acik := 0   # ayrıntısı açık silah (uid)
+
+func _silah_paneli() -> void:
+	var K: RefCounted = oyun.sil_k
+	_baslik(_ic, "Silahlar", "Elindeki silah senin imzan.")
+	var kap: float = K.kapasite("u")
+	var yk: float = K.yuk("u")
+	_bar(_ic, "Taşıma yükü", minf(100.0, yk / maxf(kap, 0.1) * 100.0), RENK["bad"] if yk > kap else Color("a89870"), "%.1f / %.1f kg" % [yk, kap])
+	if K.kapasite("b") > 0.0:
+		_bar(_ic, "Araç bagajı", minf(100.0, K.yuk("b") / K.kapasite("b") * 100.0), Color("8a7a58"), "%.1f / %.1f kg" % [K.yuk("b"), K.kapasite("b")])
+	var ek: Label = _lbl(_ic, "Güçlü ve kalabalık gezersen daha çok taşırsın; araba bagajı ek yer verir. Üstündeki yasa dışı silah ve fazla mermi polis aramasında seni yakar.", 13, RENK["soluk"])
+	ek.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	if K.asiri() > 0.0:
+		_lbl(_ic, "Yük fazla: nişanın sapıyor, doldurman yavaşlıyor. Fazlasını eve bırak.", 14, RENK["bad"])
+	for kid in K.KUSUR:
+		if K.kusur(kid):
+			_lbl(_ic, "✘ %s — %s" % [K.KUSUR[kid]["ad"], K.KUSUR[kid]["ac"]], 13, RENK["bad"])
+	if K.kusur("miyop") and not oyun.kis.get("gozluk", false):
+		_btn(_ic, "Gözlük yaptır ($45)", func(): _sonuc_goster(K.gozluk_al()))
+	var ru: String = "geçerli (%d gün)" % int((oyun.sil["ruhsat"] - oyun.t) / oyun.DAY) if K.ruhsat_var() else "yok"
+	_lbl(_ic, "Tabanca ruhsatı: %s" % ru, 14, RENK["good"] if K.ruhsat_var() else RENK["warn"])
+	if not K.ruhsat_var():
+		_btn(_ic, "Ruhsat çıkar ($200 temiz)", func(): _sonuc_goster(K.ruhsat_al()))
+	_ayrac(_ic)
+	_bolum(_ic, "Silahların")
+	var el: Dictionary = K.eldeki()
+	_lbl(_ic, "Elinde: %s" % (K.ad(el) if not el.is_empty() else "yalnızca yumruk"), 16, RENK["altin"])
+	if oyun.sil["liste"].is_empty():
+		_lbl(_ic, "Hiç silahın yok. Aşağıdan satın alabilirsin.", 14, RENK["soluk"])
+	for yer in ["u", "b", "e"]:
+		for w in oyun.sil["liste"]:
+			if w["yer"] == yer:
+				_silah_kutusu(w)
+	_ayrac(_ic)
+	_bolum(_ic, "Mermi")
+	for kal in K.KAL:
+		_lbl(_ic, "%s — üstünde %d · bagajda %d · evde %d" % [K.KAL[kal]["ad"], K.muh("u", kal), K.muh("b", kal), K.muh("e", kal)], 14)
+		var mh := HBoxContainer.new()
+		_ic.add_child(mh)
+		_btn(mh, "Kutu al (%s)" % oyun.para(K.mermi_fiyat(kal)), func(): _sonuc_goster(K.mermi_al(kal)), oyun.kirli + oyun.temiz < K.mermi_fiyat(kal))
+		_btn(mh, "Evden 20 al", func(): _sonuc_goster(K.muh_tasi(kal, 20, "e", "u")), K.muh("e", kal) <= 0)
+		_btn(mh, "Eve 20 bırak", func(): _sonuc_goster(K.muh_tasi(kal, 20, "u", "e")), K.muh("u", kal) <= 0)
+		if K.kapasite("b") > 0.0:
+			_btn(mh, "Bagaja 20", func(): _sonuc_goster(K.muh_tasi(kal, 20, "u", "b")), K.muh("u", kal) <= 0)
+	_ayrac(_ic)
+	_bolum(_ic, "Antrenman")
+	_lbl(_ic, "Poligonda atış çalışırsın: nişan ve silah ustalığı artar, silah alışır. 15 mermi + $20 gider, 3 saat sürer.", 13, RENK["soluk"])
+	_btn(_ic, "Poligona git", func(): _sonuc_goster(K.poligon()))
+	if not oyun.sil["emanet"].is_empty():
+		_ayrac(_ic)
+		_bolum(_ic, "Polis emaneti")
+		for w in oyun.sil["emanet"]:
+			var eh := HBoxContainer.new()
+			_ic.add_child(eh)
+			_lbl(eh, K.ad(w), 14)
+			var wid: int = w["uid"]
+			_btn(eh, "Rüşvetle geri al (%s)" % oyun.para(K.emanet_fiyat(w)), func(): _sonuc_goster(K.emanetten_al(wid)))
+	if not oyun.sil["kayip"].is_empty():
+		_ayrac(_ic)
+		_bolum(_ic, "Kaybettiklerin")
+		for kw in oyun.sil["kayip"]:
+			_lbl(_ic, "• %s%s" % [kw["ad"], (" (%d kurban)" % kw["kills"]) if kw["kills"] > 0 else ""], 13, RENK["soluk"])
+	_ayrac(_ic)
+	_bolum(_ic, "Silah dükkânı")
+	for tip in K.KATALOG:
+		if tip == "yumruk":
+			continue
+		var T: Dictionary = K.KATALOG[tip]
+		var dh := HBoxContainer.new()
+		_ic.add_child(dh)
+		_lbl(dh, "%s (%s)" % [T["ad"], "iki el" if T["el"] == 2 else "tek el"], 14)
+		var ff: int = K.fiyat(tip)
+		_btn(dh, oyun.para(ff), func(): _sonuc_goster(K.al(tip)), oyun.kirli + oyun.temiz < ff)
+		var tt := _lbl(_ic, T["ac"], 12, RENK["soluk"])
+		tt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_sonuc_satiri()
+
+func _silah_kutusu(w: Dictionary) -> void:
+	var K: RefCounted = oyun.sil_k
+	var kat: Dictionary = K.KATALOG[w["tip"]]
+	var el: Dictionary = K.eldeki()
+	var elde: bool = not el.is_empty() and el["uid"] == w["uid"]
+	var uid: int = w["uid"]
+	var v := _kutu(_ic)
+	var un: String = K.unvan(w)
+	_lbl(v, "%s%s%s" % ["► " if elde else "", K.ad(w), ("  [%s]" % un) if un != "" else ""], 17, RENK["altin"] if elde else Color.WHITE)
+	var alt := "%s · %s · %s" % [K.YER_AD[w["yer"]], "iki el" if kat["el"] == 2 else "tek el", ("%s mermi" % kat["kal"]) if kat["kal"] != "" else "yakın dövüş"]
+	if w["kills"] > 0:
+		alt += " · %d kurban" % w["kills"]
+	if w["sahip"] != "":
+		alt += " · %s'ın malı" % oyun.FAK[w["sahip"]]["ad"]
+	_lbl(v, alt, 13, RENK["soluk"])
+	var yazi: String = w["yazi"] if w["yazi"] != "" else kat["ac"]
+	var yl := _lbl(v, yazi, 13, RENK["soluk"])
+	yl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_bar(v, "Durum", w["durum"], Color("a89870"), "%d%%" % int(w["durum"]))
+	var h := HBoxContainer.new()
+	v.add_child(h)
+	if w["yer"] == "u" and not elde:
+		_btn(h, "Eline al", func(): _sonuc_goster(K.kusan(uid)))
+	for y in ["u", "b", "e"]:
+		if y != w["yer"] and (y != "b" or K.kapasite("b") > 0.0):
+			var yy: String = y
+			_btn(h, "→ " + K.YER_AD[y], func(): _sonuc_goster(K.tasi(uid, yy)))
+	_btn(h, "Kapat" if _sil_acik == uid else "Ayrıntı", func():
+		_sil_acik = 0 if _sil_acik == uid else uid
+		_yenile(true))
+	if _sil_acik != uid:
+		return
+	var kr: Dictionary = K.karne(w)
+	for k in kr["d"]:
+		_bar(v, k, kr["d"][k], Color("8a7a58"), "%d" % int(kr["d"][k]))
+	for ys in kr["yorum"]:
+		var yo := _lbl(v, "• " + ys, 13)
+		yo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lbl(v, kr["uyum"] + " Alışma: %d%%" % int(w["alisma"]), 13, RENK["info"])
+	_lbl(v, "İmza değeri (gösteriş): %d" % int(K.prestij(w)), 13, RENK["altin"])
+	for pid in K.parca_listesi(w["tip"]):
+		var pd: Dictionary = K.PARCA[pid]
+		var mal: int = K.parca_maliyet(w, pid)
+		var ph := HBoxContainer.new()
+		v.add_child(ph)
+		_lbl(ph, "%s %d/3" % [pd["ad"], K.lv(w, pid)], 14)
+		var pp: String = pid
+		_btn(ph, "Son seviye" if mal < 0 else "Geliştir (%s)" % oyun.para(mal), func(): _sonuc_goster(K.parca_yap(uid, pp)), mal < 0 or oyun.kirli + oyun.temiz < mal)
+		var pa := _lbl(v, pd["ac"], 12, RENK["soluk"])
+		pa.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var bh := HBoxContainer.new()
+	v.add_child(bh)
+	_btn(bh, "Bakım yap", func(): _sonuc_goster(K.bakim(uid)), w["durum"] >= 99.0)
+	_btn(bh, "Adlandır", func(): _sonuc_goster(K.lakap(uid)))
+	var sf: int = K.sat_fiyat(w)
+	_btn(bh, "Sat (%s)" % oyun.para(sf), func(): _sonuc_goster(K.sat(uid)), w["prestij_ek"] >= 15.0 or w["sahip"] != "")
+
+# ---------- beceri ağacı ----------
+func _yetenek_paneli() -> void:
+	var Y: RefCounted = oyun.yet_k
+	_baslik(_ic, "Beceri ağacı", "Yaptıkların seni şekillendirir; kullanılmayan beceri körelir.")
+	for d in Y.dallar():
+		_bolum(_ic, Y.DAL_AD[d[0]])
+		for id in d[1]:
+			var T: Dictionary = Y.YET[id]
+			var pu: float = Y.puan(id)
+			var acik: bool = Y.acik(id)
+			var v := _kutu(_ic)
+			_bar(v, "%s · sv %d" % [T["ad"], Y.seviye(id)], pu, Color("a89870") if acik else Color("6a6a6a"), "%d" % int(pu))
+			var ya := _lbl(v, T["ac"], 13, RENK["soluk"])
+			ya.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			if not acik:
+				_lbl(v, "Kilitli: %s %d puana ulaşınca açılır." % [Y.YET[T["ust"][0]]["ad"], int(T["ust"][1])], 13, RENK["bad"])
+	_ayrac(_ic)
+	_bolum(_ic, "Neyi besler, neyi köreltir?")
+	var ipucu := [
+		"Poligon, bilardo, çatışma → nişan ve silah becerileri (+).",
+		"İçki → nişan, hızlı el, direksiyon (−).",
+		"Taksicilik → direksiyon ve kaçış, biraz ikna ve sokak aklı (+); nişan hafif (−).",
+		"Sohbet, berberlik → ikna; kumar → pazarlık ve sokak aklı.",
+		"Antrenman, hamallık → yakın dövüş.",
+		"Dua etmek gözdağını köreltir; kâtiplik pazarlığı büyütür.",
+	]
+	for ip in ipucu:
+		var il := _lbl(_ic, "• " + ip, 13, RENK["soluk"])
+		il.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_sonuc_satiri()
