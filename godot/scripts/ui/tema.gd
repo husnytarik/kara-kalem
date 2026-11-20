@@ -1,7 +1,7 @@
 extends RefCounted
 # Tek yerden arayüz görünümü: sade, koyu gri + tek yumuşak vurgu rengi. Renk/boyut değiştirmek için burayı değiştir.
 
-const OLCEK := 0.85   # tüm yazı boyutları bununla çarpılır (arayüzü küçültmek için düşür)
+const OLCEK := 0.75   # tüm yazı boyutları bununla çarpılır (arayüzü küçültmek için düşür)
 
 const ARKA := Color(0.105, 0.075, 0.052, 0.94)    # koyu deri/kahve
 const ARKA2 := Color(0.15, 0.108, 0.075, 0.96)

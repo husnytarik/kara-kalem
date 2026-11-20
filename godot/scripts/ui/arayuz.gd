@@ -41,7 +41,7 @@ var _dlg: PanelContainer
 var _dlg_ic: VBoxContainer
 var _dlg_g: Dictionary = {}
 var _dlg_sonuc: Dictionary = {}
-const PANEL_GENISLIK := 480   # tüm sağ paneller aynı genişlikte
+const PANEL_GENISLIK := 420   # tüm sağ paneller aynı genişlikte
 const YAKIN := 16.0          # bir binayla/grupla işlem için gereken en büyük uzaklık (m)
 
 func kur(o: Node, s: Node) -> void:

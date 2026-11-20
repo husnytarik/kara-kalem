@@ -18,6 +18,7 @@ var _gecmis_acik: Label
 var _aile_satir: Control
 var _ozet_kutu: VBoxContainer
 var _t := 0.0
+var _ekran_yol := ""
 
 # ---------- ortak görünüm yardımcıları (duraklat.gd de kullanır; renkler tema.gd'den) ----------
 static func panel_stil(arka: Color = Tema.ARKA) -> StyleBoxFlat:
@@ -60,6 +61,12 @@ static func etiket(ebeveyn: Node, metin: String, boyut: int = 16, renk: Color = 
 func _ready() -> void:
 	Engine.time_scale = 1.0
 	var args := OS.get_cmdline_user_args()
+	for a in args:
+		if a.begins_with("--menuekran="):
+			_ekran_yol = a.substr(12).split(",")[0]
+			if a.ends_with(",kur"):
+				args.append("--kur")
+			args.append("--menu")
 	if args.size() > 0 and not args.has("--menu") and not args.has("--kur"):
 		get_tree().change_scene_to_file.call_deferred(OYUN)   # doğrulama modu: doğrudan oyun
 		return
@@ -75,62 +82,281 @@ func _ready() -> void:
 func _process(d: float) -> void:
 	_t += d
 	queue_redraw()
+	if _ekran_yol != "" and _t > 3.0:
+		get_viewport().get_texture().get_image().save_png(_ekran_yol)
+		get_tree().quit()
 
 func _draw() -> void:
 	var b := size
-	# gece gökyüzü
-	var ust := Color(0.03, 0.03, 0.06)
-	var alt := Color(0.16, 0.10, 0.09)
-	draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(b.x, 0), Vector2(b.x, b.y), Vector2(0, b.y)]),
-		PackedColorArray([ust, ust, alt, alt]))
-	draw_circle(Vector2(b.x * 0.78, b.y * 0.2), 46.0, Color(0.9, 0.86, 0.7, 0.9))
-	draw_circle(Vector2(b.x * 0.78 + 14, b.y * 0.2 - 8), 40.0, Color(0.06, 0.05, 0.08, 0.35))
-	# silüet: iki katman bina + yanan pencereler
+	var s := b.y / 720.0
+	var ufuk := b.y * 0.74
+	_gokyuzu(b, ufuk)
+	_ay(b, s)
+	_huzmeler(b, s, ufuk)
+	_siluet(b, s, ufuk - 4.0 * s, Color(0.16, 0.13, 0.17), 150.0 * s, 330.0 * s, 40.0 * s, 90.0 * s, 11, false)
+	_sis(b, s, ufuk, 0.55)
+	_siluet(b, s, ufuk + 6.0 * s, Color(0.075, 0.06, 0.09), 130.0 * s, 400.0 * s, 52.0 * s, 120.0 * s, 77, true)
+	_sis(b, s, ufuk + 10.0 * s, 0.4)
+	_sokak(b, s, ufuk)
+	_arac(Vector2(b.x * 0.56, ufuk + 62.0 * s), b.x * 0.20, s)
+	_adam(Vector2(b.x * 0.80, b.y - 26.0 * s), b.y * 0.44, s)
+	_yagmur(b, s)
+	_vinyet(b)
+
+func _gokyuzu(b: Vector2, ufuk: float) -> void:
+	var renkler := [Color(0.02, 0.02, 0.05), Color(0.07, 0.06, 0.12), Color(0.24, 0.14, 0.14), Color(0.55, 0.33, 0.2)]
+	var adim := 36
+	for i in adim:
+		var f := float(i) / float(adim - 1)
+		var k := f * 3.0
+		var a := mini(int(k), 2)
+		var c: Color = renkler[a].lerp(renkler[a + 1], k - a)
+		draw_rect(Rect2(0, ufuk * i / adim, b.x, ufuk / adim + 1.0), c)
+	draw_rect(Rect2(0, ufuk, b.x, b.y - ufuk), Color(0.05, 0.04, 0.06))
+	# yıldızlar
 	var r := RandomNumberGenerator.new()
-	for katman in 2:
-		r.seed = 77 + katman
-		var x := -20.0
-		var taban := b.y * (0.88 if katman == 0 else 1.0)
-		var renk := Color(0.07, 0.06, 0.09) if katman == 0 else Color(0.035, 0.03, 0.05)
-		while x < b.x:
-			var w := r.randf_range(50.0, 130.0)
-			var h := r.randf_range(90.0, 330.0 if katman == 0 else 200.0)
-			draw_rect(Rect2(x, taban - h, w, h + 60), renk)
-			if katman == 0:
-				var wy := taban - h + 14
-				while wy < taban - 16:
-					var wx := x + 8
-					while wx < x + w - 12:
-						if r.randf() < 0.28:
-							var titre := 0.75 + 0.25 * sin(_t * 1.5 + wx * 0.13 + wy)
-							draw_rect(Rect2(wx, wy, 6, 8), Color(1.0, 0.82, 0.45, 0.65 * titre))
-						wx += 16
-					wy += 22
-			x += w + r.randf_range(0.0, 8.0)
-	draw_rect(Rect2(0, 0, b.x, b.y), Color(0, 0, 0, 0.18))
+	r.seed = 5
+	for i in 110:
+		var p := Vector2(r.randf() * b.x, r.randf() * ufuk * 0.55)
+		var par := 0.35 + 0.65 * (0.5 + 0.5 * sin(_t * r.randf_range(0.6, 2.0) + i))
+		draw_circle(p, r.randf_range(0.6, 1.5), Color(1, 0.96, 0.85, 0.5 * par))
+
+func _ay(b: Vector2, s: float) -> void:
+	var c := Vector2(b.x * 0.74, b.y * 0.19)
+	for k in 9:
+		draw_circle(c, (52.0 + k * 20.0) * s, Color(0.95, 0.82, 0.6, 0.045 * (1.0 - k / 9.0)))
+	draw_circle(c, 52.0 * s, Color(0.96, 0.9, 0.74))
+	for kr in [[-14.0, -10.0, 9.0], [12.0, 8.0, 13.0], [-4.0, 22.0, 7.0], [20.0, -14.0, 6.0]]:
+		draw_circle(c + Vector2(kr[0], kr[1]) * s, kr[2] * s, Color(0.82, 0.74, 0.58, 0.55))
+	draw_circle(c + Vector2(18, -8) * s, 48.0 * s, Color(0.08, 0.06, 0.1, 0.25))
+
+func _huzmeler(b: Vector2, s: float, ufuk: float) -> void:
+	for i in 2:
+		var taban := Vector2(b.x * (0.18 + 0.30 * i), ufuk)
+		var aci := sin(_t * 0.22 + i * 2.1) * 0.5 + (-0.4 if i == 0 else 0.25)
+		var yon := Vector2(sin(aci), -cos(aci))
+		var dik := Vector2(-yon.y, yon.x)
+		var uc := taban + yon * b.y * 1.1
+		draw_polygon(PackedVector2Array([taban - dik * 8.0 * s, taban + dik * 8.0 * s, uc + dik * 90.0 * s, uc - dik * 90.0 * s]),
+			PackedColorArray([Color(1, 0.95, 0.78, 0.11), Color(1, 0.95, 0.78, 0.11), Color(1, 0.95, 0.78, 0.0), Color(1, 0.95, 0.78, 0.0)]))
+
+# Art Deco silüet: kademeli gövde, ince kule, sağ kenarda ay ışığı, yanan pencereler.
+func _siluet(b: Vector2, s: float, taban: float, renk: Color, hmin: float, hmax: float, wmin: float, wmax: float, tohum: int, pencere: bool) -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = tohum
+	var x := -30.0 * s
+	while x < b.x:
+		var w := r.randf_range(wmin, wmax)
+		var h := r.randf_range(hmin, hmax)
+		draw_rect(Rect2(x, taban - h, w, h + 200.0), renk)
+		var ust := taban - h
+		var cx := x
+		var cw := w
+		var kademe := r.randi_range(0, 3)
+		for i in kademe:
+			var nw := cw * r.randf_range(0.6, 0.82)
+			var nx := cx + (cw - nw) * 0.5
+			var nh := r.randf_range(0.04, 0.10) * b.y
+			draw_rect(Rect2(nx, ust - nh, nw, nh + 1.0), renk)
+			draw_rect(Rect2(nx + nw - 2.0 * s, ust - nh, 2.0 * s, nh), Color(0.8, 0.82, 1.0, 0.07))
+			ust -= nh
+			cx = nx
+			cw = nw
+		if kademe >= 2 and r.randf() < 0.75:
+			var kh := r.randf_range(0.08, 0.17) * b.y
+			draw_polygon(PackedVector2Array([Vector2(cx + cw * 0.36, ust), Vector2(cx + cw * 0.5, ust - kh), Vector2(cx + cw * 0.64, ust)]), PackedColorArray([renk, renk, renk]))
+			draw_line(Vector2(cx + cw * 0.5, ust - kh), Vector2(cx + cw * 0.5, ust - kh - 16.0 * s), renk, 1.5 * s)
+			if pencere:
+				var yan := 0.5 + 0.5 * sin(_t * 2.0 + x)
+				draw_circle(Vector2(cx + cw * 0.5, ust - kh - 16.0 * s), 2.2 * s, Color(1.0, 0.25, 0.2, 0.35 + 0.6 * yan))
+		draw_rect(Rect2(x + w - 2.0 * s, taban - h, 2.0 * s, h), Color(0.8, 0.82, 1.0, 0.08))
+		if pencere:
+			var wy := taban - h + 14.0 * s
+			while wy < taban - 14.0 * s:
+				var wx := x + 8.0 * s
+				while wx < x + w - 12.0 * s:
+					if r.randf() < 0.24:
+						var sicak := r.randf()
+						var pr := Color(1.0, 0.8 + 0.1 * sicak, 0.42 + 0.2 * sicak)
+						var titre := 0.8 + 0.2 * sin(_t * 1.4 + wx * 0.13 + wy)
+						draw_rect(Rect2(wx - 2.0 * s, wy - 2.0 * s, 10.0 * s, 12.0 * s), Color(pr.r, pr.g, pr.b, 0.07 * titre))
+						draw_rect(Rect2(wx, wy, 6.0 * s, 8.0 * s), Color(pr.r, pr.g, pr.b, 0.72 * titre))
+					else:
+						r.randf()
+					wx += 16.0 * s
+				wy += 22.0 * s
+		x += w + r.randf_range(0.0, 6.0 * s)
+
+func _sis(b: Vector2, s: float, y: float, guc: float) -> void:
+	for i in 12:
+		var f := float(i) / 12.0
+		draw_rect(Rect2(0, y - (60.0 * s) * f, b.x, 60.0 * s / 12.0 + 1.0), Color(0.85, 0.58, 0.36, 0.05 * guc * (1.0 - f)))
+	for i in 5:
+		var cx := fposmod(b.x * 0.2 * i + _t * (6.0 + 3.0 * i), b.x + 600.0 * s) - 300.0 * s
+		draw_set_transform(Vector2(cx, y - 14.0 * s * (i % 3)), 0.0, Vector2(5.0, 0.7))
+		draw_circle(Vector2.ZERO, 70.0 * s, Color(0.9, 0.65, 0.45, 0.045 * guc))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _sokak(b: Vector2, s: float, ufuk: float) -> void:
+	# ıslak asfalt: yukarıdan aşağıya kararan, sıcak yansımalı
+	for i in 16:
+		var f := float(i) / 15.0
+		var c := Color(0.13, 0.09, 0.09).lerp(Color(0.02, 0.02, 0.03), f)
+		draw_rect(Rect2(0, ufuk + (b.y - ufuk) * i / 16.0, b.x, (b.y - ufuk) / 16.0 + 1.0), c)
+	# kaldırım çizgisi
+	draw_rect(Rect2(0, ufuk, b.x, 3.0 * s), Color(0.35, 0.27, 0.2, 0.5))
+	# sokak lambaları + ıslak zeminde ışık havuzu
+	for lx in [b.x * 0.42, b.x * 0.93]:
+		var top := Vector2(lx, ufuk - 150.0 * s)
+		draw_rect(Rect2(lx - 2.5 * s, top.y, 5.0 * s, 150.0 * s + 40.0 * s), Color(0.03, 0.03, 0.04))
+		draw_rect(Rect2(lx - 14.0 * s, top.y - 3.0 * s, 28.0 * s, 6.0 * s), Color(0.03, 0.03, 0.04))
+		var titre := 0.9 + 0.1 * sin(_t * 7.0 + lx)
+		for k in 7:
+			draw_circle(top + Vector2(0, 6.0 * s), (10.0 + k * 11.0) * s, Color(1.0, 0.78, 0.4, 0.05 * titre * (1.0 - k / 7.0)))
+		draw_circle(top + Vector2(0, 5.0 * s), 5.0 * s, Color(1.0, 0.93, 0.7))
+		draw_set_transform(Vector2(lx, ufuk + 70.0 * s), 0.0, Vector2(3.4, 0.5))
+		for k in 6:
+			draw_circle(Vector2.ZERO, (14.0 + k * 14.0) * s, Color(1.0, 0.75, 0.38, 0.05 * titre * (1.0 - k / 6.0)))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		draw_polygon(PackedVector2Array([Vector2(lx - 4.0 * s, ufuk + 8.0 * s), Vector2(lx + 4.0 * s, ufuk + 8.0 * s), Vector2(lx + 14.0 * s, b.y), Vector2(lx - 14.0 * s, b.y)]),
+			PackedColorArray([Color(1, 0.8, 0.45, 0.16 * titre), Color(1, 0.8, 0.45, 0.16 * titre), Color(1, 0.8, 0.45, 0.0), Color(1, 0.8, 0.45, 0.0)]))
+
+func _arac(taban: Vector2, uzun: float, s: float) -> void:
+	var L := uzun
+	var koyu := Color(0.02, 0.02, 0.03)
+	var govde := [Vector2(-0.50, -0.10), Vector2(-0.50, -0.20), Vector2(-0.38, -0.24), Vector2(-0.20, -0.26), Vector2(-0.15, -0.40),
+		Vector2(0.05, -0.42), Vector2(0.20, -0.40), Vector2(0.28, -0.26), Vector2(0.48, -0.22), Vector2(0.50, -0.10)]
+	var pts := PackedVector2Array()
+	for p in govde:
+		pts.append(taban + p * L)
+	# yansıma (ıslak yol)
+	var yans := PackedVector2Array()
+	for p in govde:
+		yans.append(taban + Vector2(p.x, -p.y * 0.35 + 0.02) * L)
+	draw_colored_polygon(yans, Color(0.9, 0.6, 0.3, 0.05))
+	# far ışığı
+	var far := taban + Vector2(-0.50, -0.18) * L
+	var pt := 0.85 + 0.15 * sin(_t * 3.0)
+	draw_polygon(PackedVector2Array([far, far + Vector2(-1.7, -0.10) * L, far + Vector2(-1.7, 0.14) * L]),
+		PackedColorArray([Color(1, 0.9, 0.6, 0.30 * pt), Color(1, 0.9, 0.6, 0.0), Color(1, 0.9, 0.6, 0.0)]))
+	draw_colored_polygon(pts, koyu)
+	for p in [Vector2(-0.31, 0.0), Vector2(0.30, 0.0)]:
+		draw_circle(taban + p * L + Vector2(0, -0.07) * L, 0.075 * L, Color(0.01, 0.01, 0.015))
+		draw_arc(taban + p * L + Vector2(0, -0.07) * L, 0.075 * L, 0.0, TAU, 20, Color(0.5, 0.4, 0.3, 0.35), 1.2 * s)
+	# camlar
+	draw_colored_polygon(PackedVector2Array([taban + Vector2(-0.13, -0.28) * L, taban + Vector2(-0.115, -0.385) * L, taban + Vector2(0.04, -0.395) * L, taban + Vector2(0.04, -0.28) * L]), Color(0.35, 0.25, 0.18, 0.5))
+	draw_colored_polygon(PackedVector2Array([taban + Vector2(0.07, -0.28) * L, taban + Vector2(0.07, -0.395) * L, taban + Vector2(0.19, -0.38) * L, taban + Vector2(0.25, -0.28) * L]), Color(0.35, 0.25, 0.18, 0.5))
+	draw_polyline(pts, Color(0.7, 0.55, 0.4, 0.25), 1.2 * s)
+	draw_circle(far, 4.0 * s, Color(1, 0.95, 0.75))
+	draw_circle(far, 10.0 * s, Color(1, 0.85, 0.5, 0.25 * pt))
+
+func _adam(ayak: Vector2, H: float, s: float) -> void:
+	var koyu := Color(0.012, 0.012, 0.02)
+	var palto := [Vector2(-0.075, -0.665), Vector2(-0.16, -0.62), Vector2(-0.165, -0.45), Vector2(-0.14, -0.36), Vector2(-0.19, -0.20),
+		Vector2(-0.21, -0.17), Vector2(0.21, -0.17), Vector2(0.19, -0.20), Vector2(0.14, -0.36), Vector2(0.165, -0.45), Vector2(0.16, -0.62), Vector2(0.075, -0.665)]
+	var pts := PackedVector2Array()
+	for p in palto:
+		pts.append(ayak + p * H)
+	draw_colored_polygon(pts, koyu)
+	# bacaklar
+	draw_colored_polygon(PackedVector2Array([ayak + Vector2(-0.15, -0.18) * H, ayak + Vector2(-0.01, -0.18) * H, ayak + Vector2(-0.02, 0.0) * H, ayak + Vector2(-0.13, 0.0) * H]), koyu)
+	draw_colored_polygon(PackedVector2Array([ayak + Vector2(0.01, -0.18) * H, ayak + Vector2(0.15, -0.18) * H, ayak + Vector2(0.13, 0.0) * H, ayak + Vector2(0.02, 0.0) * H]), koyu)
+	# yaka, kemer, cep
+	draw_line(ayak + Vector2(-0.075, -0.665) * H, ayak + Vector2(0.0, -0.55) * H, Color(0.22, 0.18, 0.15, 0.7), 1.6 * s)
+	draw_line(ayak + Vector2(0.075, -0.665) * H, ayak + Vector2(0.0, -0.55) * H, Color(0.22, 0.18, 0.15, 0.7), 1.6 * s)
+	draw_line(ayak + Vector2(0.0, -0.55) * H, ayak + Vector2(0.0, -0.18) * H, Color(0.2, 0.17, 0.15, 0.35), 1.2 * s)
+	draw_line(ayak + Vector2(-0.14, -0.36) * H, ayak + Vector2(0.14, -0.36) * H, Color(0.22, 0.18, 0.15, 0.4), 1.6 * s)
+	# boyun + kafa
+	draw_rect(Rect2(ayak + Vector2(-0.025, -0.70) * H, Vector2(0.05, 0.05) * H), koyu)
+	draw_circle(ayak + Vector2(0, -0.735) * H, 0.05 * H, koyu)
+	# fötr şapka
+	draw_colored_polygon(PackedVector2Array([ayak + Vector2(-0.125, -0.772) * H, ayak + Vector2(0.125, -0.782) * H, ayak + Vector2(0.10, -0.758) * H, ayak + Vector2(-0.10, -0.758) * H]), koyu)
+	draw_colored_polygon(PackedVector2Array([ayak + Vector2(-0.058, -0.77) * H, ayak + Vector2(-0.05, -0.842) * H, ayak + Vector2(0.05, -0.842) * H, ayak + Vector2(0.058, -0.77) * H]), koyu)
+	draw_line(ayak + Vector2(-0.056, -0.787) * H, ayak + Vector2(0.056, -0.787) * H, Color(0.5, 0.2, 0.15, 0.85), 2.0 * s)
+	# kenar ışığı (lamba solda)
+	draw_polyline(PackedVector2Array([ayak + Vector2(-0.13, 0.0) * H, ayak + Vector2(-0.15, -0.18) * H, ayak + Vector2(-0.19, -0.20) * H, ayak + Vector2(-0.14, -0.36) * H, ayak + Vector2(-0.165, -0.45) * H, ayak + Vector2(-0.16, -0.62) * H, ayak + Vector2(-0.075, -0.665) * H]), Color(1.0, 0.75, 0.4, 0.38), 1.6 * s)
+	# sigara + duman
+	var ates := ayak + Vector2(-0.066, -0.722) * H
+	draw_circle(ates, 2.4 * s, Color(1.0, 0.45, 0.1, 0.9))
+	draw_circle(ates, 6.0 * s, Color(1.0, 0.45, 0.1, 0.18))
+	for i in 14:
+		var f := fposmod(_t * 0.35 + i / 14.0, 1.0)
+		var p := ates + Vector2(sin(f * 7.0 + i) * 10.0 * s - f * 22.0 * s, -f * 120.0 * s)
+		draw_circle(p, (3.0 + f * 11.0) * s, Color(0.8, 0.78, 0.75, 0.16 * (1.0 - f)))
+	# ıslak zemine yansıma
+	draw_set_transform(ayak, 0.0, Vector2(1.0, -0.22))
+	draw_colored_polygon(PackedVector2Array([Vector2(-0.19, 0.0) * H, Vector2(0.19, 0.0) * H, Vector2(0.15, -0.5) * H, Vector2(-0.15, -0.5) * H]), Color(0.9, 0.6, 0.3, 0.05))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+func _yagmur(b: Vector2, s: float) -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = 31
+	for i in 150:
+		var hiz := r.randf_range(520.0, 900.0) * s
+		var x := fposmod(r.randf() * b.x - _t * 60.0 * s, b.x)
+		var y := fposmod(r.randf() * b.y + _t * hiz, b.y)
+		draw_line(Vector2(x, y), Vector2(x - 5.0 * s, y + 18.0 * s), Color(0.75, 0.82, 1.0, 0.14), 1.0)
+
+func _vinyet(b: Vector2) -> void:
+	var adim := 10
+	var kal := b.y * 0.05
+	for i in adim:
+		var a := 0.55 * pow(1.0 - float(i) / adim, 2.0)
+		var c := Color(0, 0, 0, a)
+		draw_rect(Rect2(0, i * kal * 0.6, b.x, kal * 0.6), c)
+		draw_rect(Rect2(0, b.y - (i + 1) * kal * 0.6, b.x, kal * 0.6), c)
+		draw_rect(Rect2(i * kal * 0.9, 0, kal * 0.9, b.y), c)
+		draw_rect(Rect2(b.x - (i + 1) * kal * 0.9, 0, kal * 0.9, b.y), c)
+	# soldan koyulaştır: menü okunaklı olsun
+	draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(b.x * 0.55, 0), Vector2(b.x * 0.55, b.y), Vector2(0, b.y)]),
+		PackedColorArray([Color(0, 0, 0, 0.62), Color(0, 0, 0, 0.0), Color(0, 0, 0, 0.0), Color(0, 0, 0, 0.62)]))
 
 func _ana_kur() -> void:
 	_ana = Control.new()
 	_ana.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_ana)
+	var vp := get_viewport_rect().size
 	var kutu := VBoxContainer.new()
-	kutu.position = Vector2(96, 120)
-	kutu.custom_minimum_size = Vector2(420, 0)
+	kutu.position = Vector2(vp.x * 0.07, vp.y * 0.13)
+	kutu.custom_minimum_size = Vector2(400, 0)
 	kutu.add_theme_constant_override("separation", 12)
 	_ana.add_child(kutu)
-	var bas := etiket(kutu, "KARA KALEM", 72, ALTIN)
+	_sus(kutu)
+	var bas := etiket(kutu, "KARA KALEM", 64, ALTIN)
 	bas.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	bas.add_theme_constant_override("outline_size", 12)
-	etiket(kutu, "Şehir seninle büyür. Ya da seni yutar.", 20, SOLUK)
+	_sus(kutu)
+	etiket(kutu, "Şehir seninle büyür. Ya da seni yutar.", 18, Color(0.85, 0.78, 0.65))
 	var bosluk := Control.new()
-	bosluk.custom_minimum_size = Vector2(0, 34)
+	bosluk.custom_minimum_size = Vector2(0, 30)
 	kutu.add_child(bosluk)
-	dugme(kutu, "Yeni oyun", _yeni, 28)
-	var dev := dugme(kutu, "Devam et", _devam, 28)
+	var d1 := dugme(kutu, "Yeni oyun", _yeni, 26)
+	var dev := dugme(kutu, "Devam et", _devam, 26)
 	dev.disabled = not FileAccess.file_exists("user://kayit.dat")
-	dugme(kutu, "Çıkış", func(): get_tree().quit(), 28)
-	var alt := etiket(_ana, "Chicago · 1920'ler · Yasak dönemi", 15, Color(1, 1, 1, 0.35))
-	alt.position = Vector2(96, 680)
+	var d3 := dugme(kutu, "Çıkış", func(): get_tree().quit(), 26)
+	for d in [d1, dev, d3]:
+		d.custom_minimum_size = Vector2(320, 44)
+		d.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	var alt := etiket(_ana, "CHICAGO  ·  1920  ·  YASAK DÖNEMİ", 14, Color(1, 0.85, 0.55, 0.55))
+	alt.position = Vector2(vp.x * 0.07, vp.y - 48.0)
+
+# Başlık altı/üstü: ince altın çizgi, ortada baklava.
+func _sus(ebeveyn: Node) -> void:
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 8)
+	h.custom_minimum_size = Vector2(380, 10)
+	ebeveyn.add_child(h)
+	for i in 3:
+		if i == 1:
+			var l := etiket(h, "◆", 11, ALTIN)
+			l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		else:
+			var c := ColorRect.new()
+			c.color = Color(ALTIN.r, ALTIN.g, ALTIN.b, 0.7)
+			c.custom_minimum_size = Vector2(0, 1.5)
+			c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			c.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			h.add_child(c)
 
 func _kur_kur() -> void:
 	_kur = Control.new()
