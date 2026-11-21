@@ -768,7 +768,7 @@ func _cevre() -> void:
 	env.glow_bloom = 0.12
 	env.glow_hdr_threshold = 0.9
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 1.15
+	env.adjustment_saturation = 0.86   # 1.15 idi; ~%25 düşük
 	env.adjustment_contrast = 1.08
 	_env = env
 	var we := WorldEnvironment.new()
