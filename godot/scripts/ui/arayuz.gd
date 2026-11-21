@@ -851,21 +851,34 @@ func _gazete_baslik(ebeveyn: Node, metin: String, alt: String) -> void:
 	for w in kelimeler:
 		en_uzun = maxi(en_uzun, w.length())
 	var boy := 52 if en_uzun <= 9 else (42 if en_uzun <= 12 else 32)
-	var t := _lbl(ebeveyn, "
+	var foto: Control = load("res://scripts/ui/kagit_gorsel.gd").new()
+	var var_foto: bool = foto.ayarla(_gorsel_anahtarlari())
+	var kap: Control = ebeveyn
+	if var_foto:
+		# Artwork katman olarak başlığın ARKASINDA; yazı üstüne biner.
+		kap = Control.new()
+		kap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		kap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		kap.custom_minimum_size = Vector2(0, 200)
+		kap.resized.connect(func(): kap.custom_minimum_size.y = maxf(200.0, kap.size.x * 440.0 / 660.0))
+		ebeveyn.add_child(kap)
+		foto.set_anchors_preset(Control.PRESET_FULL_RECT)
+		kap.add_child(foto)
+	else:
+		foto.free()
+	var t := _lbl(kap, "
 ".join(kelimeler), boy, ink)
 	t.add_theme_font_override("font", Tema.baslik_fontu())
-	t.add_theme_constant_override("line_spacing", -9)
+	t.add_theme_constant_override("line_spacing", -14)
 	t.autowrap_mode = TextServer.AUTOWRAP_OFF
-	t.custom_minimum_size = Vector2(0, 0)
 	t.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	if var_foto:
+		t.position = Vector2(2, 0)
+		t.add_theme_color_override("font_outline_color", Color(0.86, 0.76, 0.56, 0.95))
+		t.add_theme_constant_override("outline_size", 8)
 	if alt != "":
 		var al := _lbl(ebeveyn, _buyuk(alt), 11, Tema.SOLUK)
 		al.add_theme_constant_override("line_spacing", 0)
-	var foto: Control = load("res://scripts/ui/kagit_gorsel.gd").new()
-	if foto.ayarla(_gorsel_anahtarlari()):
-		ebeveyn.add_child(foto)
-	else:
-		foto.free()
 	_ayrac(ebeveyn)
 
 # Panel arkası görsel için dosya adı adayları (assets/ui/panel/).

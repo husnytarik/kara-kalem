@@ -15,9 +15,7 @@ var _tex: ImageTexture
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	custom_minimum_size = Vector2(0, 120)
 	size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	resized.connect(func(): custom_minimum_size.y = size.x * float(YUK) / float(GEN))
 
 static func slug(s: String) -> String:
 	var t := s.to_lower()
