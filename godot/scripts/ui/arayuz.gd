@@ -840,6 +840,10 @@ func _glif_sec(metin: String) -> String:
 		for w in kelimeler:
 			if w.begins_with(kv[0]):
 				return kv[1]
+	for kv in [["bilgi", "bilgi"], ["emir", "emir"], ["adam", "adamlar"], ["çete", "adamlar"], ["aile", "aileler"], ["polis", "polis"], ["haritada", "bolgeler"]]:
+		for w in kelimeler:
+			if w.begins_with(kv[0]):
+				return kv[1]
 	return "saygi"
 
 # Gazete şablonu: gazete künyesi + sol büyük dar manşet / sağ çerçeveli fotoğraf.
@@ -859,8 +863,7 @@ func _gazete_baslik(ebeveyn: Node, metin: String, alt: String) -> void:
 		kap = Control.new()
 		kap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		kap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		kap.custom_minimum_size = Vector2(0, 200)
-		kap.resized.connect(func(): kap.custom_minimum_size.y = maxf(200.0, kap.size.x * 440.0 / 660.0))
+		kap.custom_minimum_size = Vector2(0, 230)
 		ebeveyn.add_child(kap)
 		foto.set_anchors_preset(Control.PRESET_FULL_RECT)
 		kap.add_child(foto)

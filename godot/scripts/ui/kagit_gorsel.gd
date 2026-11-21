@@ -62,32 +62,29 @@ static func _fotokopi(kaynak: Image) -> ImageTexture:
 	if img.is_compressed():
 		img.decompress()
 	img.convert(Image.FORMAT_RGBA8)
-	var oran := float(GEN) / float(YUK)
+	# Kırpma yok: görselin TAMAMI, oranı korunarak GEN x YUK kutusuna sığdırılır.
 	var kw := img.get_width()
 	var kh := img.get_height()
-	var cw := kw
-	var ch := int(round(kw / oran))
-	if ch > kh:
-		ch = kh
-		cw = int(round(kh * oran))
-	img = img.get_region(Rect2i((kw - cw) / 2, int((kh - ch) * 0.3), cw, ch))
-	img.resize(GEN, YUK, Image.INTERPOLATE_LANCZOS)
+	var olcek := minf(float(GEN) / kw, float(YUK) / kh)
+	var gw := maxi(8, int(round(kw * olcek)))
+	var gh := maxi(8, int(round(kh * olcek)))
+	img.resize(gw, gh, Image.INTERPOLATE_LANCZOS)
 	var gri := PackedFloat32Array()
-	gri.resize(GEN * YUK)
+	gri.resize(gw * gh)
 	var hist := PackedInt32Array()
 	hist.resize(256)
-	for y in YUK:
-		for x in GEN:
+	for y in gh:
+		for x in gw:
 			var c := img.get_pixel(x, y)
 			var l := 0.299 * c.r + 0.587 * c.g + 0.114 * c.b
 			l = lerpf(1.0, l, c.a)
-			gri[y * GEN + x] = l
+			gri[y * gw + x] = l
 			hist[clampi(int(l * 255.0), 0, 255)] += 1
 	var topla := 0
 	var alt := 0.0
 	var ust := 1.0
-	var esik_a := int(GEN * YUK * 0.02)
-	var esik_u := int(GEN * YUK * 0.98)
+	var esik_a := int(gw * gh * 0.02)
+	var esik_u := int(gw * gh * 0.98)
 	var bulundu_a := false
 	for i in 256:
 		topla += hist[i]
@@ -102,10 +99,10 @@ static func _fotokopi(kaynak: Image) -> ImageTexture:
 	var gur := FastNoiseLite.new()
 	gur.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
 	gur.frequency = 0.09
-	var cikti := Image.create(GEN, YUK, false, Image.FORMAT_RGBA8)
-	for y in YUK:
-		for x in GEN:
-			var l := clampf((gri[y * GEN + x] - alt) / (ust - alt), 0.0, 1.0)
+	var cikti := Image.create(gw, gh, false, Image.FORMAT_RGBA8)
+	for y in gh:
+		for x in gw:
+			var l := clampf((gri[y * gw + x] - alt) / (ust - alt), 0.0, 1.0)
 			var mur := pow(1.0 - l, 1.1)
 			var doku := 0.88 + 0.12 * gur.get_noise_2d(x, y)
 			var a := clampf(mur * doku, 0.0, 1.0) * YOGUNLUK
@@ -115,4 +112,7 @@ static func _fotokopi(kaynak: Image) -> ImageTexture:
 func _draw() -> void:
 	if _tex == null or size.x < 8.0:
 		return
-	draw_texture_rect(_tex, Rect2(Vector2.ZERO, Vector2(size.x, size.x * float(YUK) / float(GEN))), false)
+	var ts := _tex.get_size()
+	var o := minf(size.x / ts.x, size.y / ts.y)
+	var d := ts * o
+	draw_texture_rect(_tex, Rect2(Vector2(size.x - d.x, (size.y - d.y) * 0.5), d), false)
