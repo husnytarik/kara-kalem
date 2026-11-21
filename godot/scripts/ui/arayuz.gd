@@ -844,7 +844,7 @@ func _glif_sec(metin: String) -> String:
 		for w in kelimeler:
 			if w.begins_with(kv[0]):
 				return kv[1]
-	for kv in [["bilgi", "bilgi"], ["emir", "emir"], ["adam", "adamlar"], ["çete", "adamlar"], ["aile", "aileler"], ["polis", "polis"], ["haritada", "bolgeler"]]:
+	for kv in [["buraya", "ok"], ["git", "ok"], ["bilgi", "bilgi"], ["emir", "emir"], ["adam", "adamlar"], ["çete", "adamlar"], ["aile", "aileler"], ["polis", "polis"], ["haritada", "bolgeler"]]:
 		for w in kelimeler:
 			if w.begins_with(kv[0]):
 				return kv[1]
@@ -914,7 +914,6 @@ func _ic_bolumu(i: int) -> void:
 	_btn(_ic, "Dışarı çık", kapat)
 
 func _kapat_dugmesi() -> void:
-	_ic.add_child(load("res://scripts/ui/siluet.gd").new())
 	var h := HBoxContainer.new()
 	_ic.add_child(h)
 	var bosluk := Control.new()
