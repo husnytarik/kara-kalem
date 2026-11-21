@@ -204,7 +204,7 @@ func _kagit_kur() -> void:
 	cl.layer = 5
 	add_child(cl)
 	_k_kutu = Control.new()
-	_k_kutu.clip_contents = true
+	_k_kutu.clip_contents = false
 	_k_kutu.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_k_kutu.visible = false
 	cl.add_child(_k_kutu)
@@ -214,7 +214,7 @@ func _kagit_kur() -> void:
 	_k_yazi = Label.new()
 	_k_yazi.add_theme_font_override("font", Tema.yazi_tipi())
 	_k_yazi.add_theme_font_size_override("font_size", 14)
-	_k_yazi.add_theme_color_override("font_color", Tema.KAGIT_YAZI)
+	_k_yazi.add_theme_color_override("font_color", Color("14110d"))
 	_k_yazi.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_k_yazi.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_k_yazi.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -232,16 +232,23 @@ func _k_goster(oge: int) -> void:
 	var ad: String = _ogeler[oge]["ad"]
 	var ts: Vector2 = Tema.yazi_tipi().get_string_size(ad, HORIZONTAL_ALIGNMENT_LEFT, -1, 14)
 	_k_w = ts.x + 26.0
-	var sb := StyleBoxTexture.new()
-	sb.texture = Tema.kagit_tex(int(_k_w / 2.0), 11, Tema.KAGIT, Color("2b1b0c"))
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color("efe4c6")
+	sb.border_color = Color("14110d")
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(11)
+	sb.shadow_color = Color(0, 0, 0, 0.35)
+	sb.shadow_size = 3
+	sb.shadow_offset = Vector2(1, 2)
 	_k_ic.add_theme_stylebox_override("panel", sb)
 	_k_ic.size = Vector2(_k_w, 22)
 	_k_yazi.text = ad
 	_k_yazi.size = Vector2(_k_w, 22)
-	_k_kutu.size = Vector2(0, 22)
+	_k_kutu.size = Vector2(_k_w, 22)
+	_k_kutu.modulate.a = 0.0
 	_k_kutu.visible = true
 	_k_tw = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_k_tw.tween_property(_k_kutu, "size:x", _k_w, 0.2)
+	_k_tw.tween_property(_k_kutu, "modulate:a", 1.0, 0.15)
 
 func _fare_tara() -> void:
 	var cam: Camera3D = get_viewport().get_camera_3d()
@@ -272,7 +279,7 @@ func _fare_tara() -> void:
 	_k_goster(en)
 	if en >= 0:
 		var q2: Vector2 = cam.unproject_position((_ogeler[en]["sp"] as Sprite3D).global_position)
-		_k_kutu.position = q2 + Vector2(16, -11)
+		_k_kutu.position = q2 + Vector2(22, -11)
 
 func _process(dt: float) -> void:
 	_fare_tara()
