@@ -15,6 +15,7 @@ const KAT := {
 	"resmi": ["⚖", Color("9aa0aa"), "Resmî kurum"],
 	"ozel": ["★", Color("e6c45a"), "Özel mekân"],
 }
+const IKON := {"ev": "bina_ev", "gelir": "bina_gelir", "yemek": "bina_yemek", "konak": "bina_ev", "adam": "bina_adam", "is": "is", "resmi": "polis", "ozel": "bina_ozel"}
 const YEMEK := ["diner", "soda", "cafe", "restaurant", "bakery", "deli", "grill", "oyster", "kitchen", "tavern"]
 const KONAK := ["hotel", "boarding", "tenement", "mansion", "inn", "pension", "lodging"]
 
@@ -63,6 +64,25 @@ func kategori(i: int) -> String:
 		return "resmi" if oyun.isy[i]["tur"] == "resmi" else "is"
 	return "ozel" if harita.yerler[i]["ozel"] else "resmi"
 
+func _bina_ikonu(ad: String, kat: String) -> Texture2D:
+	var k := String(ad).to_lower()
+	for p in [["ı", "i"], ["'", ""], ["&", ""]]:
+		k = k.replace(p[0], p[1])
+	var s := ""
+	for ch in k:
+		s += ch if (ch >= "a" and ch <= "z") or (ch >= "0" and ch <= "9") else "_"
+	while s.contains("__"):
+		s = s.replace("__", "_")
+	s = s.trim_prefix("_").trim_suffix("_")
+	var adaylar := [s, s.trim_suffix("_iii").trim_suffix("_ii")]
+	if s.begins_with("tool_"):
+		adaylar.append("tool_die")
+	for a in adaylar:
+		var yol := "res://assets/ui/bina/%s.png" % a
+		if ResourceLoader.exists(yol):
+			return load(yol)
+	return load("res://assets/ui/icons/%s.png" % IKON[kat])
+
 func _rozet(renk: Color) -> ImageTexture:
 	var a := renk.to_html()
 	if _tex.has(a):
@@ -106,7 +126,16 @@ func _oge_kur(i: int, n: Node3D) -> void:
 	sp.render_priority = 3
 	sp.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
 	simge.add_child(sp)
+	var ik := Sprite3D.new()
+	ik.pixel_size = 0.014
+	ik.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	ik.no_depth_test = true
+	ik.shaded = false
+	ik.render_priority = 4
+	ik.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	simge.add_child(ik)
 	var gl := Label3D.new()
+	gl.visible = false
 	gl.font_size = 64
 	gl.pixel_size = 0.04
 	gl.outline_size = 0
@@ -115,7 +144,7 @@ func _oge_kur(i: int, n: Node3D) -> void:
 	gl.render_priority = 4
 	simge.add_child(gl)
 	var ad: String = y["ad"]
-	_ogeler.append({"i": i, "kok": kok, "simge": simge, "sp": sp, "gl": gl, "ad": ad, "kat": ""})
+	_ogeler.append({"i": i, "kok": kok, "simge": simge, "sp": sp, "ik": ik, "gl": gl, "ad": ad, "kat": ""})
 
 func _guncelle() -> void:
 	var gr: Node = get_parent().get("gorus")
@@ -133,6 +162,8 @@ func _guncelle() -> void:
 		var gl: Label3D = o["gl"]
 		gl.text = d[0]
 		gl.modulate = d[1].lerp(Color.WHITE, 0.35)
+		(o["ik"] as Sprite3D).texture = _bina_ikonu(o["ad"], kat)
+		(o["ik"] as Sprite3D).visibility_range_end = 0.0 if hep else 420.0
 		var uz: float = 0.0 if hep else 420.0
 		(o["sp"] as Sprite3D).visibility_range_end = uz
 		gl.visibility_range_end = uz
