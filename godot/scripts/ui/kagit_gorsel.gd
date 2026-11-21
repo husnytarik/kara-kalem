@@ -5,8 +5,8 @@ extends Control
 
 const KLASOR := "res://assets/ui/panel/"
 const UZANTILAR := ["png", "jpg", "jpeg", "webp"]
-const GEN := 330
-const YUK := 220                          # 3:2 yatay çerçeve
+const GEN := 660
+const YUK := 440                          # 3:2 yatay çerçeve
 const MUREKKEP := Color(0.22, 0.14, 0.07) # sepya toner
 const YOGUNLUK := 0.92
 
@@ -15,8 +15,9 @@ var _tex: ImageTexture
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	custom_minimum_size = Vector2(170, 114)
+	custom_minimum_size = Vector2(0, 120)
 	size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	resized.connect(func(): custom_minimum_size.y = size.x * float(YUK) / float(GEN))
 
 static func slug(s: String) -> String:
 	var t := s.to_lower()
@@ -116,6 +117,4 @@ static func _fotokopi(kaynak: Image) -> ImageTexture:
 func _draw() -> void:
 	if _tex == null or size.x < 8.0:
 		return
-	draw_texture_rect(_tex, Rect2(Vector2.ZERO, size), false)
-	draw_rect(Rect2(Vector2.ZERO, size), Color(0.17, 0.11, 0.06), false, 2.0)
-	draw_rect(Rect2(Vector2(4, 4), size - Vector2(8, 8)), Color(0.17, 0.11, 0.06, 0.45), false, 1.0)
+	draw_texture_rect(_tex, Rect2(Vector2.ZERO, Vector2(size.x, size.x * float(YUK) / float(GEN))), false)

@@ -845,53 +845,25 @@ func _glif_sec(metin: String) -> String:
 # Gazete şablonu: gazete künyesi + sol büyük dar manşet / sağ çerçeveli fotoğraf.
 func _gazete_baslik(ebeveyn: Node, metin: String, alt: String) -> void:
 	var ink := Tema.KAGIT_YAZI
-	var k := VBoxContainer.new()
-	k.add_theme_constant_override("separation", 2)
-	ebeveyn.add_child(k)
-	var satir := HBoxContainer.new()
-	k.add_child(satir)
-	var tl := _lbl(satir, oyun.tarih_yazi().to_upper(), 11, Tema.SOLUK)
-	tl.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	tl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	var ad := _lbl(satir, "The New York Gazette", 17, ink)
-	ad.add_theme_font_override("font", Tema.italik_fontu())
-	ad.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ad.autowrap_mode = TextServer.AUTOWRAP_OFF
-	var no := _lbl(satir, "No. %d" % (int(oyun.tarih()["gun"]) + 317), 11, Tema.SOLUK)
-	no.size_flags_horizontal = Control.SIZE_SHRINK_END
-	no.autowrap_mode = TextServer.AUTOWRAP_OFF
-	var xb := Control.new()   # kapat (X) düğmesinin altında kalmasın
-	xb.custom_minimum_size = Vector2(30, 0)
-	satir.add_child(xb)
-	for hh in [2, 1]:
-		var r := ColorRect.new()
-		r.color = Color(0.25, 0.17, 0.08, 0.8)
-		r.custom_minimum_size = Vector2(0, hh)
-		k.add_child(r)
-	var bosluk := Control.new()
-	bosluk.custom_minimum_size = Vector2(0, 4)
-	k.add_child(bosluk)
-	var h := HBoxContainer.new()
-	h.add_theme_constant_override("separation", 10)
-	ebeveyn.add_child(h)
-	var sol := VBoxContainer.new()
-	sol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	sol.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	sol.add_theme_constant_override("separation", 2)
-	h.add_child(sol)
-	var foto: Control = load("res://scripts/ui/kagit_gorsel.gd").new()
-	var var_foto: bool = foto.ayarla(_gorsel_anahtarlari())
 	var bas := _buyuk(metin)
-	var boy := 54 if bas.length() <= 12 else (40 if bas.length() <= 18 else 30)
-	if not var_foto:
-		boy += 6
-	var t := _lbl(sol, bas, boy, ink)
+	var kelimeler := bas.split(" ", false)
+	var en_uzun := 0
+	for w in kelimeler:
+		en_uzun = maxi(en_uzun, w.length())
+	var boy := 52 if en_uzun <= 9 else (42 if en_uzun <= 12 else 32)
+	var t := _lbl(ebeveyn, "
+".join(kelimeler), boy, ink)
 	t.add_theme_font_override("font", Tema.baslik_fontu())
+	t.add_theme_constant_override("line_spacing", -9)
+	t.autowrap_mode = TextServer.AUTOWRAP_OFF
+	t.custom_minimum_size = Vector2(0, 0)
+	t.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	if alt != "":
-		var al := _lbl(sol, _buyuk(alt), 11, Tema.SOLUK)
+		var al := _lbl(ebeveyn, _buyuk(alt), 11, Tema.SOLUK)
 		al.add_theme_constant_override("line_spacing", 0)
-	if var_foto:
-		h.add_child(foto)
+	var foto: Control = load("res://scripts/ui/kagit_gorsel.gd").new()
+	if foto.ayarla(_gorsel_anahtarlari()):
+		ebeveyn.add_child(foto)
 	else:
 		foto.free()
 	_ayrac(ebeveyn)
