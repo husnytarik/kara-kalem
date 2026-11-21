@@ -5,8 +5,8 @@ extends Control
 
 const KLASOR := "res://assets/ui/panel/"
 const UZANTILAR := ["png", "jpg", "jpeg", "webp"]
-const GEN := 660
-const YUK := 440                          # 3:2 yatay çerçeve
+const GEN := 760
+const YUK := 760                          # 3:2 yatay çerçeve
 const MUREKKEP := Color(0.22, 0.14, 0.07) # sepya toner
 const YOGUNLUK := 0.92
 
@@ -15,7 +15,8 @@ var _tex: ImageTexture
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	clip_contents = true
+	self_modulate = Color(1, 1, 1, 0.42)
 
 static func slug(s: String) -> String:
 	var t := s.to_lower()
@@ -112,7 +113,8 @@ static func _fotokopi(kaynak: Image) -> ImageTexture:
 func _draw() -> void:
 	if _tex == null or size.x < 8.0:
 		return
+	# Panelin tamamını kaplar (cover): oran korunur, taşan kısım kırpılır; üstten hizalı.
 	var ts := _tex.get_size()
-	var o := minf(size.x / ts.x, size.y / ts.y)
+	var o := maxf(size.x / ts.x, size.y / ts.y)
 	var d := ts * o
-	draw_texture_rect(_tex, Rect2(Vector2(size.x - d.x, (size.y - d.y) * 0.5), d), false)
+	draw_texture_rect(_tex, Rect2(Vector2((size.x - d.x) * 0.5, 0), d), false)

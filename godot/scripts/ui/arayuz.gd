@@ -30,6 +30,7 @@ var _ekip: Label
 var _durum: Label
 var _arama: Label
 var _sag: PanelContainer
+var _arka: Control   # panelin tamamını kaplayan artwork
 var _ic: VBoxContainer
 var _log: VBoxContainer
 var _log_panel: PanelContainer
@@ -595,6 +596,8 @@ func _sag_panel() -> void:
 	_sag.visible = false
 	_sag.theme = Tema.tema_kagit()
 	add_child(_sag)
+	_arka = load("res://scripts/ui/kagit_gorsel.gd").new()
+	_sag.add_child(_arka)
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_sag.add_child(sc)
@@ -816,6 +819,7 @@ func _yenile(zorla: bool) -> void:
 		"yetenek": _yetenek_paneli()
 	_kapat_dugmesi()
 	_kagit_mod = false
+	_arka.visible = _arka.ayarla(_gorsel_anahtarlari())
 
 func _buyuk(t: String) -> String:
 	if _mod == "bina" or _mod == "bolge":
@@ -855,30 +859,12 @@ func _gazete_baslik(ebeveyn: Node, metin: String, alt: String) -> void:
 	for w in kelimeler:
 		en_uzun = maxi(en_uzun, w.length())
 	var boy := 52 if en_uzun <= 9 else (42 if en_uzun <= 12 else 32)
-	var foto: Control = load("res://scripts/ui/kagit_gorsel.gd").new()
-	var var_foto: bool = foto.ayarla(_gorsel_anahtarlari())
-	var kap: Control = ebeveyn
-	if var_foto:
-		# Artwork katman olarak başlığın ARKASINDA; yazı üstüne biner.
-		kap = Control.new()
-		kap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		kap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		kap.custom_minimum_size = Vector2(0, 230)
-		ebeveyn.add_child(kap)
-		foto.set_anchors_preset(Control.PRESET_FULL_RECT)
-		kap.add_child(foto)
-	else:
-		foto.free()
-	var t := _lbl(kap, "
+	var t := _lbl(ebeveyn, "
 ".join(kelimeler), boy, ink)
 	t.add_theme_font_override("font", Tema.baslik_fontu())
 	t.add_theme_constant_override("line_spacing", -14)
 	t.autowrap_mode = TextServer.AUTOWRAP_OFF
 	t.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	if var_foto:
-		t.position = Vector2(2, 0)
-		t.add_theme_color_override("font_outline_color", Color(0.86, 0.76, 0.56, 0.95))
-		t.add_theme_constant_override("outline_size", 8)
 	if alt != "":
 		var al := _lbl(ebeveyn, _buyuk(alt), 11, Tema.SOLUK)
 		al.add_theme_constant_override("line_spacing", 0)
