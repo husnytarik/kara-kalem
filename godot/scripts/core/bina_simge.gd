@@ -80,31 +80,55 @@ func _bina_ikonu(ad: String, kat: String) -> Texture2D:
 	for a in adaylar:
 		var yol := "res://assets/ui/bina/%s.png" % a
 		if ResourceLoader.exists(yol):
-			return load(yol)
-	return load("res://assets/ui/icons/%s.png" % IKON[kat])
+			return _gri(yol)
+	return _gri("res://assets/ui/icons/%s.png" % IKON[kat])
 
-func _rozet(renk: Color) -> ImageTexture:
-	var a := renk.to_html()
-	if _tex.has(a):
-		return _tex[a]
-	var N := 64
+# Siyah-beyaz baskı rozeti: krem kâğıt daire, alt yarıda yarım ton noktalar, kalın siyah halka.
+func _rozet(_renk: Color) -> ImageTexture:
+	if _tex.has("bw"):
+		return _tex["bw"]
+	var N := 96
 	var im := Image.create(N, N, false, Image.FORMAT_RGBA8)
 	var c := Vector2(N / 2.0 - 0.5, N / 2.0 - 0.5)
+	var kagit := Color("efe4c6")
+	var murekkep := Color("14110d")
 	for x in N:
 		for y in N:
 			var d: float = Vector2(x, y).distance_to(c)
 			var col := Color(0, 0, 0, 0)
-			if d < 31.0:
-				col = Color("2b1d12")
-			if d >= 24.0 and d < 28.5:
-				col = renk
-			elif d >= 28.5 and d < 31.0:
-				col = Color("1a1106")
-			if d >= 31.0 and d < 32.0:
-				col = Color(0, 0, 0, 0.35)
+			if d < 47.0:
+				col = kagit
+				# yarım ton: aşağı doğru büyüyen noktalar
+				var t: float = clampf((y - N * 0.3) / (N * 0.7), 0.0, 1.0)
+				if t > 0.0 and d < 40.0:
+					var gx := fposmod(x, 4.0) - 2.0
+					var gy := fposmod(y, 4.0) - 2.0
+					if sqrt(gx * gx + gy * gy) < t * 1.9:
+						col = Color("8c8372")
+			if d >= 41.5 and d < 45.0:
+				col = murekkep
+			elif d >= 45.0 and d < 47.0:
+				col = Color(0, 0, 0, 0.0) if d >= 46.5 else murekkep
 			im.set_pixel(x, y, col)
+	var t2 := ImageTexture.create_from_image(im)
+	_tex["bw"] = t2
+	return t2
+
+func _gri(yol: String) -> Texture2D:
+	if _tex.has(yol):
+		return _tex[yol]
+	var im: Image = (load(yol) as Texture2D).get_image()
+	if im.is_compressed():
+		im.decompress()
+	im.convert(Image.FORMAT_RGBA8)
+	for x in im.get_width():
+		for y in im.get_height():
+			var c := im.get_pixel(x, y)
+			if c.a > 0.0:
+				var l := clampf((0.299 * c.r + 0.587 * c.g + 0.114 * c.b - 0.5) * 1.5 + 0.5, 0.0, 1.0)
+				im.set_pixel(x, y, Color(l, l, l, c.a))
 	var t := ImageTexture.create_from_image(im)
-	_tex[a] = t
+	_tex[yol] = t
 	return t
 
 func _oge_kur(i: int, n: Node3D) -> void:
@@ -119,7 +143,7 @@ func _oge_kur(i: int, n: Node3D) -> void:
 	simge.position = Vector3(0, 4.0, 0)
 	kok.add_child(simge)
 	var sp := Sprite3D.new()
-	sp.pixel_size = 0.055
+	sp.pixel_size = 0.0367
 	sp.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	sp.no_depth_test = true
 	sp.shaded = false
@@ -127,7 +151,7 @@ func _oge_kur(i: int, n: Node3D) -> void:
 	sp.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
 	simge.add_child(sp)
 	var ik := Sprite3D.new()
-	ik.pixel_size = 0.014
+	ik.pixel_size = 0.0118
 	ik.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	ik.no_depth_test = true
 	ik.shaded = false
