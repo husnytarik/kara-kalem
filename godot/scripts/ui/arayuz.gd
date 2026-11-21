@@ -30,7 +30,6 @@ var _ekip: Label
 var _durum: Label
 var _arama: Label
 var _sag: PanelContainer
-var _gorsel: Control   # panel arkası fotokopi görseli
 var _ic: VBoxContainer
 var _log: VBoxContainer
 var _log_panel: PanelContainer
@@ -152,13 +151,28 @@ func _btn(ebeveyn: Node, metin: String, fn: Callable, pasif: bool = false) -> Bu
 	b.disabled = pasif
 	b.pressed.connect(fn)
 	if _kagit_mod:
-		b.custom_minimum_size = Vector2(0, 34)
-		b.add_theme_stylebox_override("normal", Tema.dugme_stil(Color(0.09, 0.065, 0.045), Color("a8801f")))
-		b.add_theme_stylebox_override("hover", Tema.dugme_stil(Color(0.2, 0.14, 0.08), Tema.VURGU))
-		b.add_theme_stylebox_override("pressed", Tema.dugme_stil(Color(0.3, 0.2, 0.09), Tema.VURGU))
-		b.add_theme_stylebox_override("disabled", Tema.dugme_stil(Color(0.17, 0.15, 0.12), Color(0.3, 0.26, 0.2)))
+		var simge: bool = ebeveyn is VBoxContainer and metin.length() >= 4
+		var sol := 40 if simge else 8
+		b.custom_minimum_size = Vector2(0, 38 if simge else 34)
+		b.add_theme_stylebox_override("normal", _gaz_dugme_stil(Color(0.10, 0.07, 0.05), Color(0.55, 0.43, 0.28), sol))
+		b.add_theme_stylebox_override("hover", _gaz_dugme_stil(Color(0.18, 0.12, 0.08), Tema.VURGU, sol))
+		b.add_theme_stylebox_override("pressed", _gaz_dugme_stil(Color(0.28, 0.19, 0.09), Tema.VURGU, sol))
+		b.add_theme_stylebox_override("disabled", _gaz_dugme_stil(Color(0.17, 0.15, 0.12), Color(0.3, 0.26, 0.2), sol))
 		b.add_theme_color_override("font_color", Tema.YAZI)
 		b.add_theme_color_override("font_disabled_color", Color(0.65, 0.6, 0.5, 0.5))
+		if simge:
+			var g := Label.new()
+			g.text = _glif_sec(metin)
+			g.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			g.anchor_top = 0.0
+			g.anchor_bottom = 1.0
+			g.offset_left = 8
+			g.offset_right = 34
+			g.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			g.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			g.add_theme_font_size_override("font_size", Tema.boyut(20))
+			g.add_theme_color_override("font_color", Color("cdb88a") if not pasif else Color(0.5, 0.45, 0.35))
+			b.add_child(g)
 		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -204,6 +218,9 @@ func _portre(ebeveyn: Node, ad: String, boy: Vector2 = Vector2(56, 64)) -> Contr
 
 # Panel başlığı: altın serif başlık + altında ince çizgi.
 func _baslik(ebeveyn: Node, metin: String, alt: String = "") -> void:
+	if _kagit_mod:
+		_gazete_baslik(ebeveyn, metin, alt)
+		return
 	var l := _lbl(ebeveyn, metin, 30, RENK["altin"])
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	if _kagit_mod:
@@ -231,9 +248,11 @@ func _bolum(ebeveyn: Node, metin: String) -> Label:
 	sol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sol.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	h.add_child(sol)
-	var l := _lbl(h, metin, 18, RENK["altin"])
+	var l := _lbl(h, ("→ " + metin) if _kagit_mod else metin, 18, RENK["altin"])
 	l.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	l.autowrap_mode = TextServer.AUTOWRAP_OFF
+	if _kagit_mod:
+		l.add_theme_font_override("font", Tema.kalin_fontu())
 	var sag := sol.duplicate()
 	h.add_child(sag)
 	return l
@@ -565,8 +584,6 @@ func _sag_panel() -> void:
 	_sag.visible = false
 	_sag.theme = Tema.tema_kagit()
 	add_child(_sag)
-	_gorsel = load("res://scripts/ui/kagit_gorsel.gd").new()
-	_sag.add_child(_gorsel)
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_sag.add_child(sc)
@@ -788,7 +805,84 @@ func _yenile(zorla: bool) -> void:
 		"yetenek": _yetenek_paneli()
 	_kapat_dugmesi()
 	_kagit_mod = false
-	_gorsel.ayarla(_gorsel_anahtarlari())
+
+func _buyuk(t: String) -> String:
+	if _mod == "bina" or _mod == "bolge":
+		return t.to_upper()
+	return t.replace("i", "İ").replace("ı", "I").to_upper()
+
+func _gaz_dugme_stil(arka: Color, kenar: Color, sol: int) -> StyleBoxFlat:
+	var sb := Tema.dugme_stil(arka, kenar)
+	sb.content_margin_left = sol
+	sb.content_margin_right = sol
+	sb.content_margin_top = 8
+	sb.content_margin_bottom = 8
+	sb.shadow_offset = Vector2(0, 3)
+	sb.shadow_size = 3
+	return sb
+
+func _glif_sec(metin: String) -> String:
+	var kelimeler := metin.to_lower().split(" ")
+	var tablo := [["buraya", "➤"], ["satın", "$"], ["öde", "$"], ["sat", "$"], ["haraç", "$"], ["rüşvet", "⚖"], ["saldır", "⚔"], ["silah", "⚔"], ["ateş", "⚔"], ["koru", "⚑"], ["çalış", "✱"], ["ev", "⌂"], ["yaz", "✎"], ["defter", "✎"], ["ilaç", "✚"], ["tedavi", "✚"], ["bekle", "◔"], ["uyu", "☾"], ["ara", "✆"], ["bölge", "◉"]]
+	for kv in tablo:
+		for w in kelimeler:
+			if w.begins_with(kv[0]):
+				return kv[1]
+	return "◆"
+
+# Gazete şablonu: gazete künyesi + sol büyük dar manşet / sağ çerçeveli fotoğraf.
+func _gazete_baslik(ebeveyn: Node, metin: String, alt: String) -> void:
+	var ink := Tema.KAGIT_YAZI
+	var k := VBoxContainer.new()
+	k.add_theme_constant_override("separation", 2)
+	ebeveyn.add_child(k)
+	var satir := HBoxContainer.new()
+	k.add_child(satir)
+	var tl := _lbl(satir, oyun.tarih_yazi().to_upper(), 11, Tema.SOLUK)
+	tl.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	tl.autowrap_mode = TextServer.AUTOWRAP_OFF
+	var ad := _lbl(satir, "The New York Gazette", 17, ink)
+	ad.add_theme_font_override("font", Tema.italik_fontu())
+	ad.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ad.autowrap_mode = TextServer.AUTOWRAP_OFF
+	var no := _lbl(satir, "No. %d" % (int(oyun.tarih()["gun"]) + 317), 11, Tema.SOLUK)
+	no.size_flags_horizontal = Control.SIZE_SHRINK_END
+	no.autowrap_mode = TextServer.AUTOWRAP_OFF
+	var xb := Control.new()   # kapat (X) düğmesinin altında kalmasın
+	xb.custom_minimum_size = Vector2(30, 0)
+	satir.add_child(xb)
+	for hh in [2, 1]:
+		var r := ColorRect.new()
+		r.color = Color(0.25, 0.17, 0.08, 0.8)
+		r.custom_minimum_size = Vector2(0, hh)
+		k.add_child(r)
+	var bosluk := Control.new()
+	bosluk.custom_minimum_size = Vector2(0, 4)
+	k.add_child(bosluk)
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 10)
+	ebeveyn.add_child(h)
+	var sol := VBoxContainer.new()
+	sol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sol.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	sol.add_theme_constant_override("separation", 2)
+	h.add_child(sol)
+	var foto: Control = load("res://scripts/ui/kagit_gorsel.gd").new()
+	var var_foto: bool = foto.ayarla(_gorsel_anahtarlari())
+	var bas := _buyuk(metin)
+	var boy := 54 if bas.length() <= 12 else (40 if bas.length() <= 18 else 30)
+	if not var_foto:
+		boy += 6
+	var t := _lbl(sol, bas, boy, ink)
+	t.add_theme_font_override("font", Tema.baslik_fontu())
+	if alt != "":
+		var al := _lbl(sol, _buyuk(alt), 11, Tema.SOLUK)
+		al.add_theme_constant_override("line_spacing", 0)
+	if var_foto:
+		h.add_child(foto)
+	else:
+		foto.free()
+	_ayrac(ebeveyn)
 
 # Panel arkası görsel için dosya adı adayları (assets/ui/panel/).
 func _gorsel_anahtarlari() -> Array:
@@ -831,8 +925,15 @@ func _ic_bolumu(i: int) -> void:
 	_btn(_ic, "Dışarı çık", kapat)
 
 func _kapat_dugmesi() -> void:
-	_ayrac(_ic)
-	_btn(_ic, "Kapat", kapat)
+	_ic.add_child(load("res://scripts/ui/siluet.gd").new())
+	var h := HBoxContainer.new()
+	_ic.add_child(h)
+	var bosluk := Control.new()
+	bosluk.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(bosluk)
+	var b := _btn(h, "Kapat", kapat)
+	b.size_flags_horizontal = Control.SIZE_SHRINK_END
+	b.custom_minimum_size = Vector2(140, 34)
 
 func _sonuc_satiri() -> void:
 	if _sonuc != "":

@@ -1,21 +1,22 @@
 extends Control
-# Panelin arkasındaki fotokopi görseli. assets/ui/panel/<anahtar>.png|jpg|webp dosyasını okur,
-# gri tona çevirip kâğıda sepya mürekkep gibi basar; yukarıda belirgin, aşağı doğru solar.
-# Anahtar sırası: [özel ad, tür, genel]; ilk bulunan kullanılır. Hiçbiri yoksa görsel çizilmez.
+# Panel başlığındaki çerçeveli fotoğraf (gazete şablonu). assets/ui/panel/<anahtar>.png|jpg|webp dosyasını okur,
+# gri tona çevirip kâğıda sepya mürekkep gibi basar. Anahtar sırası: [özel ad, tür, genel]; ilk bulunan kullanılır.
+# Hiçbiri yoksa ayarla() false döner ve başlık görselsiz çizilir.
 
 const KLASOR := "res://assets/ui/panel/"
 const UZANTILAR := ["png", "jpg", "jpeg", "webp"]
-const GEN := 300
-const YUK := 400                          # 3:4 dikey; panel genişliğine göre ölçeklenir
-const MUREKKEP := Color(0.26, 0.16, 0.08) # sepya toner
-const YOGUNLUK := 0.55                    # en koyu yerde mürekkep opaklığı (yazı okunsun diye düşük)
+const GEN := 330
+const YUK := 220                          # 3:2 yatay çerçeve
+const MUREKKEP := Color(0.22, 0.14, 0.07) # sepya toner
+const YOGUNLUK := 0.92
 
 static var _onb := {}
 var _tex: ImageTexture
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	clip_contents = true
+	custom_minimum_size = Vector2(170, 114)
+	size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 
 static func slug(s: String) -> String:
 	var t := s.to_lower()
@@ -28,7 +29,7 @@ static func slug(s: String) -> String:
 		r = r.replace("__", "_")
 	return r.trim_prefix("_").trim_suffix("_")
 
-func ayarla(anahtarlar: Array) -> void:
+func ayarla(anahtarlar: Array) -> bool:
 	_tex = null
 	for k in anahtarlar:
 		var t := _yukle(str(k))
@@ -36,6 +37,7 @@ func ayarla(anahtarlar: Array) -> void:
 			_tex = t
 			break
 	queue_redraw()
+	return _tex != null
 
 static func _yukle(k: String) -> ImageTexture:
 	if k == "":
@@ -53,7 +55,7 @@ static func _yukle(k: String) -> ImageTexture:
 	_onb[k] = sonuc
 	return sonuc
 
-# Kaynak görseli kırp -> gri -> kontrast aç -> toner dokusu -> dikey solma; sepya + alfa olarak döndürür.
+# Kaynak görseli kırp (yatay, üstten ~%30) -> gri -> kontrast aç -> hafif toner dokusu; sepya + alfa döndürür.
 static func _fotokopi(kaynak: Image) -> ImageTexture:
 	if kaynak == null:
 		return null
@@ -61,7 +63,6 @@ static func _fotokopi(kaynak: Image) -> ImageTexture:
 	if img.is_compressed():
 		img.decompress()
 	img.convert(Image.FORMAT_RGBA8)
-	# 3:4 dikey kırp (üst hizalı: görselin üstü korunur)
 	var oran := float(GEN) / float(YUK)
 	var kw := img.get_width()
 	var kh := img.get_height()
@@ -70,10 +71,8 @@ static func _fotokopi(kaynak: Image) -> ImageTexture:
 	if ch > kh:
 		ch = kh
 		cw = int(round(kh * oran))
-	var cx := (kw - cw) / 2
-	img = img.get_region(Rect2i(cx, 0, cw, ch))
+	img = img.get_region(Rect2i((kw - cw) / 2, int((kh - ch) * 0.3), cw, ch))
 	img.resize(GEN, YUK, Image.INTERPOLATE_LANCZOS)
-	# gri + histogram uçları (%2 / %98)
 	var gri := PackedFloat32Array()
 	gri.resize(GEN * YUK)
 	var hist := PackedInt32Array()
@@ -82,7 +81,7 @@ static func _fotokopi(kaynak: Image) -> ImageTexture:
 		for x in GEN:
 			var c := img.get_pixel(x, y)
 			var l := 0.299 * c.r + 0.587 * c.g + 0.114 * c.b
-			l = lerpf(1.0, l, c.a)   # saydam alan = beyaz kâğıt
+			l = lerpf(1.0, l, c.a)
 			gri[y * GEN + x] = l
 			hist[clampi(int(l * 255.0), 0, 255)] += 1
 	var topla := 0
@@ -104,29 +103,19 @@ static func _fotokopi(kaynak: Image) -> ImageTexture:
 	var gur := FastNoiseLite.new()
 	gur.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
 	gur.frequency = 0.09
-	var ince := FastNoiseLite.new()
-	ince.noise_type = FastNoiseLite.TYPE_CELLULAR
-	ince.frequency = 0.9
-	var rnd := RandomNumberGenerator.new()
-	rnd.seed = 7
 	var cikti := Image.create(GEN, YUK, false, Image.FORMAT_RGBA8)
 	for y in YUK:
-		var fy := float(y) / float(YUK)
-		var solma := 1.0 - smoothstep(0.12, 0.98, fy)   # yukarıda tam, aşağıda yok
 		for x in GEN:
 			var l := clampf((gri[y * GEN + x] - alt) / (ust - alt), 0.0, 1.0)
-			var mur := pow(1.0 - l, 1.15)
-			# toner: bol kenarlı, kesik kesik gri; aşağıda daha çok kesilir (fotokopinin solan ucu)
-			var doku := 0.78 + 0.22 * gur.get_noise_2d(x, y) + 0.12 * ince.get_noise_2d(x, y)
-			if rnd.randf() < 0.05 + 0.25 * (1.0 - solma):
-				doku *= 0.55
-			var yanal := smoothstep(0.0, 0.05, float(x) / GEN) * smoothstep(0.0, 0.05, 1.0 - float(x) / GEN)
-			var a := clampf(mur * doku, 0.0, 1.0) * solma * yanal * YOGUNLUK
+			var mur := pow(1.0 - l, 1.1)
+			var doku := 0.88 + 0.12 * gur.get_noise_2d(x, y)
+			var a := clampf(mur * doku, 0.0, 1.0) * YOGUNLUK
 			cikti.set_pixel(x, y, Color(MUREKKEP.r, MUREKKEP.g, MUREKKEP.b, a))
 	return ImageTexture.create_from_image(cikti)
 
 func _draw() -> void:
 	if _tex == null or size.x < 8.0:
 		return
-	var h := size.x * float(YUK) / float(GEN)
-	draw_texture_rect(_tex, Rect2(0, 0, size.x, h), false)
+	draw_texture_rect(_tex, Rect2(Vector2.ZERO, size), false)
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0.17, 0.11, 0.06), false, 2.0)
+	draw_rect(Rect2(Vector2(4, 4), size - Vector2(8, 8)), Color(0.17, 0.11, 0.06, 0.45), false, 1.0)

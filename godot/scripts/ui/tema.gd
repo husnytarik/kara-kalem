@@ -195,3 +195,33 @@ static func yuvarlak_stil(arka: Color, kenar: Color = Color("c9972c"), r: int = 
 	sb.set_corner_radius_all(r)
 	sb.set_content_margin_all(0)
 	return sb
+
+# ---------- gazete şablonu yazı tipleri ----------
+static var _baslik_f: Font
+static func baslik_fontu() -> Font:   # dar, kalın, büyük harf manşet
+	if _baslik_f == null:
+		var f := SystemFont.new()
+		f.font_names = PackedStringArray(["Bahnschrift", "Impact", "Arial Narrow", "Georgia"])
+		f.font_weight = 700
+		f.font_stretch = 75
+		_baslik_f = f
+	return _baslik_f
+
+static var _kalin_f: Font
+static func kalin_fontu() -> Font:    # bölüm başlıkları
+	if _kalin_f == null:
+		var f := SystemFont.new()
+		f.font_names = PackedStringArray(["Georgia", "Cambria", "Palatino Linotype", "Times New Roman"])
+		f.font_weight = 700
+		_kalin_f = f
+	return _kalin_f
+
+static var _italik_f: Font
+static func italik_fontu() -> Font:   # gazete adı
+	if _italik_f == null:
+		var f := SystemFont.new()
+		f.font_names = PackedStringArray(["Georgia", "Cambria", "Palatino Linotype", "Times New Roman"])
+		f.font_weight = 700
+		f.font_italic = true
+		_italik_f = f
+	return _italik_f
