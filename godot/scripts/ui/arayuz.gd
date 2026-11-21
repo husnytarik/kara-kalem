@@ -178,6 +178,10 @@ func _btn(ebeveyn: Node, metin: String, fn: Callable, pasif: bool = false) -> Bu
 		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		if simge:
+			# alt alta dizilen eylem düğmeleri tam genişlik yerine sabit dar genişlikte, sola hizalı
+			b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+			b.custom_minimum_size.x = 250
 		# etiketle aynı satırdaysa dar kalır (örn. "Deftere yaz", "Başvur")
 		if ebeveyn is HBoxContainer and ebeveyn.get_child_count() > 0 and ebeveyn.get_child(0) is Label:
 			b.size_flags_horizontal = Control.SIZE_SHRINK_END
