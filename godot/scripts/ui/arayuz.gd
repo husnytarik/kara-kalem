@@ -161,17 +161,18 @@ func _btn(ebeveyn: Node, metin: String, fn: Callable, pasif: bool = false) -> Bu
 		b.add_theme_color_override("font_color", Tema.YAZI)
 		b.add_theme_color_override("font_disabled_color", Color(0.65, 0.6, 0.5, 0.5))
 		if simge:
-			var g := Label.new()
-			g.text = _glif_sec(metin)
+			var g := TextureRect.new()
+			g.texture = load("res://assets/ui/icons/%s.png" % _glif_sec(metin))
 			g.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			g.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			g.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			g.anchor_top = 0.0
 			g.anchor_bottom = 1.0
-			g.offset_left = 8
-			g.offset_right = 34
-			g.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			g.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-			g.add_theme_font_size_override("font_size", Tema.boyut(20))
-			g.add_theme_color_override("font_color", Color("cdb88a") if not pasif else Color(0.5, 0.45, 0.35))
+			g.offset_left = 6
+			g.offset_right = 38
+			g.offset_top = 3
+			g.offset_bottom = -3
+			g.modulate = Color(1, 1, 1, 0.9 if not pasif else 0.45)
 			b.add_child(g)
 		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -448,13 +449,23 @@ var _un: Label
 var _konum: Label
 
 # Kaynak kutusundaki bir kalem: yuvarlak simge + değer. Değer etiketini döndürür.
-func _hap(h: Node, glif: String, renk: Color, ipucu: String) -> Label:
+func _hap(h: Node, glif: String, renk: Color, ipucu: String, resim: String = "") -> Label:
 	var c := HBoxContainer.new()
 	c.add_theme_constant_override("separation", 5)
 	c.tooltip_text = ipucu
 	c.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	h.add_child(c)
-	_ikon(c, glif, renk, 24)
+	if resim != "" and ResourceLoader.exists("res://assets/ui/icons/%s.png" % resim):
+		var tr := TextureRect.new()
+		tr.texture = load("res://assets/ui/icons/%s.png" % resim)
+		tr.custom_minimum_size = Vector2(30, 30)
+		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		tr.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		c.add_child(tr)
+	else:
+		_ikon(c, glif, renk, 24)
 	var l := Label.new()
 	l.add_theme_font_size_override("font_size", Tema.boyut(20))
 	l.add_theme_color_override("font_color", Tema.YAZI)
@@ -507,8 +518,8 @@ func _ust_cubuk() -> void:
 	r.add_theme_constant_override("separation", 14)
 	r.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	p2.add_child(r)
-	_temiz = _hap(r, "$", Tema.VURGU, "Temiz para")
-	_kirli = _hap(r, "▮", Tema.KOTU, "Kirli para")
+	_temiz = _hap(r, "$", Tema.VURGU, "Temiz para", "temiz")
+	_kirli = _hap(r, "▮", Tema.KOTU, "Kirli para", "kirli")
 	_ekip = _hap(r, "♟", Tema.YAZI, "Ekip: adam sayısı / üst sınır")
 	_arama = _hap(r, "⚠", Tema.UYARI, "Polis seni arıyor: 30 ve üstünde devriyeler kovalar.")
 	_un = _hap(r, "★", Tema.VURGU, "Ünün")
@@ -821,14 +832,15 @@ func _gaz_dugme_stil(arka: Color, kenar: Color, sol: int) -> StyleBoxFlat:
 	sb.shadow_size = 3
 	return sb
 
+# Düğme metnine göre simge dosyası (assets/ui/icons/<ad>.png).
 func _glif_sec(metin: String) -> String:
 	var kelimeler := metin.to_lower().split(" ")
-	var tablo := [["buraya", "➤"], ["satın", "$"], ["öde", "$"], ["sat", "$"], ["haraç", "$"], ["rüşvet", "⚖"], ["saldır", "⚔"], ["silah", "⚔"], ["ateş", "⚔"], ["koru", "⚑"], ["çalış", "✱"], ["ev", "⌂"], ["yaz", "✎"], ["defter", "✎"], ["ilaç", "✚"], ["tedavi", "✚"], ["bekle", "◔"], ["uyu", "☾"], ["ara", "✆"], ["bölge", "◉"]]
+	var tablo := [["satın", "temiz"], ["öde", "temiz"], ["sat", "temiz"], ["yatırım", "temiz"], ["rüşvet", "kirli"], ["hesaplaş", "kirli"], ["saldır", "guc"], ["silah", "guc"], ["ateş", "guc"], ["infaz", "guc"], ["haraç", "tehdit"], ["kov", "tehdit"], ["soruştur", "tehdit"], ["koru", "ittifak"], ["bölge", "ittifak"], ["af", "ittifak"], ["tazminat", "ittifak"], ["başvur", "ittifak"]]
 	for kv in tablo:
 		for w in kelimeler:
 			if w.begins_with(kv[0]):
 				return kv[1]
-	return "◆"
+	return "saygi"
 
 # Gazete şablonu: gazete künyesi + sol büyük dar manşet / sağ çerçeveli fotoğraf.
 func _gazete_baslik(ebeveyn: Node, metin: String, alt: String) -> void:
