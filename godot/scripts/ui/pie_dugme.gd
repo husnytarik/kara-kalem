@@ -12,11 +12,17 @@ var _kw := 0.0
 var _daire: Control
 var _t := 0.0
 var _tw: Tween
+var _ikon: Texture2D
+const IKONLAR := {"Aileler": "aileler", "Adamlar": "adamlar", "Bölgeler": "bolgeler", "Polis": "polis", "Defter": "bilgi", "Hedefler": "emir", "Silahlar": "guc", "Beceri": "saygi"}
 
 func kur(g: String, e: String, y: int, fn: Callable) -> void:
 	glif = g
 	etiket = e
 	yon = y
+	if IKONLAR.has(e):
+		var yol: String = "res://assets/ui/icons/%s.png" % IKONLAR[e]
+		if ResourceLoader.exists(yol):
+			_ikon = load(yol)
 	eylem = fn
 	custom_minimum_size = Vector2(CAP, CAP)
 	size = Vector2(CAP, CAP)
@@ -96,5 +102,9 @@ func _ciz() -> void:
 	_daire.draw_circle(c, CAP / 2.0, Color("2a1c08"))
 	_daire.draw_circle(c, CAP / 2.0 - 1.5, Color("b8872a").lerp(Color("f0cf7a"), _t))
 	_daire.draw_circle(c, CAP / 2.0 - 4.0, Color("2b1d12").lerp(Color("4a3216"), _t))
+	if _ikon != null:
+		var bo := 32.0
+		_daire.draw_texture_rect(_ikon, Rect2(c - Vector2(bo, bo) / 2.0, Vector2(bo, bo)), false, Color.WHITE.lerp(Color(1.15, 1.1, 1.0), _t))
+		return
 	var ts: Vector2 = f.get_string_size(glif, HORIZONTAL_ALIGNMENT_LEFT, -1, 22)
 	_daire.draw_string(f, c + Vector2(-ts.x / 2.0, 7.5), glif, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color("f0cf7a").lerp(Color.WHITE, _t * 0.4))
