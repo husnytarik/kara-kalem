@@ -13,7 +13,7 @@ var _daire: Control
 var _t := 0.0
 var _tw: Tween
 var _ikon: Texture2D
-const IKONLAR := {"Aileler": "aileler", "Adamlar": "adamlar", "Bölgeler": "bolgeler", "Polis": "polis", "Defter": "bilgi", "Hedefler": "emir", "Silahlar": "guc", "Beceri": "saygi"}
+const IKONLAR := {"Aileler": "aileler", "Adamlar": "adamlar", "Bölgeler": "bolgeler", "Polis": "polis", "Defter": "bilgi", "Hedefler": "emir", "Silahlar": "guc", "Beceri": "saygi", "İş": "is", "Garaj": "garaj"}
 
 func kur(g: String, e: String, y: int, fn: Callable) -> void:
 	glif = g

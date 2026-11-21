@@ -520,9 +520,9 @@ func _ust_cubuk() -> void:
 	p2.add_child(r)
 	_temiz = _hap(r, "$", Tema.VURGU, "Temiz para", "temiz")
 	_kirli = _hap(r, "▮", Tema.KOTU, "Kirli para", "kirli")
-	_ekip = _hap(r, "♟", Tema.YAZI, "Ekip: adam sayısı / üst sınır")
-	_arama = _hap(r, "⚠", Tema.UYARI, "Polis seni arıyor: 30 ve üstünde devriyeler kovalar.")
-	_un = _hap(r, "★", Tema.VURGU, "Ünün")
+	_ekip = _hap(r, "♟", Tema.YAZI, "Ekip: adam sayısı / üst sınır", "ekip")
+	_arama = _hap(r, "⚠", Tema.UYARI, "Polis seni arıyor: 30 ve üstünde devriyeler kovalar.", "arama")
+	_un = _hap(r, "★", Tema.VURGU, "Ünün", "un")
 	# ihtiyaçlar
 	var p3 := _koyu_kutu(kok, 4)
 	var nb := HBoxContainer.new()
