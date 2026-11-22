@@ -606,15 +606,7 @@ func _yol_noktasi(yol: PackedVector3Array, f: float) -> Vector3:
 
 func _adam_olustur(ad: String) -> Node3D:
 	var n := Node3D.new()
-	var m := MeshInstance3D.new()
-	var cm := CapsuleMesh.new()
-	cm.radius = 0.35
-	cm.height = 1.8
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.25, 0.45, 0.85)
-	cm.material = mat
-	m.mesh = cm
-	m.position.y = 0.9
+	var m: Node3D = load("res://scripts/core/cubuk.gd").kisi(Color(0.25, 0.45, 0.85))
 	m.scale = Vector3.ONE * 2.5
 	n.add_child(m)
 	var l := Label3D.new()

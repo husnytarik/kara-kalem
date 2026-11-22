@@ -6,6 +6,11 @@ const ARABA_SAYI := 22
 const KALDIRIM := 2.2
 const MENZIL := 110.0
 const HUCRE := 8.0
+const Cubuk := preload("res://scripts/core/cubuk.gd")
+const ADLAR := ["Tom", "Frank", "Sal", "Jim", "Carl", "Ben", "Joe", "Sam", "Max", "Leo", "Nick", "Paul", "Ray", "Walt", "Mary", "Rose", "Ida", "Nell", "Grace", "Ruth", "Pearl", "Edna", "Lena", "Dora", "Vera"]
+const SOYADLAR := ["Moran", "Rossi", "Cohen", "Walsh", "Novak", "Keller", "Ortiz", "Byrne", "Hayes", "Lund", "Berg", "Pike", "Costa", "Doyle", "Fink", "Grady", "Ivanov", "Marsh", "Quinn", "Stone"]
+var _hov_etiket: Label3D
+var _hov_sure := 0.0
 var harita: Node
 var oyuncu: Node3D
 var oyun: Node
@@ -15,6 +20,9 @@ var _hash := {}                # Vector2i -> Array[Vector2i(yol, nokta)]
 var _noktalar: Array = []      # tüm (yol, nokta) çiftleri
 var _ajan: Array = []
 var _far_mat: StandardMaterial3D
+
+func _ad_uret() -> String:
+	return "%s %s" % [ADLAR[randi() % ADLAR.size()], SOYADLAR[randi() % SOYADLAR.size()]]
 
 func kur(h: Node, o: Node3D, oy: Node, ka: Node) -> void:
 	harita = h
@@ -48,37 +56,16 @@ func _agi_yukle() -> void:
 
 func _gorselleri_kur() -> void:
 	var gov_renk := ["8a6a50", "9a7a58", "5a7aa0", "b04a40", "6a9a6a", "c8b48a", "55555e"]
-	var yaya_g := CapsuleMesh.new()
-	yaya_g.radius = 0.3
-	yaya_g.height = 1.5
-	var yaya_k := SphereMesh.new()
-	yaya_k.radius = 0.2
-	yaya_k.height = 0.4
-	var ten := StandardMaterial3D.new()
-	ten.albedo_color = Color("c9a083")
 	var gov_mat: Array = []
 	for c in gov_renk:
-		var m := StandardMaterial3D.new()
-		m.albedo_color = Color(c)
-		m.roughness = 0.9
-		gov_mat.append(m)
+		gov_mat.append(Color(c))
 	for i in YAYA_SAYI:
-		var n := Node3D.new()
-		var g := MeshInstance3D.new()
-		g.mesh = yaya_g
-		g.material_override = gov_mat[i % gov_mat.size()]
-		g.position.y = 0.75
-		n.add_child(g)
-		var k := MeshInstance3D.new()
-		k.mesh = yaya_k
-		k.material_override = ten
-		k.position.y = 1.7
-		n.add_child(k)
+		var n: Node3D = Cubuk.kisi(gov_mat[i % gov_mat.size()])
 		n.scale = Vector3.ONE * 2.0
 		n.visible = false
 		add_child(n)
 		_ajan.append({"n": n, "araba": false, "yol": -1, "s": 0.0, "yon": 1, "taraf": 1.0, "hiz": randf_range(1.2, 1.9),
-			"kay": Vector3.ZERO, "faz": randf() * 6.28, "bekle": 0.0, "serbest": 0.0, "yaw": 0.0, "id": i})
+			"kay": Vector3.ZERO, "faz": randf() * 6.28, "bekle": 0.0, "serbest": 0.0, "yaw": 0.0, "id": i, "ad": _ad_uret()})
 	# arabalar
 	_far_mat = StandardMaterial3D.new()
 	_far_mat.albedo_color = Color(1, 0.9, 0.6)
@@ -118,7 +105,7 @@ func _gorselleri_kur() -> void:
 		n.visible = false
 		add_child(n)
 		_ajan.append({"n": n, "araba": true, "yol": -1, "s": 0.0, "yon": 1, "taraf": 1.0, "hiz": randf_range(7.0, 11.0),
-			"kay": Vector3.ZERO, "faz": 0.0, "bekle": 0.0, "serbest": 0.0, "yaw": 0.0, "id": i})
+			"kay": Vector3.ZERO, "faz": 0.0, "bekle": 0.0, "serbest": 0.0, "yaw": 0.0, "id": i, "ad": _ad_uret()})
 
 # Ajanı oyuncunun yakınında rastgele bir yol noktasına koyar.
 func _yerlestir(a: Dictionary) -> bool:
@@ -187,6 +174,7 @@ func _kavsak(a: Dictionary) -> void:
 func _process(delta: float) -> void:
 	if oyuncu == null or _yol.is_empty():
 		return
+	_fare_isim(delta)
 	var uz: float = kamera.mesafe
 	var saat: float = fmod(float(oyun.t), float(oyun.DAY)) / 60.0
 	var kis: float = 0.35 if (saat < 5.5 or saat > 22.0) else 1.0
@@ -261,5 +249,51 @@ func _process(delta: float) -> void:
 		else:
 			n.rotation.y = lerp_angle(n.rotation.y, hedef_yaw, 8.0 * delta)
 			a["faz"] += delta * 9.0
-			n.get_child(0).position.y = 0.75 + absf(sin(a["faz"])) * 0.07
+			n.get_child(0).position.y = absf(sin(a["faz"])) * 0.07
 		n.visible = true
+
+# ---------- fare üstünde isim (küçük, sadece bilgi) ----------
+func _etiket_hazirla() -> void:
+	_hov_etiket = Label3D.new()
+	_hov_etiket.font = load("res://scripts/ui/tema.gd").yazi_tipi()
+	_hov_etiket.font_size = 30
+	_hov_etiket.pixel_size = 0.028
+	_hov_etiket.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_hov_etiket.no_depth_test = true
+	_hov_etiket.outline_size = 8
+	_hov_etiket.modulate = Color(0.92, 0.9, 0.82, 0.92)
+	_hov_etiket.render_priority = 3
+	_hov_etiket.visible = false
+	add_child(_hov_etiket)
+
+func _fare_isim(delta: float) -> void:
+	_hov_sure -= delta
+	if _hov_sure > 0.0:
+		return
+	_hov_sure = 0.06
+	if _hov_etiket == null:
+		_etiket_hazirla()
+	var k: Camera3D = kamera.kamera()
+	var fp := get_viewport().get_mouse_position()
+	var o := k.project_ray_origin(fp)
+	var d := k.project_ray_normal(fp)
+	var en: Dictionary = {}
+	var en_uz := 1e9
+	for a in _ajan:
+		var n: Node3D = a["n"]
+		if not n.visible:
+			continue
+		var araba: bool = a["araba"]
+		var p := n.global_position + Vector3(0, 1.4 if araba else 2.0, 0)
+		var t := maxf((p - o).dot(d), 0.0)
+		var uz := p.distance_to(o + d * t)
+		if uz < (3.2 if araba else 1.9) and uz < en_uz:
+			en_uz = uz
+			en = a
+	if en.is_empty():
+		_hov_etiket.visible = false
+		return
+	var nn: Node3D = en["n"]
+	_hov_etiket.text = ("Araba · %s" % en["ad"]) if en["araba"] else String(en["ad"])
+	_hov_etiket.global_position = nn.global_position + Vector3(0, 3.6 if en["araba"] else 5.2, 0)
+	_hov_etiket.visible = true

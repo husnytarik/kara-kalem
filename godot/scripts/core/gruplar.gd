@@ -13,6 +13,7 @@ const GORUS_AV := 45.0     # rakip/polis seni bu mesafeden fark eder (m)
 const GUVENLI := 45.0      # evin çevresinde bu yarıçapta kimse sana bulaşamaz (m)
 const SECIM := 5.0         # tıklama/üzerine gelme yarıçapı (m)
 const Sakinler := preload("res://scripts/core/sakinler.gd")
+const Cubuk := preload("res://scripts/core/cubuk.gd")
 const SIVIL_AD := ["Esnaf", "İşçiler", "Pazarcılar", "Denizciler", "Komşular", "Yolcular", "Çocuklar", "Tüccar"]
 const POLIS_AD := ["Devriye", "Karakol Ekibi", "Bekçiler"]
 const HIZ := {"polis": 7.0, "rakip": 6.5, "sivil": 4.0}
@@ -273,19 +274,12 @@ func _kisileri_yenile(g: Dictionary) -> void:
 		if c.has_meta("kisi"):
 			c.queue_free()
 	var goster := mini(g["kisi"], 6)
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = _renk(g)
 	for k in goster:
-		var m := MeshInstance3D.new()
-		var cm := CapsuleMesh.new()
-		cm.radius = 0.35
-		cm.height = 1.8
-		cm.material = mat
-		m.mesh = cm
+		var m: Node3D = Cubuk.kisi(_renk(g))
 		m.set_meta("kisi", true)
 		var a := TAU * k / maxf(goster, 1.0)
 		var r := 0.0 if goster == 1 else 2.4
-		m.position = Vector3(cos(a) * r, 0.9 * 3.2, sin(a) * r)
+		m.position = Vector3(cos(a) * r, 0.0, sin(a) * r)
 		m.scale = Vector3.ONE * 3.2
 		n.add_child(m)
 	g["gorunen"] = g["kisi"]

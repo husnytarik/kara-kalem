@@ -13,13 +13,7 @@ var _isaret: MeshInstance3D
 func _ready() -> void:
 	_govde = Node3D.new()
 	add_child(_govde)
-	var m := MeshInstance3D.new()
-	var cm := CapsuleMesh.new()
-	cm.radius = 0.35
-	cm.height = 1.8
-	cm.material = _renk(Color(0.85, 0.2, 0.15), false)
-	m.mesh = cm
-	m.position.y = 0.9
+	var m: Node3D = load("res://scripts/core/cubuk.gd").kisi(Color(0.85, 0.2, 0.15))
 	_govde.add_child(m)
 	_govde.scale = Vector3.ONE * 3.0   # yukarıdan görünür olsun
 	var halka := MeshInstance3D.new()
