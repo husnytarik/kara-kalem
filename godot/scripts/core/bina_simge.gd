@@ -293,6 +293,8 @@ func vurgula(i: int) -> void:
 	if i >= 0 and _dugum.has(i):
 		_dugum[i].vurgu(true, kal)
 
+var dis_i := -1   # sokak.gd: fare simgede değil de binanın üstündeyse o bina
+
 func _fare_tara() -> void:
 	var cam: Camera3D = get_viewport().get_camera_3d()
 	if cam == null:
@@ -303,8 +305,14 @@ func _fare_tara() -> void:
 			var f: PackedStringArray = a.substr(7).split(",")
 			fare = Vector2(float(f[0]), float(f[1]))
 	var en := _simge_bul(fare)
+	var dogrudan := en >= 0
+	if en < 0 and dis_i >= 0:   # fare binanın gövdesinde: simgesi de hover olsun
+		for k in _ogeler.size():
+			if _ogeler[k]["i"] == dis_i and _ogeler[k].get("gor", true):
+				en = k
+				break
 	_k_goster(en)
-	hover_i = _ogeler[en]["i"] if en >= 0 else -1
+	hover_i = _ogeler[en]["i"] if dogrudan else -1
 	if en != _hov_k:   # üstüne gelinen simge hafifçe büyür
 		if _hov_k >= 0 and _hov_k < _ogeler.size():
 			(_ogeler[_hov_k]["simge"] as Node3D).scale = Vector3.ONE * _olcek

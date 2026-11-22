@@ -5,7 +5,6 @@ extends Node3D
 # Konum (position) binanın TABAN ORTASIDIR.
 
 static var _sh: Shader
-static var _hat_sh: Shader
 
 @export var ad := "":
 	set(v):
@@ -29,7 +28,7 @@ static var _hat_sh: Shader
 var _kutu: MeshInstance3D
 var _govde: StaticBody3D
 var _etiket: Label3D
-var _hat: MeshInstance3D
+var _hat: Node3D
 
 func _ready() -> void:
 	add_to_group("bina")
@@ -95,22 +94,44 @@ func dunya_aabb() -> AABB:
 				a = a.expand(t * Vector3(sx * yari.x, y, sz * yari.z))
 	return a
 
-# Fare üstüne gelince binanın çevresinde altın bir hat çizer. kalinlik: dünya birimi (kamera uzaklığına göre verilir).
+# Fare üstüne gelince binanın 12 kenarına ince altın çerçeve çizer. kalinlik: kamera uzaklığına göre ölçek.
 func vurgu(acik: bool, kalinlik := 1.0) -> void:
 	if not acik:
 		if _hat != null:
 			_hat.visible = false
 		return
 	if _hat == null:
-		if _hat_sh == null:
-			_hat_sh = load("res://assets/environment/shaders/hat.gdshader")
-		_hat = MeshInstance3D.new()
-		_hat.mesh = BoxMesh.new()
-		var m := ShaderMaterial.new()
-		m.shader = _hat_sh
-		_hat.material_override = m
-		_hat.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_hat = Node3D.new()
+		var m := StandardMaterial3D.new()
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		m.albedo_color = Color(1.0, 0.82, 0.3)
+		for _i in 12:
+			var mi := MeshInstance3D.new()
+			mi.mesh = BoxMesh.new()
+			mi.material_override = m
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			_hat.add_child(mi)
 		add_child(_hat)
-	(_hat.mesh as BoxMesh).size = boyut + Vector3(2.0, 1.5, 2.0) * kalinlik
-	_hat.position = Vector3(0, boyut.y / 2.0 + 0.25 * kalinlik, 0)
+	var t := 0.12 * kalinlik
+	var hx := boyut.x / 2.0
+	var hz := boyut.z / 2.0
+	var k := _hat.get_children()
+	var n := 0
+	for y in [0.0, boyut.y]:
+		for z in [-hz, hz]:
+			var e: MeshInstance3D = k[n]
+			n += 1
+			(e.mesh as BoxMesh).size = Vector3(boyut.x + t, t, t)
+			e.position = Vector3(0, y, z)
+		for x in [-hx, hx]:
+			var e2: MeshInstance3D = k[n]
+			n += 1
+			(e2.mesh as BoxMesh).size = Vector3(t, t, boyut.z + t)
+			e2.position = Vector3(x, y, 0)
+	for x in [-hx, hx]:
+		for z in [-hz, hz]:
+			var e3: MeshInstance3D = k[n]
+			n += 1
+			(e3.mesh as BoxMesh).size = Vector3(t, boyut.y + t, t)
+			e3.position = Vector3(x, boyut.y / 2.0, z)
 	_hat.visible = true

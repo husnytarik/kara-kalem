@@ -553,6 +553,7 @@ func _process(delta: float) -> void:
 	# tıklanabilir şeyin üstünde: bina hattı + el imleci
 	var tikla_i: int = -1 if (arayuz.modal or savas_aktif) else (i if gh.is_empty() else -1)
 	_bs.vurgula(tikla_i)
+	_bs.dis_i = tikla_i
 	Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND if (tikla_i >= 0 or (not gh.is_empty() and not arayuz.modal)) else Input.CURSOR_ARROW)
 	_oy_etiket.visible = oyuncu.iceride < 0
 	oyun.ic_mekan = oyuncu.iceride
