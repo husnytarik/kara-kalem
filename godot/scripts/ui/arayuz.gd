@@ -886,7 +886,10 @@ func _gorsel_anahtarlari() -> Array:
 			var taban: String = G.slug(String(oyun.harita.yerler[i]["ad"]).trim_suffix(" III").trim_suffix(" II"))
 			if not ozel.has(taban):
 				ozel.append(taban)   # "Bakeshop II" -> bakeshop.png
-			for kv in [["church", "kilise"], ["chapel", "kilise"], ["cathedral", "kilise"], ["precinct", "polis"], ["airport", "havaalani"], ["airfield", "havaalani"], ["boxing", "boks_salonu"], ["gym", "boks_salonu"]]:
+			for ek in ["_ii", "_iii"]:
+				if not ozel.has(taban + ek):
+					ozel.append(taban + ek)   # taban dosya yoksa kardeş varyasyon
+			for kv in [["church", "kilise"], ["chapel", "kilise"], ["cathedral", "kilise"], ["precinct", "polis"], ["airport", "havaalani"], ["airfield", "havaalani"], ["butcher", "butcher"], ["boxing", "boks_salonu"], ["gym", "boks_salonu"]]:
 				if ad_k.contains(kv[0]):
 					ozel.append(kv[1])
 			return ozel + [tur, "bina"]
