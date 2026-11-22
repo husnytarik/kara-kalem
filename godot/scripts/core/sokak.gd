@@ -959,12 +959,12 @@ func _ekran_cek(arg: String) -> void:
 		elif p[1] == "binafoto":
 			var yb: Dictionary = harita.yerler[0]
 			for yy in harita.yerler:
-				if yy["ad"] == "Sailors Bar":
+				if yy["ad"] == OS.get_environment("BINA_AD") or (yy["ad"] == "Sailors Bar" and OS.get_environment("BINA_AD") == ""):
 					yb = yy
 			oyuncu.global_position = yb["pos"]
 			kamera.rotation.y = float(p[2]) if p.size() > 2 else 0.0
 			kamera.mesafe = 30.0
-			kamera._pitch = -0.35
+			kamera._pitch = float(OS.get_environment("BINA_PITCH")) if OS.get_environment("BINA_PITCH") != "" else -0.35
 			await get_tree().create_timer(1.0, true, false, true).timeout
 		elif p[1] == "bolge":
 			arayuz.bolge_ac("southside")

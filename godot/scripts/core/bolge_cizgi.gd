@@ -20,11 +20,12 @@ func kur(o: Node, h: Node, s: Node) -> void:
 		_cizgi_kur(id)
 		_tabela_kur(id)
 	_renk_guncelle()
+	_goster(false)
 
 # Bölge sınırı: haritacı/mülk çizimi gibi. Yerde mürekkep çizgisi (kesik kesik akan) + içe doğru taralı bant,
 # yukarıda sınır boyunca direkler ve solan bir "perde". Sahibin rengi, oyuncunun bulunduğu bölge parlak.
 const BANT := 16.0     # içe doğru tarama bandı (m)
-const PERDE := 22.0    # sınır perdesinin yüksekliği (m)
+const PERDE := 90.0    # ışık hüzmesinin yüksekliği (m)
 
 const BANT_SH := """
 shader_type spatial;
@@ -52,16 +53,21 @@ shader_type spatial;
 render_mode unshaded, blend_add, depth_draw_never, cull_disabled, fog_disabled;
 uniform vec4 renk : source_color = vec4(0.9, 0.7, 0.3, 1.0);
 uniform float guc = 0.5;
-uniform float yuk = 22.0;
+uniform float yuk = 90.0;
 void fragment() {
 	float x = UV.x;
-	float h = UV.y / yuk;
-	float perde = pow(1.0 - clamp(h, 0.0, 1.0), 2.2) * 0.22;
-	float direk = step(0.93, fract(x / 24.0)) * (1.0 - smoothstep(0.0, 0.8, h)) * 0.8;
-	float taban = (1.0 - smoothstep(0.0, 0.03, h)) * 0.9;
-	float bayrak = step(0.93, fract(x / 24.0)) * step(0.62, h) * (1.0 - smoothstep(0.62, 0.8, h)) * 0.0;
+	float h = clamp(UV.y / yuk, 0.0, 1.0);
+	float sol = pow(1.0 - h, 1.7);
+	// yerden yükselen ışık hüzmesi: dikey şeritler + yukarı kayan parıltı paketleri
+	float serit = 0.55 + 0.45 * sin(x * 1.7 + sin(x * 0.31) * 2.0);
+	float paket = smoothstep(0.0, 0.5, fract(h * 2.2 - TIME * 0.22 + x * 0.013)) * (1.0 - smoothstep(0.5, 1.0, fract(h * 2.2 - TIME * 0.22 + x * 0.013)));
+	float perde = sol * (0.26 + 0.18 * serit + 0.35 * paket * serit);
+	// sınır boyunca her 24 m'de parlak ışık sütunu
+	float c = abs(fract(x / 24.0) - 0.5) * 24.0;
+	float sutun = (1.0 - smoothstep(0.0, 1.1, c)) * pow(1.0 - h, 1.2) * 0.95;
+	float taban = (1.0 - smoothstep(0.0, 0.035, h)) * 0.9;
 	ALBEDO = renk.rgb;
-	ALPHA = clamp((perde + direk + taban + bayrak) * guc, 0.0, 1.0);
+	ALPHA = clamp((perde + sutun + taban) * guc, 0.0, 1.0);
 }
 """
 
@@ -121,6 +127,7 @@ func _cizgi_kur(id: String) -> void:
 	for im in [bim, pim]:
 		var mi := MeshInstance3D.new()
 		mi.mesh = im
+		_meshler.append(mi)
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(mi)
 	_cizgi[id] = [bm, pm]
@@ -159,9 +166,26 @@ func _tabela_kur(id: String) -> void:
 	add_child(l)
 	_tabela[id] = {"l": l, "s": sp}
 
+# Hüzmeler yalnızca bölgeler paneli açıkken görünür; seçili bölge daha parlak.
+var _acik := false
+var _meshler: Array = []
+
+func _goster(a: bool) -> void:
+	for m in _meshler:
+		(m as MeshInstance3D).visible = a
+var _secili := ""
+
 func _process(d: float) -> void:
 	_sure += d
-	if _sure > 1.0:
+	var ar: Node = sokak.arayuz
+	var ac: bool = ar != null and ar._mod == "bolge" and ar._sag.visible
+	var sec: String = str(ar._hedef) if ac else ""
+	if ac != _acik or sec != _secili:
+		_acik = ac
+		_secili = sec
+		_goster(ac)
+		_sure = 2.0
+	if _acik and _sure > 1.0:
 		_sure = 0.0
 		_renk_guncelle()
 
@@ -178,6 +202,8 @@ func _renk_guncelle() -> void:
 			a = 0.55
 		if id == oyuncu_b:
 			a = minf(1.0, a + 0.3)
+		if id == _secili:
+			a = 1.0
 		for mt in _cizgi[id]:
 			(mt as ShaderMaterial).set_shader_parameter("renk", Color(r.r, r.g, r.b, 1.0))
 			(mt as ShaderMaterial).set_shader_parameter("guc", a * 2.4)
