@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d3yu4yn7b2cp8"
-path="res://.godot/imported/drugstore.png-258a09358b4270087ca0a4b6471283d9.ctex"
+uid="uid://dbuf0n82atgwc"
+path="res://.godot/imported/produce_stand_iii.png-aecd09d29f437a5a66714a71a436ce28.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/bina/drugstore.png"
-dest_files=["res://.godot/imported/drugstore.png-258a09358b4270087ca0a4b6471283d9.ctex"]
+source_file="res://assets/ui/bina/produce_stand_iii.png"
+dest_files=["res://.godot/imported/produce_stand_iii.png-aecd09d29f437a5a66714a71a436ce28.ctex"]
 
 [params]
 

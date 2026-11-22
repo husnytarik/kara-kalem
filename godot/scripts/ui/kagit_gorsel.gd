@@ -20,7 +20,7 @@ func _init() -> void:
 
 static func slug(s: String) -> String:
 	var t := s.to_lower()
-	for p in [["ı", "i"], ["ğ", "g"], ["ü", "u"], ["ş", "s"], ["ö", "o"], ["ç", "c"], ["â", "a"], ["î", "i"], ["û", "u"]]:
+	for p in [["'", ""], ["ı", "i"], ["ğ", "g"], ["ü", "u"], ["ş", "s"], ["ö", "o"], ["ç", "c"], ["â", "a"], ["î", "i"], ["û", "u"]]:
 		t = t.replace(p[0], p[1])
 	var r := ""
 	for ch in t:

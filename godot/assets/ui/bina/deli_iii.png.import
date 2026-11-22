@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c6cw0ewvi7sde"
-path="res://.godot/imported/dentist.png-78d93982847a061fefc66b5a6dd9a0df.ctex"
+uid="uid://22ivscr30pxs"
+path="res://.godot/imported/deli_iii.png-c05b5035edf77db0a50f6877167b5957.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/bina/dentist.png"
-dest_files=["res://.godot/imported/dentist.png-78d93982847a061fefc66b5a6dd9a0df.ctex"]
+source_file="res://assets/ui/bina/deli_iii.png"
+dest_files=["res://.godot/imported/deli_iii.png-c05b5035edf77db0a50f6877167b5957.ctex"]
 
 [params]
 
