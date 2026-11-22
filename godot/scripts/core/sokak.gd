@@ -948,6 +948,12 @@ func _ekran_cek(arg: String) -> void:
 				if g3["tur"] == gt:
 					arayuz.grup_ac(g3)
 					break
+		elif p[1] == "yaya" or p[1] == "araba":
+			kamera.mesafe = 45.0
+			for dn in 90:
+				await get_tree().process_frame
+				if dn > 20 and (get_node("Yayalar") as Node3D).test_hedef(p[1] == "araba"):
+					break
 		elif p[1] == "bolge":
 			arayuz.bolge_ac("southside")
 		await get_tree().create_timer(1.5, true, false, true).timeout

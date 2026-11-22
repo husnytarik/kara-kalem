@@ -11,6 +11,7 @@ const ADLAR := ["Tom", "Frank", "Sal", "Jim", "Carl", "Ben", "Joe", "Sam", "Max"
 const SOYADLAR := ["Moran", "Rossi", "Cohen", "Walsh", "Novak", "Keller", "Ortiz", "Byrne", "Hayes", "Lund", "Berg", "Pike", "Costa", "Doyle", "Fink", "Grady", "Ivanov", "Marsh", "Quinn", "Stone"]
 var _hov_etiket: Label3D
 var _hov_sure := 0.0
+var test_fare := Vector2(-1, -1)   # test: sahte fare konumu
 var harita: Node
 var oyuncu: Node3D
 var oyun: Node
@@ -274,7 +275,7 @@ func _fare_isim(delta: float) -> void:
 	if _hov_etiket == null:
 		_etiket_hazirla()
 	var k: Camera3D = kamera.kamera()
-	var fp := get_viewport().get_mouse_position()
+	var fp := get_viewport().get_mouse_position() if test_fare.x < 0.0 else test_fare
 	var o := k.project_ray_origin(fp)
 	var d := k.project_ray_normal(fp)
 	var en: Dictionary = {}
@@ -297,3 +298,24 @@ func _fare_isim(delta: float) -> void:
 	_hov_etiket.text = ("Araba · %s" % en["ad"]) if en["araba"] else String(en["ad"])
 	_hov_etiket.global_position = nn.global_position + Vector3(0, 3.6 if en["araba"] else 5.2, 0)
 	_hov_etiket.visible = true
+
+# Test: ekranda görünen en yakın yaya/arabayı bul, sahte fareyi üstüne koy.
+func test_hedef(araba: bool) -> bool:
+	var k: Camera3D = kamera.kamera()
+	var vp := get_viewport().get_visible_rect().size
+	var en := 1e9
+	for a in _ajan:
+		var n: Node3D = a["n"]
+		if not n.visible or a["araba"] != araba:
+			continue
+		var y := n.global_position + Vector3(0, 1.4 if araba else 2.0, 0)
+		if k.is_position_behind(y):
+			continue
+		var sp := k.unproject_position(y)
+		if sp.x < 100 or sp.x > vp.x - 700 or sp.y < 120 or sp.y > vp.y - 150:
+			continue
+		var d := sp.distance_to(vp * 0.5)
+		if d < en:
+			en = d
+			test_fare = sp
+	return en < 1e9
