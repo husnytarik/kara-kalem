@@ -59,7 +59,7 @@ Windows SmartScreen "bilinmeyen yayıncı" uyarısı verebilir; exe imzasızdır
 
 ### Yaşayan sakinler
 
-Şehirde **36 isimli sakin** yaşar (bölge başına 6): bakkal Rosa, berber Gus, Peder Brennan, komiser Brogan, gümrük memuru Pete... Her biri hep **aynı bölgede, aynı saat aralıklarında, aynı işyerlerinde** görünür; gün içinde işine, öğle yemeğine, akşam mekânına gider, gece evine çekilir. Üzerine tıklayınca işini, kısa notunu ve günlük rutinini görürsün. Şimdilik oyun mekaniğine etkileri yoktur; dedikodu ve görev kaynağı olmaları hedeflenir.
+Şehirde **36 isimli sakin** yaşar (bölge başına 6): bakkal Rosa, berber Gus, Peder Brennan, komiser Brogan, gümrük memuru Pete... Her biri hep **aynı bölgede, aynı saat aralıklarında, aynı işyerlerinde** görünür; gün içinde işine, öğle yemeğine, akşam mekânına gider, gece evine çekilir. Panelleri ya da kayıtları yoktur; sadece rutinleriyle yaşarlar (üzerine gelince adı ve işi çıkar). Şimdilik oyun mekaniğine etkileri yoktur.
 
 ---
 

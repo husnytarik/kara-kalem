@@ -464,7 +464,7 @@ func _unhandled_input(e: InputEvent) -> void:
 			var k2: Camera3D = kamera.kamera()
 			var ik2: int = _bs.ikon_isinla(e.position)
 			var g2: Dictionary = gruplar.isinla(k2.project_ray_origin(e.position), k2.project_ray_normal(e.position)) if ik2 < 0 else {}
-			if not g2.is_empty():
+			if not g2.is_empty() and not g2.has("sakin"):
 				arayuz.grup_ac(g2)
 				return
 			var i2: int = ik2 if ik2 >= 0 else harita.yer_isinla(k2.project_ray_origin(e.position), k2.project_ray_normal(e.position))
