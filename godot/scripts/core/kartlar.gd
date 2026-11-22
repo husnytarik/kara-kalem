@@ -22,6 +22,10 @@ const KARTLAR := {
 	"pazarci": ["Pazarcı teklifi", 9, 8, false],
 	"sevkiyat": ["Rakip sevkiyatı", 8, 14, false],
 	"adamlar": ["Adamlar pay istiyor", 8, 14, false],
+	# Dış baskı: dükkân sahibi oldukça mafya, yozlaşmış polis ve rakip esnaf kapına gelir.
+	"koruma": ["Koruma parası", 12, 14, false],
+	"ruhsat": ["Ruhsat ve arama", 10, 14, false],
+	"rakipesnaf": ["Rakip esnaf", 9, 12, false],
 }
 
 # Kartın görüneceği oyuncu seviyesi aralığı [en az, en çok]. Seviye: 0 sokak, 1 haraççı, 2 kaptan (1 bölge),
@@ -30,6 +34,7 @@ const SEVIYE := {
 	"dolan": [0, 4], "esnaf": [1, 4], "ihale": [1, 4], "tefeci": [0, 2], "muhbir": [1, 4], "gazeteci": [1, 4],
 	"senlik": [0, 3], "ittifak": [2, 4], "baskin": [1, 4], "secim": [2, 4],
 	"cuzdan": [0, 1], "pazarci": [0, 1], "sevkiyat": [2, 4], "adamlar": [2, 4],
+	"koruma": [0, 4], "ruhsat": [0, 4], "rakipesnaf": [0, 4],
 }
 const SEVIYE_AD := ["Sokak çocuğu", "Haraççı", "Kaptan", "Underboss", "Don"]
 
@@ -114,6 +119,8 @@ func uygun(id: String) -> bool:
 			return oyun.arama >= 40.0 or oyun.pol["kurulu"]
 		"secim":
 			return Y.puan("kulis") >= 15.0 or Y.puan("kanun") >= 15.0
+		"koruma", "ruhsat", "rakipesnaf":
+			return not oyun.isy.keys().filter(func(i): return oyun.isy[i]["sahip"]).is_empty() and oyun.tarih()["gun"] >= 8
 	return true
 
 # Ağırlıklı seçim; yola uygun kartlar biraz öne çıkar.
@@ -142,7 +149,7 @@ func hazirla(id: String) -> void:
 	var idler: Array = oyun.harita.bolgeler.keys()
 	_bolge = idler[oyun.rng.randi() % idler.size()]
 	_aile = oyun.NPC[oyun.rng.randi() % oyun.NPC.size()]
-	if id == "esnaf" and not oyun.isy.keys().filter(func(i): return oyun.isy[i]["haracli"] or oyun.isy[i]["sahip"]).is_empty():
+	if id in ["esnaf", "koruma", "ruhsat", "rakipesnaf"] and not oyun.isy.keys().filter(func(i): return oyun.isy[i]["haracli"] or oyun.isy[i]["sahip"]).is_empty():
 		var hl: Array = oyun.isy.keys().filter(func(i): return oyun.isy[i]["haracli"] or oyun.isy[i]["sahip"])
 		_bolge = oyun.harita.yerler[hl[oyun.rng.randi() % hl.size()]]["bolge"]
 
@@ -174,6 +181,12 @@ func metin(id: String) -> String:
 			return "Kaldırımda kalın bir cüzdan buldun. İçinde para ve üzerinde bir isim yazan kimlik var. Etrafta kimse yok."
 		"pazarci":
 			return "Köşedeki pazarcı seni kolluyor: \"Akşamları tezgâhıma göz kulak olsan, gelip geçen külhanbeyleri uzak durur. Sana bir şeyler veririm.\""
+		"koruma":
+			return "%s'ın adamları dükkânına geldi, şapkalarını bile çıkarmadılar: \"Güzel iş çıkarmışsın. Bu mahallede güzel şeyler kolay yanar. Haftalık küçük bir koruma ücreti, hepimiz rahat ederiz.\"" % _fad()
+		"ruhsat":
+			return "Karakoldan bir çavuş dükkânına uğradı. Ruhsatına, tartılarına, kayıtlarına bakıyor. \"Evrakta bir eksik var gibi... Ama halledilmeyecek eksik yoktur.\" Gözünü kasadan ayırmıyor."
+		"rakipesnaf":
+			return "Karşı sokaktaki esnaf müşterilerini çalıyor: fiyat kırıyor, senin hakkında dedikodu yayıyor. Dün de dükkânının önüne çöp dökülmüş."
 		"sevkiyat":
 			return "%s'ın bir viski sevkiyatı senin bölgenin sınırından geçecekmiş. Haberi getiren çocuk saati de biliyor." % _fad()
 		"adamlar":
@@ -253,6 +266,27 @@ func secenekler(id: String) -> Array:
 				{"ad": "Sahibine götür", "ipucu": "Yasal +6. %60: sahibi bahşiş verir ($25 temiz).", "can": true},
 				{"ad": "Parayı al, cüzdanı at", "ipucu": "+$40 kirli. Gölge +4. Kimse bilmez.", "can": true},
 				{"ad": "Sahibini bul, para iste", "ipucu": "Korku +4. %55: +$70 kirli. Yoksa Dosya +3.", "can": true},
+			]
+		"koruma":
+			return [
+				{"ad": "Öde ($%d)" % _m(60), "ipucu": "Kulis +4. Dükkân rahat eder, ama bir kez ödedin.", "can": tm >= _m(60)},
+				{"ad": "Pazarlık yap", "ipucu": "%50: yarı fiyatına anlaşırsın (Kulis +3). Yoksa tam öder, Korku −2.", "can": tm >= _m(60)},
+				{"ad": "Karşı koy", "ipucu": "Korku +8. %50: geri çekilirler. Yoksa vitrin kırılır, Dosya +4.", "can": true},
+				{"ad": "Polise git", "ipucu": "Yasal +5. %55: polis ilgilenir. Yoksa intikam: kasadan para gider.", "can": true},
+			]
+		"ruhsat":
+			return [
+				{"ad": "Zarf ver ($%d)" % _m(50), "ipucu": "Kulis +5, Dosya −3. Reform döneminde riskli.", "can": kt >= _m(50)},
+				{"ad": "Evrakları göster", "ipucu": "Yasal +5. %50: temiz çıkar. Yoksa harç cezası.", "can": true},
+				{"ad": "Defterleri sakla", "ipucu": "Gölge +5. %55: bulamazlar. Yoksa Dosya +8.", "can": true},
+				{"ad": "Gazeteye anlat", "ipucu": "Yasal +6, Kulis −4, polis kızar: Dosya +5.", "can": true},
+			]
+		"rakipesnaf":
+			return [
+				{"ad": "Fiyat kır ($%d)" % _m(40), "ipucu": "Müşteri geri döner: Yasal +3. Kısa vadede zarar.", "can": tm >= _m(40)},
+				{"ad": "Adamlarla konuş", "ipucu": "Korku +6. %55: rakip yatışır. Yoksa Dosya +3.", "can": true},
+				{"ad": "Mahalleyle konuş", "ipucu": "Yasal +4, bölgede sevgi +2.", "can": true},
+				{"ad": "Görmezden gel", "ipucu": "Birkaç günlük müşteri kaybı: −$%d temiz." % _m(30), "can": true},
 			]
 		"pazarci":
 			return [
@@ -536,6 +570,77 @@ func _coz(id: String, n: int) -> Dictionary:
 						return _r("Sahibi korkup para verdi. +$70 kirli.", "good")
 					_dosya(3.0)
 					return _r("Sahibi bağırıp çağırdı, bir karakol ihbarı geldi. Dosya +3.", "bad")
+		"koruma":
+			match n:
+				0:
+					oyun.harcama(_m(60), "temiz")
+					Y.ekle("kulis", 4.0)
+					return _r("Koruma ücretini ödedin. Bir süre kimse dokunmaz.", "warn")
+				1:
+					if _sans(0.5):
+						oyun.harcama(_m(30), "temiz")
+						Y.ekle("kulis", 3.0)
+						return _r("Yarı fiyata anlaştınız.", "good")
+					oyun.harcama(_m(60), "temiz")
+					Y.ekle("korku", -2.0)
+					return _r("Pazarlık tutmadı, tam ücreti ödedin.", "bad")
+				2:
+					Y.ekle("korku", 8.0)
+					if _sans(0.5):
+						return _r("Adamlar bir şey demeden çekildi. Ama seni unutmazlar.", "good")
+					oyun.harcama(_m(40), "temiz")
+					_dosya(4.0)
+					return _r("Gece vitrin kırıldı, polis de ilgilendi. Dosya +4.", "bad")
+				_:
+					Y.ekle("kanun", 5.0)
+					if _sans(0.55):
+						return _r("Polis mahalleyi kolladı, adamlar bir süre görünmedi.", "good")
+					oyun.harcama(_m(50), "temiz")
+					return _r("Polis oyalandı; adamlar intikam aldı, kasadan para gitti.", "bad")
+		"ruhsat":
+			match n:
+				0:
+					oyun.harcama(_m(50), "kirli")
+					Y.ekle("kulis", 5.0)
+					_dosya(-3.0)
+					return _r("Çavuş zarfı cebine attı: \"Evrakın tamam.\"", "warn")
+				1:
+					Y.ekle("kanun", 5.0)
+					if _sans(0.5):
+						return _r("Evraklar düzgündü. Çavuş eli boş döndü.", "good")
+					oyun.harcama(_m(40), "temiz")
+					return _r("Küçük bir eksik buldu: harç cezası kesti.", "bad")
+				2:
+					Y.ekle("golge", 5.0)
+					if _sans(0.55):
+						return _r("Defterlere ulaşamadı. Gitti.", "good")
+					_dosya(8.0)
+					return _r("Gizlediğini fark etti. Dosya +8.", "bad")
+				_:
+					Y.ekle("kanun", 6.0)
+					Y.ekle("kulis", -4.0)
+					_dosya(5.0)
+					return _r("Gazete haberi yaptı, mahalle seni sevdi; karakol sinirlendi.", "warn")
+		"rakipesnaf":
+			match n:
+				0:
+					oyun.harcama(_m(40), "temiz")
+					Y.ekle("kanun", 3.0)
+					return _r("Fiyat kırdın; müşteri geri geldi, kâr azaldı.", "warn")
+				1:
+					Y.ekle("korku", 6.0)
+					if _sans(0.55):
+						return _r("Adamların rakibe uğradı. Bir daha rahatsız etmedi.", "good")
+					_dosya(3.0)
+					return _r("Rakip şikâyet etti, polis uğradı. Dosya +3.", "bad")
+				2:
+					Y.ekle("kanun", 4.0)
+					if B.has("sev"):
+						B["sev"] = minf(100.0, B["sev"] + 2.0)
+					return _r("Mahalleye durumu anlattın. Esnaf seni tuttu.", "good")
+				_:
+					oyun.harcama(_m(30), "temiz")
+					return _r("Birkaç gün müşteri kaybettin.", "bad")
 		"pazarci":
 			match n:
 				0:

@@ -44,3 +44,11 @@ Yapılmayacak: deniz savaşı kopyası; sadece "rol özgürlüğü + fraksiyon b
 3. Dış baskı: haraç/ruhsat/arama olayları oyuncu büyüdükçe tetiklensin.
 4. KARAKTERLER.md'deki isimli kadroyu aile üyelerine bağlama.
 5. Easter egg'ler.
+
+## 7. Uygulama durumu (2026-11-23)
+- **Sabit başlangıç (YAPILDI):** menüde köken/aile/geçmiş seçimi kalktı; yalnızca ad ve yaş. Herkes havaalanında, $350 ve dedenden kalan daireyle (kira yok) başlar. Eski köken/aile kodu test komutları ve eski kayıtlar için duruyor.
+- **Açılış (YAPILDI):** HEDEF paneli sırayla yönlendirir: havaalanı → daire (H) → çalış ya da tezgâh kur → ilk iş → büyüme. Başlıkta gidişattan türeyen yol adı görünür (Yolun belli değil / Mahalle adamı / İşletmeci / Tüccar / Suç yolu).
+- **Dükkân kurma (YAPILDI):** tezgâh sınıfı (Produce Stand, Pushcart, Cobbler, Shoe Repair) $300; normal dükkânlar $500+.
+- **Dış baskı (YAPILDI):** dükkân sahibi olunca üç yeni karar kartı gelir: Koruma parası (mafya), Ruhsat ve arama (yozlaşmış polis), Rakip esnaf (sabotaj). Her birinde öde / pazarlık / karşı koy / yasal yol seçenekleri ve yol puanı etkisi var.
+- **Easter egg (YAPILDI):** `Sakinler.GIZLI`: zaman yolcusu (Elias Vane, Union Station, 11:00-11:24) ve uzaylı (Mr. Smith, Corner Diner, 03:00-04:30). Yakınından geçince günde bir kez ince bir ipucu mesajı düşer.
+- **Açık kalanlar:** KARAKTERLER.md kadrosunun aile üyelerine bağlanması; tüccar yoluna özel tedarik/zincir mekaniği; sakinlerin bina içinde görünmesi.

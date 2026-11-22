@@ -470,7 +470,19 @@ func _amac_guncelle() -> void:
 		elif oyun.isy[i]["haracli"]:
 			haracli += 1
 	var bolgeler: int = oyun.oyuncu_bolgeleri().size()
-	if oyun.adamlar.is_empty():
+	var acilis_adim := false
+	if not oyun.acilis["daire"]:
+		yazi = "Havaalanından çıktın. Dedenden kalan daire seni bekliyor: H tuşu seni oraya götürür, kapısına tıkla."
+		acilis_adim = true
+	elif sahip == 0 and haracli == 0 and oyun.adamlar.is_empty():
+		yazi = "Cebin ince. Bir dükkâna ya da atölyeye git ve 'Burada çalış' de; ya da bir tezgâh satın alıp kendi işini kur ($300'dan başlar: Produce Stand, Shoe Repair)."
+		acilis_adim = true
+	elif sahip > 0 and haracli == 0 and oyun.adamlar.is_empty():
+		yazi = "İlk işin hazır. Büyüt: ikinci dükkân, personel, itibar. Büyüdükçe mafya ve polis kapını çalar; ya da adam tutup başka bir yol seç."
+		acilis_adim = true
+	if acilis_adim:
+		pass
+	elif oyun.adamlar.is_empty():
 		yazi = "Önce bir adam tut: T tuşu (Adamlar). Tek başına esnafı sıkıştıramazsın."
 	elif haracli + sahip == 0:
 		yazi = "Bir esnafa git, paneli aç ve adamınla haraç bağla. Gelir oradan başlar."
@@ -485,6 +497,8 @@ func _amac_guncelle() -> void:
 	if not ac.is_empty() and oyun.arama < 60.0:
 		baslik = "İHTİYAÇ"
 		yazi = ac["mesaj"]
+	if baslik == "HEDEF":
+		baslik = "HEDEF · " + oyun.yol_adi().to_upper()
 	_amac_baslik.text = baslik
 	if _amac_acik:
 		yazi += "
@@ -673,6 +687,8 @@ func _sag_panel() -> void:
 
 # ---------- açma / kapama ----------
 func bina_ac(i: int) -> void:
+	if i == oyun._ev:
+		oyun.acilis["daire"] = true
 	_mod = "bina"
 	_hedef = i
 	_adam_secim = 0

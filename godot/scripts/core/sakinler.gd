@@ -85,6 +85,14 @@ const LISTE := [
 		"rutin": [[7.5, 18.0, "Ship Chandler"], [18.0, 20.0, "Dock Hiring Hall"]]},
 ]
 
+# Gizli sakinler (easter egg): sıradan görünürler; "fisilti" yalnızca yakınlarından geçen dikkatli oyuncuya (günde bir kez) bir ipucu verir.
+const GIZLI := [
+	{"ad": "Elias Vane", "is": "Saat meraklısı", "bolge": "downtown", "fisilti": "Gar bekleme salonunda biri kendi kendine mırıldanıyor: \"...yanlış on yıl. Hâlâ yanlış on yıl.\" Kolundaki saat bir saate benzemiyor.",
+		"rutin": [[11.0, 11.4, "Union Station"]]},
+	{"ad": "Mr. Smith", "is": "Sigorta acentesi", "bolge": "eastside", "fisilti": "Masadaki kahveye hiç dokunmamış. Çevresindekileri izleyip aynı anda gülüyor; sana dönüp \"Soğuk bugün, değil mi?\" dedi. Hava sıcak.",
+		"rutin": [[3.0, 4.5, "Corner Diner"]]},
+]
+
 # Bu saatte (0-24) kişi nerede? Dönen: {"yer": bina adı, "bas": bu aralığın başlangıç saati} ya da boş (evde).
 static func aralik(s: Dictionary, saat: float) -> Dictionary:
 	for r in s["rutin"]:

@@ -37,7 +37,7 @@ func kur(h: Node3D, o: Node, p: Node3D) -> void:
 	rng.seed = 777
 	for id in harita.bolgeler:
 		_polis_ekle(id)
-	for sk in Sakinler.LISTE:   # isimli, rutinli şehir sakinleri
+	for sk in Sakinler.LISTE + Sakinler.GIZLI:   # isimli, rutinli şehir sakinleri (+ gizli olanlar)
 		_sakin_ekle(sk)
 	_esitle()
 
@@ -100,6 +100,11 @@ func _sakin_plan(g: Dictionary) -> void:
 		g["evde"] = false
 		g["pos"] = g["ev_pos"]
 		dn.visible = true
+	if g["sakin"].has("fisilti") and (g["pos"] as Vector3).distance_to(oyuncu.global_position) < 8.0:
+		var gun: int = int(oyun.t / oyun.DAY)
+		if g.get("fis_gun", -1) != gun:
+			g["fis_gun"] = gun
+			oyun.kayit(g["sakin"]["fisilti"], "info")
 	var anahtar := "%s@%s" % [a["yer"], a["bas"]]
 	if g["yer"] != anahtar:
 		g["yer"] = anahtar

@@ -143,6 +143,7 @@ var arama := 0.0   # polisin seni arama seviyesi (0-100)
 var defter: Array[Dictionary] = []    # {t, metin, tur}
 var _sayac := 0
 var _ev := -1
+var acilis := {"daire": false, "calisti": false}   # havaalanı açılışı: dairene vardın mı, çalıştın mı
 var profil: Dictionary = {}     # menüden gelen karakter: {ad, yas, koken, aile, gecmis}
 var ozet: Dictionary = {}       # profil.gd ozet(): statlar, hp, ücret çarpanı...
 var vardiya: Dictionary = {}    # çalışıyorsan: {bina, bitis, ucret}
@@ -234,7 +235,14 @@ func _profil_uygula() -> void:
 			if harita.yerler[i]["ad"] == ev_ad:
 				_ev = i
 				break
+	if profil["koken"] != "havaalani":
+		acilis = {"daire": true, "calisti": true}
 	match profil["koken"]:
+		"havaalani":
+			bolge["southside"]["inf"].erase("oyuncu")
+			bolge["southside"]["tan"] = 3.0
+			kayit("%s: Havaalanına indin. Cebinde %s, bir de dedenden kalan daire var." % [profil["ad"], para(temiz)], "info")
+			kayit("İpucu: H tuşu seni eve götürür. Önce daireye uğra, sonra ne yapacağına sen karar ver.", "info")
 		"yerli":
 			borc_k.baslat()
 			kayit("%s: Southside'da doğdun. Önce adam tut, sonra esnafa git." % profil["ad"], "info")
@@ -270,7 +278,7 @@ func _en_yakin_bina(p: Vector3) -> int:
 # Başlangıç noktası: köken ve ev binasına göre, yürünebilir bir yer.
 func baslangic_noktasi() -> Vector3:
 	var p: Vector3
-	if profil.get("koken", "yerli") == "gocmen":
+	if profil.get("koken", "yerli") in ["gocmen", "havaalani"]:
 		p = Vector3(262, 0, 272)   # havaalanı apronu (tools/sehir_uret2.py)
 	elif _ev >= 0:
 		p = harita.yerler[_ev]["pos"]
@@ -630,7 +638,7 @@ func haftalik(i: int) -> int:
 	var y: Dictionary = harita.yerler[i]
 	var tt: Dictionary = TURLER[isy[i]["tur"]]
 	var b: Dictionary = bolge[y["bolge"]]
-	return int(round(tt["gelir"] * (0.5 + 0.25 * b["servet"]) * (0.6 + 0.4 * b["huzur"] / 100.0)))
+	return int(round(tt["gelir"] * (0.5 + 0.25 * b["servet"]) * (0.6 + 0.4 * b["huzur"] / 100.0) * (0.6 if tezgah(i) else 1.0)))
 
 func kontrol(i: int) -> String:
 	if not isy.has(i):
@@ -645,8 +653,37 @@ func kontrol(i: int) -> String:
 func tur_ad(i: int) -> String:
 	return TURLER[isy[i]["tur"]]["ad"] if isy.has(i) else ("Özel yer" if harita.yerler[i]["ozel"] else "Resmî kurum")
 
+# Küçük tezgâh: dükkân kurmanın en ucuz yolu (seyyar tezgâh, ayakkabı tamircisi...).
+func tezgah(i: int) -> bool:
+	var a: String = harita.yerler[i]["ad"].to_lower()
+	for k in ["produce stand", "pushcart", "cobbler", "shoe repair"]:
+		if a.contains(k):
+			return true
+	return false
+
 func fiyat(i: int) -> int:
+	if tezgah(i):
+		return 300
 	return TURLER[isy[i]["tur"]]["fiyat"]
+
+# Gidişatından türeyen yol adı (menüde seçilmez; kararlarınla belli olur).
+func yol_adi() -> String:
+	var sahip := 0
+	var haracli := 0
+	for i in isy:
+		if isy[i]["sahip"]:
+			sahip += 1
+		elif isy[i]["haracli"]:
+			haracli += 1
+	if haracli > 0 or yol_k.kotu() >= 25.0:
+		return "Suç yolu"
+	if sahip >= 3:
+		return "Tüccar"
+	if sahip >= 1:
+		return "İşletmeci"
+	if not adamlar.is_empty() or acilis["calisti"]:
+		return "Mahalle adamı"
+	return "Yolun belli değil"
 
 func yol_dakika(i: int) -> Dictionary:
 	var a: Vector3 = harita.yerler[_ev]["pos"] if _ev >= 0 else Vector3.ZERO
@@ -704,6 +741,7 @@ func calis(i: int) -> Dictionary:
 		return hata("Burada çalışamazsın.")
 	if not vardiya.is_empty():
 		return hata("Zaten çalışıyorsun.")
+	acilis["calisti"] = true
 	vardiya = {"bina": i, "bitis": t + VARDIYA_DK, "ucret": ucret(i)}
 	kayit("%s'te mesai başladı (8 saat, %s)." % [harita.yerler[i]["ad"], para(vardiya["ucret"])], "info")
 	return tamam("Mesaiye başladın. 8 saat sonra ücretini alırsın.")
@@ -957,7 +995,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler, "kara": kara, "sil": sil, "yet": yet}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler, "kara": kara, "sil": sil, "yet": yet, "acilis": acilis}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -1000,6 +1038,7 @@ func durum_yukle(d: Dictionary) -> void:
 	isler = d.get("isler", isler_k.yeni())
 	kara = d.get("kara", {"liste": [], "seq": 1})
 	yet = d.get("yet", yet_k.yeni())
+	acilis = d.get("acilis", {"daire": true, "calisti": true})
 	if d.has("sil"):
 		sil = d["sil"]
 	else:

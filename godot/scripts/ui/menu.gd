@@ -10,7 +10,7 @@ const OYUN := "res://scenes/main.tscn"
 
 var _ana: Control
 var _kur: Control
-var _p := {"ad": "", "yas": 28, "koken": "yerli", "aile": "marchetti", "gecmis": "isci"}
+var _p := {"ad": "", "yas": 28, "koken": "havaalani", "aile": "marchetti", "gecmis": "yok"}
 var _ad_giris: LineEdit
 var _yas_etiket: Label
 var _koken_acik: Label
@@ -381,7 +381,7 @@ func _kur_kur() -> void:
 	var dis := VBoxContainer.new()
 	dis.add_theme_constant_override("separation", 10)
 	pc.add_child(dis)
-	etiket(dis, "KARAKTERİNİ OLUŞTUR", 30, ALTIN)
+	etiket(dis, "YENİ OYUN", 30, ALTIN)
 	var orta := HBoxContainer.new()
 	orta.add_theme_constant_override("separation", 28)
 	orta.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -425,53 +425,9 @@ func _kur_kur() -> void:
 		_guncelle())
 	yas_satir.add_child(sl)
 	_yas_etiket = etiket(yas_satir, "", 20)
-	etiket(sol, "Kökenin", 18, ALTIN)
-	var kg := ButtonGroup.new()
-	var kh := HBoxContainer.new()
-	kh.add_theme_constant_override("separation", 8)
-	sol.add_child(kh)
-	for id in Profil.KOKENLER:
-		var k: Dictionary = Profil.KOKENLER[id]
-		var b := _secim_dugmesi(kh, k["ad"], kg, _p["koken"] == id, func():
-			_p["koken"] = id
-			_guncelle())
-		b.custom_minimum_size = Vector2(190, 44)
-	_koken_acik = etiket(sol, "", 16, SOLUK)
-	_koken_acik.custom_minimum_size = Vector2(580, 44)
-	_koken_acik.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_aile_satir = VBoxContainer.new()
-	sol.add_child(_aile_satir)
-	etiket(_aile_satir, "Hangi aile?", 18, ALTIN)
-	var ag := ButtonGroup.new()
-	var ah := HBoxContainer.new()
-	ah.add_theme_constant_override("separation", 8)
-	_aile_satir.add_child(ah)
-	for id in Profil.AILELER:
-		var a: Dictionary = Profil.AILELER[id]
-		var b := _secim_dugmesi(ah, a["ad"], ag, _p["aile"] == id, func():
-			_p["aile"] = id
-			_guncelle())
-		b.custom_minimum_size = Vector2(190, 38)
-		b.add_theme_color_override("font_color", a["renk"])
-		b.add_theme_color_override("font_pressed_color", a["renk"])
-		b.add_theme_color_override("font_hover_color", a["renk"])
-		b.tooltip_text = a["ozet"]
-	etiket(sol, "Geçmişin", 18, ALTIN)
-	var gg := ButtonGroup.new()
-	var gh := HFlowContainer.new()
-	gh.add_theme_constant_override("h_separation", 8)
-	gh.add_theme_constant_override("v_separation", 8)
-	gh.custom_minimum_size = Vector2(580, 0)
-	sol.add_child(gh)
-	for id in Profil.GECMISLER:
-		var g: Dictionary = Profil.GECMISLER[id]
-		var b := _secim_dugmesi(gh, g["ad"], gg, _p["gecmis"] == id, func():
-			_p["gecmis"] = id
-			_guncelle())
-		b.custom_minimum_size = Vector2(180, 36)
-	_gecmis_acik = etiket(sol, "", 16, SOLUK)
-	_gecmis_acik.custom_minimum_size = Vector2(580, 28)
-	_gecmis_acik.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var giris := etiket(sol, "Havaalanına indin. Elinde dedenden kalan bir daire ve birkaç yüz dolar var. Mafya, esnaf, tüccar ya da bambaşka biri: kim olacağına şehirde vereceğin kararlar karar verir.", 17, SOLUK)
+	giris.custom_minimum_size = Vector2(580, 90)
+	giris.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	# sağ: özet
 	var sag := PanelContainer.new()
 	sag.add_theme_stylebox_override("panel", panel_stil(Tema.ARKA2))
@@ -526,16 +482,11 @@ func _guncelle() -> void:
 	var p := _p.duplicate()
 	var o := Profil.ozet(p)
 	_yas_etiket.text = "%d" % p["yas"]
-	var k: Dictionary = Profil.KOKENLER[p["koken"]]
-	_koken_acik.text = k["ozet"]
-	_aile_satir.visible = p["koken"] == "aile"
-	if Profil.GECMISLER.has(p["gecmis"]):
-		_gecmis_acik.text = Profil.GECMISLER[p["gecmis"]]["ozet"]
 	for c in _ozet_kutu.get_children():
 		c.queue_free()
 	var ad: String = p["ad"].strip_edges()
 	etiket(_ozet_kutu, ad if ad != "" else "(adsız)", 26, ALTIN)
-	etiket(_ozet_kutu, "%d yaşında · %s" % [p["yas"], Profil.GECMISLER[p["gecmis"]]["ad"]], 16, SOLUK)
+	etiket(_ozet_kutu, "%d yaşında · havaalanından gelen" % p["yas"], 16, SOLUK)
 	etiket(_ozet_kutu, "", 6)
 	var s: Dictionary = o["stat"]
 	for st in [["guc", "Güç"], ["nisan", "Nişan"], ["zeka", "Zekâ"], ["karizma", "Karizma"]]:
@@ -560,10 +511,7 @@ func _guncelle() -> void:
 	etiket(_ozet_kutu, "Para: $%d temiz · $%d kirli" % [o["temiz"], o["kirli"]], 16)
 	if o["kira"] > 0:
 		etiket(_ozet_kutu, "Oda kirası: $%d / ay (iş bulmalısın)" % o["kira"], 16, Tema.UYARI)
-	if p["koken"] == "aile":
-		etiket(_ozet_kutu, "Aylık aile payı: $80 kirli", 16, Tema.IYI)
-	if p["koken"] == "yerli":
-		etiket(_ozet_kutu, "Meyhane geliri: günlük ~$50", 16, Tema.IYI)
+	etiket(_ozet_kutu, "Dedenden kalan daire: kira yok", 16, Tema.IYI)
 	etiket(_ozet_kutu, "Can: %d" % int(o["hp"]), 16, SOLUK)
 
 func _basla() -> void:

@@ -6,6 +6,10 @@ static var aktif: Dictionary = {}          # {ad, yas, koken, aile, gecmis}
 static var yukle_basta := false            # ana menüden "Devam Et" ile açıldı: kayıt dosyası yüklenecek
 
 const KOKENLER := {
+	# Herkesin tek başlangıcı: havaalanı. Elde dededen kalan bir daire ve az bir para var; gerisi kararlarına kalmış.
+	"havaalani": {"ad": "Havaalanından gelen", "ikon": "✈",
+		"ozet": "Havaalanına indin. Elinde dedenden kalan bir daire ve birkaç yüz dolar var. Kim olacağına sen karar verirsin.",
+		"temiz": 350.0, "kirli": 0.0, "kira": 0, "konum": "Havaalanı", "ev": "Home"},
 	"yerli": {"ad": "Southside'lı", "ikon": "🏠",
 		"ozet": "Bu mahallede doğdun. Herkes seni tanır, birkaç dostun ve küçük bir birikimin var. Ama baban ölünce geriye yalnızca borç kaldı; her şeyi kendin kazanacaksın.",
 		"temiz": 1500.0, "kirli": 0.0, "kira": 0, "konum": "Southside, evinin önü", "ev": "Home"},
@@ -44,7 +48,7 @@ const ISIMLER_AD := ["Tommy", "Vincent", "Frank", "Jack", "Eddie", "Sam", "Danny
 const ISIMLER_SOYAD := ["Romano", "Callahan", "Novak", "Weiss", "Santoro", "Doyle", "Kovacs", "Brennan", "Moretti", "Hayes", "Lombardi", "Fischer", "Reilly", "Costa", "Walsh", "Berg"]
 
 static func varsayilan() -> Dictionary:
-	return {"ad": "Sen", "yas": 30, "koken": "yerli", "aile": "marchetti", "gecmis": "yok"}
+	return {"ad": "Sen", "yas": 30, "koken": "havaalani", "aile": "marchetti", "gecmis": "yok"}
 
 static func rastgele_ad() -> String:
 	return "%s %s" % [ISIMLER_AD[randi() % ISIMLER_AD.size()], ISIMLER_SOYAD[randi() % ISIMLER_SOYAD.size()]]
