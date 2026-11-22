@@ -89,6 +89,32 @@ func _birim_yap(u: Dictionary, takim: int, renk: Color, poz: Vector3) -> Charact
 	birimler.append(b)
 	return b
 
+# Savaşın kendi ortamı: şehir haritasının sis/gökyüzü ayarı devralınmasın. Koyu akşam gökyüzü, hafif sis, sıcak ışık.
+func _ortam_yap() -> Environment:
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color(0.2, 0.2, 0.22)
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.55, 0.52, 0.5)
+	env.ambient_light_energy = 0.8
+	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	env.ssao_enabled = true
+	env.fog_enabled = true
+	env.fog_light_color = Color(0.22, 0.2, 0.2)
+	env.fog_density = 0.0018
+	env.glow_enabled = true
+	env.glow_intensity = 0.6
+	env.adjustment_enabled = true
+	env.adjustment_saturation = 0.86
+	env.adjustment_contrast = 1.1
+	var gun := DirectionalLight3D.new()
+	gun.light_color = Color(1.0, 0.82, 0.6)
+	gun.light_energy = 1.5
+	gun.shadow_enabled = true
+	gun.rotation_degrees = Vector3(-42, -35, 0)
+	add_child(gun)
+	return env
+
 func _kamera_kur() -> void:
 	_pivot = Node3D.new()
 	add_child(_pivot)
@@ -100,6 +126,7 @@ func _kamera_kur() -> void:
 	_kam = Camera3D.new()
 	_kam.fov = 70.0
 	_kam.h_offset = 0.7
+	_kam.environment = _ortam_yap()
 	_yay.add_child(_kam)
 	_kam.make_current()
 	_yaw = -PI / 2.0   # dünya +X yönüne (düşmana) bak
