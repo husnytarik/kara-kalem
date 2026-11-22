@@ -879,6 +879,8 @@ func _gorsel_anahtarlari() -> Array:
 			var tur: String = oyun.isy[i]["tur"] if oyun.isy.has(i) else ("ozel" if oyun.harita.yerler[i]["ozel"] else "resmi")
 			var ad_k: String = String(oyun.harita.yerler[i]["ad"]).to_lower()
 			var ozel: Array = [G.slug(oyun.harita.yerler[i]["ad"])]
+			if i == oyun._ev and sokak.oyuncu.iceride == i:
+				ozel.push_front("home_ii")   # evin icindeyken ikinci ev gorseli
 			var taban: String = G.slug(String(oyun.harita.yerler[i]["ad"]).trim_suffix(" III").trim_suffix(" II"))
 			if not ozel.has(taban):
 				ozel.append(taban)   # "Bakeshop II" -> bakeshop.png
