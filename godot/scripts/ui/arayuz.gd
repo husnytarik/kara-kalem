@@ -1540,6 +1540,8 @@ func _grup_paneli() -> void:
 		_btn(_ic, "Kovala", func(): sokak.takip_ver(g))
 
 # ---------- karşılaşma diyaloğu (ekran ortasında, oyun duraklar) ----------
+var _dlg_arka: TextureRect
+
 func _diyalog_kur() -> void:
 	_dlg = PanelContainer.new()
 	_dlg.add_theme_stylebox_override("panel", _stil(Color(0.07, 0.08, 0.09, 0.97)))
@@ -1550,6 +1552,14 @@ func _diyalog_kur() -> void:
 	_dlg.visible = false
 	_dlg.theme = Tema.tema()
 	add_child(_dlg)
+	_dlg_arka = TextureRect.new()
+	_dlg_arka.texture = load("res://assets/ui/panel/karsilasma.png")
+	_dlg_arka.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_dlg_arka.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_dlg_arka.modulate = Color(0.42, 0.40, 0.38)
+	_dlg_arka.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_dlg_arka.clip_contents = true
+	_dlg.add_child(_dlg_arka)
 	_dlg_ic = VBoxContainer.new()
 	_dlg_ic.add_theme_constant_override("separation", 8)
 	_dlg.add_child(_dlg_ic)
@@ -1569,7 +1579,8 @@ func _diyalog_ciz() -> void:
 		c.queue_free()
 	var g := _dlg_g
 	_dlg.add_theme_stylebox_override("panel", _stil(Color(0.07, 0.05, 0.035, 0.97)))
-	_dlg.custom_minimum_size = Vector2(440, 0)
+	_dlg.custom_minimum_size = Vector2(480, 460)
+	_dlg_arka.visible = true
 	var renk: Color = sokak.gruplar._renk(g)
 	_lbl(_dlg_ic, _kars.baslik(g), 24, renk.lerp(Color.WHITE, 0.4))
 	_lbl(_dlg_ic, _kars.giris(g), 16)
@@ -1633,6 +1644,7 @@ func _kart_ciz() -> void:
 	var K: RefCounted = oyun.kart_k
 	var kw: Color = Tema.KAGIT_YAZI
 	_dlg.add_theme_stylebox_override("panel", Tema.kagit_stil())
+	_dlg_arka.visible = false
 	_dlg.custom_minimum_size = Vector2(520, 0)
 	var bsl := _lbl(_dlg_ic, K.baslik(_kart_id), 26, kw)
 	bsl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
