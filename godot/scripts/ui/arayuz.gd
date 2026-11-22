@@ -81,7 +81,7 @@ func kur(o: Node, s: Node) -> void:
 	saat.position = Vector2(6, 4)
 	add_child(saat)
 	var sp := Pie.new()
-	sp.kur(true, [["♟", "Ben", ben_ac], ["⚒", "İş", meslek_ac], ["⚙", "Garaj", garaj_ac], ["★", "Hedefler", zafer_ac], ["⚔", "Silahlar", silah_ac], ["✦", "Beceri", yetenek_ac]])
+	sp.kur(true, [["⚒", "İş", meslek_ac], ["⚙", "Garaj", garaj_ac], ["★", "Hedefler", zafer_ac], ["⚔", "Silahlar", silah_ac], ["✦", "Beceri", yetenek_ac]])
 	sp.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	sp.offset_left = 0
 	sp.offset_top = -Pie.BOY
