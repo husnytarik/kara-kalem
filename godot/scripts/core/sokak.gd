@@ -944,6 +944,12 @@ func _ekran_cek(arg: String) -> void:
 			arayuz.defter_ac()
 		elif p[1] == "zafer":
 			arayuz.zafer_ac()
+		elif p[1].begins_with("grup_"):
+			var gt: String = p[1].substr(5)
+			for g3 in gruplar.liste:
+				if g3["tur"] == gt:
+					arayuz.grup_ac(g3)
+					break
 		elif p[1] == "bolge":
 			arayuz.bolge_ac("southside")
 		await get_tree().create_timer(1.5, true, false, true).timeout

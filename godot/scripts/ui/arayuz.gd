@@ -897,6 +897,8 @@ func _gorsel_anahtarlari() -> Array:
 			return ozel + [tur, "bina"]
 		"bolge":
 			return ["bolge_" + str(_hedef), "bolge"]
+		"grup":
+			return ["grup_" + str(_hedef.get("tur", "")), "grup"]
 	return [_mod]
 
 # İçerideyken: haritada görünmezsin, kimse sana bulaşamaz. Ev ise dinlenip zaman geçirebilirsin.
