@@ -131,7 +131,7 @@ Windows exe için: Godot'ta *Project → Export → Windows Desktop* ön ayarı 
 
 ## Notlar
 
-- Oyun görselleri (bina fotoğrafları, paneller, ikonlar) yapay zekâ ile üretilmiştir; dosyalarda üretim bilgisi (IPTC/XMP) bırakılmıştır.
+- Oyun görselleri (bina fotoğrafları, paneller, ikonlar) yapay zekâ yardımıyla üretilmiştir.
 - Kod geliştirmesi yapay zekâ yardımıyla yapılmaktadır.
 - Oyundaki kişiler, işletmeler ve olaylar kurgusaldır; gerçek kişi ve kurumlarla ilgisi yoktur.
 - Henüz bir lisans seçilmedi; tüm haklar saklıdır. Lisans, oyun olgunlaştığında belirlenecek.
