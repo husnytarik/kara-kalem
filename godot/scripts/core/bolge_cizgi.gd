@@ -8,7 +8,7 @@ const SIMGE := {"oyuncu": "♛", "marchetti": "♛", "obrien": "☘", "tammany":
 var oyun: Node
 var harita: Node
 var sokak: Node
-var _cizgi: Dictionary = {}    # id -> StandardMaterial3D
+var _cizgi: Dictionary = {}    # id -> [bant ShaderMaterial, perde ShaderMaterial]
 var _tabela: Dictionary = {}   # id -> {"l": Label3D, "s": Sprite3D}
 var _sure := 0.0
 
@@ -21,54 +21,109 @@ func kur(o: Node, h: Node, s: Node) -> void:
 		_tabela_kur(id)
 	_renk_guncelle()
 
+# Bölge sınırı: haritacı/mülk çizimi gibi. Yerde mürekkep çizgisi (kesik kesik akan) + içe doğru taralı bant,
+# yukarıda sınır boyunca direkler ve solan bir "perde". Sahibin rengi, oyuncunun bulunduğu bölge parlak.
+const BANT := 16.0     # içe doğru tarama bandı (m)
+const PERDE := 22.0    # sınır perdesinin yüksekliği (m)
+
+const BANT_SH := """
+shader_type spatial;
+render_mode unshaded, blend_add, depth_draw_never, cull_disabled, fog_disabled;
+uniform vec4 renk : source_color = vec4(0.9, 0.7, 0.3, 1.0);
+uniform float guc = 0.5;
+uniform float bant = 16.0;
+void fragment() {
+	float x = UV.x;
+	float d = UV.y;
+	float kenar = smoothstep(0.0, 0.25, d) * (1.0 - smoothstep(0.9, 1.3, d));
+	float kesik = step(0.38, fract((x - TIME * 2.0) / 7.0));
+	float ince = smoothstep(2.3, 2.45, d) * (1.0 - smoothstep(2.65, 2.8, d));
+	float sol = 1.0 - smoothstep(2.0, bant, d);
+	float tarama = step(0.84, fract((x + d) / 2.4)) * sol * 0.85;
+	float dolgu = pow(1.0 - clamp(d / bant, 0.0, 1.0), 2.0) * 0.28;
+	float a = max(max(kenar * mix(0.55, 1.0, kesik), ince * 0.7), max(tarama, dolgu));
+	ALBEDO = renk.rgb;
+	ALPHA = clamp(a * guc, 0.0, 1.0);
+}
+"""
+
+const PERDE_SH := """
+shader_type spatial;
+render_mode unshaded, blend_add, depth_draw_never, cull_disabled, fog_disabled;
+uniform vec4 renk : source_color = vec4(0.9, 0.7, 0.3, 1.0);
+uniform float guc = 0.5;
+uniform float yuk = 22.0;
+void fragment() {
+	float x = UV.x;
+	float h = UV.y / yuk;
+	float perde = pow(1.0 - clamp(h, 0.0, 1.0), 2.2) * 0.22;
+	float direk = step(0.93, fract(x / 24.0)) * (1.0 - smoothstep(0.0, 0.8, h)) * 0.8;
+	float taban = (1.0 - smoothstep(0.0, 0.03, h)) * 0.9;
+	float bayrak = step(0.93, fract(x / 24.0)) * step(0.62, h) * (1.0 - smoothstep(0.62, 0.8, h)) * 0.0;
+	ALBEDO = renk.rgb;
+	ALPHA = clamp((perde + direk + taban + bayrak) * guc, 0.0, 1.0);
+}
+"""
+
 func _cizgi_kur(id: String) -> void:
 	var b: Dictionary = harita.bolgeler[id]
-	var pts: Array = []
 	var x0: float = b["x0"]
 	var z0: float = b["z0"]
 	var x1: float = b["x1"]
 	var z1: float = b["z1"]
-	var adim := 8.0
-	var x := x0
-	while x < x1:
-		pts.append(Vector2(x, z0))
-		x += adim
-	var z := z0
-	while z < z1:
-		pts.append(Vector2(x1, z))
-		z += adim
-	x = x1
-	while x > x0:
-		pts.append(Vector2(x, z1))
-		x -= adim
-	z = z1
-	while z > z0:
-		pts.append(Vector2(x0, z))
-		z -= adim
-	pts.append(pts[0])
-	var m := StandardMaterial3D.new()
-	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	m.no_depth_test = false
-	m.cull_mode = BaseMaterial3D.CULL_DISABLED
-	var im := ImmediateMesh.new()
-	im.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, m)
-	var w := 1.8
-	for i in pts.size():
-		var p: Vector2 = pts[i]
-		var q: Vector2 = pts[(i + 1) % pts.size()] if i < pts.size() - 1 else pts[i - 1]
-		var dir := (q - p).normalized() if i < pts.size() - 1 else (p - q).normalized()
-		var nrm := Vector2(-dir.y, dir.x)
-		var y: float = harita.yuk(p.x, p.y, false) + 0.5
-		im.surface_add_vertex(Vector3(p.x + nrm.x * w, y, p.y + nrm.y * w))
-		im.surface_add_vertex(Vector3(p.x - nrm.x * w, y, p.y - nrm.y * w))
-	im.surface_end()
-	var mi := MeshInstance3D.new()
-	mi.mesh = im
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(mi)
-	_cizgi[id] = m
+	# kenarlar: [başlangıç, bitiş, içe doğru birim vektör]
+	var kenarlar := [
+		[Vector2(x0, z0), Vector2(x1, z0), Vector2(0, 1)],
+		[Vector2(x1, z0), Vector2(x1, z1), Vector2(-1, 0)],
+		[Vector2(x1, z1), Vector2(x0, z1), Vector2(0, -1)],
+		[Vector2(x0, z1), Vector2(x0, z0), Vector2(1, 0)],
+	]
+	var bsh := Shader.new()
+	bsh.code = BANT_SH
+	var psh := Shader.new()
+	psh.code = PERDE_SH
+	var bm := ShaderMaterial.new()
+	bm.shader = bsh
+	bm.render_priority = -1
+	var pm := ShaderMaterial.new()
+	pm.shader = psh
+	pm.render_priority = -1
+	var bim := ImmediateMesh.new()
+	var pim := ImmediateMesh.new()
+	for k in kenarlar:
+		var a: Vector2 = k[0]
+		var c: Vector2 = k[1]
+		var inw: Vector2 = k[2]
+		var uz := a.distance_to(c)
+		var dir := (c - a) / uz
+		var n := int(ceil(uz / 8.0))
+		bim.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
+		pim.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
+		for i in n + 1:
+			var m := minf(float(i) * 8.0, uz)
+			var p: Vector2 = a + dir * m
+			var q: Vector2 = p + inw * BANT
+			var y0: float = harita.yuk(p.x, p.y, false) + 0.45
+			var y1: float = harita.yuk(q.x, q.y, false) + 0.45
+			bim.surface_set_uv(Vector2(m, 0.0))
+			bim.surface_add_vertex(Vector3(p.x, y0, p.y))
+			bim.surface_set_uv(Vector2(m, BANT))
+			bim.surface_add_vertex(Vector3(q.x, y1, q.y))
+			pim.surface_set_uv(Vector2(m, 0.0))
+			pim.surface_add_vertex(Vector3(p.x, y0, p.y))
+			pim.surface_set_uv(Vector2(m, PERDE))
+			pim.surface_add_vertex(Vector3(p.x, y0 + PERDE, p.y))
+		bim.surface_end()
+		pim.surface_end()
+	for i in 4:
+		bim.surface_set_material(i, bm)
+		pim.surface_set_material(i, pm)
+	for im in [bim, pim]:
+		var mi := MeshInstance3D.new()
+		mi.mesh = im
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi)
+	_cizgi[id] = [bm, pm]
 
 func _tabela_kur(id: String) -> void:
 	var ad: String = harita.bolgeler[id]["ad"]
@@ -123,7 +178,9 @@ func _renk_guncelle() -> void:
 			a = 0.55
 		if id == oyuncu_b:
 			a = minf(1.0, a + 0.3)
-		(_cizgi[id] as StandardMaterial3D).albedo_color = Color(r.r, r.g, r.b, a)
+		for mt in _cizgi[id]:
+			(mt as ShaderMaterial).set_shader_parameter("renk", Color(r.r, r.g, r.b, 1.0))
+			(mt as ShaderMaterial).set_shader_parameter("guc", a * 2.4)
 		var t: Dictionary = _tabela[id]
 		var simge: String = SIMGE.get(sahip, "")
 		(t["l"] as Label3D).text = ("%s " % simge if simge != "" else "") + String(harita.bolgeler[id]["ad"])
