@@ -17,12 +17,14 @@ func _ready() -> void:
 	_govde.add_child(m)
 	_govde.scale = Vector3.ONE * 3.0   # yukarıdan görünür olsun
 	var halka := MeshInstance3D.new()
-	var cyl := CylinderMesh.new()
-	cyl.top_radius = 4.0
-	cyl.bottom_radius = 4.0
-	cyl.height = 0.15
-	cyl.material = _renk(Color(0.9, 0.75, 0.3, 0.7), true)
-	halka.mesh = cyl
+	var tor := TorusMesh.new()
+	tor.inner_radius = 3.8
+	tor.outer_radius = 4.0
+	tor.rings = 40
+	tor.ring_segments = 6
+	tor.material = _renk(Color(0.9, 0.75, 0.3, 0.9), true)
+	halka.mesh = tor
+	halka.scale = Vector3(1, 0.25, 1)
 	halka.position.y = 0.2
 	add_child(halka)
 	_cizgi = MeshInstance3D.new()

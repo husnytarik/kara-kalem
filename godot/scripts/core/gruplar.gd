@@ -253,16 +253,18 @@ func _gorsel_kur(g: Dictionary) -> void:
 	n.add_child(l)
 	g["etiket"] = l
 	var halka := MeshInstance3D.new()
-	var cyl := CylinderMesh.new()
-	cyl.top_radius = 3.6
-	cyl.bottom_radius = 3.6
-	cyl.height = 0.12
+	var tor := TorusMesh.new()
+	tor.inner_radius = 3.45
+	tor.outer_radius = 3.65
+	tor.rings = 40
+	tor.ring_segments = 6
 	var hm := StandardMaterial3D.new()
-	hm.albedo_color = Color(_renk(g), 0.65)
+	hm.albedo_color = Color(_renk(g), 0.85)
 	hm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	hm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	cyl.material = hm
-	halka.mesh = cyl
+	tor.material = hm
+	halka.mesh = tor
+	halka.scale = Vector3(1, 0.25, 1)
 	halka.position.y = 0.15
 	n.add_child(halka)
 	_kisileri_yenile(g)
