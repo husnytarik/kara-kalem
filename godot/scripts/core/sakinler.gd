@@ -1,8 +1,8 @@
 extends RefCounted
-# İsimli şehir sakinleri: her biri hep aynı bölgede, hep aynı saat aralıklarında, aynı yerlerde görünür.
+# İsimli şehir sakinleri: her biri hep aynı mahallede, hep aynı saat aralıklarında, aynı yerlerde görünür.
 # Oyun mekaniğine etkisi YOK (şimdilik): sadece yaşayan bir şehir hissi. İleride dedikodu/bilgi/görev bunlara bağlanabilir.
-# rutin: [başlangıç saati, bitiş saati, bina adı]. "*" = bölgede dolaşır. Aralık dışında kişi evinde (haritada görünmez).
-# Bina adı, o bölgedeki ilk eşleşen binadır (II/III varyasyonları dahil, ad başı eşleşir).
+# rutin: [başlangıç saati, bitiş saati, bina adı]. "*" = mahallede dolaşır. Aralık dışında kişi evinde (haritada görünmez).
+# Bina adı, o mahalledeki ilk eşleşen binadır (II/III varyasyonları dahil, ad başı eşleşir).
 
 const LISTE := [
 	# ---------- SOUTHSIDE ----------

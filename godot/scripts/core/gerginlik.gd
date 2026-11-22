@@ -1,7 +1,7 @@
 extends RefCounted
-# Aileler arası gerginlik ve savaş. Bir aile, başka ailenin bölgesinde esnaftan haraç alırsa / nüfuz
+# Aileler arası gerginlik ve savaş. Bir aile, başka ailenin mahallesinde esnaftan haraç alırsa / nüfuz
 # kemirirse aralarında gerginlik birikir; eşik aşılınca SAVAŞ çıkar (2 ay). Oyuncu da bir taraf olabilir
-# ("oyuncu"). Çalıştığın bölgenin ailesi senin "ev sahibin" sayılır: onun düşmanları seni onun adamı sayar.
+# ("oyuncu"). Çalıştığın mahallenin ailesi senin "ev sahibin" sayılır: onun düşmanları seni onun adamı sayar.
 
 const ESIK := 10.0
 const SAVAS_SURE := 20 * 1440      # 2 ay (10 gün/ay)
@@ -46,7 +46,7 @@ func gerginlik(a: String, b: String) -> float:
 	var k := _anahtar(a, b)
 	return oyun.gerg[k]["puan"] if oyun.gerg.has(k) else 0.0
 
-# Çalıştığın yer: vardiya veya meslek -> bölge id (yoksa "")
+# Çalıştığın yer: vardiya veya meslek -> mahalle id (yoksa "")
 func is_bolgesi() -> String:
 	if not oyun.vardiya.is_empty():
 		return oyun.harita.yerler[oyun.vardiya["bina"]]["bolge"]
@@ -54,7 +54,7 @@ func is_bolgesi() -> String:
 		return oyun.mes["is"]["b"]
 	return ""
 
-# Çalıştığın bölgeyi elinde tutan NPC ailesi (yoksa "")
+# Çalıştığın mahalleyi elinde tutan NPC ailesi (yoksa "")
 func ev_sahibi() -> String:
 	var b := is_bolgesi()
 	if b == "":
@@ -85,7 +85,7 @@ func ay() -> void:
 		else:
 			g["puan"] *= SOGUMA
 
-# Savaş ayı: güçlü taraf zayıfın bir bölgesinde nüfuz kazanır.
+# Savaş ayı: güçlü taraf zayıfın bir mahallesinde nüfuz kazanır.
 func _savas_ay(a: String, b: String) -> void:
 	if a == "oyuncu" or b == "oyuncu":
 		return   # oyuncu tarafı savaşı kendi hamleleriyle yürütür

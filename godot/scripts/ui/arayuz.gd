@@ -1,5 +1,5 @@
 extends CanvasLayer
-# 2D arayüz şablonu: üst çubuk (tarih, para, ekip, hız), sağ panel (bina / bölge / adamlar / defter),
+# 2D arayüz şablonu: üst çubuk (tarih, para, ekip, hız), sağ panel (bina / mahalle / adamlar / defter),
 # sol altta son olaylar. Her şey kodla kuruluyor; görünümü değiştirmek için _stil(), RENK ve
 # font boyutlarını değiştirmen yeter. Veri tarafı oyun.gd'dedir; burada kural yok, yalnızca gösterim.
 
@@ -89,7 +89,7 @@ func kur(o: Node, s: Node) -> void:
 	sp.offset_bottom = 0
 	add_child(sp)
 	var rp := Pie.new()
-	rp.kur(false, [["♜", "Aileler", aile_ac], ["♞", "Adamlar", adamlar_ac], ["⚑", "Bölgeler", _bolge_dugmesi], ["⚖", "Polis", polis_ac], ["✎", "Defter", defter_ac]])
+	rp.kur(false, [["♜", "Aileler", aile_ac], ["♞", "Adamlar", adamlar_ac], ["⚑", "Mahalleler", _bolge_dugmesi], ["⚖", "Polis", polis_ac], ["✎", "Defter", defter_ac]])
 	rp.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	rp.offset_left = -Pie.BOY
 	rp.offset_top = -Pie.BOY
@@ -489,7 +489,7 @@ func _amac_guncelle() -> void:
 	elif bolgeler == 0:
 		yazi = "Nüfuzunu büyüt: haraç bağladıkça mahalle senin olur. Haraçlı iş: %d" % (haracli + sahip)
 	else:
-		yazi = "%d bölge senin. Rakip ailelere karşı büyü: Hedefler panelinde zafer yollarına bak." % bolgeler
+		yazi = "%d mahalle senin. Rakip ailelere karşı büyü: Hedefler panelinde zafer yollarına bak." % bolgeler
 	if oyun.arama >= 60.0:
 		baslik = "TEHLİKE"
 		yazi = "Polis dosyan kabarık (%d). Ortalıkta görünme, rüşvet ver ya da evine gir." % int(oyun.arama)
@@ -919,11 +919,11 @@ func _gaz_dugme_stil(arka: Color, kenar: Color, sol: int, sag: int = -1) -> Styl
 # Düğme metnine göre simge dosyası (assets/ui/icons/<ad>.png).
 func _glif_sec(metin: String) -> String:
 	var dusuk := metin.to_lower()
-	for kv in [["dışarı çık", "kapi"], ["bölge bilgisi", "bilgi_rulo"], ["haracı topla", "haraci_topla"], ["1 saat bekle", "saat"], ["sabaha kadar", "yastik"], ["pencere başında", "saat"]]:
+	for kv in [["dışarı çık", "kapi"], ["mahalle bilgisi", "bilgi_rulo"], ["haracı topla", "haraci_topla"], ["1 saat bekle", "saat"], ["sabaha kadar", "yastik"], ["pencere başında", "saat"]]:
 		if dusuk.begins_with(kv[0]):
 			return kv[1]
 	var kelimeler := dusuk.split(" ")
-	var tablo := [["satın", "temiz"], ["öde", "temiz"], ["sat", "temiz"], ["yatırım", "temiz"], ["rüşvet", "kirli"], ["hesaplaş", "kirli"], ["saldır", "guc"], ["silah", "guc"], ["ateş", "guc"], ["infaz", "guc"], ["haraç", "tehdit"], ["kov", "tehdit"], ["soruştur", "tehdit"], ["koru", "ittifak"], ["bölge", "ittifak"], ["af", "ittifak"], ["tazminat", "ittifak"], ["başvur", "ittifak"]]
+	var tablo := [["satın", "temiz"], ["öde", "temiz"], ["sat", "temiz"], ["yatırım", "temiz"], ["rüşvet", "kirli"], ["hesaplaş", "kirli"], ["saldır", "guc"], ["silah", "guc"], ["ateş", "guc"], ["infaz", "guc"], ["haraç", "tehdit"], ["kov", "tehdit"], ["soruştur", "tehdit"], ["koru", "ittifak"], ["mahalle", "ittifak"], ["af", "ittifak"], ["tazminat", "ittifak"], ["başvur", "ittifak"]]
 	for kv in tablo:
 		for w in kelimeler:
 			if w.begins_with(kv[0]):
@@ -1015,7 +1015,7 @@ func _bina_paneli() -> void:
 	_ic.add_child(kunye)
 	var kl := _lbl(kunye, "%s · %s" % [oyun.harita.bolgeler[bid]["ad"], oyun.tur_ad(i)], 14, RENK["soluk"])
 	kl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	var bb := _btn(kunye, "Bölge bilgisi", bolge_ac.bind(bid))
+	var bb := _btn(kunye, "Mahalle bilgisi", bolge_ac.bind(bid))
 	bb.size_flags_horizontal = Control.SIZE_SHRINK_END
 	bb.custom_minimum_size = Vector2(0, 26)
 	bb.add_theme_font_size_override("font_size", Tema.boyut(13))
@@ -1165,7 +1165,7 @@ func _isletme_bolumu(i: int, r: Dictionary) -> void:
 			b3.pressed.connect(func(): _sonuc_goster(isl.tut(i, usta), ""))
 			h2.add_child(b3)
 
-# ---------- bölge paneli ----------
+# ---------- mahalle paneli ----------
 func _bolge_paneli() -> void:
 	var id: String = _hedef
 	var b: Dictionary = oyun.bolge[id]
@@ -1190,13 +1190,13 @@ func _bolge_paneli() -> void:
 	_bar(_ic, "Tanınırlık", b["tan"], Color("9a8fa8"))
 	_ayrac(_ic)
 	if not oyun.erisim(id):
-		_lbl(_ic, "Buraya girmek için önce komşu bir bölgeye hakim ol.", 15, RENK["warn"])
+		_lbl(_ic, "Buraya girmek için önce komşu bir mahalleye hakim ol.", 15, RENK["warn"])
 	else:
-		_bolum(_ic, "Bölge işleri")
+		_bolum(_ic, "Mahalle işleri")
 		var ici := bolgede_mi(id)
 		if not ici:
-			_lbl(_ic, "Bölge işleri için bu bölgede olmalısın.", 15, RENK["warn"])
-			_btn(_ic, "Bölgeye git", func(): sokak.oyuncu.git(oyun.harita.merkez(id)))
+			_lbl(_ic, "Mahalle işleri için bu mahallede olmalısın.", 15, RENK["warn"])
+			_btn(_ic, "Mahalleye git", func(): sokak.oyuncu.git(oyun.harita.merkez(id)))
 		for tur in ["himaye", "hediye", "gozdagi"]:
 			_btn(_ic, "%s  (%s)" % [oyun.IS_AD[tur], oyun.IS_BEDEL[tur]], func(): _sonuc_goster(oyun.bolge_is(id, tur)), not ici)
 	if hk == "oyuncu":
@@ -1288,7 +1288,7 @@ func _aile_paneli() -> void:
 		for id in oyun.bolge:
 			if oyun.hakim_of(id) == f:
 				bs += 1
-		_lbl(v, "Bölge: %d" % bs, 14, Tema.SOLUK)
+		_lbl(v, "Mahalle: %d" % bs, 14, Tema.SOLUK)
 	for f in oyun.NPC:
 		var fd: Dictionary = oyun.FAK[f]
 		_ayrac(_ic)
@@ -1436,7 +1436,7 @@ func _meslek_paneli() -> void:
 			_btn(bh, "Öde $%d" % m, func(): _sonuc_goster(oyun.borc_k.ode(float(m))), oyun.temiz < minf(m, b["ana"]))
 		_ayrac(_ic)
 	if M["is"].is_empty():
-		_lbl(_ic, "İşsizsin. Bulunduğun bölge: %s. Düz iş temiz gelir, tecrübe ve meşru bir yüz verir." % (oyun.harita.bolgeler[bid]["ad"] if bid != "" else "—"), 14, RENK["soluk"])
+		_lbl(_ic, "İşsizsin. Bulunduğun mahalle: %s. Düz iş temiz gelir, tecrübe ve meşru bir yüz verir." % (oyun.harita.bolgeler[bid]["ad"] if bid != "" else "—"), 14, RENK["soluk"])
 	else:
 		var j: String = M["is"]["j"]
 		var iy: String = oyun.harita.yerler[M["is"]["bina"]]["ad"] if M["is"].get("bina", -1) >= 0 else "?"
@@ -1492,7 +1492,7 @@ func _garaj_paneli() -> void:
 	var a: Dictionary = oyun.arac
 	_baslik(_ic, "Garaj")
 	if a["tip"] == "":
-		_lbl(_ic, "Araban yok. Araba yürümekten çok hızlıdır ama yakıt ve bakım ister; ekibin, paran ve bölgelerin büyüdükçe masrafı azalır.", 14, RENK["soluk"])
+		_lbl(_ic, "Araban yok. Araba yürümekten çok hızlıdır ama yakıt ve bakım ister; ekibin, paran ve mahallelerin büyüdükçe masrafı azalır.", 14, RENK["soluk"])
 		for tip in Ar:
 			var T: Dictionary = Ar[tip]
 			_ayrac(_ic)
@@ -1605,7 +1605,7 @@ func _grup_paneli() -> void:
 	_lbl(_ic, "%s · %d kişi" % [tur_ad[g["tur"]], g["kisi"]], 16, RENK["soluk"])
 	_ayrac(_ic)
 	_lbl(_ic, "Durum: %s" % g["durum"], 16)
-	_lbl(_ic, "Bölgesi: %s" % oyun.harita.bolgeler[g["ev"]]["ad"], 16)
+	_lbl(_ic, "Mahallesi: %s" % oyun.harita.bolgeler[g["ev"]]["ad"], 16)
 	var simdi: String = oyun.harita.bolge_at(g["pos"])
 	if simdi != "":
 		_lbl(_ic, "Şu an: %s" % oyun.harita.bolgeler[simdi]["ad"], 16)
@@ -1615,7 +1615,7 @@ func _grup_paneli() -> void:
 		"rakip":
 			var f: Dictionary = oyun.FAK[g["fak"]]
 			_lbl(_ic, "Fraksiyon: %s" % f["ad"], 16, f["renk"])
-			_lbl(_ic, "Bu ekibin bölgesinde rakip sayılırsın. İleride pazarlık, baskın ve çatışma buradan açılacak.", 15, RENK["warn"])
+			_lbl(_ic, "Bu ekibin mahallesinde rakip sayılırsın. İleride pazarlık, baskın ve çatışma buradan açılacak.", 15, RENK["warn"])
 		"sivil":
 			_lbl(_ic, "Mahalle halkı.", 15, RENK["soluk"])
 	_ayrac(_ic)

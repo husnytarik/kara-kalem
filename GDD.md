@@ -125,63 +125,63 @@ Kurgusal bir liman kenti, **Roaring Twenties** atmosferi: içki yasağı, caz, g
 
 Semtlerin karakteri farklıdır: Liman (kaçakçılık, işçi), Çarşı (ticaret), Southside (sadık halk, dar sokaklar), Tepeler (villalar, siyasetçiler), Sanayi (depolar), Belediye çevresi (bürokrasi).
 
-#### 5.1.1 Bölgeler: hakimlik, büyüme, genişleme `[UYGULANDI v0.2]`
+#### 5.1.1 Mahalleler: hakimlik, büyüme, genişleme `[UYGULANDI v0.2]`
 
-Prototipte şehir 6 bölgedir (Hilltop, Downtown, Southside, Eastside, The Flats, Docks); 50 bina bölgelere dağılır, bölgeler birbirine komşudur (genişleme komşuluk üzerinden olur). Kod: `core/bolge.js`; coğrafya `core/world.js` `BOLGELER`.
+Prototipte şehir 6 mahalledir (Hilltop, Downtown, Southside, Eastside, The Flats, Docks); 50 bina mahallelere dağılır, mahalleler birbirine komşudur (genişleme komşuluk üzerinden olur). Kod: `core/bolge.js`; coğrafya `core/world.js` `BOLGELER`.
 
-- **Nüfuz:** her bölgede her aile (Sen, Marchetti Family, O'Brien Çetesi, Belediye Makinesi) için 0–100; toplam 100'ü geçmez (biri artınca diğerleri orantılı küçülür).
-- **Hakim:** nüfuzu **%35'i geçen ve en yüksek** olan aile. Eşiğin altında bölge sahipsizdir. Hakim değişince olay akışına yazılır.
-- **Büyüme (★1–5):** huzurlu bölgede ilerleme birikir (aylık ≈ 4,5 + (huzur−50)/10), 100'de ★ artar; huzur 30'un altındaysa bölge küçülür. Huzuru garnizon artırır, ağır haraç ve rakip baskısı düşürür. Hakim yatırım yaparak büyümeyi hızlandırır ($400 temiz, +35).
-- **Haraç:** hakim olduğun bölgeden her Hesap Günü kirli para: servet × $600 × kademe (Yok / %8 / %15 / %25) × huzur etkisi. Ağır haraç halkta İyilik'i düşürür, polis dikkatini artırır; haraç almamak halkın sevgisini artırır. Marchetti Ahidi varsa haraçtan pay gider.
-- **Nüfuz kazanma (Bölgeler sekmesi, o bölgede bulunmak gerekir):** esnafa himaye sat ($120 kirli), ziyafet ($200 temiz, huzur↑), rakip adamları sindir ($150 kirli, koruma gerekir; huzur↓, rakip öfkelenir, tanık riski). Sağlam bir hakimi yerinden etmek zordur; nüfuz yükseldikçe her puan pahalılaşır.
-- **Garnizon:** bölge başına ≤6 adam ($100 + ayda $40); rakip baskısını azaltır, huzuru yükseltir.
-- **Genişleme kapısı:** bir bölgede iş yapmak için orada nüfuzun ≥%15 olmalı ya da komşu bir bölgeye hakim olmalısın.
-- **Rakip aileler** her ay komşu bölgelere genişlemeyi dener (kudretleri hakim oldukları bölgelerin servetiyle artar; O'Brien daha saldırgan, Belediye Makinesi temkinli). Sindirdiğin aile öfkelenir ve seni hedef alır.
-- **Mevki bağı:** hakim olunan bölgeler Güç Puanı'na girer; **Ağa → Reis için en az 2 bölgeye hakim olmak** gerekir.
-- Bölge sistemi kendi tohumlu RNG'sini kullanır; dengeyi ve eski testleri etkilemez.
+- **Nüfuz:** her mahallede her aile (Sen, Marchetti Family, O'Brien Çetesi, Belediye Makinesi) için 0–100; toplam 100'ü geçmez (biri artınca diğerleri orantılı küçülür).
+- **Hakim:** nüfuzu **%35'i geçen ve en yüksek** olan aile. Eşiğin altında mahalle sahipsizdir. Hakim değişince olay akışına yazılır.
+- **Büyüme (★1–5):** huzurlu mahallede ilerleme birikir (aylık ≈ 4,5 + (huzur−50)/10), 100'de ★ artar; huzur 30'un altındaysa mahalle küçülür. Huzuru garnizon artırır, ağır haraç ve rakip baskısı düşürür. Hakim yatırım yaparak büyümeyi hızlandırır ($400 temiz, +35).
+- **Haraç:** hakim olduğun mahalleden her Hesap Günü kirli para: servet × $600 × kademe (Yok / %8 / %15 / %25) × huzur etkisi. Ağır haraç halkta İyilik'i düşürür, polis dikkatini artırır; haraç almamak halkın sevgisini artırır. Marchetti Ahidi varsa haraçtan pay gider.
+- **Nüfuz kazanma (Mahalleler sekmesi, o mahallede bulunmak gerekir):** esnafa himaye sat ($120 kirli), ziyafet ($200 temiz, huzur↑), rakip adamları sindir ($150 kirli, koruma gerekir; huzur↓, rakip öfkelenir, tanık riski). Sağlam bir hakimi yerinden etmek zordur; nüfuz yükseldikçe her puan pahalılaşır.
+- **Garnizon:** mahalle başına ≤6 adam ($100 + ayda $40); rakip baskısını azaltır, huzuru yükseltir.
+- **Genişleme kapısı:** bir mahallede iş yapmak için orada nüfuzun ≥%15 olmalı ya da komşu bir mahalleye hakim olmalısın.
+- **Rakip aileler** her ay komşu mahallelere genişlemeyi dener (kudretleri hakim oldukları mahallelerin servetiyle artar; O'Brien daha saldırgan, Belediye Makinesi temkinli). Sindirdiğin aile öfkelenir ve seni hedef alır.
+- **Mevki bağı:** hakim olunan mahalleler Güç Puanı'na girer; **Ağa → Reis için en az 2 mahalleye hakim olmak** gerekir.
+- Mahalle sistemi kendi tohumlu RNG'sini kullanır; dengeyi ve eski testleri etkilemez.
 
 #### 5.1.2 Tanınırlık, ekip, pusu ve baskınlar `[UYGULANDI v0.3]`
 
 Kod: `core/savas.js` (+ `bolge.js`, `sim.js` saatlik kancası). Konum yalnızca arayüz oyununda (`mesafe`) anlamlıdır; botlar ve testler pusuyu yaşamaz.
 
-- **Tanınırlık (0–100, bölge başına):** bölgede zaman geçirdikçe ve nüfuz işleri yaptıkça artar, yavaşça söner. Yüksek tanınırlık, düşman bölgede seni kolay hedef yapar ama nüfuz işlerine direnci de artırır.
+- **Tanınırlık (0–100, mahalle başına):** mahallede zaman geçirdikçe ve nüfuz işleri yaptıkça artar, yavaşça söner. Yüksek tanınırlık, düşman mahallede seni kolay hedef yapar ama nüfuz işlerine direnci de artırır.
 - **Ekip (≤8 adam, $100 kirli, ayda $40):** seninle yürür. Güç = ekip + 0,5 (sen) + Gözüpek + yanında koruma + Yeraltı Korkusu/40.
-- **Pusu:** düşman hakim bölgede yürürken saatlik risk (hakimin nüfuzu × tanınırlık × öfke; kendi nüfuzun ve ekibin riski düşürür; evin önü güvenli). Kart çıkar, 1 saat süre: **Çatış** (kazanma ≈ G^1,5/(G^1,5+D^1,5)), **Kaç** (ekibe bağlı), **Parayla geç** ($100+60n kirli). Yenilgide kayıp, yaralanma, ölüm riski (ekipliyken 0,05, ekipsizken 0,2).
+- **Pusu:** düşman hakim mahallede yürürken saatlik risk (hakimin nüfuzu × tanınırlık × öfke; kendi nüfuzun ve ekibin riski düşürür; evin önü güvenli). Kart çıkar, 1 saat süre: **Çatış** (kazanma ≈ G^1,5/(G^1,5+D^1,5)), **Kaç** (ekibe bağlı), **Parayla geç** ($100+60n kirli). Yenilgide kayıp, yaralanma, ölüm riski (ekipliyken 0,05, ekipsizken 0,2).
 - **Yaralanma:** eve düşersin, birkaç gün yürüyemez, adam toplayamaz, meyhane geliri %75'e düşer; revir bedeli.
-- **Baskın (oyuncu):** düşman hakim bölgede, en az 2 adamla, $200 kirli; bölge başına 4 gün bekleme. Kazanırsan rakip nüfuzu çöker, sen artarsın, ganimet alırsın, rakip öfkelenir ve kanıt izi kalır; kaybedersen ekibin erir, vurulabilirsin. Arayüz kazanma şansını gösterir.
-- **Düşman baskını:** rakipler hakim olduğun bölgeye saldırır (hücum ekip + öfkeye, savunma garnizon + orada bulunan ekibin gücüne bağlı). Yarılırsa nüfuz ve huzur düşer, garnizon erir; baskın Southside'a (meyhane/çamaşırhane bölgesi) denk gelirse mekanlar 1–3 gün **kapanır**, nakit zararı olur. Hakim rakipse Southside'dan himaye bedeli (%4 ciro) kesilir.
-- **Halk ilişkisi (bölge başına sevgi ve korku, 0–100):** her bölgenin halkı farklı tepki verir (`KARAKTER`): Southside sevgiyle bağlanır, Docks ve Flats korkuyla boyun eğer, Hilltop çekingendir. Himaye ve ziyafet sevgiyi, sindirme ve baskın korkuyu artırır; ağır haraç sevgiyi eritir. Sevgi ziyafet/himaye nüfuzunu, korku gözdağı nüfuzunu ve haraç tahsilatını güçlendirir; yüksek sevgi huzuru yükseltir, halk saldırıda seni uyarır (savunma ↑), pusu riski düşer; sindirmeyi ihbar etme şansı sevgiyle artar, korkuyla azalır.
-- **Aile ilişkisi (Marchetti, O'Brien, Belediye için görüş −100…100 ve korku 0–100):** gönül almak ($300 temiz, 10 günde bir) görüşü artırır; baskın, sindirme ve pusuyu yenmek görüşü bozar ve korkuyu artırır. Dost aile bölgene göz dikmez, pusu riski düşer; düşman aile fırsat kollar; korkulan aile daha zayıf saldırır. Zamanla ikisi de durulur.
+- **Baskın (oyuncu):** düşman hakim mahallede, en az 2 adamla, $200 kirli; mahalle başına 4 gün bekleme. Kazanırsan rakip nüfuzu çöker, sen artarsın, ganimet alırsın, rakip öfkelenir ve kanıt izi kalır; kaybedersen ekibin erir, vurulabilirsin. Arayüz kazanma şansını gösterir.
+- **Düşman baskını:** rakipler hakim olduğun mahalleye saldırır (hücum ekip + öfkeye, savunma garnizon + orada bulunan ekibin gücüne bağlı). Yarılırsa nüfuz ve huzur düşer, garnizon erir; baskın Southside'a (meyhane/çamaşırhane mahallesi) denk gelirse mekanlar 1–3 gün **kapanır**, nakit zararı olur. Hakim rakipse Southside'dan himaye bedeli (%4 ciro) kesilir.
+- **Halk ilişkisi (mahalle başına sevgi ve korku, 0–100):** her mahallenin halkı farklı tepki verir (`KARAKTER`): Southside sevgiyle bağlanır, Docks ve Flats korkuyla boyun eğer, Hilltop çekingendir. Himaye ve ziyafet sevgiyi, sindirme ve baskın korkuyu artırır; ağır haraç sevgiyi eritir. Sevgi ziyafet/himaye nüfuzunu, korku gözdağı nüfuzunu ve haraç tahsilatını güçlendirir; yüksek sevgi huzuru yükseltir, halk saldırıda seni uyarır (savunma ↑), pusu riski düşer; sindirmeyi ihbar etme şansı sevgiyle artar, korkuyla azalır.
+- **Aile ilişkisi (Marchetti, O'Brien, Belediye için görüş −100…100 ve korku 0–100):** gönül almak ($300 temiz, 10 günde bir) görüşü artırır; baskın, sindirme ve pusuyu yenmek görüşü bozar ve korkuyu artırır. Dost aile mahallene göz dikmez, pusu riski düşer; düşman aile fırsat kollar; korkulan aile daha zayıf saldırır. Zamanla ikisi de durulur.
 - **Sınır:** mekanlar kalıcı kaybedilmez, yalnızca kapanır/haraca bağlanır; kalıcı mülk el değiştirme sonraki sürüme kalmıştır.
 
 #### 5.1.3 Düz işler, meslek öğrenme ve işletmeler `[UYGULANDI v0.4]`
-- **Harita:** 2760×1830, 6 sokak şeridi, ~196 bina; altı bölge (Hilltop, Downtown, Southside, Eastside, The Flats, Docks).
-- **Düz iş:** Dört meslek (taksi şoförü, liman hamalı, berber çırağı, defter katibi). Bölge seçilip işe girilir; günlük temiz maaş, tecrübe ve bölgeye göre ödeme. Çalışırken meyhane satışı −%10.
+- **Harita:** 2760×1830, 6 sokak şeridi, ~196 bina; altı mahalle (Hilltop, Downtown, Southside, Eastside, The Flats, Docks).
+- **Düz iş:** Dört meslek (taksi şoförü, liman hamalı, berber çırağı, defter katibi). Mahalle seçilip işe girilir; günlük temiz maaş, tecrübe ve mahalleye göre ödeme. Çalışırken meyhane satışı −%10.
 - **Kabul puanı** (≥50): meslek tabanı + 0,3×tecrübe + halk sevgisi × sevgi ağırlığı + korku × korku ağırlığı − ceza + küçük sevgi bonusu. Tanınmak iki yönlüdür: ceza, korkulan ve tanınan biri (ya da polis dosyası kabarık biri) için büyür; sevilen ve tanınan biri kayırılır; hiç tanınmayan biri ise referanssız sayılır (küçük ceza). Hamal korkulan adamı sever; berber sevileni. Puan 35'in altına düşerse kovulursun.
 - **Meslek öğrenme:** Her iş günü beceri artar (0–100; Çaylak/Tecrübeli/Usta/Üstat), işsiz kalınca çok yavaş körelir.
 - **İşletme:** Beceri ≥20 ise sahibi olunabilir (taksi filosu, nakliye, berber salonu, muhasebe bürosu). Aylık temiz gelir tecrübeye bağlıdır; mesleğin avantajı işletmeyle 4 kat güçlenir: taksi → yürüyüş hızı (+%40), hamal → pusu riski (−%25), berber → halk sevgisi, katip → aklama ücreti (−%30) ve kapasite (+%40, işletme cirosu aklamaya ek).
 
 #### 5.1.4 Yaşayan şehir `[UYGULANDI v0.5]`
-- **Sokak olayları:** Günde ~%70 ihtimalle bir bölgede kendiliğinden olay (12 tür: düğün, cenaze, pazar, festival, yangın, polis taraması, seçim, grip, yeni dükkân, kavga, hırsızlık, kaçak gemi). Bölge ağırlıkları farklıdır (liman → gemi/kavga, Eastside → pazar/festival). Etki: huzur, halk sevgisi/korkusu, büyüme, nüfuz. Haritada ikonla görünür, "Şehirde neler oluyor" kutusunda ve günlükte akar.
+- **Sokak olayları:** Günde ~%70 ihtimalle bir mahallede kendiliğinden olay (12 tür: düğün, cenaze, pazar, festival, yangın, polis taraması, seçim, grip, yeni dükkân, kavga, hırsızlık, kaçak gemi). Mahalle ağırlıkları farklıdır (liman → gemi/kavga, Eastside → pazar/festival). Etki: huzur, halk sevgisi/korkusu, büyüme, nüfuz. Haritada ikonla görünür, "Şehirde neler oluyor" kutusunda ve günlükte akar.
 - **Karar kartları** (3 günde en çok bir): grev, hırsızlık dalgası, esnaf yardım isteği, gazeteci, kayıp çocuk, sokak kumarı, kaçak gemi. Seçimler sevgi/korku, aile görüşü, para ve dosyayı etkiler.
 - **Hava:** mevsime göre açık/yağmur/kar/sis/sıcak; haritada efekt ve kalabalık yoğunluğu.
-- **Harita hayatı:** Saate, havaya ve bölge huzuruna göre değişen yayalar, arabalar ve limanda tekneler (yalnız görsel).
+- **Harita hayatı:** Saate, havaya ve mahalle huzuruna göre değişen yayalar, arabalar ve limanda tekneler (yalnız görsel).
 
 #### 5.1.5 Araba ve görsel katman `[UYGULANDI v0.6]`
 - **Araba:** Ford Model T / Buick Master Six / Packard Twin Six (temiz parayla alınır, %60'a satılır). Arabayla yürüyüş ×2,0–3,2 hızlıdır ve pusu riskini azaltır (×0,9–0,65). Yakıt litreyle yanar (mesafeye bağlı); bitince yaya kalınır. Aylık bakım, yolda arıza (90 dk yaya).
-- **Kolaylık (0–1):** 0,4×ekip/8 + 0,3×para/15.000 + 0,3×bölge/4. Yüksek kolaylıkta yakıt −%60, bakım −%50, arıza −%80: güçlü, kalabalık ve zengin adamın pompası ve tamircisi vardır.
+- **Kolaylık (0–1):** 0,4×ekip/8 + 0,3×para/15.000 + 0,3×mahalle/4. Yüksek kolaylıkta yakıt −%60, bakım −%50, arıza −%80: güçlü, kalabalık ve zengin adamın pompası ve tamircisi vardır.
 - **Görsel katman:** bina gölgesi, tuğla dokusu, korniş/kaide, bacalar, çizgili tenteler, kaldırım, yaya geçidi, asfalt dokusu, sokak lambası (gece ışık), limanda dalga animasyonu.
 
 #### 5.1.6 İş yerleri ve adamlar (Gangsters: Organized Crime'dan ilham)
-- **Her bina bir işletmedir** (resmî kurumlar hariç): esnaf, eğlence, lüks, atölye, depo, apartman. Türü direncini (zorlukla boyun eğme), haftalık haraç gelirini ve fiyatını belirler; gelir bölgenin servetine ve huzuruna bağlıdır.
+- **Her bina bir işletmedir** (resmî kurumlar hariç): esnaf, eğlence, lüks, atölye, depo, apartman. Türü direncini (zorlukla boyun eğme), haftalık haraç gelirini ve fiyatını belirler; gelir mahallenin servetine ve huzuruna bağlıdır.
 - **Adamlar bireydir:** isim, yumruk, bıçak, zekâ (20–75). Ekip sayısı ile eşitlenir. Görev verilir: *Haraç bağla*, *Haracı topla*, *Nöbet koy*. Adam meyhaneden binaya yürür (haritada görünür), iş bitince sonuç çıkar.
-- **Eşleşme önemlidir:** zayıf adam sert yerde başarısız olur ve yakalanabilir (3 gün karakol, dosya +); bıçağı yumruğundan çok yüksek adam esnafı yaralayabilir (halk sevgisi ve polis kanıtı). Rakip hakimin bölgesinde haraç bağlamak onun öfkesini artırır.
-- **Haraç** birikir (en çok 3 hafta) ve adam gönderip toplanır; direnç edebilir. Nöbetsiz, rakip hakimli bölgedeki haraçlı yerler geri alınabilir.
+- **Eşleşme önemlidir:** zayıf adam sert yerde başarısız olur ve yakalanabilir (3 gün karakol, dosya +); bıçağı yumruğundan çok yüksek adam esnafı yaralayabilir (halk sevgisi ve polis kanıtı). Rakip hakimin mahallesinde haraç bağlamak onun öfkesini artırır.
+- **Haraç** birikir (en çok 3 hafta) ve adam gönderip toplanır; direnç edebilir. Nöbetsiz, rakip hakimli mahalledeki haraçlı yerler geri alınabilir.
 - **Satın alma:** temiz parayla alınan yer haftalık 1,5× temiz gelir verir; haraç yerine meşru yol ("dürüst iş" zaferinin temeli).
 - Sıradaki: haftalık plan ekranı, avukat/muhasebeci görevleri, adam terfisi ve ekip liderliği, yangın/baskın görevleri, belediye başkanlığı ve dürüst iş zafer yolları.
 
 #### 5.1.7 Zafer yolları
-Her ay kontrol edilir; ilk gerçekleşen oyunu kazanç olarak bitirir. **Dürüst iş:** ≥4 yer sahibi, ≥$12.000 temiz, dosya ≤15, sıfır haraçlı yer, ekip ≤2; 2 ay üst üste. **Belediye başkanlığı:** 2. yıldan itibaren her yıl 12. ay seçim; oy = 12 + 0,3×(hakim bölgelerin ort. sevgisi) + 22×(kampanya fonu/$6.000) + 4×bölge − 0,3×dosya (±5), ≥%50 kazanır; kaybedersen fon erir. **Hâkimiyet:** 6 bölgenin 5'ine hakim, 2 ay.
+Her ay kontrol edilir; ilk gerçekleşen oyunu kazanç olarak bitirir. **Dürüst iş:** ≥4 yer sahibi, ≥$12.000 temiz, dosya ≤15, sıfır haraçlı yer, ekip ≤2; 2 ay üst üste. **Belediye başkanlığı:** 2. yıldan itibaren her yıl 12. ay seçim; oy = 12 + 0,3×(hakim mahallelerin ort. sevgisi) + 22×(kampanya fonu/$6.000) + 4×mahalle − 0,3×dosya (±5), ≥%50 kazanır; kaybedersen fon erir. **Hâkimiyet:** 6 mahallenin 5'ine hakim, 2 ay.
 
 ### 5.2 Parseller ve binalar
 
@@ -440,7 +440,7 @@ Taktik dövüş ekranı yok. Çatışmalar soyut çözülür: tarafların Güç 
 
 ### 12.4 Diplomasi
 
-Görüşme (sit-down), bölge paylaşımı, ateşkes, haraç, ortak iş, evlilik bağı, ihanet. Anlaşmaya uymamak tüm ailelerle "Söz" itibarını düşürür.
+Görüşme (sit-down), mahalle paylaşımı, ateşkes, haraç, ortak iş, evlilik bağı, ihanet. Anlaşmaya uymamak tüm ailelerle "Söz" itibarını düşürür.
 
 ## 13. Mevsimler ve olaylar
 
@@ -793,8 +793,8 @@ Patron
 
 - **Doğrudan yönetim sınırı:** Patron bizzat `3 + Ticaret/20` varlık yönetebilir (tipik 4–8). Sınırı aşan her varlık hepsinin verimini düşürür ve İz üretimini artırır. Senin anlattığın kesit (4 işyeri + imalathane) tam bu sınırdadır: **oyunun ilk perdesi** orada biter.
 - **Üst basamaklarda:** Kaptan–patron bağı, Bölüm 24.4'teki **Ahit** sözleşmesinin en küçük hâlidir; Reis, Baba ve üstü basamaklarda aynı mekanik bağımsız ailelere de uygulanır.
-- **Kaptan:** Bir bölgeyi ve içindeki varlıkları kendi adına yönetir; kazancın belirlenen **payını** yukarı gönderir. Patron kaptanın işine karışmaz; yalnızca özet rapor görür (ve raporun doğruluğunu sorgulayabilir).
-- **Kaptanın ayarları:** pay oranı, özerklik (kendi başına genişleyebilir mi, şiddet kullanabilir mi), bölge sınırı.
+- **Kaptan:** Bir mahalleyi ve içindeki varlıkları kendi adına yönetir; kazancın belirlenen **payını** yukarı gönderir. Patron kaptanın işine karışmaz; yalnızca özet rapor görür (ve raporun doğruluğunu sorgulayabilir).
+- **Kaptanın ayarları:** pay oranı, özerklik (kendi başına genişleyebilir mi, şiddet kullanabilir mi), mahalle sınırı.
 - **Tampon:** Kaptan, patron ile suç arasındaki mesafedir. Kaptanın ekibindeki bir baskın patronun Dosyasına ancak kaptan konuşursa ulaşır. Sadık kaptan = kalkan; küskün kaptan = itirafçı adayı.
 - **Hizipler:** Hoşnutsuz kaptanlar birleşir ve talep sunar: daha düşük pay, daha fazla özerklik, vârisin değişmesi, patronun çekilmesi. Hizbin gücü (adam + para + nüfuz) patronunkine yaklaşınca **ültimatom** gelir: kabul, pazarlık veya iç savaş.
 
@@ -878,9 +878,9 @@ Dünya olaylarına (Bölüm 13) ek olarak, **kişisel** ve seçenekli olaylar:
 Şehirdeki ailelerin patronlarından oluşan gayriresmî meclis.
 
 - **Yazısız kurallar:** polis/savcı/gazeteci öldürülmez · aile bireylerine dokunulmaz · görüşme masasında silah çekilmez · başka ailenin yeminli adamı izinsiz alınmaz. Kurallar oylamayla değişebilir.
-- **Kural çiğneme:** Kanıtlanırsa Komisyon yaptırım oylar: tazminat, bölge kaybı, "açık av" ilanı.
+- **Kural çiğneme:** Kanıtlanırsa Komisyon yaptırım oylar: tazminat, mahalle kaybı, "açık av" ilanı.
 - **Oylama:** Her patronun oyu; ağırlığı ailesinin gücü ve Saygısıyla orantılı. Oylar görüş, koz ve pazarlıkla kazanılır.
-- **Gündem:** bölge anlaşmazlıkları, savaş izni, yeni ailenin tanınması, Komisyon başkanlığı.
+- **Gündem:** mahalle anlaşmazlıkları, savaş izni, yeni ailenin tanınması, Komisyon başkanlığı.
 - **Tanınma:** Oyuncu başta Komisyon'da yoktur; "tanınmış aile" olmak orta oyunun büyük hedefidir. Başkanlık geç oyunun hedefidir.
 
 ### 22.10 Arayüze etkisi
@@ -1063,7 +1063,7 @@ En yüksek puanlı eylem yapılır (küçük bir rastgelelikle). Oyuncu bir kiş
 |---|---|---|---|---|
 | **Aile** | Eş, çocuklar, kardeşler, yeğenler | Sadakat, vâris, ittifak (evlilik) | Himaye, iş, hoşgörü | Beceriksiz akraba; aile içi hizip |
 | **Dostlar** | Çocukluk arkadaşı, savaş arkadaşı, sırdaş | İyilik ucuza gelir, gerçek bilgi, kriz anında yardım | Aynı karşılık; ihanete tahammülsüz | Dostun yanması seni yakar; dost ihaneti en çok stres yapar |
-| **Akranlar** | Aynı basamaktaki patronlar (semt reisleri, esnaf başkanları) | Ortak iş, bölge anlaşması, Komisyon oyu | Saygı, sınıra riayet | Terfin onları tehdit eder |
+| **Akranlar** | Aynı basamaktaki patronlar (semt reisleri, esnaf başkanları) | Ortak iş, mahalle anlaşması, Komisyon oyu | Saygı, sınıra riayet | Terfin onları tehdit eder |
 | **Ekip** | Adamlar, kaptanlar, ustalar | Güç, üretim, tampon | Maaş, himaye, terfi | Hizip, sızıntı |
 | **İş dünyası** | Esnaf, tüccar, armatör, bankacı, sanayici | Kredi, ihale, aklama kapısı, meşru cephe | Koruma, tekel, kolaylık | Seni araç görürler; Dosya'dan sonra seni yüzüstü bırakırlar |
 | **Siyaset** | Meclis üyesi, başkan, parti il yöneticisi, vali, milletvekili | Ruhsat, polis bütçesi, af, ihale | Bağış, oy, susma | Yeni yönetim eskisinin adamını yakar |
@@ -1082,7 +1082,7 @@ En yüksek puanlı eylem yapılır (küçük bir rastgelelikle). Oyuncu bir kiş
 | **Hami ↔ Himaye edilen** | Biri öbürünü korumayı üstlenir (Ahit, 24.4) | Haraç ve çağrı karşılığı koruma |
 | **Mentor ↔ Çırak** | Gençlikte öğretme | Çıraktaki odak yolu mentordan; sadakat bonusu |
 | **Müttefik** | Yazılı/sözlü ortaklık, evlilik | Savaşta çağrı; ihanet "Söz" itibarını yakar |
-| **Rakip** | Aynı pazar/bölge | Ticari rekabet; kişisel olması gerekmez |
+| **Rakip** | Aynı pazar/mahalle | Ticari rekabet; kişisel olması gerekmez |
 | **Düşman** | Kara Defter'de kayıt veya savaş | Entrika ve saldırı hedefi; Görüş tavanı −60 |
 | **Kan davası** | Yakını öldürülmüş | Aile içinde nesillere geçer; barışmak çok zor |
 
@@ -1191,7 +1191,7 @@ Merdiven çevreyi, rakibi, devleti ve oyunun **türünü** birlikte değiştirir
 | **1 Ağa** | 1–4 iş, 1 sokak | Sokak çeteleri | Esnaf birliği | Meclis üyesi | Karakol amiri | Adamlarını ve kasayı yönetmek |
 | **2 Reis** | 1–3 semt | Semt aileleri | Armatör, orta fabrika | Belediye başkanı | Komiser | Kaptanlara devir, sınır anlaşmaları |
 | **3 Baba** | Şehir | Şehir aileleri, **Komisyon** | Harbor Trust, Banka, Gazete grubu | Vali, milletvekili | Başsavcı, özel birim | Diplomasi, Komisyon oylaması, siyaset |
-| **4 Kıyı Başı** | 3–6 liman şehri | Bölge birliği | Ulusal tröst, demiryolu, denizcilik | Bakan, parti merkezi | Bakanlık istihbaratı | İttifak ağı, ticaret yolları |
+| **4 Kıyı Başı** | 3–6 liman şehri | Mahalle birliği | Ulusal tröst, demiryolu, denizcilik | Bakan, parti merkezi | Bakanlık istihbaratı | İttifak ağı, ticaret yolları |
 | **5 Sendika Başkanı** | Ülke + denizaşırı | Ulusal sendika, uluslararası kaçakçılık ağları | Çok uluslu kartel | Hükümet, dış ilişkiler | Ulusal güvenlik, ortak operasyonlar | Meta oyun: sendika politikası, savaş ve barış |
 
 Her basamakta çevre **yukarı kayar**: Reis'in karşısında komiser durur, Baba'nın karşısında savcı. Eski dostlar (yeraltından, esnaftan) kalır ama artık "küçük adamlar"dır; yeni akranlar farklı yaşar. Basamak atlamak stres de üretir (eski çevre küser).
@@ -1282,12 +1282,12 @@ Suç örgütleri de **kurum** olarak aynı modele girer; tek fark, tüzüklerini
 | **Kıyı Birliği** | 4 | Kıyı Başı | Birkaç şehrin Baba'sı bağlıdır; ticaret yolları, ortak mahkeme |
 | **Ulusal Sendika** | 5 | Başkan | Genel Kurul; uluslararası ağlar |
 
-**Oluşumlar** (üyelerin oluşturduğu meclisler): **Komisyon** (şehir, 22.9), **Kıyı Konseyi** (bölge), **Genel Kurul** (ülke). Aynı yapıdadır: yazısız/yazılı kurallar, oylama (ağırlık: GP ve Saygı), gündem, yaptırım. Üst oluşumun kuralları alt oluşumu bağlar.
+**Oluşumlar** (üyelerin oluşturduğu meclisler): **Komisyon** (şehir, 22.9), **Kıyı Konseyi** (mahalle), **Genel Kurul** (ülke). Aynı yapıdadır: yazısız/yazılı kurallar, oylama (ağırlık: GP ve Saygı), gündem, yaptırım. Üst oluşumun kuralları alt oluşumu bağlar.
 
 **Büyük balığın davranışı.** Üst basamaktaki YZ aileler seni üç aşamada fark eder:
 
 ```
-Tehdit = GP_sen / GP_onlar × Yakınlık(bölge, pazar) × (1 + K_yeraltı/100)
+Tehdit = GP_sen / GP_onlar × Yakınlık(mahalle, pazar) × (1 + K_yeraltı/100)
 ```
 
 1. **Görmezden gelir** (Tehdit < 0,3): sen onlar için yoksun.
@@ -1382,7 +1382,7 @@ Savaş, iki **taraf** arasında ilan edilmiş (ya da açık hâle gelmiş) çat�
 | **Sokak kavgası** | Ağa | Çeteler | 1–2 sokak | günler | İş yeri, haraç hakkı |
 | **Semt savaşı** | Reis | Aileler | 1–3 semt | haftalar (aylar) | Semt el değiştirir |
 | **Şehir savaşı** | Baba | Şehir aileleri, Komisyon | Şehrin tümü | aylar | Komisyon dengesi, başkanlık |
-| **Bölge savaşı** | Kıyı Başı | Birlikler | Birkaç şehir | yıllar | Ticaret yolları, birlik hâkimiyeti |
+| **Mahalle savaşı** | Kıyı Başı | Birlikler | Birkaç şehir | yıllar | Ticaret yolları, birlik hâkimiyeti |
 | **Sendika savaşı** | Sendika | Ulusal sendikalar | Ülke | çok yıl | Sendika politikası, bölünme |
 
 Şirketler arası savaş ayrı çözülür (fiyat savaşı, boykot, satın alma); polis ve devlet taraf değil, **ortam**dır (25.4).
@@ -1394,7 +1394,7 @@ Savaş başlatmak için bir **gerekçe** gerekir; gerekçe, Komisyon ve çevreni
 | Gerekçe | Kaynak | Meşruiyet |
 |---|---|---|
 | **Kara Defter kaydı** (ağırlık ≥ 2) | 24.2 | Orta: ünde Kin etkisi; Komisyon bakışı tarafsız |
-| **Bölge ihlali** | Rakip, sınırı geçti (Ahit/anlaşma) | Yüksek: müttefik çağırma hakkı |
+| **Mahalle ihlali** | Rakip, sınırı geçti (Ahit/anlaşma) | Yüksek: müttefik çağırma hakkı |
 | **Söz bozma** | Ateşkes/ortaklık ihlali | Yüksek: ihlal edenin "Söz" itibarı düşer |
 | **Aile dokunulmazlığı ihlali** (22.9) | Suçsuz akraba öldürüldü | **Tam meşruiyet:** Komisyon saldırgan aleyhine, herkes çağrılır |
 | **Kan davası** | Nesiller boyu | Orta; sönmez, barış çok pahalı |
@@ -1449,10 +1449,10 @@ Bu, savaşın **ucuz** ve **uzun** olmasını engelleyen temel sınırdır: "kaz
 
 | Son | Koşul | Sonuç |
 |---|---|---|
-| **Barış masası** (sit-down) | Her iki taraf yorgun (60+ gün) ya da Komisyon oturumu | Koşullar pazarlıkla: bölge, tazminat, evlilik bağı, Ahit |
+| **Barış masası** (sit-down) | Her iki taraf yorgun (60+ gün) ya da Komisyon oturumu | Koşullar pazarlıkla: mahalle, tazminat, evlilik bağı, Ahit |
 | **Zafer / teslim** | Tüm cepheler ±100 | Kaybeden Ahit verir, öldürülür ya da kaçar |
 | **Kampanya** | Polis ezmesi | İki taraf da zayıflar, Dosya yüksek |
-| **Komisyon dayatması** | Meşruiyetsiz savaş | Savaş durdurulur, saldırgan tazminat/bölge öder |
+| **Komisyon dayatması** | Meşruiyetsiz savaş | Savaş durdurulur, saldırgan tazminat/mahalle öder |
 | **Üstün müdahalesi** | Bir üst Ahit sahibi | Üst savaşı durdurur; yoksa üste de saldırılmış sayılır |
 | **Yorgunluk** | Skor ±20 içinde 90 gün | Ateşkes zorunlu |
 

@@ -1,5 +1,5 @@
 extends Control
-# Sol altta mini harita: bölge çerçeveleri, işletmeler ve oyuncu noktası.
+# Sol altta mini harita: mahalle çerçeveleri, işletmeler ve oyuncu noktası.
 
 var oyun: Node
 var sokak: Node
@@ -21,8 +21,13 @@ func kur(o: Node, s: Node) -> void:
 		z1 = maxf(z1, b["z1"])
 	_sin = Rect2(x0, z0, x1 - x0, z1 - z0)
 
-func _process(_d: float) -> void:
-	queue_redraw()
+var _t := 0.0
+
+func _process(d: float) -> void:
+	_t += d
+	if _t >= 0.15:   # her karede çizmek gereksiz; ~7 fps yeter
+		_t = 0.0
+		queue_redraw()
 
 func _p(x: float, z: float) -> Vector2:
 	return Vector2((x - _sin.position.x) / _sin.size.x * size.x, (z - _sin.position.y) / _sin.size.y * size.y)
@@ -31,15 +36,21 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0.06, 0.05, 0.04, 0.9))
 	for id in oyun.harita.bolgeler:
 		var b: Dictionary = oyun.harita.bolgeler[id]
-		var a := _p(b["x0"], b["z0"])
-		var c := _p(b["x1"], b["z1"])
+		var pl: Array = b.get("poly", [])
+		var nk := PackedVector2Array()
+		for q in pl:
+			nk.append(_p(q[0], q[1]))
+		if nk.size() < 3:
+			nk = PackedVector2Array([_p(b["x0"], b["z0"]), _p(b["x1"], b["z0"]), _p(b["x1"], b["z1"]), _p(b["x0"], b["z1"])])
 		var sahip: String = oyun.hakim_of(id) if oyun.bolge.has(id) else ""
 		var r := Color(0.4, 0.29, 0.15, 0.5)
 		if sahip != "" and oyun.FAK.has(sahip):
 			r = (oyun.FAK[sahip]["renk"] as Color)
 			r.a = 0.8
-			draw_rect(Rect2(a, c - a), Color(r.r, r.g, r.b, 0.12))
-		draw_rect(Rect2(a, c - a), r, false, 1.0)
+			draw_colored_polygon(nk, Color(r.r, r.g, r.b, 0.25))
+		var kapali := nk.duplicate()
+		kapali.append(nk[0])
+		draw_polyline(kapali, r, 1.0)
 	for y in oyun.harita.yerler:
 		var q := _p(y["pos"].x, y["pos"].z)
 		draw_rect(Rect2(q - Vector2(1, 1), Vector2(2, 2)), Color(0.7, 0.6, 0.4, 0.55))

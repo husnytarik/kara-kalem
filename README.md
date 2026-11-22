@@ -27,7 +27,7 @@ Windows SmartScreen "bilinmeyen yayıncı" uyarısı verebilir; exe imzasızdır
 | Tekerlek | Yakınlaş / uzaklaş |
 | `WASD` | Kamerayı kaydır · `C`: karakterde ortala |
 | `Boşluk` | Duraklat · `1` `2` `3`: oyun hızı |
-| `T` Adamlar · `F` Defter · `B` Bölgeler · `H` Eve git | Paneller |
+| `T` Adamlar · `F` Defter · `B` Mahalleler · `H` Eve git | Paneller |
 | `V` | Sis aç / kapa |
 | `F6` / `F9` | Kaydet / yükle |
 | `F11` | Tam ekran aç / kapa |
@@ -36,9 +36,9 @@ Windows SmartScreen "bilinmeyen yayıncı" uyarısı verebilir; exe imzasızdır
 
 ## Dünya
 
-Şehir altı bölgeden oluşur, her birinin kendi karakteri, ailesi ve işyerleri vardır:
+Şehir altı mahalleden oluşur, her birinin kendi karakteri, ailesi ve işyerleri vardır:
 
-| Bölge | Havası |
+| Mahalle | Havası |
 |---|---|
 | **Southside** | İşçi mahallesi. Meyhane, bakkal, berber, boks salonu. Oyunun evi. |
 | **Eastside** | Göçmen sokakları, pazar yeri, sinagog, matbaa, terzi atölyeleri. |
@@ -59,7 +59,7 @@ Windows SmartScreen "bilinmeyen yayıncı" uyarısı verebilir; exe imzasızdır
 
 ### Yaşayan sakinler
 
-Şehirde **36 isimli sakin** yaşar (bölge başına 6): bakkal Rosa, berber Gus, Peder Brennan, komiser Brogan, gümrük memuru Pete... Her biri hep **aynı bölgede, aynı saat aralıklarında, aynı işyerlerinde** görünür; gün içinde işine, öğle yemeğine, akşam mekânına gider, gece evine çekilir. Panelleri ya da kayıtları yoktur; sadece rutinleriyle yaşarlar (üzerine gelince adı ve işi çıkar). Şimdilik oyun mekaniğine etkileri yoktur.
+Şehirde **36 isimli sakin** yaşar (mahalle başına 6): bakkal Rosa, berber Gus, Peder Brennan, komiser Brogan, gümrük memuru Pete... Her biri hep **aynı mahallede, aynı saat aralıklarında, aynı işyerlerinde** görünür; gün içinde işine, öğle yemeğine, akşam mekânına gider, gece evine çekilir. Panelleri ya da kayıtları yoktur; sadece rutinleriyle yaşarlar (üzerine gelince adı ve işi çıkar). Şimdilik oyun mekaniğine etkileri yoktur.
 
 ---
 
@@ -89,12 +89,12 @@ Windows SmartScreen "bilinmeyen yayıncı" uyarısı verebilir; exe imzasızdır
 
 **Yasa ve çatışma**
 - Polis dosyası ve dikkat, arama emri, baskın, rüşvet
-- Aileler arası gerginlik, savaş ve evde güvenli bölge
+- Aileler arası gerginlik, savaş ve evde güvenli mahalle
 - Polisin yasadışı ekipleri kovalaması, mafya gruplarının birbirine saldırması
 - Karar kartları ve dört yükseliş yolu (Yasal, Gölge, Korku, Kulis); dönem olayları (reform, skandal, çete savaşı...)
 
 **Oyun sonları**
-- Dürüst iş imparatorluğu · Belediye başkanlığı · Bölge hâkimiyeti · Ya da dosyan dolar, borcun batar, adamın düşer.
+- Dürüst iş imparatorluğu · Belediye başkanlığı · Mahalle hâkimiyeti · Ya da dosyan dolar, borcun batar, adamın düşer.
 
 ---
 

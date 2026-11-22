@@ -28,8 +28,8 @@ const KARTLAR := {
 	"rakipesnaf": ["Rakip esnaf", 9, 12, false],
 }
 
-# Kartın görüneceği oyuncu seviyesi aralığı [en az, en çok]. Seviye: 0 sokak, 1 haraççı, 2 kaptan (1 bölge),
-# 3 underboss (2-3 bölge), 4 don (4+ bölge).
+# Kartın görüneceği oyuncu seviyesi aralığı [en az, en çok]. Seviye: 0 sokak, 1 haraççı, 2 kaptan (1 mahalle),
+# 3 underboss (2-3 mahalle), 4 don (4+ mahalle).
 const SEVIYE := {
 	"dolan": [0, 4], "esnaf": [1, 4], "ihale": [1, 4], "tefeci": [0, 2], "muhbir": [1, 4], "gazeteci": [1, 4],
 	"senlik": [0, 3], "ittifak": [2, 4], "baskin": [1, 4], "secim": [2, 4],
@@ -56,7 +56,7 @@ const OZ_SEC := {
 	"secim0": {"mahalleli": 2, "vicdanli": 2}, "secim1": {"dilbaz": 3, "polis_dostu": 2}, "secim2": {"acimasiz": 3, "sinirli": 2},
 }
 
-var _bolge := ""      # kartın ilgili bölgesi
+var _bolge := ""      # kartın ilgili mahallesi
 var _aile := ""       # kartın ilgili ailesi
 
 func _init(o: Node) -> void:
@@ -66,7 +66,7 @@ func _init(o: Node) -> void:
 func baslik(id: String) -> String:
 	return KARTLAR[id][0]
 
-# Oyuncunun statüsü: bölge sayısı, ekip ve servetle belirlenir.
+# Oyuncunun statüsü: mahalle sayısı, ekip ve servetle belirlenir.
 func seviye() -> int:
 	var nb: int = oyun.oyuncu_bolgeleri().size()
 	if nb >= 4:
@@ -142,7 +142,7 @@ func cek() -> String:
 			return id
 	return adaylar[0]
 
-# Kart açılırken ilgili bölge/aile belirlenir.
+# Kart açılırken ilgili mahalle/aile belirlenir.
 func hazirla(id: String) -> void:
 	_bolge = ""
 	_aile = ""
@@ -188,7 +188,7 @@ func metin(id: String) -> String:
 		"rakipesnaf":
 			return "Karşı sokaktaki esnaf müşterilerini çalıyor: fiyat kırıyor, senin hakkında dedikodu yayıyor. Dün de dükkânının önüne çöp dökülmüş."
 		"sevkiyat":
-			return "%s'ın bir viski sevkiyatı senin bölgenin sınırından geçecekmiş. Haberi getiren çocuk saati de biliyor." % _fad()
+			return "%s'ın bir viski sevkiyatı senin mahallenin sınırından geçecekmiş. Haberi getiren çocuk saati de biliyor." % _fad()
 		"adamlar":
 			return "Adamların son işlerden sonra bir araya geldi: \"Patron, çalışıyoruz ama payımız hep aynı. Ya prim ya söz.\""
 		"ittifak":
@@ -220,9 +220,9 @@ func secenekler(id: String) -> Array:
 			]
 		"esnaf":
 			return [
-				{"ad": "Rakibin adamını korkut", "ipucu": "%s ile gerginlik +4, Korku +8, bölgede sevgi −2." % oyun.FAK[_aile]["ad"], "can": true},
+				{"ad": "Rakibin adamını korkut", "ipucu": "%s ile gerginlik +4, Korku +8, mahallede sevgi −2." % oyun.FAK[_aile]["ad"], "can": true},
 				{"ad": "Gizlice zarar ver", "ipucu": "%55: gerginlik yok, nüfuz −3. Yoksa gerginlik +5, Gölge −3.", "can": true},
-				{"ad": "Belediyeye dilekçe", "ipucu": "Yasal +6, bölgede huzur +3.", "can": true},
+				{"ad": "Belediyeye dilekçe", "ipucu": "Yasal +6, mahallede huzur +3.", "can": true},
 				{"ad": "Aracı ayarla ($40)", "ipucu": "Kulis +6, gerginlik −2.", "can": kt >= 40.0},
 			]
 		"ihale":
@@ -247,7 +247,7 @@ func secenekler(id: String) -> Array:
 			]
 		"gazeteci":
 			return [
-				{"ad": "Röportaj ver", "ipucu": "Yasal +6, sevgi +2 (bir bölgede). Dosya +3.", "can": true},
+				{"ad": "Röportaj ver", "ipucu": "Yasal +6, sevgi +2 (bir mahallede). Dosya +3.", "can": true},
 				{"ad": "Haberi gömdür ($100)", "ipucu": "Dosya −8, Kulis +6.", "can": kt >= 100.0},
 				{"ad": "Rakibe yönlendir", "ipucu": "Gölge +6. Aile ile gerginlik +3.", "can": true},
 				{"ad": "Korkut", "ipucu": "Korku +6, Dosya +8.", "can": true},
@@ -256,7 +256,7 @@ func secenekler(id: String) -> Array:
 			var b1: int = _m(60.0)
 			var b2: int = _m(40.0)
 			return [
-				{"ad": "Masrafı üstlen ($%d)" % b1, "ipucu": "Şenliği sen finanse edersin. Yasal +6. Bölgede sevgi +5, huzur +3.", "can": tm >= b1},
+				{"ad": "Masrafı üstlen ($%d)" % b1, "ipucu": "Şenliği sen finanse edersin. Yasal +6. Mahallede sevgi +5, huzur +3.", "can": tm >= b1},
 				{"ad": "Esnaftan zorla \"katkı\" al", "ipucu": "Şenlik adı altında esnaftan para sıkarsın: +$%d kirli, Korku +6, sevgi −3." % _m(80.0), "can": true},
 				{"ad": "Parayı kes", "ipucu": "Muhtarın topladığı parayı ele geçirirsin: +$%d kirli, Gölge +4. %%30 yakalanırsın: Dosya +8." % _m(50.0), "can": true},
 				{"ad": "Belediye sponsor olsun ($%d)" % b2, "ipucu": "Belediyeyi ikna edersin. Kulis +6, sevgi +2.", "can": kt >= b2},
@@ -285,12 +285,12 @@ func secenekler(id: String) -> Array:
 			return [
 				{"ad": "Fiyat kır ($%d)" % _m(40), "ipucu": "Müşteri geri döner: Yasal +3. Kısa vadede zarar.", "can": tm >= _m(40)},
 				{"ad": "Adamlarla konuş", "ipucu": "Korku +6. %55: rakip yatışır. Yoksa Dosya +3.", "can": true},
-				{"ad": "Mahalleyle konuş", "ipucu": "Yasal +4, bölgede sevgi +2.", "can": true},
+				{"ad": "Mahalleyle konuş", "ipucu": "Yasal +4, mahallede sevgi +2.", "can": true},
 				{"ad": "Görmezden gel", "ipucu": "Birkaç günlük müşteri kaybı: −$%d temiz." % _m(30), "can": true},
 			]
 		"pazarci":
 			return [
-				{"ad": "Kabul et", "ipucu": "Birkaç gün tezgâh başında beklersin: +$35 temiz. Yasal +4. Bölgede sevgi +2.", "can": true},
+				{"ad": "Kabul et", "ipucu": "Birkaç gün tezgâh başında beklersin: +$35 temiz. Yasal +4. Mahallede sevgi +2.", "can": true},
 				{"ad": "Daha fazlasını iste", "ipucu": "%55: +$70 kirli, Korku +4. Yoksa pazarcı küser: sevgi −2.", "can": true},
 				{"ad": "Reddet", "ipucu": "Hiçbir şey olmaz.", "can": true},
 			]

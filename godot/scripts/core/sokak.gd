@@ -1,6 +1,6 @@
 extends Node3D
 # Ana sahne: haritayı, oyun kurallarını (oyun.gd) ve 2D arayüzü (arayuz.gd) bir araya getirir.
-# Sol tık: git (binaya tıklarsan önüne gider, varınca panel açılır). Sağ tık: bina bilgisi. Boşluk: duraklat. 1/2/3: hız. B: bölge. T: adamlar. F: defter.
+# Sol tık: git (binaya tıklarsan önüne gider, varınca panel açılır). Sağ tık: bina bilgisi. Boşluk: duraklat. 1/2/3: hız. B: mahalle. T: adamlar. F: defter.
 
 var harita: Node3D
 var oyun: Node
@@ -119,7 +119,7 @@ func _ready() -> void:
 	_ipucu.modulate = Color("d6c49c")
 	hud.add_child(_ipucu)
 	var yardim := Label.new()
-	yardim.text = "Sol tık: git/binaya gir/kovala · Sağ tık: bina-adam bilgisi · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · V: sis aç/kapa · 1/2/3: hız · B: bölge · T: adamlar · F: defter · H: eve git · F6: kaydet · F9: yükle · F11: tam ekran"
+	yardim.text = "Sol tık: git/binaya gir/kovala · Sağ tık: bina-adam bilgisi · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · V: sis aç/kapa · 1/2/3: hız · B: mahalle · T: adamlar · F: defter · H: eve git · F6: kaydet · F9: yükle · F11: tam ekran"
 	yardim.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	yardim.offset_left = 205
 	yardim.offset_top = -26
@@ -539,7 +539,7 @@ func _process(delta: float) -> void:
 	_hava_guncelle(delta)
 	_atmosfer()
 	var uz: float = kamera.mesafe
-	_env.ssao_enabled = uz < 160.0
+	_env.ssao_enabled = false
 	_gunes.shadow_enabled = uz < 260.0
 	_gunes.directional_shadow_max_distance = clampf(uz * 2.2, 120.0, 400.0)
 	# fare altındakini bulmak (1000 bina üstünde ışın testi) her karede değil, kısa aralıkla
@@ -786,7 +786,7 @@ func _cevre() -> void:
 	env.sky = s
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.ssao_enabled = true
+	env.ssao_enabled = false
 	env.fog_enabled = true
 	env.fog_density = 0.0004
 	env.glow_enabled = true

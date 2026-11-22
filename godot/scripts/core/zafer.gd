@@ -45,13 +45,13 @@ func durum() -> Dictionary:
 		{"k": "Temiz sicil (gölge/korku)", "v": "%d / en çok 30" % int(oyun.yol_k.kotu()), "ok": oyun.yol_k.kotu() <= 30.0},
 	]
 	var baskan := [
-		{"k": "Hakim olduğun bölge", "v": "%d / en az 2" % n, "ok": n >= 2},
+		{"k": "Hakim olduğun mahalle", "v": "%d / en az 2" % n, "ok": n >= 2},
 		{"k": "Seçim", "v": "her yıl 12. ay (%s)" % ("açık" if d["yil"] >= 2 else "2. yıldan sonra"), "ok": d["yil"] >= 2},
 		{"k": "Kampanya fonu", "v": "%s / %s" % [oyun.para(oyun.zf["kampanya"]), oyun.para(KAMPANYA_HEDEF)], "ok": oyun.zf["kampanya"] >= KAMPANYA_HEDEF},
 		{"k": "Tahmini oy", "v": "%%%d / %%50" % int(round(oy_orani())), "ok": oy_orani() >= 50.0},
 		{"k": "Sicil (gölge/korku)", "v": "%d / en çok 50" % int(oyun.yol_k.kotu()), "ok": oyun.yol_k.kotu() < 50.0},
 	]
-	var hakim := [{"k": "Hakim olduğun bölge", "v": "%d / 5" % n, "ok": n >= 5}]
+	var hakim := [{"k": "Hakim olduğun mahalle", "v": "%d / 5" % n, "ok": n >= 5}]
 	return {"durust": durust, "baskan": baskan, "hakim": hakim}
 
 func kampanya_fon(miktar: int) -> Dictionary:
@@ -80,7 +80,7 @@ func ay() -> void:
 		_bitir("zafer", "İki ay üst üste temiz kasa, temiz dosya, sıfır haraç ve küçük bir ekip. Dükkânları ve apartmanları olan saygın bir iş adamısın; polisin sana dosyası bile yok. DÜRÜST İŞ ZAFERİ.")
 		return
 	if z["hakim_ay"] >= 2:
-		_bitir("zafer", "Şehrin bölgelerinin neredeyse hepsi senin. Rakip aileler çekildi ya da boyun eğdi; kimse senden izin almadan şehirde iş yapamaz. HÂKİMİYET ZAFERİ.")
+		_bitir("zafer", "Şehrin mahallelerinin neredeyse hepsi senin. Rakip aileler çekildi ya da boyun eğdi; kimse senden izin almadan şehirde iş yapamaz. HÂKİMİYET ZAFERİ.")
 		return
 	if d["ay_yil"] == 12 and d["yil"] >= 2 and oyun.oyuncu_bolgeleri().size() >= 2:
 		var oy: float = oy_orani() + (oyun.rng.randf() - 0.5) * 10.0

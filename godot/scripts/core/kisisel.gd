@@ -392,7 +392,7 @@ func uyku_bitti() -> void:
 	oyun.kis["uyuyor"] = false
 
 # ---------- tanınırlık ----------
-# Tanınırlık: parayla, bölgelerle, ekiple ve dosyayla büyür. Aileler, ancak ismin yayılınca seni umursar.
+# Tanınırlık: parayla, mahallelerle, ekiple ve dosyayla büyür. Aileler, ancak ismin yayılınca seni umursar.
 func taninma() -> float:
 	var top := 0.0
 	var mx := 0.0

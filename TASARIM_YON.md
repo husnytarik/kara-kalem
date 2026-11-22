@@ -28,8 +28,8 @@ Oyuncu seçebilir:
 Yapılmayacak: deniz savaşı kopyası; sadece "rol özgürlüğü + fraksiyon baskısı" alınır.
 
 ## 4. Şehir sakinleri (YAPILDI — ilk sürüm)
-- `scripts/core/sakinler.gd`: 36 isimli kişi (bölge başına 6). Her biri sabit bölgede, sabit saat aralıklarında, sabit işyerlerinde. Aralık dışında evde (haritada yok).
-- Oyun mekaniğine etkisi yok; panel, not ya da kayıt YOK (RAM/dosya şişmesin). Sadece rutin: aynı bölge, aynı saatler, aynı yerler. Üzerine gelince ad + iş.
+- `scripts/core/sakinler.gd`: 36 isimli kişi (mahalle başına 6). Her biri sabit mahallede, sabit saat aralıklarında, sabit işyerlerinde. Aralık dışında evde (haritada yok).
+- Oyun mekaniğine etkisi yok; panel, not ya da kayıt YOK (RAM/dosya şişmesin). Sadece rutin: aynı mahalle, aynı saatler, aynı yerler. Üzerine gelince ad + iş.
 - Sonraki adımlar: sivillerin binalar içinde görünmesi, sohbet/dedikodu, ses/animasyon, haftalık rutin (pazar kilise), hava durumuna göre rutin.
 
 ## 5. Easter egg'ler (NOT — henüz yapılmadı)

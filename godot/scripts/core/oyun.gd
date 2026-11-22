@@ -94,7 +94,7 @@ const RUTBE_SIRA := ["don", "ikinci", "danisman", "kaptan", "asker"]
 const RUTBE := {
 	"marchetti": {"don": "Don", "ikinci": "Underboss", "danisman": "Consigliere", "kaptan": "Capo", "asker": "Soldato"},
 	"obrien": {"don": "Patron", "ikinci": "Sağ Kol", "danisman": "Muhasebeci", "kaptan": "Kaptan", "asker": "Külhanbeyi"},
-	"tammany": {"don": "Başkan", "ikinci": "Meclis Üyesi", "danisman": "Avukat", "kaptan": "Bölge Temsilcisi", "asker": "Yardakçı"},
+	"tammany": {"don": "Başkan", "ikinci": "Meclis Üyesi", "danisman": "Avukat", "kaptan": "Mahalle Temsilcisi", "asker": "Yardakçı"},
 }
 # Savaştaki güç: hp, silah havuzu, nişan başarısı
 const RUTBE_GUC := {
@@ -466,7 +466,7 @@ func hava() -> Dictionary:
 		yog = clampf(yog * 1.6, 0.0, 1.0)
 	return {"tur": tur, "orttu": orttu, "yog": yog}
 
-# ---------- bölge okuma ----------
+# ---------- mahalle okuma ----------
 func hakim_of(id: String) -> String:
 	var inf: Dictionary = bolge[id]["inf"]
 	var en := ""
@@ -485,7 +485,7 @@ func etki(b: Dictionary, id: String) -> Dictionary:
 
 func erisim(id: String) -> bool:
 	if _ev >= 0 and harita.yerler[_ev]["bolge"] == id:
-		return true   # yaşadığın bölgede her zaman iş yapabilirsin
+		return true   # yaşadığın mahallede her zaman iş yapabilirsin
 	if bolge[id]["inf"].get("oyuncu", 0.0) >= 15.0:
 		return true
 	for k in KOMSU[id]:
@@ -525,11 +525,11 @@ func _hakim_degisti(id: String, onceki: String) -> void:
 		return
 	var ad: String = harita.bolgeler[id]["ad"]
 	if yeni == "oyuncu":
-		kayit("%s artık senin. Bölgenin hakimisin." % ad, "good")
+		kayit("%s artık senin. Mahallenin hakimisin." % ad, "good")
 	elif onceki == "oyuncu":
 		kayit("%s'ı kaybettin: artık %s hakim." % [ad, hakim_ad(yeni)], "bad")
 	elif yeni != "":
-		kayit("%s: %s bölgeyi %s aldı." % [ad, hakim_ad(yeni), hakim_ad(onceki) if onceki != "" else "sahipsizlikten"], "info")
+		kayit("%s: %s mahalleyi %s aldı." % [ad, hakim_ad(yeni), hakim_ad(onceki) if onceki != "" else "sahipsizlikten"], "info")
 	else:
 		kayit("%s sahipsiz kaldı: %s nüfuzunu yitirdi." % [ad, hakim_ad(onceki)], "info")
 
@@ -700,7 +700,7 @@ func gorev_ver(i: int, gorev: String, adam_id: int = 0) -> Dictionary:
 	var y: Dictionary = harita.yerler[i]
 	var G: Dictionary = GOREVLER[gorev]
 	if not erisim(y["bolge"]):
-		return hata("%s'da henüz ayağın yok: önce komşu bir bölgeye hakim ol." % harita.bolgeler[y["bolge"]]["ad"])
+		return hata("%s'da henüz ayağın yok: önce komşu bir mahalleye hakim ol." % harita.bolgeler[y["bolge"]]["ad"])
 	var k := kontrol(i)
 	if gorev == "haraclan" and (k == "haraci" or k == "sahip"):
 		return hata("Bu yer zaten senin.")
@@ -758,7 +758,7 @@ func satin_al(i: int) -> Dictionary:
 	var y: Dictionary = harita.yerler[i]
 	var r: Dictionary = isy[i]
 	if not erisim(y["bolge"]):
-		return hata("Bu bölgede henüz ayağın yok.")
+		return hata("Bu mahallede henüz ayağın yok.")
 	if r["sahip"]:
 		return hata("Zaten senin.")
 	if r["tur"] in ["luks", "resmi"] and yol_k.sicil_kirli() and yol_k.puan("kanun") < 20.0:
@@ -832,14 +832,14 @@ func _coz(g: Dictionary) -> void:
 		b["sev"] = clampf(b["sev"] + 1, 0, 100)
 		kayit("%s: %s bir hafta boyunca kapıda nöbet tutacak." % [ad, adam["ad"]], "info")
 
-# ---------- bölge işleri ----------
+# ---------- mahalle işleri ----------
 func bolge_is(id: String, tur: String) -> Dictionary:
 	var b: Dictionary = bolge[id]
 	if not erisim(id):
-		return hata("%s'a girmek için önce komşu bir bölgeye hakim olmalısın." % harita.bolgeler[id]["ad"])
+		return hata("%s'a girmek için önce komşu bir mahalleye hakim olmalısın." % harita.bolgeler[id]["ad"])
 	var gun: int = tarih()["gun"]
 	if b["sonIs"].get(tur, -99) + BEKLEME[tur] > gun:
-		return hata("Bu işi bu bölgede %d günde bir yapabilirsin." % BEKLEME[tur])
+		return hata("Bu işi bu mahallede %d günde bir yapabilirsin." % BEKLEME[tur])
 	var onceki := hakim_of(id)
 	var kayip: float = 1.0 - b["inf"].get("oyuncu", 0.0) / 120.0
 	var rakip := onceki if onceki != "" and onceki != "oyuncu" else ""
@@ -884,12 +884,12 @@ func bolge_is(id: String, tur: String) -> Dictionary:
 func bolge_yatirim(id: String) -> Dictionary:
 	var b: Dictionary = bolge[id]
 	if hakim_of(id) != "oyuncu":
-		return hata("Yalnızca hakim olduğun bölgeye yatırım yaparsın.")
+		return hata("Yalnızca hakim olduğun mahalleye yatırım yaparsın.")
 	var ay: int = tarih()["ay"]
 	if b["yatirimAy"] == ay:
-		return hata("Bu bölgeye bu ay zaten yatırım yaptın.")
+		return hata("Bu mahalleye bu ay zaten yatırım yaptın.")
 	if b["servet"] >= SERVET_MAX and b["ilerleme"] >= 99:
-		return hata("Bölge zaten en büyük hâlinde.")
+		return hata("Mahalle zaten en büyük hâlinde.")
 	if not harcama(400, "temiz"):
 		return hata("Temiz para yetmiyor ($400).")
 	b["yatirimAy"] = ay
@@ -901,7 +901,7 @@ func bolge_yatirim(id: String) -> Dictionary:
 
 func bolge_harac(id: String, v: int) -> Dictionary:
 	if hakim_of(id) != "oyuncu":
-		return hata("Yalnızca hakim olduğun bölgeden haraç toplarsın.")
+		return hata("Yalnızca hakim olduğun mahalleden haraç toplarsın.")
 	bolge[id]["harac"] = clampi(v, 0, HARAC.size() - 1)
 	degisti.emit()
 	return tamam()

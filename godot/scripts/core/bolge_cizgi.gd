@@ -1,5 +1,5 @@
 extends Node3D
-# Haritada bölge sınırlarında ışıklı altın çizgiler ve kâğıt üstünde bölge adı tabelaları.
+# Haritada mahalle sınırlarında ışıklı altın çizgiler ve kâğıt üstünde mahalle adı tabelaları.
 # Sahibine göre renk değişir: oyuncu altın, aileler kendi renginde, sahipsiz soluk.
 
 const Tema := preload("res://scripts/ui/tema.gd")
@@ -22,8 +22,8 @@ func kur(o: Node, h: Node, s: Node) -> void:
 	_renk_guncelle()
 	_goster(false)
 
-# Bölge sınırı: haritacı/mülk çizimi gibi. Yerde mürekkep çizgisi (kesik kesik akan) + içe doğru taralı bant,
-# yukarıda sınır boyunca direkler ve solan bir "perde". Sahibin rengi, oyuncunun bulunduğu bölge parlak.
+# Mahalle sınırı: haritacı/mülk çizimi gibi. Yerde mürekkep çizgisi (kesik kesik akan) + içe doğru taralı bant,
+# yukarıda sınır boyunca direkler ve solan bir "perde". Sahibin rengi, oyuncunun bulunduğu mahalle parlak.
 const BANT := 16.0     # içe doğru tarama bandı (m)
 const PERDE := 90.0    # ışık hüzmesinin yüksekliği (m)
 
@@ -73,17 +73,22 @@ void fragment() {
 
 func _cizgi_kur(id: String) -> void:
 	var b: Dictionary = harita.bolgeler[id]
-	var x0: float = b["x0"]
-	var z0: float = b["z0"]
-	var x1: float = b["x1"]
-	var z1: float = b["z1"]
+	var pl: Array = b.get("poly", [])
+	if pl.size() < 3:
+		pl = [[b["x0"], b["z0"]], [b["x1"], b["z0"]], [b["x1"], b["z1"]], [b["x0"], b["z1"]]]
+	var mrk: Vector2 = harita.poly_agirlik(b)
 	# kenarlar: [başlangıç, bitiş, içe doğru birim vektör]
-	var kenarlar := [
-		[Vector2(x0, z0), Vector2(x1, z0), Vector2(0, 1)],
-		[Vector2(x1, z0), Vector2(x1, z1), Vector2(-1, 0)],
-		[Vector2(x1, z1), Vector2(x0, z1), Vector2(0, -1)],
-		[Vector2(x0, z1), Vector2(x0, z0), Vector2(1, 0)],
-	]
+	var kenarlar := []
+	for i in pl.size():
+		var pa: Array = pl[i]
+		var pc: Array = pl[(i + 1) % pl.size()]
+		var ea := Vector2(pa[0], pa[1])
+		var ec := Vector2(pc[0], pc[1])
+		var dd := (ec - ea).normalized()
+		var nn := Vector2(-dd.y, dd.x)
+		if nn.dot(mrk - ea) < 0.0:
+			nn = -nn
+		kenarlar.append([ea, ec, nn])
 	var bsh := Shader.new()
 	bsh.code = BANT_SH
 	var psh := Shader.new()
@@ -121,7 +126,7 @@ func _cizgi_kur(id: String) -> void:
 			pim.surface_add_vertex(Vector3(p.x, y0 + PERDE, p.y))
 		bim.surface_end()
 		pim.surface_end()
-	for i in 4:
+	for i in kenarlar.size():
 		bim.surface_set_material(i, bm)
 		pim.surface_set_material(i, pm)
 	for im in [bim, pim]:
@@ -166,7 +171,7 @@ func _tabela_kur(id: String) -> void:
 	add_child(l)
 	_tabela[id] = {"l": l, "s": sp}
 
-# Hüzmeler yalnızca bölgeler paneli açıkken görünür; seçili bölge daha parlak.
+# Hüzmeler yalnızca mahalleler paneli açıkken görünür; seçili mahalle daha parlak.
 var _acik := false
 var _meshler: Array = []
 

@@ -201,7 +201,7 @@ Kim olduğunu menüde sen seçersin: **Southside'lı** (mahalleli, borçlu), **B
 
 ### Carlo Bruno — *Underboss* (44)
 
-**Hikâye:** Vito'nun eski şoförünün oğlu; "yeğen" değil ama Vito'ya yeğen gibi bakar. Öfkelidir, hırslıdır, her sözde **bir tehdit** arar. Don'un sağ kolu olarak bölgeleri yönetir. Bir gün Don'un yerine geçeceğini düşünür, ama bunun hakkı olduğuna emin değildir.
+**Hikâye:** Vito'nun eski şoförünün oğlu; "yeğen" değil ama Vito'ya yeğen gibi bakar. Öfkelidir, hırslıdır, her sözde **bir tehdit** arar. Don'un sağ kolu olarak mahalleleri yönetir. Bir gün Don'un yerine geçeceğini düşünür, ama bunun hakkı olduğuna emin değildir.
 
 - **Görüş: −10.** (Seni rakip görür.)
 - **Savaş:** HP 115 · İsabet %58 · Tommy / pompalı.
@@ -243,13 +243,13 @@ Kim olduğunu menüde sen seçersin: **Southside'lı** (mahalleli, borçlu), **B
 - **Savaş:** HP 95 · İsabet %56 · Tommy.
 - **Özellikler:** Acımasız · Soğukkanlı · Gizli (iz bırakmaz) · Kindar.
 - **Direnç:** İkna +5 · **Korku −15** · Rüşvet +10.
-- **Değişir:** Flats'te Marchetti'ye saygı gösterirsen seni görmezden gelir; bölgesine girersen sessiz bir uyarı gelir, ikincisi gelmez.
+- **Değişir:** Flats'te Marchetti'ye saygı gösterirsen seni görmezden gelir; mahallesine girersen sessiz bir uyarı gelir, ikincisi gelmez.
 
 ### Gino Fontana — *Capo, Southside* (41)
 
 **Hikâye:** Southside'ın haraç toplayıcısı. Esnaf onu tanır ve sevmez, ama kapıdan geçerken saygıyla başını eğer. Sende babasını görür ("o da borçluydu").
 
-- **Görüş: +5.** (Mahalleli olduğunu bilir; sen onun bölgesindesin.)
+- **Görüş: +5.** (Mahalleli olduğunu bilir; sen onun mahallesindesin.)
 - **Savaş:** HP 95 · İsabet %55 · Pompalı.
 - **Özellikler:** Sert bakış · Cimri · Polisle iyi · Sözünün eri.
 - **Direnç:** İkna +5 · Korku −10 · **Rüşvet +15**.
@@ -361,12 +361,12 @@ O'Brien'ın askeri: yüksek kafa, ucuz içki, yüksek öfke.
 - **Direnç:** İkna −10 · Korku +15 · Rüşvet −5.
 - **Etki:** Dosyanı düşürmenin en güvenli yolu; ücreti yüksek.
 
-### Bölge Temsilcileri: **Clarence Vandermeer** (Hilltop) · **Chester Crane** (Downtown) · **Lloyd Talbot** (Eastside) · **Percy Whitcomb** (Southside)
+### Mahalle Temsilcileri: **Clarence Vandermeer** (Hilltop) · **Chester Crane** (Downtown) · **Lloyd Talbot** (Eastside) · **Percy Whitcomb** (Southside)
 
-Dört "temsilci", dört farklı bölge, dört farklı nezaket. Hepsi seçim zamanı kapına gelir, "oyun nasıl işliyor" diye sorar.
+Dört "temsilci", dört farklı mahalle, dört farklı nezaket. Hepsi seçim zamanı kapına gelir, "oyun nasıl işliyor" diye sorar.
 - **Özellikler:** Dilbaz · Temkinli · Cömert (seçim dönemi) · Muhbir ağı.
 - **Direnç:** İkna −10 · Korku +20 · Rüşvet +20.
-- **Percy Whitcomb** özel: Southside'da senin bölgende; seni mahalle meclisi **adayı** yapmak ya da sana ruhsat engeli çıkarmak onun elinde.
+- **Percy Whitcomb** özel: Southside'da senin mahallende; seni mahalle meclisi **adayı** yapmak ya da sana ruhsat engeli çıkarmak onun elinde.
 
 ### Yardakçı *(tip)*
 
@@ -385,7 +385,7 @@ Belediye'nin "adamı": memur, kapıcı, zabıta, arkadaş. Kimi sıradan, kimi s
 - **Dosya (senin hakkında):** senin aramanla bağlı.
 - **Özellikler:** Açgözlü · Polisle iyi · Temkinli · Sözünün eri (kendi kuralında).
 - **Direnç:** İkna −5 · Korku +15 · **Rüşvet +25** (reform dönemlerinde −15).
-- **Etki:** Aramanı düşürür, devriyeyi başka bölgeye çeker, ama bir gün rakibine daha fazla öder.
+- **Etki:** Aramanı düşürür, devriyeyi başka mahalleye çeker, ama bir gün rakibine daha fazla öder.
 
 ### Edie Marlowe — *Daily Courier Editörü* (38)
 

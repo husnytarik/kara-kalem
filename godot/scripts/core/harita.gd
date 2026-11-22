@@ -2,8 +2,8 @@ extends Node3D
 # Harita sahnesinin (scenes/city/harita.tscn) çalışma zamanı beyni. Haritayı sen düzenlersin:
 #   • Arazi: assets/environment/terrain/yukseklik.png ve renk.png (resim programında boya)
 #   • Binalar: sahnede "Binalar" altındaki Bina düğümleri (taşı, çoğalt, boyutlandır, model ekle)
-#   • Bölgeler: data/bolgeler.json (adı ve sınırları)
-# Bu betik sahneyi okuyup yol ızgarasını, bina listesini ve bölge sınırlarını kurar.
+#   • Mahalleler: data/bolgeler.json (adı ve sınırları)
+# Bu betik sahneyi okuyup yol ızgarasını, bina listesini ve mahalle sınırlarını kurar.
 
 var bolgeler := {}                     # id -> {ad, x0, z0, x1, z1}
 var yerler: Array[Dictionary] = []     # {ad, bolge, ozel, pos, aabb}
@@ -30,7 +30,8 @@ func _ready() -> void:
 			dolgu.append(a)
 			_dolgu_obb.append({"xf": n.global_transform, "ters": n.global_transform.affine_inverse(), "yerel": yerel, "aabb": a})
 			continue
-		yerler.append({"ad": n.ad, "bolge": n.bolge, "ozel": n.ozel, "pos": n.global_position, "aabb": a,
+		var mb: String = bolge_at(n.global_position)
+		yerler.append({"ad": n.ad, "bolge": mb if mb != "" else n.bolge, "ozel": n.ozel, "pos": n.global_position, "aabb": a,
 			"xf": n.global_transform, "ters": n.global_transform.affine_inverse(), "yerel": yerel})
 	for n in get_tree().get_nodes_in_group("iskele"):
 		var m := n as MeshInstance3D
@@ -44,7 +45,7 @@ func _bolgeleri_oku() -> void:
 		return
 	bolgeler = JSON.parse_string(f.get_as_text())
 
-# ---------- yükseklik, bölge ----------
+# ---------- yükseklik, mahalle ----------
 func yuk(x: float, z: float, iskele: bool = true) -> float:
 	if iskele:
 		for a in _iskeleler:
@@ -54,19 +55,50 @@ func yuk(x: float, z: float, iskele: bool = true) -> float:
 
 func merkez(id: String) -> Vector3:
 	var b: Dictionary = bolgeler[id]
-	var x: float = (b["x0"] + b["x1"]) / 2.0
-	var z: float = (b["z0"] + b["z1"]) / 2.0
-	return Vector3(x, yuk(x, z), z)
+	var c := poly_agirlik(b)
+	return Vector3(c.x, yuk(c.x, c.y), c.y)
+
+# Mahalle çokgeninin ağırlık merkezi (çokgen yoksa dikdörtgen merkezi).
+func poly_agirlik(b: Dictionary) -> Vector2:
+	var pl: Array = b.get("poly", [])
+	if pl.size() < 3:
+		return Vector2((b["x0"] + b["x1"]) / 2.0, (b["z0"] + b["z1"]) / 2.0)
+	var A := 0.0
+	var cx := 0.0
+	var cz := 0.0
+	for i in pl.size():
+		var p: Array = pl[i]
+		var q: Array = pl[(i + 1) % pl.size()]
+		var cr: float = p[0] * q[1] - q[0] * p[1]
+		A += cr
+		cx += (p[0] + q[0]) * cr
+		cz += (p[1] + q[1]) * cr
+	if absf(A) < 0.001:
+		return Vector2((b["x0"] + b["x1"]) / 2.0, (b["z0"] + b["z1"]) / 2.0)
+	return Vector2(cx / (3.0 * A), cz / (3.0 * A))
 
 func bolge_at(p: Vector3) -> String:
 	for id in bolgeler:
 		var b: Dictionary = bolgeler[id]
 		if p.x >= b["x0"] and p.x < b["x1"] and p.z >= b["z0"] and p.z < b["z1"]:
-			return id
+			var pl: Array = b.get("poly", [])
+			if pl.size() < 3 or _poly_ici(pl, p.x, p.z):
+				return id
 	return ""
 
+func _poly_ici(pl: Array, x: float, z: float) -> bool:
+	var ic := false
+	var j := pl.size() - 1
+	for i in pl.size():
+		var a: Array = pl[i]
+		var c: Array = pl[j]
+		if (a[1] > z) != (c[1] > z) and x < (c[0] - a[0]) * (z - a[1]) / (c[1] - a[1]) + a[0]:
+			ic = not ic
+		j = i
+	return ic
+
 # ---------- yol bulma (1 m'lik ızgara, A*) ----------
-# Yürünür: bölge sınırları içi. Kapalı: binalar, kaideler. Açık: iskeleler.
+# Yürünür: mahalle sınırları içi. Kapalı: binalar, kaideler. Açık: iskeleler.
 func _rect(a: AABB, pay: float) -> Rect2i:
 	var x0 := int(floor(a.position.x - pay)) - _gx0
 	var z0 := int(floor(a.position.z - pay)) - _gz0
@@ -132,7 +164,7 @@ func _izgara_kur() -> void:
 		r.size.y += 1
 		_izgara.fill_solid_region(r, false)
 
-# Görüş/yürüme için: bu nokta bina, kaide ya da bölge dışı mı?
+# Görüş/yürüme için: bu nokta bina, kaide ya da mahalle dışı mı?
 func engelli(p: Vector3) -> bool:
 	return _izgara.is_point_solid(_hucre(p))
 
@@ -184,7 +216,7 @@ func yol_bul(a: Vector3, b: Vector3) -> PackedVector3Array:
 
 # ---------- savaş alanı seçimi ----------
 # Konuma en yakın savaş seviyesi. Önce sahnede senin koyduğun "savas_alani" düğümleri (150 m içinde),
-# yoksa kural: iskele/liman bölgesi -> liman, bir binanın kapısındaysan -> ic, aksi halde sokak.
+# yoksa kural: iskele/liman mahallesi -> liman, bir binanın kapısındaysan -> ic, aksi halde sokak.
 func savas_alani(p: Vector3) -> Dictionary:
 	var en: Node = null
 	var en_uz := 150.0

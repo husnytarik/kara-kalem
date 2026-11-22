@@ -34,7 +34,7 @@ func _draw() -> void:
 		return
 	var yazi := "Ev · %d m" % int(mesafe)
 	if sokak.gruplar.guvenli_mi():
-		yazi = "Ev · GÜVENLİ BÖLGE"
+		yazi = "Ev · GÜVENLİ MAHALLE"
 		renk = Color("6fcf7a")
 	if not arkada and alan.has_point(p):
 		var s := 1.0 + 0.08 * sin(_zaman * 4.0)

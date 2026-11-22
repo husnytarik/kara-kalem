@@ -142,13 +142,13 @@ func is_gir(j: String, bid: String, bina: int = -1, carpan: float = 1.0) -> Dict
 	if not MESLEKLER.has(j):
 		return oyun.hata("Böyle bir meslek yok.")
 	if not oyun.bolge.has(bid):
-		return oyun.hata("Bu bölgede iş yok.")
+		return oyun.hata("Bu mahallede iş yok.")
 	if not M["is"].is_empty():
 		return oyun.hata("Zaten bir işte çalışıyorsun. Önce ayrıl.")
 	var k := kabul(j, bid)
 	if not k["ok"]:
 		var b: Dictionary = oyun.bolge[bid]
-		var neden := "Mahalle senden korkuyor; kimse başına iş açmak istemiyor." if b["tan"] > 30.0 and b["kor"] > 35.0 else "Bölge sana güvenmiyor."
+		var neden := "Mahalle senden korkuyor; kimse başına iş açmak istemiyor." if b["tan"] > 30.0 and b["kor"] > 35.0 else "Mahalle sana güvenmiyor."
 		return oyun.hata("%s olarak seni almadılar (puan %d/%d). %s" % [MESLEKLER[j]["ad"], k["puan"], k["esik"], neden])
 	var gn: int = oyun.tarih()["gun"]
 	M["is"] = {"j": j, "b": bid, "gun": 0, "bina": bina, "carpan": carpan, "son": gn}
@@ -229,7 +229,7 @@ func gun() -> void:
 	var b: Dictionary = oyun.bolge[bid]
 	var k := kabul(j, bid)
 	if k["puan"] < 35:
-		oyun.kayit("%s işinden kovuldun: %s (puan %d)." % [m["ad"], "mahalle senden korkuyor" if b["tan"] > 30.0 and b["kor"] > 35.0 else "bölge sana sırt çevirdi", k["puan"]], "bad")
+		oyun.kayit("%s işinden kovuldun: %s (puan %d)." % [m["ad"], "mahalle senden korkuyor" if b["tan"] > 30.0 and b["kor"] > 35.0 else "mahalle sana sırt çevirdi", k["puan"]], "bad")
 		M["is"] = {}
 		return
 	var yok: int = oyun.tarih()["gun"] - int(M["is"].get("son", 0))

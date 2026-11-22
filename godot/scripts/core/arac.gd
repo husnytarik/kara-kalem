@@ -1,6 +1,6 @@
 extends RefCounted
 # Araba (web prototipindeki arac.js): yürümekten hızlı ama araç, yakıt ve bakım ister.
-# "Kolaylık": ekip, para ve bölgeler büyüdükçe yakıt/bakım/arıza derdi azalır.
+# "Kolaylık": ekip, para ve mahalleler büyüdükçe yakıt/bakım/arıza derdi azalır.
 
 const ARACLAR := {
 	"ford": {"ad": "Ford Model T", "fiyat": 600, "hiz": 2.0, "tank": 30.0, "tuk": 0.9, "bakim": 30, "guv": 1.0, "pusu": 0.9,

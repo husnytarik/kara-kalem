@@ -1,7 +1,7 @@
 extends RefCounted
 # Denge/oynanabilirlik probu: arayüzsüz, hızlandırılmış simülasyon.
 #   mod "bos"  : hiçbir şey yapma
-#   mod "bot"  : makul bir oyuncu (adam tut, haraç bağla/topla, bölge işleri, yatırım)
+#   mod "bot"  : makul bir oyuncu (adam tut, haraç bağla/topla, mahalle işleri, yatırım)
 
 static func ozet(o: Node) -> String:
 	var s := []

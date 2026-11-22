@@ -63,7 +63,7 @@ func _polis_ekle(ev: String) -> void:
 func _sivil_ekle(ev: String) -> void:
 	_yeni("sivil", "sivil", SIVIL_AD[rng.randi() % SIVIL_AD.size()], 1 + rng.randi() % 3, ev)
 
-# İsimli sakin: tek kişi, kendi bölgesinde, rutin saatlerinde görünür; aralık dışında evinde (haritada yok).
+# İsimli sakin: tek kişi, kendi mahallesinde, rutin saatlerinde görünür; aralık dışında evinde (haritada yok).
 func _sakin_ekle(sk: Dictionary) -> void:
 	var g := _yeni("sivil", "sivil", sk["ad"], 1, sk["bolge"])
 	g["sakin"] = sk
@@ -75,7 +75,7 @@ func _sakin_ekle(sk: Dictionary) -> void:
 	g["ev_pos"] = harita.yerler[yerler[absi(hash(sk["ad"])) % yerler.size()]]["pos"]
 	(g["dugum"] as Node3D).visible = false
 
-# Rutindeki bina adının, sakinin bölgesindeki ilk eşleşen binası (yoksa rastgele bölge yeri).
+# Rutindeki bina adının, sakinin mahallesindeki ilk eşleşen binası (yoksa rastgele mahalle yeri).
 func _sakin_hedef(g: Dictionary, bina: String) -> Vector3:
 	var yerler: Array = _bolge_yerleri(g["ev"])
 	if bina != "*":
@@ -129,7 +129,7 @@ func lider_ata(g: Dictionary) -> void:
 	g["lider"] = u["uid"]
 	g["ad"] = oyun.uye_ad(u)
 
-# Don, ailenin en güçlü grubuyla kendi bölgesinde gezer.
+# Don, ailenin en güçlü grubuyla kendi mahallesinde gezer.
 func _don_gruplari() -> void:
 	for f in oyun.NPC:
 		var don: Array = oyun.aile_uyeleri(f).filter(func(u): return u["rutbe"] == "don")
@@ -149,7 +149,7 @@ func _don_gruplari() -> void:
 		g["lider"] = don[0]["uid"]
 		g["don"] = true
 
-# Her fraksiyonun, hâkim olduğu bölge başına bir ekibi olur. Bölge el değiştirirse ekip de taşınır.
+# Her fraksiyonun, hâkim olduğu mahalle başına bir ekibi olur. Mahalle el değiştirirse ekip de taşınır.
 func _esitle() -> void:
 	for g in liste:
 		if g["kisi"] < g["kisi_max"] and oyun.t >= g["rejen"]:
@@ -178,7 +178,7 @@ func _esitle() -> void:
 		for k in ekipler.size():
 			if bolgeleri.size() > 0:
 				ekipler[k]["ev"] = bolgeleri[k % bolgeleri.size()]
-	# polis her bölgede bir devriye; sivil sayısı sabit
+	# polis her mahallede bir devriye; sivil sayısı sabit
 
 func _sil(g: Dictionary) -> void:
 	if g["dugum"]:
@@ -427,7 +427,7 @@ func _ai(g: Dictionary, delta: float) -> void:
 	elif g["tur"] == "rakip":
 		if g["mod"] == "" and d < GORUS_AV:
 			if oyun.gerginlik.dost_mu(g["fak"]):
-				pass   # çalıştığın bölgenin ailesi: seni kollar, bulaşmaz
+				pass   # çalıştığın mahallenin ailesi: seni kollar, bulaşmaz
 			elif oyun.gerginlik.dusman_mi(g["fak"]):
 				g["mod"] = "kovala"   # savaşta ya da ev sahibinin düşmanı: gücüne bakmadan üstüne gelir
 			elif not oyun.kis_k.fark_edildi():
@@ -514,7 +514,7 @@ func _hedef_sec(g: Dictionary) -> void:
 	var sans := rng.randf()
 	match g["tur"]:
 		"polis":
-			if sans < 0.3:   # komşu bölgeye de uğra
+			if sans < 0.3:   # komşu mahalleye de uğra
 				var k: Array = oyun.KOMSU[ev]
 				bolge = k[rng.randi() % k.size()]
 			g["durum"] = "Devriye geziyor"
@@ -527,7 +527,7 @@ func _hedef_sec(g: Dictionary) -> void:
 			if sans < 0.15:
 				var k3: Array = oyun.KOMSU[ev]
 				bolge = k3[rng.randi() % k3.size()]
-			g["durum"] = "Bölgesini geziyor"
+			g["durum"] = "Mahallesini geziyor"
 	var yerler := _bolge_yerleri(bolge)
 	var hedef: Vector3 = harita.yerler[yerler[rng.randi() % yerler.size()]]["pos"]
 	var yol: PackedVector3Array = harita.yol_bul(g["pos"], hedef)

@@ -99,7 +99,7 @@ func _ortam_yap() -> Environment:
 	env.ambient_light_color = Color(0.55, 0.52, 0.5)
 	env.ambient_light_energy = 0.8
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.ssao_enabled = true
+	env.ssao_enabled = false
 	env.fog_enabled = true
 	env.fog_light_color = Color(0.22, 0.2, 0.2)
 	env.fog_density = 0.0018
