@@ -86,8 +86,18 @@ func _process(d: float) -> void:
 		get_viewport().get_texture().get_image().save_png(_ekran_yol)
 		get_tree().quit()
 
+var _arka_tex: Texture2D = load("res://assets/ui/menu_arka.png")
+
 func _draw() -> void:
 	var b := size
+	if _arka_tex != null:
+		var ts := _arka_tex.get_size()
+		var o := maxf(b.x / ts.x, b.y / ts.y)
+		var d := ts * o
+		draw_texture_rect(_arka_tex, Rect2((b - d) * 0.5, d), false)
+		_yagmur(b, b.y / 720.0)
+		_vinyet(b)
+		return
 	var s := b.y / 720.0
 	var ufuk := b.y * 0.74
 	_gokyuzu(b, ufuk)
