@@ -1511,6 +1511,9 @@ func _ana_menu() -> void:
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
 
 # ---------- grup paneli (polis, rakip ekip, sivil) ----------
+func _saat_yazi(h: float) -> String:
+	return "%02d:%02d" % [int(h), int(round((h - int(h)) * 60.0))]
+
 func _grup_paneli() -> void:
 	var g: Dictionary = _hedef
 	if not sokak.gruplar.liste.has(g):
@@ -1534,7 +1537,15 @@ func _grup_paneli() -> void:
 			_lbl(_ic, "Fraksiyon: %s" % f["ad"], 16, f["renk"])
 			_lbl(_ic, "Bu ekibin bölgesinde rakip sayılırsın. İleride pazarlık, baskın ve çatışma buradan açılacak.", 15, RENK["warn"])
 		"sivil":
-			_lbl(_ic, "Mahalle halkı. İleride dedikodu ve bilgi buradan alınacak.", 15, RENK["soluk"])
+			if g.has("sakin"):
+				var sk: Dictionary = g["sakin"]
+				_lbl(_ic, "%s" % sk["is"], 16, RENK["altin"])
+				_lbl(_ic, sk["not"], 15, RENK["soluk"])
+				_lbl(_ic, "Günlük rutini:", 14, RENK["soluk"])
+				for r in sk["rutin"]:
+					_lbl(_ic, "%s–%s  %s" % [_saat_yazi(r[0]), _saat_yazi(r[1]), "mahallede dolaşır" if r[2] == "*" else r[2]], 14)
+			else:
+				_lbl(_ic, "Mahalle halkı. İleride dedikodu ve bilgi buradan alınacak.", 15, RENK["soluk"])
 	_ayrac(_ic)
 	if yakin_grup(g):
 		_btn(_ic, "Konuş / karşılaş", func(): karsilasma_ac(g))

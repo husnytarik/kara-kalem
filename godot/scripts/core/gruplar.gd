@@ -12,6 +12,7 @@ const TEMAS := 7.0         # kovalama bu mesafede yetişme sayılır (m)
 const GORUS_AV := 45.0     # rakip/polis seni bu mesafeden fark eder (m)
 const GUVENLI := 45.0      # evin çevresinde bu yarıçapta kimse sana bulaşamaz (m)
 const SECIM := 5.0         # tıklama/üzerine gelme yarıçapı (m)
+const Sakinler := preload("res://scripts/core/sakinler.gd")
 const SIVIL_AD := ["Esnaf", "İşçiler", "Pazarcılar", "Denizciler", "Komşular", "Yolcular", "Çocuklar", "Tüccar"]
 const POLIS_AD := ["Devriye", "Karakol Ekibi", "Bekçiler"]
 const HIZ := {"polis": 7.0, "rakip": 6.5, "sivil": 4.0}
@@ -35,8 +36,8 @@ func kur(h: Node3D, o: Node, p: Node3D) -> void:
 	rng.seed = 777
 	for id in harita.bolgeler:
 		_polis_ekle(id)
-		for k in 5:
-			_sivil_ekle(id)
+	for sk in Sakinler.LISTE:   # isimli, rutinli şehir sakinleri
+		_sakin_ekle(sk)
 	_esitle()
 
 # ---------- oluşturma ----------
@@ -60,6 +61,54 @@ func _polis_ekle(ev: String) -> void:
 
 func _sivil_ekle(ev: String) -> void:
 	_yeni("sivil", "sivil", SIVIL_AD[rng.randi() % SIVIL_AD.size()], 1 + rng.randi() % 3, ev)
+
+# İsimli sakin: tek kişi, kendi bölgesinde, rutin saatlerinde görünür; aralık dışında evinde (haritada yok).
+func _sakin_ekle(sk: Dictionary) -> void:
+	var g := _yeni("sivil", "sivil", sk["ad"], 1, sk["bolge"])
+	g["sakin"] = sk
+	g["evde"] = true
+	g["yer"] = ""
+	g["sakin_durum"] = "Evinde"
+	g["hiz"] = HIZ["sivil"] * rng.randf_range(0.85, 1.1)
+	var yerler: Array = _bolge_yerleri(sk["bolge"])
+	g["ev_pos"] = harita.yerler[yerler[absi(hash(sk["ad"])) % yerler.size()]]["pos"]
+	(g["dugum"] as Node3D).visible = false
+
+# Rutindeki bina adının, sakinin bölgesindeki ilk eşleşen binası (yoksa rastgele bölge yeri).
+func _sakin_hedef(g: Dictionary, bina: String) -> Vector3:
+	var yerler: Array = _bolge_yerleri(g["ev"])
+	if bina != "*":
+		for i in yerler:
+			if String(harita.yerler[i]["ad"]).begins_with(bina):
+				return harita.yerler[i]["pos"]
+	return harita.yerler[yerler[rng.randi() % yerler.size()]]["pos"]
+
+func _sakin_plan(g: Dictionary) -> void:
+	var saat: float = fmod(float(oyun.t), float(oyun.DAY)) / 60.0
+	var a: Dictionary = Sakinler.aralik(g["sakin"], saat)
+	var dn: Node3D = g["dugum"]
+	if a.is_empty():
+		if not g["evde"]:
+			g["evde"] = true
+			g["yer"] = ""
+			g["yol"] = PackedVector3Array()
+			dn.visible = false
+		g["sakin_durum"] = "Evinde"
+		return
+	if g["evde"]:
+		g["evde"] = false
+		g["pos"] = g["ev_pos"]
+		dn.visible = true
+	var anahtar := "%s@%s" % [a["yer"], a["bas"]]
+	if g["yer"] != anahtar:
+		g["yer"] = anahtar
+		var hedef := _sakin_hedef(g, a["yer"])
+		if (g["pos"] as Vector3).distance_to(oyuncu.global_position) > 140.0 and hedef.distance_to(oyuncu.global_position) > 140.0:
+			g["pos"] = hedef   # kimse görmüyorsa ışınlan (zaman atlamaları / uzaktan)
+			g["yol"] = PackedVector3Array()
+		else:
+			_git(g, hedef)
+		g["sakin_durum"] = "Mahallede dolaşıyor" if a["yer"] == "*" else "Şurada: %s" % a["yer"]
 
 func _kullanilan(f: String) -> Array:
 	return liste.filter(func(g): return g["fak"] == f and g.has("lider")).map(func(g): return g["lider"])
@@ -242,6 +291,8 @@ func _kisileri_yenile(g: Dictionary) -> void:
 	g["gorunen"] = g["kisi"]
 
 func etiket_yazi(g: Dictionary) -> String:
+	if g.has("sakin"):
+		return "%s · %s" % [g["ad"], g["sakin"]["is"]]
 	return "%s (%d)" % [g["ad"], g["kisi"]]
 
 # ---------- hareket ----------
@@ -414,14 +465,21 @@ func _git(g: Dictionary, hedef: Vector3) -> void:
 
 func _yuru(g: Dictionary, delta: float) -> void:
 	_ai(g, delta)
+	if g.has("sakin") and g["mod"] == "" and takip_id != g["id"]:
+		_sakin_plan(g)
+		if g["evde"]:
+			return
 	var yol: PackedVector3Array = g["yol"]
 	if yol.size() == 0 and g["mod"] != "":
 		return
 	if yol.size() == 0:
 		g["bekle"] -= delta
-		g["durum"] = "Bekliyor" if g["tur"] != "polis" else "Nöbette"
+		g["durum"] = g["sakin_durum"] if g.has("sakin") else ("Bekliyor" if g["tur"] != "polis" else "Nöbette")
 		if g["bekle"] <= 0.0:
-			_hedef_sec(g)
+			if g.has("sakin") and not String(g["yer"]).begins_with("*"):
+				g["bekle"] = 5.0   # işyerinde kal
+			else:
+				_hedef_sec(g)
 		return
 	var kalan: float = g["hiz"] * delta
 	var p: Vector3 = g["pos"]
@@ -460,7 +518,7 @@ func _hedef_sec(g: Dictionary) -> void:
 				bolge = k[rng.randi() % k.size()]
 			g["durum"] = "Devriye geziyor"
 		"sivil":
-			if sans < 0.25:
+			if sans < 0.25 and not g.has("sakin"):
 				var k2: Array = oyun.KOMSU[ev]
 				bolge = k2[rng.randi() % k2.size()]
 			g["durum"] = "Yolda"
@@ -484,12 +542,16 @@ func _karsilasma() -> void:
 		return
 	# yedek: yeni "temas" için önce en yakın uygun grubu bul
 	for g in liste.duplicate():
+		if g.get("evde", false):
+			continue
 		var uz: float = (g["pos"] as Vector3).distance_to(oyuncu.global_position)
 		var serbest: bool = oyun.t < g["serbest"]
 		if uz < TEMAS and not serbest and (g["mod"] != "" or takip_id == g["id"]):
 			temas.emit(g)
 			return
 	for g in liste:
+		if g.get("evde", false):
+			continue
 		var uz: float = (g["pos"] as Vector3).distance_to(oyuncu.global_position)
 		var yakin: bool = uz < GORUS
 		if yakin and not _temas.get(g["id"], false):
