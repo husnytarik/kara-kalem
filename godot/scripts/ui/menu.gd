@@ -21,10 +21,10 @@ var _t := 0.0
 var _ekran_yol := ""
 
 # ---------- ortak görünüm yardımcıları (duraklat.gd de kullanır; renkler tema.gd'den) ----------
-static func panel_stil(arka: Color = Tema.ARKA) -> StyleBoxFlat:
+static func panel_stil(arka: Color = Tema.ARKA) -> StyleBox:
 	return Tema.stil(arka, Tema.KENAR, 16, 6)
 
-static func _dugme_stil(c: Color, kenar: Color = Tema.KENAR) -> StyleBoxFlat:
+static func _dugme_stil(c: Color, kenar: Color = Tema.KENAR) -> StyleBox:
 	var sb := Tema.dugme_stil(c, kenar)
 	sb.content_margin_top = 6
 	sb.content_margin_bottom = 6

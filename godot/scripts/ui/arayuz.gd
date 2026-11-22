@@ -122,7 +122,7 @@ func kur(o: Node, s: Node) -> void:
 	_log_panel.add_child(_log)
 
 # ---------- kurulum ----------
-func _stil(arka: Color = Tema.ARKA) -> StyleBoxFlat:
+func _stil(arka: Color = Tema.ARKA) -> StyleBox:
 	return Tema.stil(arka)
 
 var _kagit_mod := false   # true iken paneller kâğıt üstünde: açık renkler koyu mürekkebe çevrilir
@@ -266,7 +266,7 @@ func _bolum(ebeveyn: Node, metin: String) -> Label:
 # Yuvarlak altın çerçeveli simge (üst çubuk, hedef kutusu).
 func _ikon(ebeveyn: Node, glif: String, renk: Color, boy: int = 26) -> PanelContainer:
 	var pc := PanelContainer.new()
-	pc.add_theme_stylebox_override("panel", Tema.yuvarlak_stil(Color(0.05, 0.035, 0.025), Color("c9972c"), boy / 2))
+	pc.add_theme_stylebox_override("panel", Tema.yuvarlak_stil(Color(0.05, 0.035, 0.025), Color("8f7c52"), boy / 2))
 	pc.custom_minimum_size = Vector2(boy, boy)
 	pc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -292,7 +292,6 @@ func _kutu(ebeveyn: Node, baslik: String = "") -> VBoxContainer:
 	var pc := PanelContainer.new()
 	if _kagit_mod:
 		var ks := Tema.stil(Color(0.55, 0.42, 0.24, 0.16), Tema.KAGIT_KENAR, 8, 2)
-		ks.shadow_size = 0   # saydam dolgudan gölge sızmasın
 		pc.add_theme_stylebox_override("panel", ks)
 	else:
 		pc.add_theme_stylebox_override("panel", Tema.stil(Color(0.06, 0.045, 0.03, 0.9), Tema.KENAR, 8, 2))
@@ -552,7 +551,7 @@ func _ust_cubuk() -> void:
 		hb.custom_minimum_size = Vector2(34, 34)
 		hb.add_theme_font_size_override("font_size", 12)
 		for dn in ["normal", "hover", "pressed", "focus"]:
-			hb.add_theme_stylebox_override(dn, Tema.yuvarlak_stil(Color(0.2, 0.05, 0.05) if dn != "hover" else Color(0.34, 0.09, 0.07), Color("c9972c"), 17))
+			hb.add_theme_stylebox_override(dn, Tema.yuvarlak_stil(Color(0.2, 0.05, 0.05) if dn != "hover" else Color(0.34, 0.09, 0.07), Color("8f7c52"), 17))
 		hb.add_theme_color_override("font_color", Tema.YAZI)
 		hb.pressed.connect(sokak.hiz_ayarla.bind(hv[1]))
 		sh.add_child(hb)
@@ -582,7 +581,7 @@ func _kapat_x() -> void:
 	x.offset_bottom = 132
 	x.add_theme_font_size_override("font_size", 14)
 	for dn in ["normal", "hover", "pressed", "focus"]:
-		x.add_theme_stylebox_override(dn, Tema.yuvarlak_stil(Color(0.08, 0.055, 0.04) if dn != "hover" else Color(0.3, 0.08, 0.06), Color("c9972c"), 16))
+		x.add_theme_stylebox_override(dn, Tema.yuvarlak_stil(Color(0.08, 0.055, 0.04) if dn != "hover" else Color(0.3, 0.08, 0.06), Color("8f7c52"), 16))
 	x.add_theme_color_override("font_color", Tema.YAZI)
 	x.pressed.connect(kapat)
 	x.visible = false
@@ -830,14 +829,12 @@ func _buyuk(t: String) -> String:
 		return t.to_upper()
 	return t.replace("i", "İ").replace("ı", "I").to_upper()
 
-func _gaz_dugme_stil(arka: Color, kenar: Color, sol: int) -> StyleBoxFlat:
+func _gaz_dugme_stil(arka: Color, kenar: Color, sol: int) -> StyleBox:
 	var sb := Tema.dugme_stil(arka, kenar)
 	sb.content_margin_left = sol
 	sb.content_margin_right = sol
 	sb.content_margin_top = 8
 	sb.content_margin_bottom = 8
-	sb.shadow_offset = Vector2(0, 3)
-	sb.shadow_size = 3
 	return sb
 
 # Düğme metnine göre simge dosyası (assets/ui/icons/<ad>.png).

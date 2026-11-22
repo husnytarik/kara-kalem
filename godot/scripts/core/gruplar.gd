@@ -1,4 +1,5 @@
 extends Node3D
+const Tema := preload("res://scripts/ui/tema.gd")
 # Haritada gezen gruplar (Warband'daki "party" gibi): polis devriyeleri, rakip ekipler, siviller.
 # Her grubun adı, kaç kişi olduğu, fraksiyonu ve durumu var; etiketi kafasının üstünde yazar.
 # Yürüyüş: harita.yol_bul (A*). Hareket delta ile (Engine.time_scale hızı uygular).
@@ -136,6 +137,37 @@ func _renk(g: Dictionary) -> Color:
 		"sivil": return Color(0.65, 0.62, 0.55)
 	return oyun.FAK[g["fak"]]["renk"]
 
+static var _plaka_onb := {}
+# Krem kâğıt plaka: ince siyah çerçeve, içte fraksiyon renginde çizgi, pahlı Art Deco uçlar.
+static func _plaka_tex(w: int, h: int, renk: Color) -> ImageTexture:
+	w = (w + 7) / 8 * 8
+	var k := "%d_%d_%s" % [w, h, renk.to_html()]
+	if _plaka_onb.has(k):
+		return _plaka_onb[k]
+	var im := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	var ink := Color("1c1710")
+	var kagit := Color("e8dfc8")
+	var ic := renk.lerp(Color("8f7c52"), 0.5)
+	var pah := h / 4
+	for y in h:
+		for x in w:
+			var kx := mini(x, w - 1 - x)
+			var ky := mini(y, h - 1 - y)
+			var e := mini(mini(kx, ky), kx + ky - pah)
+			var c := Color(0, 0, 0, 0)
+			if e >= 0:
+				c = kagit
+				if e <= 1:
+					c = ink
+				elif e == 3:
+					c = ic
+				elif y > h * 0.55:
+					c = kagit.darkened(0.06)
+			im.set_pixel(x, y, c)
+	var t := ImageTexture.create_from_image(im)
+	_plaka_onb[k] = t
+	return t
+
 func _gorsel_kur(g: Dictionary) -> void:
 	var n := Node3D.new()
 	add_child(n)
@@ -145,15 +177,29 @@ func _gorsel_kur(g: Dictionary) -> void:
 	l.pixel_size = 0.07
 	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	l.no_depth_test = true
-	l.outline_size = 10
+	l.outline_size = 0
 	l.position.y = 11.0
-	l.modulate = _renk(g).lerp(Color.WHITE, 0.45)
+	l.font = Tema.yazi_tipi()
+	l.modulate = Color("1c1710")
+	l.render_priority = 2
+	var pl := Sprite3D.new()
+	pl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	pl.no_depth_test = true
+	pl.shaded = false
+	pl.render_priority = 1
+	pl.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
+	pl.position.y = 11.0
+	n.add_child(pl)
+	g["plaka"] = pl
 	if g["tur"] == "sivil":
 		l.visibility_range_end = 110.0
 		l.font_size = 36
 		l.pixel_size = 0.05
+		pl.visibility_range_end = 110.0
 	else:
 		l.visibility_range_end = 400.0
+		pl.visibility_range_end = 400.0
+	pl.pixel_size = l.pixel_size
 	n.add_child(l)
 	g["etiket"] = l
 	var halka := MeshInstance3D.new()
@@ -210,7 +256,13 @@ func _process(delta: float) -> void:
 		n.global_position = g["pos"]
 		if g["gorunen"] != g["kisi"]:
 			_kisileri_yenile(g)
-		(g["etiket"] as Label3D).text = etiket_yazi(g)
+		var yz := etiket_yazi(g)
+		if g.get("yz", "") != yz:
+			g["yz"] = yz
+			var l3: Label3D = g["etiket"]
+			l3.text = yz
+			var w: float = Tema.yazi_tipi().get_string_size(yz, HORIZONTAL_ALIGNMENT_LEFT, -1, l3.font_size).x
+			(g["plaka"] as Sprite3D).texture = _plaka_tex(int(w) + 40, int(l3.font_size * 1.55), _renk(g))
 	_npc_sure += delta
 	if _npc_sure > 2.5:
 		_npc_sure = 0.0

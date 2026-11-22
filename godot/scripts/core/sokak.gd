@@ -8,6 +8,8 @@ var arayuz: CanvasLayer
 var oyuncu: Node3D
 var gruplar: Node3D
 var _oy_etiket: Label3D
+var _oy_plaka: Sprite3D
+var _oy_yz := ""
 var kamera: Node3D
 var _etiket: Label
 var _fps: Label
@@ -50,10 +52,20 @@ func _ready() -> void:
 	_oy_etiket.pixel_size = 0.07
 	_oy_etiket.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_oy_etiket.no_depth_test = true
-	_oy_etiket.outline_size = 12
-	_oy_etiket.modulate = Color("e6e0d0")
+	_oy_etiket.outline_size = 0
+	_oy_etiket.font = load("res://scripts/ui/tema.gd").yazi_tipi()
+	_oy_etiket.modulate = Color("1c1710")
+	_oy_etiket.render_priority = 2
 	_oy_etiket.position.y = 12.0
 	oyuncu.add_child(_oy_etiket)
+	_oy_plaka = Sprite3D.new()
+	_oy_plaka.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_oy_plaka.no_depth_test = true
+	_oy_plaka.shaded = false
+	_oy_plaka.render_priority = 1
+	_oy_plaka.pixel_size = 0.07
+	_oy_plaka.position.y = 12.0
+	oyuncu.add_child(_oy_plaka)
 	gruplar = load("res://scripts/core/gruplar.gd").new()
 	gruplar.name = "Gruplar"
 	add_child(gruplar)
@@ -533,7 +545,12 @@ func _process(delta: float) -> void:
 	var i: int = _hi
 	_oy_etiket.visible = oyuncu.iceride < 0
 	oyun.ic_mekan = oyuncu.iceride
-	_oy_etiket.text = "%s · %d kişi" % [oyun.profil.get("ad", "Sen"), 1 + oyun.adamlar.size()]
+	var yz := "%s · %d kişi" % [oyun.profil.get("ad", "Sen"), 1 + oyun.adamlar.size()]
+	if yz != _oy_yz:
+		_oy_yz = yz
+		_oy_etiket.text = yz
+		var w: float = load("res://scripts/ui/tema.gd").yazi_tipi().get_string_size(yz, HORIZONTAL_ALIGNMENT_LEFT, -1, _oy_etiket.font_size).x
+		_oy_plaka.texture = load("res://scripts/core/gruplar.gd")._plaka_tex(int(w) + 40, int(_oy_etiket.font_size * 1.55), Color("c9a14a"))
 	oyuncu.kilitli = not oyun.vardiya.is_empty()
 	if not gh.is_empty():
 		_ipucu.text = "%s — %s" % [gruplar.etiket_yazi(gh), gh["durum"]]

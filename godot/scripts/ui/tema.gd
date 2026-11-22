@@ -31,26 +31,67 @@ static func yazi_tipi() -> Font:
 static func boyut(n: int) -> int:
 	return maxi(10, int(round(n * OLCEK)))
 
-static func stil(arka: Color = ARKA, kenar: Color = KENAR, marj: int = 10, yuvarlak: int = 4) -> StyleBoxFlat:
+# Art Deco çerçeve: kesik (pahlı) köşeler, çift ince çizgi, köşede küçük baklava. Mat pirinç; parlak altın yok.
+static var _deco_onb := {}
+static func deco_tex(fill: Color, cizgi: Color, pah: int = 6, kose: int = 8) -> ImageTexture:
+	var anahtar := "%s_%s_%d_%d" % [fill.to_html(), cizgi.to_html(), pah, kose]
+	if _deco_onb.has(anahtar):
+		return _deco_onb[anahtar]
+	var N := 2 * (kose + 6) + 4
+	var img := Image.create(N, N, false, Image.FORMAT_RGBA8)
+	var koyu := Color(fill.r * 0.35, fill.g * 0.35, fill.b * 0.35, maxf(fill.a, 0.95))
+	var soluk := Color(cizgi.r * 0.7, cizgi.g * 0.7, cizgi.b * 0.7, 0.95)
+	var parlak := cizgi.lightened(0.3)
+	for y in N:
+		for x in N:
+			var kx := mini(x, N - 1 - x)
+			var ky := mini(y, N - 1 - y)
+			var e := mini(mini(kx, ky), kx + ky - pah)
+			var c := fill
+			if e < 0:
+				c = Color(0, 0, 0, 0)
+			elif e <= 1:
+				c = cizgi
+			elif e == 2:
+				c = koyu
+			elif e == 4:
+				c = soluk
+			var dx := absi(kx - (pah + 3))
+			var dy := absi(ky - (pah + 3))
+			if dx + dy <= 1 and kx < kose + 6 and ky < kose + 6:
+				c = parlak
+			img.set_pixel(x, y, c)
+	var t := ImageTexture.create_from_image(img)
+	_deco_onb[anahtar] = t
+	return t
+
+static func stil(arka: Color = ARKA, kenar: Color = KENAR, marj: int = 10, _yuvarlak: int = 4) -> StyleBoxTexture:
+	var sb := StyleBoxTexture.new()
+	sb.texture = deco_tex(arka, kenar, 6, 8)
+	sb.set_texture_margin_all(14)
+	sb.set_content_margin_all(maxi(marj, 12))
+	return sb
+
+# Düz dolgu/çubuk için (çerçevesiz)
+static func duz_stil(arka: Color, kenar: Color = Color(0, 0, 0, 0)) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = arka
 	sb.border_color = kenar
-	sb.set_border_width_all(2)
-	sb.set_corner_radius_all(mini(yuvarlak, 3))
-	sb.set_content_margin_all(marj)
-	sb.shadow_color = Color(0, 0, 0, 0.45)
-	sb.shadow_size = 4
+	if kenar.a > 0.0:
+		sb.set_border_width_all(1)
 	return sb
 
-static func kagit_stil() -> StyleBoxFlat:
-	var sb := stil(KAGIT, KAGIT_KENAR, 14, 2)
-	sb.set_border_width_all(3)
-	return sb
+static func kagit_stil() -> StyleBoxTexture:
+	return kagit_panel()
 
-static func dugme_stil(arka: Color, kenar: Color = KENAR) -> StyleBoxFlat:
-	var sb := stil(arka, kenar, 6, 3)
-	sb.content_margin_left = 7
-	sb.content_margin_right = 7
+static func dugme_stil(arka: Color, kenar: Color = KENAR) -> StyleBoxTexture:
+	var sb := StyleBoxTexture.new()
+	sb.texture = deco_tex(arka, kenar, 3, 4)
+	sb.set_texture_margin_all(9)
+	sb.content_margin_left = 10
+	sb.content_margin_right = 10
+	sb.content_margin_top = 6
+	sb.content_margin_bottom = 6
 	return sb
 
 static var _tema: Theme
@@ -75,8 +116,8 @@ static func tema() -> Theme:
 		t.set_color("font_hover_color", tip, Color.WHITE)
 		t.set_color("font_pressed_color", tip, VURGU)
 		t.set_color("font_disabled_color", tip, Color(1, 1, 1, 0.25))
-	var fill := stil(VURGU, Color(0, 0, 0, 0), 0, 2)
-	var bg := stil(Color(0, 0, 0, 0.55), KENAR, 0, 2)
+	var fill := duz_stil(VURGU)
+	var bg := duz_stil(Color(0, 0, 0, 0.55), KENAR)
 	t.set_stylebox("fill", "ProgressBar", fill)
 	t.set_stylebox("background", "ProgressBar", bg)
 	t.set_font_size("font_size", "ProgressBar", boyut(13))
@@ -105,19 +146,22 @@ static func kagit_tex(w: int, h: int, tint: Color = KAGIT, kenar: Color = Color(
 	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
 	for y in h:
 		for x in w:
-			var d := mini(mini(x, y), mini(w - 1 - x, h - 1 - y))
-			var v: float = 0.92 + 0.10 * n.get_noise_2d(x, y) + 0.03 * n2.get_noise_2d(x, y)
-			var c := Color(tint.r * v, tint.g * v, tint.b * v, 1.0)
-			if d < 14:
-				c = c.darkened(0.38 * (1.0 - d / 14.0))
-			if d < 3:
-				c = kenar
-			elif d == 4 or d == 5:
-				c = Color(0.88, 0.66, 0.23, 0.9).lerp(c, 0.35)   # ince altın çizgi
 			var kx := mini(x, w - 1 - x)
 			var ky := mini(y, h - 1 - y)
-			if absi(kx - 11) + absi(ky - 11) <= 3:
-				c = Color(0.88, 0.66, 0.23)   # köşe baklavası
+			var d := mini(mini(kx, ky), kx + ky - 7)
+			var v: float = 0.92 + 0.10 * n.get_noise_2d(x, y) + 0.03 * n2.get_noise_2d(x, y)
+			var c := Color(tint.r * v, tint.g * v, tint.b * v, 1.0)
+			if d < 0:
+				c = Color(0, 0, 0, 0)
+			else:
+				if d < 14:
+					c = c.darkened(0.30 * (1.0 - d / 14.0))
+				if d <= 1:
+					c = kenar
+				elif d == 4:
+					c = Color(0.50, 0.42, 0.28, 0.95).lerp(c, 0.25)   # ince mat pirinç çizgi
+				if absi(kx - 10) + absi(ky - 10) <= 2:
+					c = Color(0.50, 0.42, 0.28)
 			img.set_pixel(x, y, c)
 	var t := ImageTexture.create_from_image(img)
 	_kagit_onb[anahtar] = t
@@ -144,41 +188,8 @@ static func tema_kagit() -> Theme:
 # ---------- koyu deri çerçeve (üst çubuk, hedef kutusu, haber kutusu) ----------
 static var _koyu_onb := {}
 
-static func koyu_tex(w: int = 96, h: int = 96) -> ImageTexture:
-	var anahtar := "%d_%d" % [w, h]
-	if _koyu_onb.has(anahtar):
-		return _koyu_onb[anahtar]
-	var n := FastNoiseLite.new()
-	n.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	n.frequency = 0.06
-	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
-	var altin := Color(0.86, 0.64, 0.22)
-	var altin_k := Color(0.5, 0.36, 0.14)
-	for y in h:
-		for x in w:
-			var d := mini(mini(x, y), mini(w - 1 - x, h - 1 - y))
-			var v: float = 1.0 + 0.12 * n.get_noise_2d(x, y)
-			var c := Color(0.085 * v, 0.058 * v, 0.042 * v, 0.97)
-			if d < 1:
-				c = altin_k
-			elif d == 1:
-				c = altin
-			elif d == 2:
-				c = Color(0.02, 0.012, 0.008)
-			elif d == 3 or d == 4:
-				c = altin_k.lerp(altin, 0.4)
-			elif d == 5:
-				c = Color(0.02, 0.012, 0.008)
-			elif d == 6:
-				c = Color(0.3, 0.21, 0.09, 0.9)
-			var kx := mini(x, w - 1 - x)
-			var ky := mini(y, h - 1 - y)
-			if absi(kx - 10) + absi(ky - 10) <= 3:
-				c = altin
-			img.set_pixel(x, y, c)
-	var tx := ImageTexture.create_from_image(img)
-	_koyu_onb[anahtar] = tx
-	return tx
+static func koyu_tex(_w: int = 96, _h: int = 96) -> ImageTexture:
+	return deco_tex(Color(0.085, 0.08, 0.075, 0.96), Color(0.62, 0.53, 0.36), 8, 8)
 
 static func koyu_panel(marj: int = 10) -> StyleBoxTexture:
 	var sb := StyleBoxTexture.new()
@@ -187,7 +198,7 @@ static func koyu_panel(marj: int = 10) -> StyleBoxTexture:
 	sb.set_content_margin_all(marj + 4)
 	return sb
 
-static func yuvarlak_stil(arka: Color, kenar: Color = Color("c9972c"), r: int = 16) -> StyleBoxFlat:
+static func yuvarlak_stil(arka: Color, kenar: Color = Color("8f7c52"), r: int = 16) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = arka
 	sb.border_color = kenar
