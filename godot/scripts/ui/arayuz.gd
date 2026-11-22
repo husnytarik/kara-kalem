@@ -839,7 +839,7 @@ func _gaz_dugme_stil(arka: Color, kenar: Color, sol: int) -> StyleBox:
 # Düğme metnine göre simge dosyası (assets/ui/icons/<ad>.png).
 func _glif_sec(metin: String) -> String:
 	var dusuk := metin.to_lower()
-	for kv in [["dışarı çık", "kapi"], ["bölge bilgisi", "bilgi_rulo"], ["haracı topla", "haraci_topla"]]:
+	for kv in [["dışarı çık", "kapi"], ["bölge bilgisi", "bilgi_rulo"], ["haracı topla", "haraci_topla"], ["1 saat bekle", "saat"], ["sabaha kadar", "yastik"], ["pencere başında", "saat"]]:
 		if dusuk.begins_with(kv[0]):
 			return kv[1]
 	var kelimeler := dusuk.split(" ")

@@ -916,6 +916,9 @@ func _ekran_cek(arg: String) -> void:
 			arayuz.adamlar_ac()
 		elif p[1] == "aile":
 			arayuz.aile_ac()
+		elif p[1] == "ev":
+			oyuncu.gir(oyun._ev)
+			arayuz.bina_ac(oyun._ev)
 		elif p[1] == "bar":
 			oyun.temiz = 500.0
 			oyuncu.gir(97)
