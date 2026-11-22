@@ -1581,6 +1581,13 @@ func _diyalog_ciz() -> void:
 	_dlg.add_theme_stylebox_override("panel", _stil(Color(0.07, 0.05, 0.035, 0.97)))
 	_dlg.custom_minimum_size = Vector2(480, 460)
 	_dlg_arka.visible = true
+	var arka_ad := "karsilasma"
+	match str(_dlg_sonuc.get("savas_sonuc", "")):
+		"zafer":
+			arka_ad = "savas_win"
+		"yenilgi":
+			arka_ad = "savas_lose"
+	_dlg_arka.texture = load("res://assets/ui/panel/%s.png" % arka_ad)
 	var renk: Color = sokak.gruplar._renk(g)
 	_lbl(_dlg_ic, _kars.baslik(g), 24, renk.lerp(Color.WHITE, 0.4))
 	_lbl(_dlg_ic, _kars.giris(g), 16)
@@ -1606,6 +1613,7 @@ func _secenek(id: String) -> void:
 		sokak.savas_baslat(_dlg_g, on["ceza"], func(s: Dictionary):
 			var r: Dictionary = _kars.savas_bitir(_dlg_g, s)
 			r["metin"] = "%s %s" % [on["metin"], r["metin"]]
+			r["savas_sonuc"] = str(s.get("sonuc", ""))
 			_dlg_sonuc = r
 			_diyalog_ciz())
 		return
