@@ -43,11 +43,19 @@ func _yenile() -> void:
 			_kutu.mesh = BoxMesh.new()
 			_kutu.visibility_range_end = 520.0   # kameradan çok uzaktaki binalar çizilmez
 			add_child(_kutu)
-		(_kutu.mesh as BoxMesh).size = boyut
-		_kutu.position = Vector3(0, boyut.y / 2.0, 0)
-		_kutu.material_override = _malzeme(renk)
-		(_kutu.material_override as ShaderMaterial).set_shader_parameter("taban", global_position.y)
-		(_kutu.material_override as ShaderMaterial).set_shader_parameter("yukseklik", boyut.y)
+		var dm: ArrayMesh = _doku_mesh() if not Engine.is_editor_hint() or true else null
+		if dm != null:
+			_kutu.mesh = dm
+			_kutu.position = Vector3.ZERO
+			_kutu.material_override = null
+		else:
+			if not (_kutu.mesh is BoxMesh):
+				_kutu.mesh = BoxMesh.new()
+			(_kutu.mesh as BoxMesh).size = boyut
+			_kutu.position = Vector3(0, boyut.y / 2.0, 0)
+			_kutu.material_override = _malzeme(renk)
+			(_kutu.material_override as ShaderMaterial).set_shader_parameter("taban", global_position.y)
+			(_kutu.material_override as ShaderMaterial).set_shader_parameter("yukseklik", boyut.y)
 	elif _kutu != null:
 		_kutu.queue_free()
 		_kutu = null
@@ -74,6 +82,58 @@ func _yenile() -> void:
 	_etiket.text = ad
 	_etiket.modulate = Color(1.0, 0.85, 0.4) if ozel else Color(0.95, 0.95, 0.95)
 	_etiket.position = Vector3(0, boyut.y + 3.0, 0)
+
+# assets/textures/bina/<ad>_cephe|_yan|_cati.png varsa: ön yüz (+Z) cephe, yanlar/arka yan doku, üst çatı dokusuyla kutu.
+static var _dokular := {}
+
+static func _doku(yol: String) -> Texture2D:
+	if not _dokular.has(yol):
+		_dokular[yol] = load(yol) if ResourceLoader.exists(yol) else null
+	return _dokular[yol]
+
+func _doku_mesh() -> ArrayMesh:
+	var taban := String(ad).to_lower().replace("'", "").replace(" ", "_").replace("&", "").replace("__", "_")
+	for ek in ["_iii", "_ii"]:
+		if not ResourceLoader.exists("res://assets/textures/bina/%s_cephe.png" % taban):
+			taban = taban.trim_suffix(ek)
+	var tc := _doku("res://assets/textures/bina/%s_cephe.png" % taban)
+	if tc == null:
+		return null
+	var ty := _doku("res://assets/textures/bina/%s_yan.png" % taban)
+	var tt := _doku("res://assets/textures/bina/%s_cati.png" % taban)
+	var hx := boyut.x / 2.0
+	var hz := boyut.z / 2.0
+	var h := boyut.y
+	var mesh := ArrayMesh.new()
+	# [doku, köşeler(4), uv tekrarı]
+	var yuzler := [
+		[tc, [Vector3(-hx, 0, hz), Vector3(hx, 0, hz), Vector3(hx, h, hz), Vector3(-hx, h, hz)], Vector2(1, 1), Vector3(0, 0, 1)],
+		[ty, [Vector3(hx, 0, -hz), Vector3(-hx, 0, -hz), Vector3(-hx, h, -hz), Vector3(hx, h, -hz)], Vector2(boyut.x / 12.0, h / 12.0), Vector3(0, 0, -1)],
+		[ty, [Vector3(hx, 0, hz), Vector3(hx, 0, -hz), Vector3(hx, h, -hz), Vector3(hx, h, hz)], Vector2(boyut.z / 12.0, h / 12.0), Vector3(1, 0, 0)],
+		[ty, [Vector3(-hx, 0, -hz), Vector3(-hx, 0, hz), Vector3(-hx, h, hz), Vector3(-hx, h, -hz)], Vector2(boyut.z / 12.0, h / 12.0), Vector3(-1, 0, 0)],
+		[tt, [Vector3(-hx, h, hz), Vector3(hx, h, hz), Vector3(hx, h, -hz), Vector3(-hx, h, -hz)], Vector2(1, 1), Vector3(0, 1, 0)],
+	]
+	for f in yuzler:
+		var dk: Texture2D = f[0] if f[0] != null else tc
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var q: Array = f[1]
+		var uvs := [Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)]
+		var rp: Vector2 = f[2]
+		st.set_normal(f[3])
+		for k in [0, 2, 1, 0, 3, 2]:
+			st.set_uv(Vector2(uvs[k].x * rp.x, uvs[k].y * rp.y))
+			st.add_vertex(q[k])
+		var m := StandardMaterial3D.new()
+		m.albedo_texture = dk
+		m.roughness = 1.0
+		m.texture_repeat = true
+		if dk == tc:
+			m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+			m.alpha_scissor_threshold = 0.5
+		st.set_material(m)
+		st.commit(mesh)
+	return mesh
 
 func _malzeme(c: Color) -> ShaderMaterial:
 	if _sh == null:

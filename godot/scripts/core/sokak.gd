@@ -956,6 +956,16 @@ func _ekran_cek(arg: String) -> void:
 				await get_tree().process_frame
 				if dn > 20 and (get_node("Yayalar") as Node3D).test_hedef(p[1] == "araba"):
 					break
+		elif p[1] == "binafoto":
+			var yb: Dictionary = harita.yerler[0]
+			for yy in harita.yerler:
+				if yy["ad"] == "Sailors Bar":
+					yb = yy
+			oyuncu.global_position = yb["pos"]
+			kamera.rotation.y = float(p[2]) if p.size() > 2 else 0.0
+			kamera.mesafe = 30.0
+			kamera._pitch = -0.35
+			await get_tree().create_timer(1.0, true, false, true).timeout
 		elif p[1] == "bolge":
 			arayuz.bolge_ac("southside")
 		await get_tree().create_timer(1.5, true, false, true).timeout
