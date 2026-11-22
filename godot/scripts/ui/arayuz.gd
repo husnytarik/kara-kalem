@@ -146,47 +146,110 @@ func _lbl(ebeveyn: Node, metin: String, boyut: int = 16, renk: Color = Color.WHI
 
 func _btn(ebeveyn: Node, metin: String, fn: Callable, pasif: bool = false) -> Button:
 	var b := Button.new()
-	b.text = metin
 	b.focus_mode = Control.FOCUS_NONE   # Boşluk tuşu düğmeye basmasın
 	b.disabled = pasif
 	b.pressed.connect(fn)
-	if _kagit_mod:
-		var simge: bool = ebeveyn is VBoxContainer and metin.length() >= 4
-		var sol := 40 if simge else 8
-		b.custom_minimum_size = Vector2(0, 38 if simge else 34)
-		b.add_theme_stylebox_override("normal", _gaz_dugme_stil(Color(0.10, 0.07, 0.05), Color(0.55, 0.43, 0.28), sol))
-		b.add_theme_stylebox_override("hover", _gaz_dugme_stil(Color(0.18, 0.12, 0.08), Tema.VURGU, sol))
-		b.add_theme_stylebox_override("pressed", _gaz_dugme_stil(Color(0.28, 0.19, 0.09), Tema.VURGU, sol))
-		b.add_theme_stylebox_override("disabled", _gaz_dugme_stil(Color(0.17, 0.15, 0.12), Color(0.3, 0.26, 0.2), sol))
-		b.add_theme_color_override("font_color", Tema.YAZI)
-		b.add_theme_color_override("font_disabled_color", Color(0.65, 0.6, 0.5, 0.5))
-		if simge:
-			var g := TextureRect.new()
-			g.texture = load("res://assets/ui/icons/%s.png" % _glif_sec(metin))
-			g.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			g.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			g.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			g.anchor_top = 0.0
-			g.anchor_bottom = 1.0
-			g.offset_left = 6
-			g.offset_right = 38
-			g.offset_top = 3
-			g.offset_bottom = -3
-			g.modulate = Color(1, 1, 1, 0.9 if not pasif else 0.45)
-			b.add_child(g)
-		b.alignment = HORIZONTAL_ALIGNMENT_CENTER
-		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		if simge:
-			# alt alta dizilen eylem düğmeleri tam genişlik yerine sabit dar genişlikte, sola hizalı
-			b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-			b.custom_minimum_size.x = 250
-		# etiketle aynı satırdaysa dar kalır (örn. "Deftere yaz", "Başvur")
-		if ebeveyn is HBoxContainer and ebeveyn.get_child_count() > 0 and ebeveyn.get_child(0) is Label:
-			b.size_flags_horizontal = Control.SIZE_SHRINK_END
-			b.autowrap_mode = TextServer.AUTOWRAP_OFF
+	if not _kagit_mod:
+		b.text = metin
+		ebeveyn.add_child(b)
+		return b
+	# Dönem itme düğmesi: koyu bakalit gövde, pirinç çerçeve. "Ad  (ayrıntı)" -> ad solda, ayrıntı sağda pirinç etiket.
+	var ad := metin
+	var ek := ""
+	var k := metin.find("  (")
+	if k > 0 and metin.ends_with(")"):
+		ad = metin.substr(0, k)
+		ek = metin.substr(k + 3, metin.length() - k - 4)
+	# etiketle aynı satırdaysa dar kalır (örn. "Deftere yaz", "Başvur")
+	var satir_ici: bool = ebeveyn is HBoxContainer and ebeveyn.get_child_count() > 0 and ebeveyn.get_child(0) is Label
+	var simge: bool = ebeveyn is VBoxContainer and ad.length() >= 4
+	var sol := 44 if simge else 10
+	var sag := 10
+	if ek != "":
+		sag = 10
+	b.text = ad
+	b.custom_minimum_size = Vector2(0, 40 if simge else 34)
+	b.add_theme_stylebox_override("normal", _gaz_dugme_stil(Color(0.11, 0.08, 0.055), Color(0.62, 0.48, 0.26), sol))
+	b.add_theme_stylebox_override("hover", _gaz_dugme_stil(Color(0.22, 0.15, 0.08), Tema.VURGU, sol))
+	b.add_theme_stylebox_override("pressed", _gaz_dugme_stil(Color(0.34, 0.23, 0.10), Color("f0d890"), sol))
+	b.add_theme_stylebox_override("disabled", _gaz_dugme_stil(Color(0.2, 0.18, 0.15, 0.85), Color(0.36, 0.32, 0.25), sol))
+	b.add_theme_color_override("font_color", Tema.YAZI)
+	b.add_theme_color_override("font_hover_color", Color("f6e6b4"))
+	b.add_theme_color_override("font_disabled_color", Color(0.78, 0.72, 0.6, 0.8))
+	b.add_theme_font_size_override("font_size", Tema.boyut(16))
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT if simge else HORIZONTAL_ALIGNMENT_CENTER
+	if simge:
+		var g := TextureRect.new()
+		g.texture = load("res://assets/ui/icons/%s.png" % _glif_sec(ad))
+		g.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		g.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		g.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		g.anchor_top = 0.0
+		g.anchor_bottom = 1.0
+		g.offset_left = 8
+		g.offset_right = 38
+		g.offset_top = 4
+		g.offset_bottom = -4
+		g.modulate = Color(1, 1, 1, 0.92 if not pasif else 0.4)
+		b.add_child(g)
+	if ek != "":
+		var e := Label.new()
+		e.text = ek
+		e.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		e.add_theme_font_size_override("font_size", Tema.boyut(13))
+		e.add_theme_color_override("font_color", Color("d9b862") if not pasif else Color(0.8, 0.7, 0.45, 0.8))
+		e.set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
+		e.offset_right = -12
+		e.offset_left = -150
+		e.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		e.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		b.add_child(e)
+		b.clip_text = true
+		b.add_theme_stylebox_override("normal", _gaz_dugme_stil(Color(0.11, 0.08, 0.055), Color(0.62, 0.48, 0.26), sol, 150))
+		b.add_theme_stylebox_override("hover", _gaz_dugme_stil(Color(0.22, 0.15, 0.08), Tema.VURGU, sol, 150))
+		b.add_theme_stylebox_override("pressed", _gaz_dugme_stil(Color(0.34, 0.23, 0.10), Color("f0d890"), sol, 150))
+		b.add_theme_stylebox_override("disabled", _gaz_dugme_stil(Color(0.2, 0.18, 0.15, 0.85), Color(0.36, 0.32, 0.25), sol, 150))
+	if satir_ici:
+		b.size_flags_horizontal = Control.SIZE_SHRINK_END
+		b.autowrap_mode = TextServer.AUTOWRAP_OFF
 	ebeveyn.add_child(b)
 	return b
+
+# Defter satırı: "Anahtar ......... değer" (muhasebe defteri havası).
+func _satir(ebeveyn: Node, anahtar: String, deger: String, renk: Color = Color.WHITE) -> void:
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 4)
+	ebeveyn.add_child(h)
+	var a := _lbl(h, anahtar, 15, RENK["soluk"])
+	a.size_flags_horizontal = Control.SIZE_FILL
+	a.autowrap_mode = TextServer.AUTOWRAP_OFF
+	var nokta := Label.new()
+	nokta.text = "· · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·"
+	nokta.clip_text = true
+	nokta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	nokta.add_theme_font_size_override("font_size", Tema.boyut(10))
+	nokta.add_theme_color_override("font_color", Color(0.3, 0.22, 0.12, 0.45))
+	nokta.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	nokta.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	h.add_child(nokta)
+	var d := _lbl(h, deger, 16, renk if renk != Color.WHITE else Color.WHITE)
+	d.size_flags_horizontal = Control.SIZE_FILL
+	d.autowrap_mode = TextServer.AUTOWRAP_OFF
+	d.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	d.add_theme_font_override("font", Tema.kalin_fontu())
+
+# Durum şeridi: renkli damga gibi tek satır (sahiplik / uyarı).
+func _damga(ebeveyn: Node, metin: String, renk: Color) -> void:
+	renk = _murekkep(renk)
+	var pc := PanelContainer.new()
+	var sb := Tema.stil(Color(renk.r, renk.g, renk.b, 0.12), renk, 6, 2)
+	pc.add_theme_stylebox_override("panel", sb)
+	pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ebeveyn.add_child(pc)
+	var l := _lbl(pc, metin.to_upper() if false else metin, 16, renk)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.add_theme_font_override("font", Tema.kalin_fontu())
 
 func _bar(ebeveyn: Node, ad: String, deger: float, renk: Color, yazi: String = "") -> void:
 	var h := HBoxContainer.new()
@@ -819,7 +882,6 @@ func _yenile(zorla: bool) -> void:
 		"ben": _ben_paneli()
 		"silah": _silah_paneli()
 		"yetenek": _yetenek_paneli()
-	_kapat_dugmesi()
 	_kagit_mod = false
 	_arka.visible = _arka.ayarla(_gorsel_anahtarlari())
 
@@ -828,10 +890,10 @@ func _buyuk(t: String) -> String:
 		return t.to_upper()
 	return t.replace("i", "İ").replace("ı", "I").to_upper()
 
-func _gaz_dugme_stil(arka: Color, kenar: Color, sol: int) -> StyleBox:
+func _gaz_dugme_stil(arka: Color, kenar: Color, sol: int, sag: int = -1) -> StyleBox:
 	var sb := Tema.dugme_stil(arka, kenar)
 	sb.content_margin_left = sol
-	sb.content_margin_right = sol
+	sb.content_margin_right = sol if sag < 0 else sag
 	sb.content_margin_top = 8
 	sb.content_margin_bottom = 8
 	return sb
@@ -858,17 +920,14 @@ func _glif_sec(metin: String) -> String:
 func _gazete_baslik(ebeveyn: Node, metin: String, alt: String) -> void:
 	var ink := Tema.KAGIT_YAZI
 	var bas := _buyuk(metin)
-	var kelimeler := bas.split(" ", false)
-	var en_uzun := 0
-	for w in kelimeler:
-		en_uzun = maxi(en_uzun, w.length())
-	var boy := 52 if en_uzun <= 9 else (42 if en_uzun <= 12 else 32)
-	var t := _lbl(ebeveyn, "
-".join(kelimeler), boy, ink)
+	var boy := 40 if bas.length() <= 12 else (32 if bas.length() <= 18 else 26)
+	var t := _lbl(ebeveyn, bas, boy, ink)
 	t.add_theme_font_override("font", Tema.baslik_fontu())
-	t.add_theme_constant_override("line_spacing", -14)
-	t.autowrap_mode = TextServer.AUTOWRAP_OFF
-	t.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	t.add_theme_constant_override("line_spacing", -8)
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	t.custom_minimum_size = Vector2(0, 0)
+	t.clip_text = false
 	if alt != "":
 		var al := _lbl(ebeveyn, _buyuk(alt), 11, Tema.SOLUK)
 		al.add_theme_constant_override("line_spacing", 0)
@@ -924,16 +983,6 @@ func _ic_bolumu(i: int) -> void:
 			_btn(_ic, "Pencere başında bekle (2 saat)", func(): _sonuc_goster(oyun.isler_k.pusu_bekle(i)))
 	_btn(_ic, "Dışarı çık", kapat)
 
-func _kapat_dugmesi() -> void:
-	var h := HBoxContainer.new()
-	_ic.add_child(h)
-	var bosluk := Control.new()
-	bosluk.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	h.add_child(bosluk)
-	var b := _btn(h, "Kapat", kapat)
-	b.size_flags_horizontal = Control.SIZE_SHRINK_END
-	b.custom_minimum_size = Vector2(140, 34)
-
 func _sonuc_satiri() -> void:
 	if _sonuc != "":
 		_lbl(_ic, _sonuc, 15, RENK[_sonuc_tur])
@@ -944,8 +993,14 @@ func _bina_paneli() -> void:
 	var y: Dictionary = oyun.harita.yerler[i]
 	var bid: String = y["bolge"]
 	_baslik(_ic, y["ad"])
-	_lbl(_ic, "%s · %s" % [oyun.harita.bolgeler[bid]["ad"], oyun.tur_ad(i)], 15, RENK["soluk"]).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_btn(_ic, "Bölge bilgisi", bolge_ac.bind(bid))
+	var kunye := HBoxContainer.new()
+	_ic.add_child(kunye)
+	var kl := _lbl(kunye, "%s · %s" % [oyun.harita.bolgeler[bid]["ad"], oyun.tur_ad(i)], 14, RENK["soluk"])
+	kl.autowrap_mode = TextServer.AUTOWRAP_OFF
+	var bb := _btn(kunye, "Bölge bilgisi", bolge_ac.bind(bid))
+	bb.size_flags_horizontal = Control.SIZE_SHRINK_END
+	bb.custom_minimum_size = Vector2(0, 26)
+	bb.add_theme_font_size_override("font_size", Tema.boyut(13))
 	if sokak.oyuncu.iceride == i:
 		_ic_bolumu(i)
 		_kisisel_bolumu(i)
@@ -969,12 +1024,12 @@ func _bina_paneli() -> void:
 	elif k != "":
 		kontrol_yazi = "%s koruma parası alıyor" % oyun.hakim_ad(k)
 		kontrol_renk = RENK["warn"]
-	_lbl(_ic, kontrol_yazi, 17, kontrol_renk)
-	_lbl(_ic, "Haftalık gelir: %s" % oyun.para(oyun.haftalik(i)), 16)
+	_damga(_ic, kontrol_yazi, kontrol_renk)
+	_satir(_ic, "Haftalık gelir", oyun.para(oyun.haftalik(i)))
 	if r["haracli"]:
-		_lbl(_ic, "Biriken haraç: %s" % oyun.para(r["birikim"]), 16, RENK["altin"])
-	_lbl(_ic, "Direnç: %d · Fiyat: %s" % [oyun.TURLER[r["tur"]]["direnc"] * 10, oyun.para(oyun.fiyat(i))], 15, RENK["soluk"])
-	_ayrac(_ic)
+		_satir(_ic, "Biriken haraç", oyun.para(r["birikim"]), RENK["altin"])
+	_satir(_ic, "Direnç", str(oyun.TURLER[r["tur"]]["direnc"] * 10))
+	_satir(_ic, "Fiyat", oyun.para(oyun.fiyat(i)))
 	for g in oyun.gorevler:
 		if g["hedef"] == i:
 			var a: Dictionary = oyun.adam_bul(g["adam"])
@@ -984,7 +1039,13 @@ func _bina_paneli() -> void:
 	_adam_idler = [0]
 	var ob := OptionButton.new()
 	ob.focus_mode = Control.FOCUS_NONE
-	ob.add_item("Adam: otomatik (en uygun)")
+	ob.custom_minimum_size = Vector2(0, 34)
+	for dn in ["normal", "hover", "pressed", "disabled"]:
+		ob.add_theme_stylebox_override(dn, _gaz_dugme_stil(Color(0.11, 0.08, 0.055) if dn != "hover" else Color(0.22, 0.15, 0.08), Color(0.62, 0.48, 0.26), 10))
+	ob.add_theme_color_override("font_color", Tema.YAZI)
+	ob.add_theme_color_override("font_hover_color", Color("f6e6b4"))
+	ob.add_theme_font_size_override("font_size", Tema.boyut(15))
+	ob.add_item("Görevli: otomatik (en uygun adam)")
 	for a in bos:
 		ob.add_item("%s · beceri %d" % [a["ad"], oyun.beceri(a)])
 		_adam_idler.append(a["id"])
@@ -995,6 +1056,7 @@ func _bina_paneli() -> void:
 	var yakin := yakin_bina(i)
 	if not yakin:
 		_lbl(_ic, "Uzaktasın: işlem yapmak için binaya yaklaş.", 15, RENK["warn"])
+	_bolum(_ic, "Eylemler")
 	for gk in ["haraclan", "topla", "koru"]:
 		_btn(_ic, "%s  (%d dk iş)" % [oyun.GOREVLER[gk]["ad"], oyun.GOREVLER[gk]["is"]], func(): _sonuc_goster(oyun.gorev_ver(i, gk, secili), "Adam yola çıktı."), not yakin)
 	_btn(_ic, "Satın al  (%s temiz)" % oyun.para(oyun.fiyat(i)), func(): _sonuc_goster(oyun.satin_al(i), "Satın aldın."), r["sahip"] or not yakin)
@@ -1021,7 +1083,7 @@ func _bina_paneli() -> void:
 func _hareket_bolumu(i: int) -> void:
 	var g: Node3D = sokak.gorus
 	_ayrac(_ic)
-	_bolum(_ic, "Görüş ve hareket")
+	_bolum(_ic, "Gözlem")
 	var log: Array = oyun.ziyaret.get(i, [])
 	if g.bina_gorunur(i):
 		var n: Dictionary = g.nufus(i)
@@ -1037,7 +1099,7 @@ func _hareket_bolumu(i: int) -> void:
 		return
 	if log.is_empty():
 		_lbl(_ic, "Gelen giden kaydı yok.", 14, RENK["soluk"])
-	for k in range(log.size() - 1, maxi(-1, log.size() - 9), -1):
+	for k in range(log.size() - 1, maxi(-1, log.size() - 6), -1):
 		var e: Dictionary = log[k]
 		var renk: Color = RENK["warn"] if e["tur"] != "sivil" else RENK["soluk"]
 		_lbl(_ic, "%s  %s (%d kişi) %s" % [oyun.saat_yazi(e["t"]), e["ad"], e["kisi"], e["ne"]], 13, renk)

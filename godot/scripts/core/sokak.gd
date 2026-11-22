@@ -120,7 +120,9 @@ func _ready() -> void:
 	hud.add_child(_ipucu)
 	var yardim := Label.new()
 	yardim.text = "Sol tık: git/binaya gir/kovala · Sağ tık: bina-adam bilgisi · Sağ tık sürükle: döndür · Tekerlek: yakınlaş · WASD: kaydır · C: ortala · Boşluk: duraklat · V: sis aç/kapa · 1/2/3: hız · B: bölge · T: adamlar · F: defter · H: eve git · F6: kaydet · F9: yükle · F11: tam ekran"
-	yardim.position = Vector2(205, 700)
+	yardim.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	yardim.offset_left = 205
+	yardim.offset_top = -26
 	yardim.add_theme_font_size_override("font_size", 12)
 	yardim.modulate = Color(1, 1, 1, 0.5)
 	hud.add_child(yardim)
