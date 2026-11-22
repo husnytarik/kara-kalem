@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://1akgkorsd8kt"
-path="res://.godot/imported/grup_polis.png-fb00607507dbac99848625628da67243.ctex"
+path="res://.godot/imported/karsilasma_polis.png-d220c882c70b710a7a92d0b5838ae2b9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/panel/grup_polis.png"
-dest_files=["res://.godot/imported/grup_polis.png-fb00607507dbac99848625628da67243.ctex"]
+source_file="res://assets/ui/panel/karsilasma_polis.png"
+dest_files=["res://.godot/imported/karsilasma_polis.png-d220c882c70b710a7a92d0b5838ae2b9.ctex"]
 
 [params]
 

@@ -893,9 +893,6 @@ func _gorsel_anahtarlari() -> Array:
 			return ozel + [tur, "bina"]
 		"bolge":
 			return ["bolge_" + str(_hedef), "bolge"]
-		"grup":
-			if _hedef is Dictionary and _hedef.has("tur"):
-				return ["grup_" + str(_hedef["tur"]), "grup"]
 	return [_mod]
 
 # İçerideyken: haritada görünmezsin, kimse sana bulaşamaz. Ev ise dinlenip zaman geçirebilirsin.
@@ -1586,6 +1583,8 @@ func _diyalog_ciz() -> void:
 	_dlg.custom_minimum_size = Vector2(480, 460)
 	_dlg_arka.visible = true
 	var arka_ad := "karsilasma"
+	if str(g.get("tur", "")) == "polis" and ResourceLoader.exists("res://assets/ui/panel/karsilasma_polis.png"):
+		arka_ad = "karsilasma_polis"
 	match str(_dlg_sonuc.get("savas_sonuc", "")):
 		"zafer":
 			arka_ad = "savas_win"
