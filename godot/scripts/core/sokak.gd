@@ -966,6 +966,17 @@ func _ekran_cek(arg: String) -> void:
 			kamera.mesafe = 30.0
 			kamera._pitch = float(OS.get_environment("BINA_PITCH")) if OS.get_environment("BINA_PITCH") != "" else -0.35
 			await get_tree().create_timer(1.0, true, false, true).timeout
+		elif p[1] == "savas":
+			var gs: Dictionary = {}
+			for x in gruplar.liste:
+				if x["tur"] == "rakip":
+					gs = x
+					break
+			gs["kisi"] = 4
+			oyun.adam_tut()
+			oyun.adam_tut()
+			savas_baslat(gs, 1.0, func(_s): pass, p[2] if p.size() > 2 else "sokak", false)
+			await get_tree().create_timer(1.0, true, false, true).timeout
 		elif p[1] == "bolge":
 			arayuz.bolge_ac("southside")
 		await get_tree().create_timer(1.5, true, false, true).timeout

@@ -25,12 +25,13 @@ var _pivot: Node3D
 var _yay: SpringArm3D
 var _kam: Camera3D
 var _yaw := 0.0
-var _pitch := -0.15
+var _pitch := -0.1
 var _bitis := false
 var _bitis_t := 0.0
 var _bitis_yazi := ""
 var _bitis_sonuc := ""
 var _hud: CanvasLayer
+var _nis: Control
 var _l_sol: Label
 var _l_silah: Label
 var _l_orta: Label
@@ -119,35 +120,61 @@ func _kamera_kur() -> void:
 	_pivot = Node3D.new()
 	add_child(_pivot)
 	_yay = SpringArm3D.new()
-	_yay.spring_length = 3.4
+	_yay.spring_length = 4.2
 	_yay.collision_mask = 1
 	_yay.margin = 0.3
+	_yay.position = Vector3(0.75, 0.0, 0.0)   # omuz ustu: kamera saga kayik, nisan ekran ortasinda
 	_pivot.add_child(_yay)
 	_kam = Camera3D.new()
-	_kam.fov = 70.0
-	_kam.h_offset = 0.7
+	_kam.fov = 62.0
 	_kam.environment = _ortam_yap()
 	_yay.add_child(_kam)
 	_kam.make_current()
 	_yaw = -PI / 2.0   # dünya +X yönüne (düşmana) bak
-	_pivot.global_position = oyuncu.global_position + Vector3(0, 1.6, 0)
+	_pivot.global_position = oyuncu.global_position + Vector3(0, 1.75, 0)
 
 func _hud_kur() -> void:
 	_hud = CanvasLayer.new()
 	_hud.layer = 20
 	add_child(_hud)
 	_l_sol = _etiket(Vector2(20, 14), 20)
-	_l_orta = _etiket(Vector2(0, 280), 44)
-	_l_orta.size = Vector2(1280, 80)
+	_l_orta = _etiket(Vector2(0, 0), 44)
+	_l_orta.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_l_orta.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_l_orta.offset_top = -140.0
+	_l_orta.offset_left = -400.0
+	_l_orta.offset_right = 400.0
 	_l_orta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_l_silah = _etiket(Vector2(20, 640), 20)
+	_l_silah = _etiket(Vector2(0, 0), 20)
+	_l_silah.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	_l_silah.offset_left = 20.0
+	_l_silah.offset_top = -72.0
 	_hp_bar = ProgressBar.new()
-	_hp_bar.position = Vector2(20, 672)
-	_hp_bar.size = Vector2(300, 18)
+	_hp_bar.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	_hp_bar.offset_left = 20.0
+	_hp_bar.offset_top = -40.0
+	_hp_bar.offset_right = 320.0
+	_hp_bar.offset_bottom = -22.0
 	_hp_bar.show_percentage = false
 	_hud.add_child(_hp_bar)
-	var nis := _etiket(Vector2(632, 350), 28)
-	nis.text = "+"
+	_yay.position = Vector3(0.75, 0.0, 0.0)   # omuz ustu: kamera saga kayik, nisan ekran ortasinda
+	_nis = Control.new()
+	_nis.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_nis.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.add_child(_nis)
+	for k in 4:
+		var r := ColorRect.new()
+		r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var yatay := k < 2
+		var isaret := -1.0 if k % 2 == 0 else 1.0
+		r.size = Vector2(9, 2) if yatay else Vector2(2, 9)
+		r.position = (Vector2(isaret * 7.0 + (-9.0 if isaret < 0 else 0.0), -1.0) if yatay else Vector2(-1.0, isaret * 7.0 + (-9.0 if isaret < 0 else 0.0)))
+		_nis.add_child(r)
+	var nok := ColorRect.new()
+	nok.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	nok.size = Vector2(2, 2)
+	nok.position = Vector2(-1, -1)
+	_nis.add_child(nok)
 	var ipucu := _etiket(Vector2(20, 40), 14)
 	ipucu.text = "WASD: hareket · Shift: koş · Fare: nişan · Sol tık: ateş · R: doldur · Esc: menü"
 	ipucu.modulate = Color(1, 1, 1, 0.6)
@@ -250,7 +277,17 @@ func _physics_process(_dt: float) -> void:
 	oyuncu.kos = Input.is_key_pressed(KEY_SHIFT)
 	oyuncu.bakis = _yaw
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		oyuncu.oyuncu_ates(_kam.global_position, -_kam.global_transform.basis.z)
+		var cikis: Vector3 = oyuncu.global_position + Vector3(0, 1.45, 0)
+		var yon := (nisan_noktasi() - cikis).normalized()
+		oyuncu.oyuncu_ates(cikis, yon)
+
+	_yay.position = Vector3(0.75, 0.0, 0.0)   # omuz ustu: kamera saga kayik, nisan ekran ortasinda
+func nisan_noktasi() -> Vector3:
+	var o: Vector3 = _kam.global_position
+	var f: Vector3 = -_kam.global_transform.basis.z
+	var q := PhysicsRayQueryParameters3D.create(o, o + f * 90.0, 1 | 2, [oyuncu.get_rid()])
+	var r := get_world_3d().direct_space_state.intersect_ray(q)
+	return r["position"] if not r.is_empty() else o + f * 90.0
 
 func _process(dt: float) -> void:
 	var hedef_poz: Vector3 = oyuncu.global_position
@@ -276,6 +313,9 @@ func _process(dt: float) -> void:
 	_hp_bar.max_value = oyuncu.hp_max
 	_hp_bar.value = oyuncu.hp
 	_vurus_t = maxf(0.0, _vurus_t - dt)
+	var nc := Color(1, 0.25, 0.2) if _vurus_t > 0.0 else Color(1, 1, 1, 0.9)
+	for c in _nis.get_children():
+		(c as ColorRect).color = nc
 	if _bitis:
 		_bitis_t -= dt
 		_l_orta.text = _bitis_yazi

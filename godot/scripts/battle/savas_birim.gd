@@ -103,6 +103,7 @@ func kur(s: Node3D, v: Dictionary, poz: Vector3) -> void:
 	_etiket.outline_size = 8
 	_etiket.position.y = 2.3
 	_etiket.modulate = renk.lerp(Color.WHITE, 0.5)
+	_etiket.visible = not oyuncu_mu
 	if lider:
 		_etiket.pixel_size = 0.008
 		_etiket.modulate = Color(1.0, 0.8, 0.3)
@@ -140,7 +141,7 @@ func _physics_process(dt: float) -> void:
 			_mat.albedo_color = renk
 	if oyuncu_mu and not oto:
 		_hareket(girdi_yon, 7.5 if kos else 5.0, dt)
-		_govde.rotation.y = lerp_angle(_govde.rotation.y, bakis + PI, 14.0 * dt)
+		_govde.rotation.y = lerp_angle(_govde.rotation.y, bakis, 14.0 * dt)
 	else:
 		_ai(dt)
 
@@ -196,7 +197,7 @@ func _ai(dt: float) -> void:
 			_kac = -_kac
 	_hareket(hareket, hiz_yuru, dt)
 	bakis = atan2(-yon.x, -yon.z)
-	_govde.rotation.y = lerp_angle(_govde.rotation.y, bakis + PI, 12.0 * dt)
+	_govde.rotation.y = lerp_angle(_govde.rotation.y, bakis, 12.0 * dt)
 	if _gorus and d <= menzil:
 		_ates_ai(d)
 
