@@ -86,6 +86,7 @@ func _ready() -> void:
 	bs.name = "BinaSimge"
 	add_child(bs)
 	bs.kur(oyun, harita, kamera)
+	_bs = bs
 	gruplar.yakinlasti.connect(_karsilasti)
 	gruplar.temas.connect(func(g): arayuz.karsilasma_ac(g))
 	arayuz = load("res://scripts/ui/arayuz.gd").new()
@@ -409,6 +410,7 @@ var _gunes: DirectionalLight3D
 var _hover_sure := 0.0
 var _gh: Dictionary = {}
 var _hi := -1
+var _bs: Node3D   # bina simgeleri (simge tıklama + bina vurgusu)
 
 func _duraklat_menu() -> void:
 	if _dur != null:
@@ -433,13 +435,14 @@ func _unhandled_input(e: InputEvent) -> void:
 		var k: Camera3D = kamera.kamera()
 		var o := k.project_ray_origin(e.position)
 		var n := k.project_ray_normal(e.position)
-		var gt: Dictionary = gruplar.isinla(o, n)
+		var ik: int = _bs.ikon_isinla(e.position)   # bina simgesine tıklamak binaya tıklamakla aynı
+		var gt: Dictionary = gruplar.isinla(o, n) if ik < 0 else {}
 		if not gt.is_empty():
 			_gir_bina = -1
 			takip_ver(gt)   # gruba tıkla: kovala, yetişince karşılaşma diyaloğu açılır
 			return
 		takip_birak()
-		var i: int = harita.yer_isinla(o, n)
+		var i: int = ik if ik >= 0 else harita.yer_isinla(o, n)
 		if i >= 0:
 			if oyuncu.iceride == i:
 				arayuz.bina_ac(i)
@@ -457,11 +460,12 @@ func _unhandled_input(e: InputEvent) -> void:
 			_sag_basla = e.position
 		elif e.position.distance_to(_sag_basla) < 6.0:
 			var k2: Camera3D = kamera.kamera()
-			var g2: Dictionary = gruplar.isinla(k2.project_ray_origin(e.position), k2.project_ray_normal(e.position))
+			var ik2: int = _bs.ikon_isinla(e.position)
+			var g2: Dictionary = gruplar.isinla(k2.project_ray_origin(e.position), k2.project_ray_normal(e.position)) if ik2 < 0 else {}
 			if not g2.is_empty():
 				arayuz.grup_ac(g2)
 				return
-			var i2: int = harita.yer_isinla(k2.project_ray_origin(e.position), k2.project_ray_normal(e.position))
+			var i2: int = ik2 if ik2 >= 0 else harita.yer_isinla(k2.project_ray_origin(e.position), k2.project_ray_normal(e.position))
 			if i2 >= 0:
 				arayuz.bina_ac(i2)
 	elif e is InputEventKey and e.pressed and not e.echo:
@@ -543,6 +547,13 @@ func _process(delta: float) -> void:
 		_hi = harita.yer_isinla(k.project_ray_origin(fp), k.project_ray_normal(fp))
 	var gh: Dictionary = _gh
 	var i: int = _hi
+	if _bs.hover_i >= 0:
+		i = _bs.hover_i   # fare bir simgenin üstündeyse o bina
+		gh = {}
+	# tıklanabilir şeyin üstünde: bina hattı + el imleci
+	var tikla_i: int = -1 if (arayuz.modal or savas_aktif) else (i if gh.is_empty() else -1)
+	_bs.vurgula(tikla_i)
+	Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND if (tikla_i >= 0 or (not gh.is_empty() and not arayuz.modal)) else Input.CURSOR_ARROW)
 	_oy_etiket.visible = oyuncu.iceride < 0
 	oyun.ic_mekan = oyuncu.iceride
 	var yz := "%s · %d kişi" % [oyun.profil.get("ad", "Sen"), 1 + oyun.adamlar.size()]

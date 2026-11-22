@@ -27,6 +27,10 @@ var _ogeler: Array = []   # {i, kok, simge, glif, serit, serit_l, kat}
 var _tex: Dictionary = {}
 var _sure := 0.0
 var _olcek := -1.0
+var hover_i := -1          # fare altındaki simgenin bina indeksi (yoksa -1)
+var _hov_k := -1
+var _vurgulu := -1
+var _dugum: Dictionary = {}   # bina indeksi -> bina düğümü
 
 func kur(o: Node, h: Node, ka: Node) -> void:
 	oyun = o
@@ -168,6 +172,7 @@ func _oge_kur(i: int, n: Node3D) -> void:
 	gl.render_priority = 4
 	simge.add_child(gl)
 	var ad: String = y["ad"]
+	_dugum[i] = n
 	_ogeler.append({"i": i, "kok": kok, "simge": simge, "sp": sp, "ik": ik, "gl": gl, "ad": ad, "kat": ""})
 
 func _guncelle() -> void:
@@ -250,15 +255,11 @@ func _k_goster(oge: int) -> void:
 	_k_tw = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_k_tw.tween_property(_k_kutu, "modulate:a", 1.0, 0.15)
 
-func _fare_tara() -> void:
+# Verilen ekran noktasına en yakın (22 px içinde) görünür simgenin _ogeler indeksi; yoksa -1.
+func _simge_bul(fare: Vector2) -> int:
 	var cam: Camera3D = get_viewport().get_camera_3d()
 	if cam == null:
-		return
-	var fare: Vector2 = get_viewport().get_mouse_position()
-	for a in OS.get_cmdline_user_args():   # test: --fare=x,y
-		if a.begins_with("--fare="):
-			var f: PackedStringArray = a.substr(7).split(",")
-			fare = Vector2(float(f[0]), float(f[1]))
+		return -1
 	var en := -1
 	var en_d := 22.0 * 22.0
 	for k in _ogeler.size():
@@ -271,12 +272,45 @@ func _fare_tara() -> void:
 			continue
 		if sp.visibility_range_end > 0.0 and cam.global_position.distance_to(w) > sp.visibility_range_end:
 			continue
-		var q: Vector2 = cam.unproject_position(w)
-		var d: float = q.distance_squared_to(fare)
+		var d: float = cam.unproject_position(w).distance_squared_to(fare)
 		if d < en_d:
 			en_d = d
 			en = k
+	return en
+
+# Tıklama için: ekran noktasındaki simgenin bina indeksi (yoksa -1).
+func ikon_isinla(fare: Vector2) -> int:
+	var k := _simge_bul(fare)
+	return _ogeler[k]["i"] if k >= 0 else -1
+
+# Fare üstündeki binayı vurgula (-1: hiçbiri). Hat kalınlığı kamera uzaklığıyla büyür.
+func vurgula(i: int) -> void:
+	var kal: float = clampf(kamera.mesafe / 110.0, 0.5, 3.0)
+	if i != _vurgulu:
+		if _dugum.has(_vurgulu):
+			_dugum[_vurgulu].vurgu(false)
+		_vurgulu = i
+	if i >= 0 and _dugum.has(i):
+		_dugum[i].vurgu(true, kal)
+
+func _fare_tara() -> void:
+	var cam: Camera3D = get_viewport().get_camera_3d()
+	if cam == null:
+		return
+	var fare: Vector2 = get_viewport().get_mouse_position()
+	for a in OS.get_cmdline_user_args():   # test: --fare=x,y
+		if a.begins_with("--fare="):
+			var f: PackedStringArray = a.substr(7).split(",")
+			fare = Vector2(float(f[0]), float(f[1]))
+	var en := _simge_bul(fare)
 	_k_goster(en)
+	hover_i = _ogeler[en]["i"] if en >= 0 else -1
+	if en != _hov_k:   # üstüne gelinen simge hafifçe büyür
+		if _hov_k >= 0 and _hov_k < _ogeler.size():
+			(_ogeler[_hov_k]["simge"] as Node3D).scale = Vector3.ONE * _olcek
+		_hov_k = en
+		if en >= 0:
+			(_ogeler[en]["simge"] as Node3D).scale = Vector3.ONE * _olcek * 1.18
 	if en >= 0:
 		var q2: Vector2 = cam.unproject_position((_ogeler[en]["sp"] as Sprite3D).global_position)
 		_k_kutu.position = q2 + Vector2(22, -11)
@@ -291,6 +325,7 @@ func _process(dt: float) -> void:
 	var s: float = clampf(m / 90.0, 1.0, 3.0)
 	if absf(s - _olcek) > 0.01:
 		_olcek = s
-		for o in _ogeler:
-			(o["simge"] as Node3D).scale = Vector3.ONE * s
+		for k in _ogeler.size():
+			var o: Dictionary = _ogeler[k]
+			(o["simge"] as Node3D).scale = Vector3.ONE * s * (1.18 if k == _hov_k else 1.0)
 			(o["simge"] as Node3D).position.y = 4.0 * s

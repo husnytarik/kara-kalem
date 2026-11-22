@@ -5,6 +5,7 @@ extends Node3D
 # Konum (position) binanın TABAN ORTASIDIR.
 
 static var _sh: Shader
+static var _hat_sh: Shader
 
 @export var ad := "":
 	set(v):
@@ -28,6 +29,7 @@ static var _sh: Shader
 var _kutu: MeshInstance3D
 var _govde: StaticBody3D
 var _etiket: Label3D
+var _hat: MeshInstance3D
 
 func _ready() -> void:
 	add_to_group("bina")
@@ -92,3 +94,23 @@ func dunya_aabb() -> AABB:
 			for y in [0.0, boyut.y]:
 				a = a.expand(t * Vector3(sx * yari.x, y, sz * yari.z))
 	return a
+
+# Fare üstüne gelince binanın çevresinde altın bir hat çizer. kalinlik: dünya birimi (kamera uzaklığına göre verilir).
+func vurgu(acik: bool, kalinlik := 1.0) -> void:
+	if not acik:
+		if _hat != null:
+			_hat.visible = false
+		return
+	if _hat == null:
+		if _hat_sh == null:
+			_hat_sh = load("res://assets/environment/shaders/hat.gdshader")
+		_hat = MeshInstance3D.new()
+		_hat.mesh = BoxMesh.new()
+		var m := ShaderMaterial.new()
+		m.shader = _hat_sh
+		_hat.material_override = m
+		_hat.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(_hat)
+	(_hat.mesh as BoxMesh).size = boyut + Vector3(2.0, 1.5, 2.0) * kalinlik
+	_hat.position = Vector3(0, boyut.y / 2.0 + 0.25 * kalinlik, 0)
+	_hat.visible = true
