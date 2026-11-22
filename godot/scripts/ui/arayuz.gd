@@ -1674,6 +1674,8 @@ func _diyalog_ciz() -> void:
 	var arka_ad := "karsilasma"
 	if str(g.get("tur", "")) == "polis" and ResourceLoader.exists("res://assets/ui/panel/karsilasma_polis.png"):
 		arka_ad = "karsilasma_polis"
+	if str(g.get("tur", "")) == "sivil" and ResourceLoader.exists("res://assets/ui/panel/grup_sivil.png"):
+		arka_ad = "grup_sivil"
 	match str(_dlg_sonuc.get("savas_sonuc", "")):
 		"zafer":
 			arka_ad = "savas_win"
