@@ -3,22 +3,22 @@ extends RefCounted
 
 const OLCEK := 0.75   # tüm yazı boyutları bununla çarpılır (arayüzü küçültmek için düşür)
 
-const ARKA := Color(0.105, 0.075, 0.052, 0.94)    # koyu deri/kahve
-const ARKA2 := Color(0.15, 0.108, 0.075, 0.96)
-const KENAR := Color(0.40, 0.29, 0.15)                # pirinç kenar
-const YAZI := Color("e6d9bd")                         # krem
-const SOLUK := Color("a8977a")
-const VURGU := Color("e0a93a")                        # altın
-const IYI := Color("74c260")
-const KOTU := Color("e0513a")
-const UYARI := Color("e6a52e")
-const BILGI := Color("9dbbdc")
-const DUGME := Color(0.16, 0.115, 0.078)
-const DUGME_UZERI := Color(0.24, 0.17, 0.10)
-const DUGME_BASILI := Color(0.33, 0.23, 0.10)
-const KAGIT := Color("d8c39a")                        # eski kâğıt (karar kartı)
-const KAGIT_YAZI := Color("2b1d10")
-const KAGIT_KENAR := Color("7a5a30")
+const ARKA := Color(0.095, 0.086, 0.078, 0.94)    # koyu deri/kahve
+const ARKA2 := Color(0.135, 0.124, 0.114, 0.96)
+const KENAR := Color(0.38, 0.34, 0.27)                # pirinç kenar
+const YAZI := Color("e3ddd0")                         # krem
+const SOLUK := Color("a49d90")
+const VURGU := Color("cdb177")                        # altın
+const IYI := Color("84ab76")
+const KOTU := Color("c4655a")
+const UYARI := Color("d1ab5f")
+const BILGI := Color("a1afc0")
+const DUGME := Color(0.15, 0.137, 0.125)
+const DUGME_UZERI := Color(0.22, 0.2, 0.175)
+const DUGME_BASILI := Color(0.30, 0.265, 0.2)
+const KAGIT := Color("d5cab3")                        # eski kâğıt (karar kartı)
+const KAGIT_YAZI := Color("29231b")
+const KAGIT_KENAR := Color("6f6450")
 
 static var _yazi_tipi: Font
 static func yazi_tipi() -> Font:
