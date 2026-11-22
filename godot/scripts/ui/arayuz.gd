@@ -44,27 +44,26 @@ var _dlg_g: Dictionary = {}
 var _dlg_sonuc: Dictionary = {}
 # Sağ üstteki oyuncu madalyonu (tıklayınca "Ben" paneli).
 class Madalyon extends Control:
+	var _tex: Texture2D = load("res://assets/ui/profil.png")
 	func _init() -> void:
-		custom_minimum_size = Vector2(78, 78)
+		custom_minimum_size = Vector2(96, 96)
 		mouse_filter = Control.MOUSE_FILTER_STOP
 		tooltip_text = "Sen — tıkla: Ben paneli"
 	func _draw() -> void:
 		var c := size / 2.0
 		var r := minf(size.x, size.y) / 2.0 - 3.0
-		draw_circle(c, r, Color(0.30, 0.05, 0.05))
-		draw_circle(c, r * 0.86, Color(0.42, 0.08, 0.07))
-		draw_circle(c + Vector2(0, -r * 0.1), r * 0.5, Color(0.55, 0.14, 0.1, 0.5))
-		var f := func(x: float, y: float) -> Vector2: return c + Vector2(x, y) * r
-		draw_colored_polygon(PackedVector2Array([f.call(-0.62, 0.76), f.call(-0.56, 0.46), f.call(-0.25, 0.32), f.call(0.25, 0.32), f.call(0.56, 0.46), f.call(0.62, 0.76)]), Color(0.07, 0.07, 0.09))
-		draw_colored_polygon(PackedVector2Array([f.call(-0.14, 0.32), f.call(0.14, 0.32), f.call(0.0, 0.66)]), Color(0.88, 0.85, 0.78))
-		draw_colored_polygon(PackedVector2Array([f.call(-0.04, 0.38), f.call(0.04, 0.38), f.call(0.05, 0.64), f.call(-0.05, 0.64)]), Color(0.6, 0.1, 0.08))
-		draw_circle(f.call(0.0, 0.04), r * 0.28, Color(0.78, 0.6, 0.45))
-		draw_colored_polygon(PackedVector2Array([f.call(-0.52, -0.12), f.call(0.52, -0.12), f.call(0.42, -0.03), f.call(-0.42, -0.03)]), Color(0.05, 0.04, 0.04))
-		draw_colored_polygon(PackedVector2Array([f.call(-0.30, -0.1), f.call(-0.26, -0.56), f.call(0.26, -0.56), f.call(0.30, -0.1)]), Color(0.08, 0.06, 0.05))
-		draw_rect(Rect2(f.call(-0.29, -0.2), Vector2(0.58, 0.07) * r), Color(0.55, 0.12, 0.09))
-		draw_arc(c, r, 0.0, TAU, 56, Color(0.02, 0.012, 0.008), 6.0, true)
-		draw_arc(c, r, 0.0, TAU, 56, Color(0.86, 0.64, 0.22), 3.0, true)
-		draw_arc(c, r - 4.0, 0.0, TAU, 56, Color(0.5, 0.36, 0.14), 1.2, true)
+		draw_circle(c, r + 2.0, Color(0.02, 0.012, 0.008))
+		var pts := PackedVector2Array()
+		var uvs := PackedVector2Array()
+		for k in 48:
+			var a := TAU * k / 48.0
+			var d := Vector2(cos(a), sin(a))
+			pts.append(c + d * (r - 4.0))
+			uvs.append(Vector2(0.5, 0.5) + d * 0.5)
+		draw_colored_polygon(pts, Color(1, 1, 1), uvs, _tex)
+		draw_arc(c, r - 3.0, 0.0, TAU, 56, Color(0.02, 0.012, 0.008), 3.0, true)
+		draw_arc(c, r, 0.0, TAU, 56, Color(0.62, 0.53, 0.36), 2.5, true)
+		draw_arc(c, r - 6.0, 0.0, TAU, 56, Color(0.62, 0.53, 0.36, 0.55), 1.0, true)
 
 const PANEL_GENISLIK := 420   # tüm sağ paneller aynı genişlikte
 const YAKIN := 16.0          # bir binayla/grupla işlem için gereken en büyük uzaklık (m)
@@ -75,7 +74,6 @@ func kur(o: Node, s: Node) -> void:
 	_ust_cubuk()
 	_amac_paneli()
 	_sag_panel()
-	_madalyon()
 	_kapat_x()
 	_diyalog_kur()
 	var saat := CepSaati.new()
@@ -98,6 +96,7 @@ func kur(o: Node, s: Node) -> void:
 	rp.offset_right = 0
 	rp.offset_bottom = 0
 	add_child(rp)
+	_madalyon()
 	_log_panel = PanelContainer.new()
 	var lsb := Tema.koyu_panel(2)
 	lsb.set_content_margin(SIDE_LEFT, 14)
@@ -559,11 +558,11 @@ func _ust_cubuk() -> void:
 
 func _madalyon() -> void:
 	var m := Madalyon.new()
-	m.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	m.offset_left = -88
-	m.offset_right = -10
-	m.offset_top = 6
-	m.offset_bottom = 84
+	m.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	m.offset_left = -8      # çeyrek dairenin merkezine (sol alt köşe) doğru
+	m.offset_right = 76
+	m.offset_top = -76
+	m.offset_bottom = 8
 	m.gui_input.connect(func(e: InputEvent) -> void:
 		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 			ben_ac()
