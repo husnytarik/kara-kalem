@@ -838,7 +838,11 @@ func _gaz_dugme_stil(arka: Color, kenar: Color, sol: int) -> StyleBox:
 
 # Düğme metnine göre simge dosyası (assets/ui/icons/<ad>.png).
 func _glif_sec(metin: String) -> String:
-	var kelimeler := metin.to_lower().split(" ")
+	var dusuk := metin.to_lower()
+	for kv in [["dışarı çık", "kapi"], ["bölge bilgisi", "bilgi_rulo"], ["haracı topla", "haraci_topla"]]:
+		if dusuk.begins_with(kv[0]):
+			return kv[1]
+	var kelimeler := dusuk.split(" ")
 	var tablo := [["satın", "temiz"], ["öde", "temiz"], ["sat", "temiz"], ["yatırım", "temiz"], ["rüşvet", "kirli"], ["hesaplaş", "kirli"], ["saldır", "guc"], ["silah", "guc"], ["ateş", "guc"], ["infaz", "guc"], ["haraç", "tehdit"], ["kov", "tehdit"], ["soruştur", "tehdit"], ["koru", "ittifak"], ["bölge", "ittifak"], ["af", "ittifak"], ["tazminat", "ittifak"], ["başvur", "ittifak"]]
 	for kv in tablo:
 		for w in kelimeler:
@@ -1823,6 +1827,9 @@ func _kisisel_bolumu(i: int) -> void:
 			_lbl(v, c["not"], 12, Tema.SOLUK)
 			var b := _btn(h, "Tut
 $%d" % int(c["fiyat"]), func(): _sonuc_goster(oyun.pazar_k.tut(i, idx)), oyun.adamlar.size() >= oyun.EKIP_MAX)
+			b.icon = load("res://assets/ui/icons/tokalasma.png")
+			b.expand_icon = true
+			b.add_theme_constant_override("icon_max_width", 30)
 			b.tooltip_text = "Kirli para ile tutulur. Beceri %d" % int((c["yumruk"] * 0.5 + c["bicak"] * 0.3 + c["zeka"] * 0.2))
 			n += 1
 		var jv := _kutu(_ic, "Kirli İşler (ün %d)" % int(oyun.kis_k.taninma()))
