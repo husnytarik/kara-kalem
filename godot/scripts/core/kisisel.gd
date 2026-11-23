@@ -251,7 +251,7 @@ func saat() -> void:
 			k["uyari"]["agir"] = true
 			oyun.kayit("%s ağırlaştı! Hemen eve git, karnını doyur, ilaç al; yoksa ölebilirsin." % k["hasta_ad"], "bad")
 		if k["agir"] >= 100.0 and oyun.son.is_empty():
-			oyun.son = {"tur": "yenilgi", "metin": "%s seni yendi. Kendine bakmadın; bedenin dayanamadı. Southside sessizce bir adam eksildi." % k["hasta_ad"]}
+			oyun.ol("%s seni yendi. Kendine bakmadın; bedenin dayanamadı." % k["hasta_ad"])
 		if oyun.t >= k["hasta"] and k["agir"] >= 50.0:
 			k["hasta"] = oyun.t + int(0.5 * oyun.DAY)   # geçmedi, uzadı
 	elif k["hasta_ad"] != "":

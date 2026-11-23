@@ -130,6 +130,7 @@ var aile: Dictionary = {}       # aile kültürü (aile.gd)
 var aile_k: RefCounted
 var un: Dictionary = {}         # ün eksenleri birikimi (un.gd)
 var un_k: RefCounted
+var kisi_k: RefCounted
 var uyeler: Array = []   # aile üyeleri: {uid, ad, fak, rutbe, durum: aktif|olu, iliski, ev}
 var _uid := 0
 var _pid := 0
@@ -225,6 +226,8 @@ func kur(h: Node3D) -> void:
 	yet_k.baslat()
 	aile_k = load("res://scripts/core/aile.gd").new(self)
 	aile = aile_k.yeni()
+	kisi_k = load("res://scripts/core/kisiler.gd").new(self)
+	kisi_k.hazirla()
 	un_k = load("res://scripts/core/un.gd").new(self)
 	un = un_k.yeni()
 	sil_k = load("res://scripts/core/silahlik.gd").new(self)
@@ -416,6 +419,16 @@ func harcama(miktar: float, mod: String) -> bool:
 	kirli -= d
 	temiz -= miktar - d
 	return true
+
+# Aile başı öldü: mirasçı varsa sorulur, yoksa hayat biter.
+func ol(neden: String) -> void:
+	if not son.is_empty():
+		return
+	if kisi_k.adaylar().is_empty():
+		son = {"tur": "yenilgi", "metin": neden + "\n\n" + kisi_k.ozet_yazi() + "\nMirasçı kalmadı; isim sokaklarda unutuldu."}
+	else:
+		son = {"tur": "olum", "metin": neden}
+	degisti.emit()
 
 func hata(m: String) -> Dictionary:
 	return {"ok": false, "msg": m}
@@ -1049,6 +1062,7 @@ func durum_yukle(d: Dictionary) -> void:
 	yet = d.get("yet", yet_k.yeni())
 	aile = d.get("aile", aile_k.yeni())
 	un = d.get("un", un_k.yeni())
+	kisi_k.hazirla()
 	acilis = d.get("acilis", {"daire": true, "calisti": true})
 	if d.has("sil"):
 		sil = d["sil"]
@@ -1114,6 +1128,7 @@ func _gun() -> void:
 	kara_k.gun()
 	yet_k.gun()
 	un_k.gun()
+	kisi_k.gun()
 	sil_k.gun()
 	for i in isy:
 		var r: Dictionary = isy[i]

@@ -1582,15 +1582,38 @@ func _son_kontrol() -> void:
 	v.add_theme_constant_override("separation", 10)
 	pc.add_child(v)
 	var zafer: bool = oyun.son["tur"] == "zafer"
-	var b := _lbl(v, "ZAFER" if zafer else "OYUN BİTTİ", 28, RENK["good"] if zafer else RENK["bad"])
+	var olum: bool = oyun.son["tur"] == "olum"
+	var bas := "ZAFER" if zafer else ("HAYATIN SONU" if olum else "OYUN BİTTİ")
+	var b := _lbl(v, bas, 28, RENK["good"] if zafer else RENK["bad"])
 	b.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_lbl(v, oyun.son["metin"], 16)
+	if olum:
+		_lbl(v, "Devam edelim mi? Ailenin başına kim geçsin? (Servetin %%%d'i kaybolur.)" % int(round(oyun.kisi_k.kayip_orani() * 100.0)), 16, RENK["warn"])
+		var K := preload("res://scripts/core/kisiler.gd")
+		for k in oyun.kisi_k.adaylar():
+			var kid: int = int(k["id"])
+			_btn(v, "%s — %s, %d yaş · %s" % [k["ad"], K.ROL_AD[k["rol"]], oyun.kisi_k.yas(k), oyun.kisi_k.oz_yazi(k["oz"])], func(): _miras_sec(kid))
+		_btn(v, "Hayır, hayat burada bitsin", func():
+			oyun.son = {"tur": "yenilgi", "metin": oyun.son["metin"] + "\n\n" + oyun.kisi_k.ozet_yazi()}
+			_son_ortu.queue_free()
+			_son_ortu = null
+			_son_kontrol())
 	if zafer:
 		_btn(v, "Oynamaya devam et", _son_kapat)
-	_btn(v, "Ana menü", _ana_menu)
+	if not olum:
+		_btn(v, "Ana menü", _ana_menu)
 	add_child(_son_ortu)
 	Engine.time_scale = 0.0
 	modal = true
+
+func _miras_sec(id: int) -> void:
+	var r: Dictionary = oyun.kisi_k.miras_al(id)
+	if not r["ok"]:
+		return
+	_son_ortu.queue_free()
+	_son_ortu = null
+	modal = false
+	Engine.time_scale = sokak._hiz
 
 func _son_kapat() -> void:
 	_son_ortu.queue_free()
@@ -2197,6 +2220,8 @@ func _ailem_paneli() -> void:
 		_ayrac(_ic)
 		_btn(_ic, "Aileyi kur (onayla)", func(): _sonuc_goster(A.kur_onayla()))
 	_ayrac(_ic)
+	_uyeler_bolumu()
+	_ayrac(_ic)
 	_bolum(_ic, "Toplam etkiler")
 	var te: Dictionary = A.toplam_etkiler()
 	if te.is_empty():
@@ -2205,6 +2230,31 @@ func _ailem_paneli() -> void:
 		var v2: float = te[k]
 		_lbl(_ic, "%s: %s%d%%" % [A.ETKI_AD[k], "+" if v2 > 0 else "−", int(round(absf(v2) * 100.0))], 14, RENK["good"] if v2 > 0 else RENK["bad"])
 	_sonuc_satiri()
+
+func _uyeler_bolumu() -> void:
+	var KS: RefCounted = oyun.kisi_k
+	var K := preload("res://scripts/core/kisiler.gd")
+	_bolum(_ic, "Aile üyeleri — nesil %d" % int(oyun.aile["nesil"]))
+	_lbl(_ic, "Sen: %s, %d yaşında · %s" % [oyun.profil.get("ad", "Sen"), KS.oyuncu_yas(), KS.oz_yazi(oyun.aile["oz"])], 14, RENK["altin"])
+	var l: Array = KS.canlilar()
+	if l.is_empty():
+		_lbl(_ic, "Henüz kimse yok.", 13, RENK["soluk"])
+	for k in l:
+		var kid: int = int(k["id"])
+		var v := _kutu(_ic, "%s (%s, %d yaş)" % [k["ad"], K.ROL_AD[k["rol"]], KS.yas(k)])
+		var tl := _lbl(v, "%s · bağ %d" % [KS.oz_yazi(k["oz"]), int(k["sevgi"])], 13, RENK["soluk"])
+		tl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_btn(v, "Konuş", func(): _sonuc_goster(KS.konus(kid)))
+	if KS.evlenebilir():
+		if oyun.aile["adaylar"].is_empty():
+			_btn(_ic, "Eş ara", func():
+				KS.es_adaylari_uret()
+				_yenile(true))
+		else:
+			_lbl(_ic, "Evlilik adayları (düğün %s):" % oyun.para(K.EVLEN_UCRET), 14)
+			for i in oyun.aile["adaylar"].size():
+				var c: Dictionary = oyun.aile["adaylar"][i]
+				_btn(_ic, "%s, %d yaş · %s" % [c["ad"], KS.yas(c), KS.oz_yazi(c["oz"])], func(): _sonuc_goster(KS.evlen(i)))
 
 func _un_bolumu() -> void:
 	var U: RefCounted = oyun.un_k

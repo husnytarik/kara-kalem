@@ -114,6 +114,8 @@ func etki(anahtar: String) -> float:
 	for id in a["gel"]:
 		if id != "":
 			top += _topla(GEL[id]["e"], anahtar, 0.5 if yari_mi(id) else 1.0)
+	for id in a.get("oz", []):
+		top += _topla(load("res://scripts/core/kisiler.gd").OZ[id]["e"], anahtar, 1.0)
 	return top
 
 # Hangi etki anahtarları (kaynak adıyla) bu aileye dokunuyor? Panel özeti için.

@@ -940,6 +940,14 @@ func _ekran_cek(arg: String) -> void:
 			arayuz.silah_ac()
 		elif p[1] == "yetenek":
 			arayuz.yetenek_ac()
+		elif p[1] == "miras2":
+			oyun.kisi_k.test_hazirla()
+			oyun.ol("Test")
+			print(oyun.kisi_k.miras_al(int(oyun.kisi_k.cocuklar()[0]["id"])))
+			arayuz.ailem_ac()
+		elif p[1] == "miras":
+			oyun.kisi_k.test_hazirla()
+			oyun.ol("Test: yıllara yenik düştün.")
 		elif p[1] == "ailem":
 			oyun.aile_k.koken_sec("italyan")
 			oyun.aile_k.inanc_sec("dindar")
