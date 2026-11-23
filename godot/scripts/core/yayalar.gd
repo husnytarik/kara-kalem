@@ -21,6 +21,7 @@ var _hash := {}                # Vector2i -> Array[Vector2i(yol, nokta)]
 var _noktalar: Array = []      # tüm (yol, nokta) çiftleri
 var _ajan: Array = []
 var _far_mat: StandardMaterial3D
+var trafik: Node
 
 func _ad_uret() -> String:
 	return "%s %s" % [ADLAR[randi() % ADLAR.size()], SOYADLAR[randi() % SOYADLAR.size()]]
@@ -34,6 +35,10 @@ func kur(h: Node, o: Node3D, oy: Node, ka: Node) -> void:
 	if _yol.is_empty():
 		return
 	_gorselleri_kur()
+	trafik = Node3D.new()
+	trafik.set_script(load("res://scripts/core/trafik.gd"))
+	add_child(trafik)
+	trafik.kur(harita, _yol, _hash)
 
 func _agi_yukle() -> void:
 	var f := FileAccess.open("res://data/yol_ag.json", FileAccess.READ)
@@ -178,7 +183,23 @@ func _process(delta: float) -> void:
 	_fare_isim(delta)
 	var uz: float = kamera.mesafe
 	var saat: float = fmod(float(oyun.t), float(oyun.DAY)) / 60.0
-	var kis: float = 0.35 if (saat < 5.5 or saat > 22.0) else 1.0
+	# yoğunluk: gündüz tam, akşam azalır, gece neredeyse ıssız
+	var kis_y: float = 1.0
+	var kis_a: float = 1.0
+	if saat < 5.0 or saat >= 23.0:
+		kis_y = 0.04
+		kis_a = 0.15
+	elif saat < 7.0:
+		kis_y = 0.25
+		kis_a = 0.4
+	elif saat >= 21.0:
+		kis_y = 0.1
+		kis_a = 0.3
+	elif saat >= 19.0:
+		kis_y = 0.4
+		kis_a = 0.6
+	elif saat >= 17.0:
+		kis_y = 0.8
 	var gizle: bool = uz > 260.0
 	_far_mat.emission_energy_multiplier = 3.0 if (saat < 6.5 or saat > 18.5) else 0.0
 	var c: Vector3 = oyuncu.global_position
@@ -193,7 +214,7 @@ func _process(delta: float) -> void:
 			ak += 1
 		else:
 			yk += 1
-		var kota: int = int(float(ARABA_SAYI if araba else YAYA_SAYI) * kis)
+		var kota: int = int(float(ARABA_SAYI if araba else YAYA_SAYI) * (kis_a if araba else kis_y))
 		if gizle or sira >= kota:
 			n.visible = false
 			a["yol"] = -1
@@ -226,6 +247,17 @@ func _process(delta: float) -> void:
 					if d < 7.0 and d > 0.01 and fark.dot(ileri) / d > 0.8:
 						hiz = 0.0
 						break
+			var ik: Dictionary = trafik.one_bak(Vector2(n.global_position.x, n.global_position.z), Vector2(ileri.x, ileri.z), 11.0)
+			if not ik.is_empty() and int(ik["durum"]) != 0 and float(ik["d"]) > float(ik["w"]) * 0.5 + 1.2:
+				hiz = 0.0
+		else:
+			# yaya: kendi ekseni yeşil değilse karşıdan karşıya geçmek için bekler
+			var k1: Dictionary = _konum(a)
+			var ik2: Dictionary = trafik.one_bak(Vector2(k1["x"], k1["z"]), k1["t"], 8.0)
+			if not ik2.is_empty() and int(ik2["durum"]) == 2:
+				var g: float = float(ik2["d"]) - float(ik2["w"]) * 0.5
+				if g > 0.3 and g < 1.6:
+					hiz = 0.0
 		var p: PackedVector2Array = _yol[a["yol"]]["p"]
 		var onceki_i := int(a["s"])
 		a["s"] += float(a["yon"]) * hiz * delta / 2.0

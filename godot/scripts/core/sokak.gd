@@ -956,6 +956,17 @@ func _ekran_cek(arg: String) -> void:
 				await get_tree().process_frame
 				if dn > 20 and (get_node("Yayalar") as Node3D).test_hedef(p[1] == "araba"):
 					break
+		elif p[1] == "kavsak":
+			var tr: Node = (get_node("Yayalar") as Node).trafik
+			var en := 1e9
+			for j in tr._kav:
+				var dd: float = (j["p"] as Vector2).distance_to(Vector2(oyuncu.global_position.x, oyuncu.global_position.z))
+				if dd < en:
+					en = dd
+					oyuncu.global_position = Vector3(j["p"].x, harita.yuk(j["p"].x, j["p"].y), j["p"].y)
+			kamera.mesafe = 22.0
+			kamera._pitch = -0.6
+			await get_tree().create_timer(1.0, true, false, true).timeout
 		elif p[1] == "binafoto":
 			var yb: Dictionary = harita.yerler[0]
 			for yy in harita.yerler:
