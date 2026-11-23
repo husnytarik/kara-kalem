@@ -16,6 +16,8 @@ const Sakinler := preload("res://scripts/core/sakinler.gd")
 const Cubuk := preload("res://scripts/core/cubuk.gd")
 const SIVIL_AD := ["Esnaf", "İşçiler", "Pazarcılar", "Denizciler", "Komşular", "Yolcular", "Çocuklar", "Tüccar"]
 const POLIS_AD := ["Devriye", "Karakol Ekibi", "Bekçiler"]
+const KARARGAH := {"marchetti": "Marchetti Family", "obrien": "Murphy's Tavern", "tammany": "City Hall"}
+const TEHLIKE := 85.0      # karargâhın bu yarıçapında nöbetçiler seni görür görmez üstüne gelir (m)
 const HIZ := {"polis": 7.0, "rakip": 6.5, "sivil": 4.0}
 
 var harita: Node3D
@@ -28,6 +30,8 @@ var takip_id := 0          # oyuncunun kovaladığı grup
 var _esitle_sure := 0.0
 var _gorus_sure := 0.0
 var _npc_sure := 0.0
+var _hq := {}      # fraksiyon -> karargâh konumu
+var _hq_ici := {}  # fraksiyon -> oyuncu tehlike bölgesinde mi
 var _temas := {}   # grup id -> oyuncunun yakınında mı (tekrar uyarı vermesin)
 
 func kur(h: Node3D, o: Node, p: Node3D) -> void:
@@ -37,6 +41,13 @@ func kur(h: Node3D, o: Node, p: Node3D) -> void:
 	rng.seed = 777
 	for id in harita.bolgeler:
 		_polis_ekle(id)
+	for f in KARARGAH:
+		for i in harita.yerler.size():
+			if harita.yerler[i]["ad"] == KARARGAH[f]:
+				_hq[f] = harita.yerler[i]["pos"]
+				for k in 3:
+					_nobet_ekle(f, harita.yerler[i]["bolge"], k)
+				break
 	for sk in Sakinler.LISTE + Sakinler.GIZLI:   # isimli, rutinli şehir sakinleri (+ gizli olanlar)
 		_sakin_ekle(sk)
 	_esitle()
@@ -59,6 +70,13 @@ func _polis_ekle(ev: String) -> void:
 	var n: int = 3 + oyun.bolge[ev]["servet"] / 2 + rng.randi() % 2
 	var ad := "%s %s" % [harita.bolgeler[ev]["ad"], POLIS_AD[rng.randi() % POLIS_AD.size()]]
 	_yeni("polis", "polis", ad, n, ev)
+
+# Karargâh nöbetçileri: kalabalık, karargâhın çevresinde dolaşır, bölgeye giren herkesin üstüne gelir.
+func _nobet_ekle(f: String, ev: String, k: int) -> void:
+	var g := _yeni("rakip", f, "%s Nöbetçileri" % oyun.FAK[f]["ad"].split(" ")[0], 6 + rng.randi() % 3, ev)
+	g["nobet"] = f
+	var a := TAU * k / 3.0
+	g["pos"] = (_hq[f] as Vector3) + Vector3(cos(a), 0, sin(a)) * 22.0
 
 func _sivil_ekle(ev: String) -> void:
 	_yeni("sivil", "sivil", SIVIL_AD[rng.randi() % SIVIL_AD.size()], 1 + rng.randi() % 3, ev)
@@ -169,10 +187,10 @@ func _esitle() -> void:
 		for id in harita.bolgeler:
 			if oyun.hakim_of(id) == f:
 				bolgeleri.append(id)
-		var ekipler: Array = liste.filter(func(g): return g["fak"] == f and not g.has("don"))
+		var ekipler: Array = liste.filter(func(g): return g["fak"] == f and not g.has("don") and not g.has("nobet"))
 		while ekipler.size() < bolgeleri.size():
 			_rakip_ekle(f, bolgeleri[ekipler.size()])
-			ekipler = liste.filter(func(g): return g["fak"] == f and not g.has("don"))
+			ekipler = liste.filter(func(g): return g["fak"] == f and not g.has("don") and not g.has("nobet"))
 		while ekipler.size() > bolgeleri.size() and ekipler.size() > 1:
 			_sil(ekipler.pop_back())
 		for k in ekipler.size():
@@ -424,6 +442,14 @@ func _ai(g: Dictionary, delta: float) -> void:
 			g["mod"] = "kovala"
 		elif g["mod"] == "kovala" and (d > 130.0 or oyun.arama < 30.0):
 			g["mod"] = ""
+	elif g["tur"] == "rakip" and g.has("nobet"):
+		var hq: Vector3 = _hq[g["nobet"]]
+		var dh := Vector2(hq.x - oyuncu.global_position.x, hq.z - oyuncu.global_position.z).length()
+		if g["mod"] == "" and dh < TEHLIKE and not oyun.gerginlik.dost_mu(g["fak"]):
+			g["mod"] = "kovala"
+		elif g["mod"] != "" and (dh > TEHLIKE + 55.0 or oyun.gerginlik.dost_mu(g["fak"])):
+			g["mod"] = ""
+			g["yol"] = PackedVector3Array()
 	elif g["tur"] == "rakip":
 		if g["mod"] == "" and d < GORUS_AV:
 			if oyun.gerginlik.dost_mu(g["fak"]):
@@ -509,6 +535,20 @@ func _bolge_yerleri(id: String) -> Array:
 	return r
 
 func _hedef_sec(g: Dictionary) -> void:
+	if g.has("nobet"):
+		var hq: Vector3 = _hq[g["nobet"]]
+		var yakin: Array = []
+		for i in harita.yerler.size():
+			if (harita.yerler[i]["pos"] as Vector3).distance_to(hq) < TEHLIKE * 0.7:
+				yakin.append(i)
+		g["durum"] = "Karargâhı gözlüyor"
+		if yakin.is_empty():
+			g["bekle"] = 3.0
+			return
+		_git(g, harita.yerler[yakin[rng.randi() % yakin.size()]]["pos"])
+		if (g["yol"] as PackedVector3Array).size() == 0:
+			g["bekle"] = 2.0
+		return
 	var ev: String = g["ev"]
 	var bolge := ev
 	var sans := rng.randf()
@@ -538,7 +578,16 @@ func _hedef_sec(g: Dictionary) -> void:
 		g["bekle"] = 2.0
 
 # ---------- karşılaşma ----------
+func _tehlike_uyari() -> void:
+	for f in _hq:
+		var hq: Vector3 = _hq[f]
+		var ici := Vector2(hq.x - oyuncu.global_position.x, hq.z - oyuncu.global_position.z).length() < TEHLIKE
+		if ici and not _hq_ici.get(f, false) and oyuncu.iceride < 0 and not oyun.gerginlik.dost_mu(f):
+			oyun.kayit("TEHLİKE: %s karargâhına yaklaşıyorsun. Nöbetçiler gören herkesin üstüne gelir." % oyun.FAK[f]["ad"], "warn")
+		_hq_ici[f] = ici
+
 func _karsilasma() -> void:
+	_tehlike_uyari()
 	if guvenli_mi():
 		return
 	# yedek: yeni "temas" için önce en yakın uygun grubu bul
