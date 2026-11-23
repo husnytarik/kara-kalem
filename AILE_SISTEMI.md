@@ -370,7 +370,7 @@ Bölüm 0'daki hayat özeti ekranı bu kazanımları listeler: **hangi unvanlarl
 ## 10. Kararlar ve açık sorular
 - **Karar:** takvim süresiz; 1920'de başlar, sabit bir bitiş yılı yok. Dönem olayları (Yasak'ın kalkması 1933, 1929 krizi) takvimde gerçek tarihinde olur ama oyunu bitirmez; oyun, hanedan sürdükçe devam eder.
 - Aile başlangıçta kaç gelenek slotu ile başlasın (öneri: 3)?
-- Eş ve çocuklar sadece istatistik mi, sahneli mi?
+- **Karar:** eş ve çocuklar konuşulabilir isimli kişiler olacak (sahneli); evde/sokakta yanlarına gidilip diyalog açılır, olaylar sahne olarak oynanır. Diyalog tonu özelliklere, sevgi/sadakat değerine ve etkenlere bağlı.
 - Gelenek değiştirmenin bedeli: sadece itibar kaybı mı, yoksa belirli bir süre bekleme mi?
 - Çocuklar sahneli (konuşma/olay) mı olsun, yoksa yıllık özet kartlarıyla mı ilerlesin?
 - Etkenlerin görsel gösterimi: karakter portresinde mi, ayrı bir durum çubuğunda mı?
