@@ -867,7 +867,7 @@ func _imza() -> String:
 			var g: Dictionary = _hedef
 			return str([g["kisi"], g["durum"], g["ev"], sokak.gruplar.liste.has(g), yakin_grup(g), sokak.takip_id])
 		"ben":
-			return str([oyun.kis, oyun.kis_k.taninma(), oyun.yol["puan"]])
+			return str([oyun.kis, oyun.kis_k.taninma(), oyun.yol["puan"], oyun.un, oyun.arama, oyun.temiz, oyun.kirli])
 		"defter":
 			return str(oyun.defter.size())
 		"silah":
@@ -1859,6 +1859,7 @@ func _ben_paneli() -> void:
 	_btn(kisa, "Silahlar", silah_ac)
 	_btn(kisa, "Beceri ağacı", yetenek_ac)
 	_btn(kisa, "Ailem", ailem_ac)
+	_un_bolumu()
 	_sonuc_satiri()
 
 func _ihtiyac_bar_to(hedef: Node, ad: String, deger: float) -> void:
@@ -2204,3 +2205,13 @@ func _ailem_paneli() -> void:
 		var v2: float = te[k]
 		_lbl(_ic, "%s: %s%d%%" % [A.ETKI_AD[k], "+" if v2 > 0 else "−", int(round(absf(v2) * 100.0))], 14, RENK["good"] if v2 > 0 else RENK["bad"])
 	_sonuc_satiri()
+
+func _un_bolumu() -> void:
+	var U: RefCounted = oyun.un_k
+	var tip: Dictionary = U.tip()
+	_bolum(_ic, "Ün: %s" % tip["ad"])
+	var tl := _lbl(_ic, tip["ac"], 13, RENK["soluk"])
+	tl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	for e in U.EKSENLER:
+		_bar(_ic, U.AD[e], U.deger(e), U.RENK[e], "%d" % int(U.deger(e)))
+	_btn(_ic, "Mahalleye bağış (%s)" % oyun.para(U.BAGIS_FIYAT), func(): _sonuc_goster(U.bagis()))
