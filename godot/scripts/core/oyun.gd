@@ -109,6 +109,12 @@ const ADLAR := {
 	"obrien": [["Seamus", "Declan", "Finn", "Patrick", "Liam", "Colm", "Brendan", "Rory"], ["O'Brien", "Doyle", "Keane", "Murphy", "Quinn", "Walsh", "Byrne", "Kelly"]],
 	"tammany": [["Walter", "Harold", "Edmund", "Clarence", "Arthur", "Chester", "Lloyd", "Percy"], ["Whitcomb", "Hargrove", "Pembroke", "Ashworth", "Sterling", "Vandermeer", "Crane", "Talbot"]],
 }
+# Sabit isimli kadro (KARAKTERLER.md): ilk atamalar buradan; kadro tükenirse rastgele isim.
+const KADRO := {
+	"marchetti": {"don": ["Vito Marchetti"], "ikinci": ["Carlo Bruno"], "danisman": ["Enzo Conti"], "kaptan": ["Rocco Rizzo", "Paulie Gallo", "Gino Fontana", "Nico Greco"]},
+	"obrien": {"don": ["Seamus O'Brien"], "ikinci": ["Declan Doyle"], "danisman": ["Finn Keane"], "kaptan": ["Colm Quinn", "Brendan Byrne", "Rory Kelly", "Liam Walsh"]},
+	"tammany": {"don": ["Harold Pembroke"], "ikinci": ["Edmund Ashworth"], "danisman": ["Arthur Sterling"], "kaptan": ["Clarence Vandermeer", "Chester Crane", "Lloyd Talbot", "Percy Whitcomb"]},
+}
 const ISIMLER := ["Vinnie", "Moe", "Sully", "Bugsy", "Lenny", "Sal", "Dutch", "Frankie", "Mickey", "Nate", "Ray", "Hank", "Joey", "Tommy", "Lou", "Abe"]
 
 var harita: Node3D
@@ -324,7 +330,12 @@ func uye_yarat(f: String, rutbe: String) -> Dictionary:
 	_uid += 1
 	var ad := ""
 	var denendi := 0
-	while denendi < 20:
+	for kn in KADRO.get(f, {}).get(rutbe, []):
+		if uyeler.filter(func(u): return u["ad"] == kn).is_empty():
+			ad = kn
+			break
+	var sabit: bool = ad != ""
+	while not sabit and denendi < 20:
 		var a: Array = ADLAR[f]
 		ad = "%s %s" % [a[0][rng.randi() % a[0].size()], a[1][rng.randi() % a[1].size()]]
 		if uyeler.filter(func(u): return u["ad"] == ad and u["durum"] == "aktif").is_empty():
