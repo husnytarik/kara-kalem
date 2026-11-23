@@ -342,7 +342,7 @@ func _ana_kur() -> void:
 	kutu.add_child(bosluk)
 	var d1 := dugme(kutu, "Yeni oyun", _yeni, 26)
 	var dev := dugme(kutu, "Devam et", _devam, 26)
-	dev.disabled = not FileAccess.file_exists("user://kayit.dat")
+	dev.disabled = not load("res://scripts/core/kayitlar.gd").hicbiri_var()
 	var d3 := dugme(kutu, "Çıkış", func(): get_tree().quit(), 26)
 	for d in [d1, dev, d3]:
 		d.custom_minimum_size = Vector2(320, 44)
@@ -457,8 +457,12 @@ func _geri() -> void:
 	_ana.visible = true
 
 func _devam() -> void:
-	Profil.yukle_basta = true
-	get_tree().change_scene_to_file(OYUN)
+	var kp: CanvasLayer = load("res://scripts/ui/kayit_paneli.gd").new()
+	add_child(kp)
+	kp.kur("yukle", func(s: String):
+		Profil.yukle_slot = s
+		Profil.yukle_basta = true
+		get_tree().change_scene_to_file(OYUN))
 
 func _zar() -> void:
 	_p["ad"] = Profil.rastgele_ad()

@@ -3,6 +3,7 @@ extends RefCounted
 # varsayılan profil geçerlidir: eski davranışın aynısı.
 
 static var aktif: Dictionary = {}          # {ad, yas, koken, aile, gecmis}
+static var yukle_slot := ""                # Devam Et ile seçilen yuva
 static var yukle_basta := false            # ana menüden "Devam Et" ile açıldı: kayıt dosyası yüklenecek
 
 const KOKENLER := {

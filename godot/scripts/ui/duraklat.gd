@@ -26,12 +26,18 @@ func kur(sokak: Node) -> void:
 	b.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(b)
 	Menu.dugme(v, "Devam", func(): queue_free())
-	Menu.dugme(v, "Kaydet (F6)", func():
-		sokak.kaydet()
-		queue_free())
-	Menu.dugme(v, "Yükle (F9)", func():
-		sokak.yukle()
-		queue_free())
+	Menu.dugme(v, "Kaydet (F6 hızlı)", func():
+		var kp: CanvasLayer = load("res://scripts/ui/kayit_paneli.gd").new()
+		add_child(kp)
+		kp.kur("kaydet", func(s: String):
+			sokak.kaydet(s)
+			queue_free()))
+	Menu.dugme(v, "Yükle (F9 hızlı)", func():
+		var kp: CanvasLayer = load("res://scripts/ui/kayit_paneli.gd").new()
+		add_child(kp)
+		kp.kur("yukle", func(s: String):
+			sokak.yukle(s)
+			queue_free()))
 	Menu.dugme(v, "Ana menü", func():
 		Engine.time_scale = 1.0
 		sokak.get_tree().change_scene_to_file("res://scenes/menu.tscn"))

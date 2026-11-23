@@ -136,7 +136,8 @@ func _ready() -> void:
 	var PR := load("res://scripts/core/profil.gd")
 	if PR.yukle_basta:
 		PR.yukle_basta = false
-		yukle()
+		yukle(PR.yukle_slot)
+		PR.yukle_slot = ""
 	for a in OS.get_cmdline_user_args():   # doğrulama: --hedef=x,z  --bina=ad  --hizli
 		if a.begins_with("--hedef="):
 			var p := a.substr(8).split(",")
@@ -329,21 +330,32 @@ func _karsilasti(g: Dictionary) -> void:
 		"rakip":
 			oyun.kayit("%s yakınında (%d kişi)." % [g["ad"], g["kisi"]], "bad")
 
-const KAYIT := "user://kayit.dat"
+const KY := preload("res://scripts/core/kayitlar.gd")
+var _son_oto := -1
 
-func kaydet() -> void:
-	var f := FileAccess.open(KAYIT, FileAccess.WRITE)
+func kaydet(slot: String = "") -> void:
+	if slot == "":
+		slot = KY.aktif
+	var f := FileAccess.open(KY.yol(slot), FileAccess.WRITE)
 	if f == null:
 		oyun.kayit("Kayıt yazılamadı.", "bad")
 		return
-	f.store_var({"oyun": oyun.durum_al(), "oyuncu": oyuncu.global_position, "gorus": gorus.durum_al(), "surum": 1}, true)
-	oyun.kayit("Oyun kaydedildi (F9 ile yüklenir).", "good")
+	var yil: int = oyun.t / 172800
+	var meta := {"tarih": Time.get_datetime_string_from_system(false, true).substr(0, 16), "yil": 1920 + yil, "tip": oyun.un_k.tip()["ad"],
+		"nesil": int(oyun.aile.get("nesil", 1)), "para": int(oyun.temiz)}
+	f.store_var({"oyun": oyun.durum_al(), "oyuncu": oyuncu.global_position, "gorus": gorus.durum_al(), "surum": 2, "meta": meta}, true)
+	if slot != "oto":
+		KY.aktif = slot
+		oyun.kayit("Oyun kaydedildi (%s)." % KY.ad(slot), "good")
 
-func yukle() -> void:
-	if not FileAccess.file_exists(KAYIT):
+func yukle(slot: String = "") -> void:
+	if slot == "":
+		slot = KY.aktif if KY.var_mi(KY.aktif) else KY.en_yeni()
+	var yol: String = KY.hangisi(slot) if slot != "" else ""
+	if yol == "":
 		oyun.kayit("Kayıt bulunamadı (F6 ile kaydet).", "bad")
 		return
-	var f := FileAccess.open(KAYIT, FileAccess.READ)
+	var f := FileAccess.open(yol, FileAccess.READ)
 	var d: Variant = f.get_var(true)
 	if typeof(d) != TYPE_DICTIONARY or not d.has("oyun"):
 		oyun.kayit("Kayıt dosyası bozuk.", "bad")
@@ -354,7 +366,20 @@ func yukle() -> void:
 	if d.has("gorus"):
 		gorus.durum_yukle(d["gorus"])
 	takip_birak()
-	oyun.kayit("Kayıt yüklendi.", "good")
+	if slot != "oto":
+		KY.aktif = slot
+	_son_oto = int(oyun.t / (oyun.DAY * 10))
+	oyun.kayit("Kayıt yüklendi (%s)." % KY.ad(slot), "good")
+
+# Her oyun ayında (10 gün) otomatik kayıt; kart/panel açıkken veya öldüyken yazılmaz.
+func _oto_kayit() -> void:
+	var ay: int = int(oyun.t / (oyun.DAY * 10))
+	if _son_oto < 0:
+		_son_oto = ay
+		return
+	if ay != _son_oto and not arayuz.modal and oyun.son.is_empty():
+		_son_oto = ay
+		kaydet("oto")
 
 func takip_ver(g: Dictionary) -> void:
 	takip_id = g["id"]
@@ -508,6 +533,7 @@ var _gir_bina := -1
 var _sag_basla := Vector2.ZERO
 
 func _process(delta: float) -> void:
+	_oto_kayit()
 	if _gir_bina >= 0 and oyuncu.iceride < 0 and arayuz.yakin_bina(_gir_bina):
 		oyuncu.gir(_gir_bina)
 		arayuz.bina_ac(_gir_bina)
@@ -1074,6 +1100,16 @@ func _ekran_cek(arg: String) -> void:
 			print("YENI ", yeni)
 			print("ESKI ", eski)
 			print("OYNAT_BITTI")
+		elif p[1] == "kayit":
+			kaydet("2")
+			oyun.t += 172800 * 3
+			oyun.temiz = 8200.0
+			kaydet("4")
+			oyun.t += 14400
+			var kpn: CanvasLayer = load("res://scripts/ui/kayit_paneli.gd").new()
+			add_child(kpn)
+			kpn.kur("yukle", func(sl: String): pass)
+			print("OTO_VAR=", FileAccess.file_exists("user://oto.dat"))
 		elif p[1] == "olay2":
 			var OLY = oyun.kart_k.OL
 			var bn := 0
