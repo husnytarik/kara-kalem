@@ -1113,7 +1113,7 @@ func _gun() -> void:
 		var r: Dictionary = isy[i]
 		var w := haftalik(i)
 		if r["sahip"]:
-			yasal(w * 1.5 / 7.0 * isl.carpan(i) * yol_k.yasal_carpan())
+			yasal(w * 1.5 / 7.0 * isl.carpan(i) * yol_k.yasal_carpan() * maxf(0.3, 1.0 + aile_k.etki("gelir_mesru")))
 			continue
 		if not r["haracli"]:
 			continue

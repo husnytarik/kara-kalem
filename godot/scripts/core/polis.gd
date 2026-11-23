@@ -63,7 +63,7 @@ func dikkat() -> float:
 	return clampf(s, 5.0, 100.0)
 
 func gizlilik() -> float:
-	return 0.75 if oyun.pol["gizli"] else 0.5
+	return clampf((0.75 if oyun.pol["gizli"] else 0.5) + oyun.aile_k.etki("alkol_gizli") + 0.5 * oyun.aile_k.etki("gizlilik"), 0.05, 0.95)
 
 func gunluk_iz(hacim: float) -> float:
 	if hacim <= 0.0:
@@ -124,7 +124,7 @@ func gun() -> void:
 	var uretim := 0.0
 	if p["kurulu"] and oyun.t >= p["saklanma"] and oyun.adamlar.size() > 0:
 		uretim = minf(float(p["hacim"]), STOK_MAX - p["stok"])
-		var maliyet := uretim * HAM_MALIYET
+		var maliyet := uretim * HAM_MALIYET * maxf(0.3, 1.0 + oyun.aile_k.etki("alkol_maliyet"))
 		if uretim > 0.0 and oyun.harcama(maliyet, "kirli"):
 			p["stok"] += uretim
 		elif uretim > 0.0:

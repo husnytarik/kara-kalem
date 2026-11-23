@@ -84,7 +84,7 @@ func yasal_carpan() -> float:
 	return 1.0 + 0.15 * etki("kanun") + 0.2 * oyun.kis_k.oz("yasal")
 
 func harac_carpan() -> float:
-	return 1.0 + 0.2 * etki("korku") + 0.2 * oyun.kis_k.oz("korku")
+	return maxf(0.3, 1.0 + 0.2 * etki("korku") + 0.2 * oyun.kis_k.oz("korku") + oyun.aile_k.etki("gelir_haram") + 0.5 * oyun.aile_k.etki("korku"))
 
 # Haraçta direnç: korku yolu esnafın karşı koymasını azaltır (başarı olasılığı bonusu)
 func harac_sans() -> float:
@@ -92,7 +92,7 @@ func harac_sans() -> float:
 
 # Polis dosyası artışı çarpanı (gölge azaltır, korku artırır, reform dönemi artırır)
 func arama_carpan() -> float:
-	var c: float = 1.0 - 0.15 * etki("golge") + 0.12 * float(seviye("korku")) - 0.4 * oyun.kis_k.oz("gizli")
+	var c: float = 1.0 - 0.15 * etki("golge") + 0.12 * float(seviye("korku")) - 0.4 * oyun.kis_k.oz("gizli") + oyun.aile_k.etki("dikkat") + oyun.aile_k.etki("polis_ilgi") - 0.5 * oyun.aile_k.etki("gizlilik")
 	if oyun.yol["donem"] == "reform":
 		c += 0.25
 	if oyun.yol["donem"] == "baski":
