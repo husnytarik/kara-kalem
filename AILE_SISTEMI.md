@@ -367,8 +367,10 @@ Bölüm 0'daki hayat özeti ekranı bu kazanımları listeler: **hangi unvanlarl
 - **UI:** "Aile" sekmesi: köken/inanç/değerler, gelenek slotları, aile üyeleri (kart), soyağacı, kazanımlar, hanedan günlüğü.
 - Sıra önerisi: (1) etki toplayıcı + tablolar, (2) gelenek seçimi ve etkileri (adam maliyeti, alkol, gizlilik gibi mevcut sistemlere bağlanır), (3) özellikler/etkenler (hasta/yaralı), (4) evlilik/çocuk/yaşlanma, (5) miras ve devam sorusu, (6) kazanımlar ve hayat özeti.
 
-## 10. Açık sorular
+## 10. Kararlar ve açık sorular
+- **Karar:** takvim süresiz; 1920'de başlar, sabit bir bitiş yılı yok. Dönem olayları (Yasak'ın kalkması 1933, 1929 krizi) takvimde gerçek tarihinde olur ama oyunu bitirmez; oyun, hanedan sürdükçe devam eder.
 - Aile başlangıçta kaç gelenek slotu ile başlasın (öneri: 3)?
+- Eş ve çocuklar sadece istatistik mi, sahneli mi?
 - Gelenek değiştirmenin bedeli: sadece itibar kaybı mı, yoksa belirli bir süre bekleme mi?
 - Çocuklar sahneli (konuşma/olay) mı olsun, yoksa yıllık özet kartlarıyla mı ilerlesin?
 - Etkenlerin görsel gösterimi: karakter portresinde mi, ayrı bir durum çubuğunda mı?
