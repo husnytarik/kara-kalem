@@ -621,7 +621,7 @@ func ruhsat_al() -> Dictionary:
 		return oyun.hata("Ruhsatın hâlâ geçerli.")
 	if oyun.arama >= 40.0:
 		return oyun.hata("Dosyan kabarık; memur ruhsat vermiyor.")
-	var f: float = 200.0 * (1.0 - 0.3 * oyun.yet_k.etki("rusvet"))
+	var f: float = 200.0 * (1.0 - 0.3 * oyun.yet_k.etki("rusvet") + oyun.aile_k.etki("rusvet"))
 	if not oyun.harcama(f, "temiz"):
 		return oyun.hata("Temiz para yetmiyor (%s)." % oyun.para(f))
 	oyun.sil["ruhsat"] = oyun.t + 180 * oyun.DAY

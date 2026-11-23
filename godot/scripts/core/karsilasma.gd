@@ -155,7 +155,7 @@ func uygula(g: Dictionary, id: String) -> Dictionary:
 			var m3 := _ara_rusvet(ara2)
 			if not oyun.harcama(m3, "kirli"):
 				return _r("Yeterli kirli paran yok ($%d lazım)." % m3, "bad", false)
-			var pr := clampf(0.6 + oyun.yet_k.etki("rusvet") * 0.5 + oyun.kis_k.oz("rusvet") * 0.3 - oyun.arama / 200.0, 0.2, 0.92)
+			var pr := clampf(0.6 + oyun.yet_k.etki("rusvet") * 0.5 - oyun.aile_k.etki("rusvet") * 0.5 + oyun.kis_k.oz("rusvet") * 0.3 - oyun.arama / 200.0, 0.2, 0.92)
 			if rng.randf() < pr:
 				g["ara"] = {"bulundu": [], "mermi": 0}
 				gruplar.serbest_birak(g, 720)

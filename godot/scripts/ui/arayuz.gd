@@ -766,6 +766,16 @@ func yetenek_ac() -> void:
 	_mod = "yetenek"
 	_yenile(true)
 
+var _ailem_slot := -1
+
+func ailem_ac() -> void:
+	if _mod == "ailem":
+		kapat()
+		return
+	_mod = "ailem"
+	_ailem_slot = -1
+	_yenile(true)
+
 func defter_ac() -> void:
 	if _mod == "defter":
 		kapat()
@@ -864,6 +874,8 @@ func _imza() -> String:
 			return str([oyun.sil, oyun.sil_k.kusur("miyop"), oyun.kis.get("gozluk", false), oyun.temiz, oyun.kirli, _sonuc, _sil_acik, oyun.arac.get("tip", ""), oyun.t / 1440])
 		"yetenek":
 			return str([oyun.yet, _sonuc])
+		"ailem":
+			return str([oyun.aile, _sonuc, _ailem_slot, oyun.t / 1440])
 		"polis":
 			return str([oyun.pol, oyun.arama, oyun.temiz, oyun.kirli, _sonuc])
 		"meslek":
@@ -900,6 +912,7 @@ func _yenile(zorla: bool) -> void:
 		"ben": _ben_paneli()
 		"silah": _silah_paneli()
 		"yetenek": _yetenek_paneli()
+		"ailem": _ailem_paneli()
 	_kagit_mod = false
 	_arka.visible = _arka.ayarla(_gorsel_anahtarlari())
 
@@ -1845,6 +1858,7 @@ func _ben_paneli() -> void:
 	_ic.add_child(kisa)
 	_btn(kisa, "Silahlar", silah_ac)
 	_btn(kisa, "Beceri ağacı", yetenek_ac)
+	_btn(kisa, "Ailem", ailem_ac)
 	_sonuc_satiri()
 
 func _ihtiyac_bar_to(hedef: Node, ad: String, deger: float) -> void:
@@ -2114,4 +2128,79 @@ func _yetenek_paneli() -> void:
 	for ip in ipucu:
 		var il := _lbl(_ic, "• " + ip, 13, RENK["soluk"])
 		il.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_sonuc_satiri()
+
+
+# ---------- ailem (kültür: köken, inanç, değerler, gelenekler) ----------
+func _ailem_secenek(ebeveyn: Node, ad: String, ac: String, secili: bool, pasif: bool, fn: Callable) -> void:
+	var v := _kutu(ebeveyn)
+	_btn(v, ("✔ " if secili else "") + ad, fn, pasif)
+	var ya := _lbl(v, ac, 13, RENK["soluk"])
+	ya.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+func _ailem_paneli() -> void:
+	var A: RefCounted = oyun.aile_k
+	var a: Dictionary = oyun.aile
+	var kuruldu: bool = a["kuruldu"]
+	_baslik(_ic, "Ailem", "Kültürün her seçimi bir bonus ve bir bedel getirir.")
+	_lbl(_ic, "Aile Namı: %d" % int(a["nam"]), 15, RENK["altin"])
+	if not kuruldu:
+		var u := _lbl(_ic, "Aile henüz kurulmadı: köken, inanç ve değerler şimdi seçilir, onaylayınca kilitlenir. Gelenekler sonradan değişebilir (bedelli).", 13, RENK["soluk"])
+		u.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_bolum(_ic, "Köken")
+	for id in A.KOKEN:
+		var T: Dictionary = A.KOKEN[id]
+		var ac: String = T["ac"] + (" · " + A.etki_yazi(T["e"]) if not T["e"].is_empty() else "")
+		_ailem_secenek(_ic, T["ad"], ac, a["koken"] == id, kuruldu, func(): _sonuc_goster(A.koken_sec(id)))
+	_bolum(_ic, "İnanç")
+	for id in A.INANC:
+		var T: Dictionary = A.INANC[id]
+		_ailem_secenek(_ic, T["ad"], T["ac"] + " · " + A.etki_yazi(T["e"]), a["inanc"] == id, kuruldu, func(): _sonuc_goster(A.inanc_sec(id)))
+	_bolum(_ic, "Değerler (en fazla iki)")
+	for k in A.DEGER:
+		var D: Dictionary = A.DEGER[k]
+		var h := _kutu(_ic, D["ad"])
+		for taraf in ["sol", "sag"]:
+			var T: Dictionary = D[taraf]
+			_btn(h, ("✔ " if a["deger"].get(k, "") == taraf else "") + T["ad"] + " — " + A.etki_yazi(T["e"]), func(): _sonuc_goster(A.deger_sec(k, taraf)), kuruldu)
+	_bolum(_ic, "Gelenekler (%d slot)" % A.GEL_SLOT)
+	for s in A.GEL_SLOT:
+		var id: String = a["gel"][s]
+		var v := _kutu(_ic, "Slot %d" % (s + 1))
+		if id == "":
+			_lbl(v, "Boş", 14, RENK["soluk"])
+		else:
+			var G: Dictionary = A.GEL[id]
+			var yari: bool = A.yari_mi(id)
+			_lbl(v, G["ad"] + (" (alışıyor: yarım etki)" if yari else ""), 15)
+			var ya := _lbl(v, A.etki_yazi(G["e"], yari), 13, RENK["soluk"])
+			ya.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_btn(v, "Seç" if id == "" else "Değiştir", func():
+			_ailem_slot = -1 if _ailem_slot == s else s
+			_yenile(true))
+		if _ailem_slot == s:
+			var grup := ""
+			for gid in A.GEL:
+				var G2: Dictionary = A.GEL[gid]
+				if G2["g"] != grup:
+					grup = G2["g"]
+					_lbl(v, grup, 14, RENK["altin"])
+				var secili: bool = a["gel"].has(gid)
+				var cak: String = A._cakisan(gid)
+				var engel: bool = secili or (cak != "" and cak != id)
+				var ad: String = G2["ad"] + ("  (çatışır: %s)" % A.GEL[cak]["ad"] if engel and not secili else "")
+				_btn(v, ad + " — " + A.etki_yazi(G2["e"]), func():
+					_ailem_slot = -1
+					_sonuc_goster(A.gelenek_sec(s, gid)), engel)
+	if not kuruldu:
+		_ayrac(_ic)
+		_btn(_ic, "Aileyi kur (onayla)", func(): _sonuc_goster(A.kur_onayla()))
+	_ayrac(_ic)
+	_bolum(_ic, "Toplam etkiler")
+	var te: Dictionary = A.toplam_etkiler()
+	if te.is_empty():
+		_lbl(_ic, "Henüz etki yok.", 13, RENK["soluk"])
+	for k in te:
+		var v2: float = te[k]
+		_lbl(_ic, "%s: %s%d%%" % [A.ETKI_AD[k], "+" if v2 > 0 else "−", int(round(absf(v2) * 100.0))], 14, RENK["good"] if v2 > 0 else RENK["bad"])
 	_sonuc_satiri()

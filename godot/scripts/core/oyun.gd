@@ -126,6 +126,8 @@ var sil: Dictionary = {}        # silah envanteri (silahlik.gd)
 var sil_k: RefCounted
 var yet: Dictionary = {}        # beceri ağacı (yetenek.gd)
 var yet_k: RefCounted
+var aile: Dictionary = {}       # aile kültürü (aile.gd)
+var aile_k: RefCounted
 var uyeler: Array = []   # aile üyeleri: {uid, ad, fak, rutbe, durum: aktif|olu, iliski, ev}
 var _uid := 0
 var _pid := 0
@@ -219,6 +221,8 @@ func kur(h: Node3D) -> void:
 	yet_k = load("res://scripts/core/yetenek.gd").new(self)
 	yet = yet_k.yeni()
 	yet_k.baslat()
+	aile_k = load("res://scripts/core/aile.gd").new(self)
+	aile = aile_k.yeni()
 	sil_k = load("res://scripts/core/silahlik.gd").new(self)
 	sil_k.baslat()
 
@@ -564,8 +568,9 @@ func beceri(a: Dictionary) -> int:
 func adam_tut() -> Dictionary:
 	if adamlar.size() >= EKIP_MAX:
 		return hata("Ekip en fazla %d kişi olabilir." % EKIP_MAX)
-	if not harcama(EKIP_FIYAT, "kirli"):
-		return hata("Para yetmiyor ($%d)." % EKIP_FIYAT)
+	var fiyat: int = int(round(EKIP_FIYAT * (1.0 + aile_k.etki("adam_maliyet"))))
+	if not harcama(fiyat, "kirli"):
+		return hata("Para yetmiyor ($%d)." % fiyat)
 	var a := _yeni_adam()
 	adamlar.append(a)
 	kayit("Ekibe %s katıldı (%d adam). Ayda $%d." % [a["ad"], adamlar.size(), EKIP_MAAS], "info")
@@ -995,7 +1000,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler, "kara": kara, "sil": sil, "yet": yet, "acilis": acilis}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler, "kara": kara, "sil": sil, "yet": yet, "aile": aile, "acilis": acilis}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -1038,6 +1043,7 @@ func durum_yukle(d: Dictionary) -> void:
 	isler = d.get("isler", isler_k.yeni())
 	kara = d.get("kara", {"liste": [], "seq": 1})
 	yet = d.get("yet", yet_k.yeni())
+	aile = d.get("aile", aile_k.yeni())
 	acilis = d.get("acilis", {"daire": true, "calisti": true})
 	if d.has("sil"):
 		sil = d["sil"]
