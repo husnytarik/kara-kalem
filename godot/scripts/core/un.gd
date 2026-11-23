@@ -48,8 +48,8 @@ func deger(e: String) -> float:
 	var u: Dictionary = oyun.un
 	match e:
 		"servet":
-			# $0 -> 0, $50.000 -> 100 (logaritmik)
-			return clampf(log(maxf(net_servet(), 1.0)) / log(50000.0) * 100.0, 0.0, 100.0)
+			# $100 -> 0, $50.000 -> 100 (logaritmik)
+			return clampf(log(maxf(net_servet(), 100.0) / 100.0) / log(500.0) * 100.0, 0.0, 100.0)
 		"korku":
 			return clampf(oyun.yol_k.puan("korku") + 4.0 * _haracli(), 0.0, 100.0)
 		"sevgi":

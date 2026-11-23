@@ -962,6 +962,28 @@ func _ekran_cek(arg: String) -> void:
 			oyun.ol("Test")
 			print(oyun.kisi_k.miras_al(int(oyun.kisi_k.cocuklar()[0]["id"])))
 			arayuz.ailem_ac()
+		elif p[1] == "senaryo":
+			var U: RefCounted = oyun.un_k
+			# 1) Baba: zengin, korkulan, sayılan
+			oyun.temiz = 30000.0
+			oyun.yol["puan"]["korku"] = 60.0
+			oyun.un["saygi"] = 50.0
+			print("BABA: ", U.tip()["ad"], " servet=", int(U.deger("servet")))
+			# 2) Saygın iş adamı: zengin, sevilen, korkusuz
+			oyun.yol["puan"]["korku"] = 0.0
+			oyun.un["sevgi"] = 60.0
+			print("IS ADAMI: ", U.tip()["ad"])
+			# 3) Rezil haraççı: fakir, haraçlı, saygısız, dikkat çekiyor
+			oyun.temiz = 150.0
+			oyun.un["sevgi"] = 0.0
+			oyun.un["saygi"] = -20.0
+			oyun.arama = 40.0
+			var n := 0
+			for i in oyun.isy:
+				if n < 2:
+					oyun.isy[i]["haracli"] = true
+					n += 1
+			print("REZIL: ", U.tip()["ad"], " saygi=", int(U.deger("saygi")), " dikkat=", int(U.deger("dikkat")))
 		elif p[1] == "ozet":
 			oyun.kisi_k.test_hazirla()
 			oyun.kisi_k.cocuklar().clear()
