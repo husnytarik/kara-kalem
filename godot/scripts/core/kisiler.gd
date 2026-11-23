@@ -280,6 +280,35 @@ func ozet_yazi() -> String:
 	return "
 ".join(l)
 
+func ozet_anisi() -> String:
+	return ANI.get(oyun.un_k.tip()["ad"], "")
+
+# Hayat özetinin "Sonuç" paragrafı: oynanışa göre hükümler.
+func sonuc_yazi() -> String:
+	var a := _a()
+	var U: RefCounted = oyun.un_k
+	var tip: String = U.tip()["ad"]
+	var yil: int = oyun.tarih()["yil"]
+	var nesil: int = int(a["nesil"])
+	var p: PackedStringArray = []
+	match tip:
+		"Baba":
+			p.append("Sokaklar onu korkuyla andı, kapılar onun için açıldı. Gücünü hem cebinden hem gölgesinden aldı.")
+		"Saygın iş adamı":
+			p.append("Silahla değil defterle büyüdü; mahalle ona şapka çıkardı, çocuklar adını duyunca gülümsedi.")
+		"Rezil haraççı":
+			p.append("Büyük hayaller kurdu ama sokak onu ciddiye almadı. Yine de her sabah kalkıp denemekten vazgeçmedi.")
+		_:
+			p.append("Büyük bir şey olamadı; ama kendi ayakları üstünde durmaya çalıştı.")
+	if nesil > 1:
+		p.append("Soyadı %d kuşak boyunca şehrin hafızasında kaldı." % nesil)
+	if int(oyun.kotu["hapis_say"]) > 0:
+		p.append("Parmaklıkların ardında %d kez uyandı." % int(oyun.kotu["hapis_say"]))
+	if oyun.kaz_k.sayi() >= 8:
+		p.append("%d kazanımıyla dolu dolu bir hayat sürdü." % oyun.kaz_k.sayi())
+	p.append("Toplam %d yıl yaşandı. Bir sonraki hayat başka türlü olabilir." % yil)
+	return " ".join(p)
+
 func miras_al(id: int) -> Dictionary:
 	var a := _a()
 	var h: Dictionary = {}

@@ -997,6 +997,23 @@ func _ekran_cek(arg: String) -> void:
 				oyun.borc_k.ay()
 			print("SON=", oyun.son, " KAZ=", oyun.kaz.keys())
 			arayuz.kazanim_ac()
+		elif p[1] == "ozet2":
+			oyun.kisi_k.test_hazirla()
+			oyun.aile["gecmis"] = [{"ad": "Vito", "tip": "Sokak haraççısı", "yas": 58}, {"ad": "Enzo", "tip": "Baba", "yas": 66}]
+			oyun.aile["nesil"] = 3
+			oyun.t = 172800 * 41
+			oyun.temiz = 38000.0
+			oyun.yol["puan"]["korku"] = 62.0
+			oyun.un["saygi"] = 55.0
+			oyun.un["sevgi"] = 20.0
+			oyun.arama = 30.0
+			oyun.kotu["hapis_say"] = 2
+			for kid in ["baskan", "hakim", "hapis", "evlilik", "cocuk", "malikane", "nesil", "nesil3", "baba", "dava", "federal"]:
+				oyun.kaz[kid] = 1
+			oyun.kisi_k.cocuklar().clear()
+			for k in oyun.aile["kisiler"]:
+				k["olu"] = true
+			oyun.ol("Yetmiş yaşında, malikânesinin bahçesinde kalbi durdu.")
 		elif p[1] == "ozet":
 			oyun.kisi_k.test_hazirla()
 			oyun.kisi_k.cocuklar().clear()

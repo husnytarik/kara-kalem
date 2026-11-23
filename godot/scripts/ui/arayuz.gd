@@ -1604,7 +1604,11 @@ func _son_kontrol() -> void:
 	var olum: bool = oyun.son["tur"] == "olum"
 	var b := _lbl(v, "HAYATIN SONU", 28, RENK["bad"])
 	b.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_lbl(v, oyun.son["metin"], 16)
+	if oyun.son["tur"] == "yenilgi":
+		pc.custom_minimum_size = Vector2(760, 0)
+		_ozet_paneli(v)
+	else:
+		_lbl(v, oyun.son["metin"], 16)
 	if olum:
 		_lbl(v, "Devam edelim mi? Ailenin başına kim geçsin? (Servetin %%%d'i kaybolur.)" % int(round(oyun.kisi_k.kayip_orani() * 100.0)), 16, RENK["warn"])
 		var K := preload("res://scripts/core/kisiler.gd")
@@ -2257,6 +2261,40 @@ func _kazanim_paneli() -> void:
 		var v := _kutu(_ic, ("★ " if al else "☆ ") + KZ.LISTE[id]["ad"])
 		var tl := _lbl(v, KZ.LISTE[id]["ac"], 13, RENK["good"] if al else RENK["soluk"])
 		tl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+# Hayat özeti: ün eksenleri çubuk grafiği, kuşak zaman çizgisi, kazanımlar ve sonuç.
+func _ozet_paneli(v: VBoxContainer) -> void:
+	var K: RefCounted = oyun.kisi_k
+	var U: RefCounted = oyun.un_k
+	var tip: Dictionary = U.tip()
+	var ana: String = str(oyun.son["metin"]).split("\n\n")[0]
+	var l0 := _lbl(v, ana, 15, RENK["soluk"])
+	l0.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lbl(v, "%s — %s" % [oyun.profil.get("ad", "Sen"), tip["ad"]], 24, RENK["warn"])
+	_lbl(v, "%d yaşında öldü · %d nesil · %d yıl" % [K.oyuncu_yas(), int(oyun.aile["nesil"]), oyun.tarih()["yil"]], 14, RENK["soluk"])
+	_bolum(v, "Ün eksenleri")
+	for e in U.EKSENLER:
+		_bar(v, U.AD[e], U.deger(e), U.RENK[e])
+	_bolum(v, "Kuşaklar")
+	var zc := HBoxContainer.new()
+	zc.add_theme_constant_override("separation", 6)
+	v.add_child(zc)
+	for g in oyun.aile["gecmis"]:
+		var gl := _lbl(zc, "%s\n%s\n%d yaş" % [g["ad"], g["tip"], g["yas"]], 12, RENK["soluk"])
+		gl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_lbl(zc, "→", 16, RENK["soluk"])
+	var sl := _lbl(zc, "%s\n%s\n%d yaş" % [oyun.profil.get("ad", "Sen"), tip["ad"], K.oyuncu_yas()], 12, RENK["warn"])
+	sl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_bolum(v, "Kazanımlar (%d/%d)" % [oyun.kaz_k.sayi(), oyun.kaz_k.LISTE.size()])
+	var ad: PackedStringArray = []
+	for id in oyun.kaz_k.LISTE:
+		if oyun.kaz_k.var_mi(id):
+			ad.append("★ " + oyun.kaz_k.LISTE[id]["ad"])
+	var kl := _lbl(v, "  ".join(ad) if not ad.is_empty() else "Hiç kazanım yok.", 13, RENK["good"])
+	kl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_bolum(v, "Sonuç")
+	var sy := _lbl(v, K.ozet_anisi() + "\n" + K.sonuc_yazi(), 15)
+	sy.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 func _nufuz_paneli() -> void:
 	var N: RefCounted = oyun.nuf_k
