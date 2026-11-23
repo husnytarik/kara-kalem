@@ -3,7 +3,7 @@
 Bu belge [TASARIM_YASAM.md](TASARIM_YASAM.md)'deki "özgür yaşam" fikrinin **aile** bölümüdür. Rakamlar ilk denge önerisidir; oynarken ayarlanır. Hiçbir şey koda geçmedi.
 
 ## 0. Temel fikir
-- Oyuncu tek bir kişi değil, bir **ailenin** (ailenin) o anki başıdır. Oyun bir kişinin ölümüyle bitmez: **"Devam edelim mi?"** diye sorulur.
+- Oyuncu tek bir kişi değil, bir **ailenin** o anki başıdır. Oyun bir kişinin ölümüyle bitmez: **"Devam edelim mi?"** diye sorulur.
   - **Evet** → bir **mirasçı** seçilir, oyun onunla sürer. Aile servetinin, borcunun, düşmanlarının ve gelenek bonuslarının tamamı devredilir.
   - **Hayır** → "hayat özeti" ekranı (unvanın, serveti, çocukların, kimlerin hatırladığı) ve oyun biter.
 - Aile, CK3'teki aile gibi bir **kültür kimliği** taşır: köken, inanç, değerler, gelenekler. Bunlar bonus **ve** bedel verir (hiçbir seçim bedelsiz değildir).
