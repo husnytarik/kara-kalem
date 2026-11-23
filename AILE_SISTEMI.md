@@ -371,6 +371,6 @@ Bölüm 0'daki hayat özeti ekranı bu kazanımları listeler: **hangi unvanlarl
 - **Karar:** takvim süresiz; 1920'de başlar, sabit bir bitiş yılı yok. Dönem olayları (Yasak'ın kalkması 1933, 1929 krizi) takvimde gerçek tarihinde olur ama oyunu bitirmez; oyun, hanedan sürdükçe devam eder.
 - Aile başlangıçta kaç gelenek slotu ile başlasın (öneri: 3)?
 - **Karar:** eş ve çocuklar konuşulabilir isimli kişiler olacak (sahneli); evde/sokakta yanlarına gidilip diyalog açılır, olaylar sahne olarak oynanır. Diyalog tonu özelliklere, sevgi/sadakat değerine ve etkenlere bağlı.
-- Gelenek değiştirmenin bedeli: sadece itibar kaybı mı, yoksa belirli bir süre bekleme mi?
+- **Karar:** 3 gelenek slotuyla başlanır. Gelenek değiştirme bedeli: `Hanedan İtibarı` −1, yeni geleneğin ilk 3 ayında yarım etki (alışma süresi) ve aynı slot 1 yıl tekrar değiştirilemez. Aile başı değişince (miras) ilk değişiklik itibar kaybı olmadan yapılabilir.
 - Çocuklar sahneli (konuşma/olay) mı olsun, yoksa yıllık özet kartlarıyla mı ilerlesin?
 - Etkenlerin görsel gösterimi: karakter portresinde mi, ayrı bir durum çubuğunda mı?
