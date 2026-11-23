@@ -1868,32 +1868,35 @@ func _kisisel_bolumu(i: int) -> void:
 	var l: Array = K.eylemler(i)
 	if not l.is_empty():
 		var kv := _kutu(_ic, "Eylemler")
-		var g := GridContainer.new()
-		g.columns = 4
-		g.add_theme_constant_override("h_separation", 10)
-		g.add_theme_constant_override("v_separation", 2)
-		kv.add_child(g)
 		for id in l:
 			var e: Dictionary = K.EYLEM[id]
 			var b := Button.new()
-			b.text = e["ad"]
-			b.flat = true
-			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 			b.focus_mode = Control.FOCUS_NONE
+			b.custom_minimum_size = Vector2(0, 38)
 			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			b.add_theme_font_size_override("font_size", Tema.boyut(15))
-			b.add_theme_color_override("font_color", Tema.KAGIT_YAZI)
-			b.add_theme_color_override("font_hover_color", Color("8a5a10"))
+			b.add_theme_stylebox_override("normal", _gaz_dugme_stil(Color(0.11, 0.08, 0.055), Color(0.62, 0.48, 0.26), 10))
+			b.add_theme_stylebox_override("hover", _gaz_dugme_stil(Color(0.22, 0.15, 0.08), Tema.VURGU, 10))
+			b.add_theme_stylebox_override("pressed", _gaz_dugme_stil(Color(0.34, 0.23, 0.10), Color("f0d890"), 10))
 			b.pressed.connect(func(): _sonuc_goster(K.yap(id)))
-			g.add_child(b)
-			var u := _lbl(g, "$%d" % int(e["ucret"]), 14, Tema.VURGU)
-			u.size_flags_horizontal = Control.SIZE_FILL
-			var dk := _lbl(g, "%d dk" % int(e["dk"]), 14, Tema.SOLUK)
-			dk.size_flags_horizontal = Control.SIZE_FILL
-			var ef := _lbl(g, _efekt_yazi(e["d"]), 13, Tema.IYI)
-			ef.size_flags_horizontal = Control.SIZE_FILL
-			for lb in [u, dk, ef]:
-				lb.autowrap_mode = TextServer.AUTOWRAP_OFF
+			var hb := HBoxContainer.new()
+			hb.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			hb.offset_left = 12.0
+			hb.offset_right = -12.0
+			hb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			hb.add_theme_constant_override("separation", 12)
+			b.add_child(hb)
+			var parcalar := [[String(e["ad"]), Tema.YAZI, 15, true], ["$%d" % int(e["ucret"]), Tema.VURGU, 14, false], ["%d dk" % int(e["dk"]), Color(0.78, 0.72, 0.6), 14, false], [_efekt_yazi(e["d"]), Color("8fd08f"), 13, false]]
+			for pc in parcalar:
+				var lb := Label.new()
+				lb.text = pc[0]
+				lb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				lb.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+				lb.add_theme_font_size_override("font_size", Tema.boyut(pc[2]))
+				lb.add_theme_color_override("font_color", pc[1])
+				if pc[3]:
+					lb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				hb.add_child(lb)
+			kv.add_child(b)
 	if oyun.pazar_k.site_mi(i):
 		var kv := _kutu(_ic, "Adam Arayanlar")
 		var adaylar: Array = oyun.pazar_k.liste(i)
