@@ -1110,6 +1110,16 @@ func _ekran_cek(arg: String) -> void:
 			add_child(kpn)
 			kpn.kur("yukle", func(sl: String): pass)
 			print("OTO_VAR=", FileAccess.file_exists("user://oto.dat"))
+		elif p[1] == "kimler":
+			var bi := -1
+			for k in oyun.isy:
+				if oyun.kontrol(k) in ["marchetti", "obrien", "tammany"]:
+					bi = k
+					break
+			if bi < 0:
+				bi = oyun.isy.keys()[0]
+			gorus.acik = false
+			arayuz.bina_ac(bi)
 		elif p[1] == "kadro":
 			for u in oyun.uyeler:
 				print("KADRO ", oyun.uye_ad(u))

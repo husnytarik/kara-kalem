@@ -1125,6 +1125,7 @@ func _bina_paneli() -> void:
 			_btn(_ic, "Mesaiyi bırak (ücret yok)", func(): oyun.mesai_birak(); _yenile(true))
 		else:
 			_lbl(_ic, "Başka yerde çalışıyorsun.", 15, RENK["soluk"])
+	load("res://scripts/ui/kimler.gd").kur(self, oyun, sokak, i)
 	_hareket_bolumu(i)
 	if r["sahip"] and r.has("itibar"):
 		_isletme_bolumu(i, r)
