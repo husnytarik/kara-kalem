@@ -1,12 +1,12 @@
-# Kara Kalem — Aile Sistemi (hanedan, gelenekler, özellikler, beceriler, etkenler)
+# Kara Kalem — Aile Sistemi (aile, gelenekler, özellikler, beceriler, etkenler)
 
 Bu belge [TASARIM_YASAM.md](TASARIM_YASAM.md)'deki "özgür yaşam" fikrinin **aile** bölümüdür. Rakamlar ilk denge önerisidir; oynarken ayarlanır. Hiçbir şey koda geçmedi.
 
 ## 0. Temel fikir
-- Oyuncu tek bir kişi değil, bir **hanedanın** (ailenin) o anki başıdır. Oyun bir kişinin ölümüyle bitmez: **"Devam edelim mi?"** diye sorulur.
+- Oyuncu tek bir kişi değil, bir **ailenin** (ailenin) o anki başıdır. Oyun bir kişinin ölümüyle bitmez: **"Devam edelim mi?"** diye sorulur.
   - **Evet** → bir **mirasçı** seçilir, oyun onunla sürer. Aile servetinin, borcunun, düşmanlarının ve gelenek bonuslarının tamamı devredilir.
   - **Hayır** → "hayat özeti" ekranı (unvanın, serveti, çocukların, kimlerin hatırladığı) ve oyun biter.
-- Aile, CK3'teki hanedan gibi bir **kültür kimliği** taşır: köken, inanç, değerler, gelenekler. Bunlar bonus **ve** bedel verir (hiçbir seçim bedelsiz değildir).
+- Aile, CK3'teki aile gibi bir **kültür kimliği** taşır: köken, inanç, değerler, gelenekler. Bunlar bonus **ve** bedel verir (hiçbir seçim bedelsiz değildir).
 - Her seçim, [üç hayatı](TASARIM_YASAM.md) (Baba / İş adamı / Rezil haraççı) farklı yönlere iter.
 
 ### Etkileşim şeması
@@ -89,7 +89,7 @@ Her değer çifti zıt uçlar. Seçtiğin uç, ailenin "kuralı" olur (dışına
 | Sessiz ↔ Gösterişli | `dikkat` −%10 / `saygi` −%5 | `saygi` +%10 / `dikkat` +%10 |
 
 ## 3. Aile gelenekleri
-Aile başlangıçta **3 gelenek slotuna** sahip; **Hanedan İtibarı** ve kazanımlarla (bölüm 7) slot sayısı 6'ya kadar çıkar. Gelenek listesi aşağıda. Her biri: **Bonus / Bedel / Çatışır** (aynı anda seçilemeyen). Hepsi bedelli, hiçbiri bedava değil.
+Aile başlangıçta **3 gelenek slotuna** sahip; **Aile Namı** ve kazanımlarla (bölüm 7) slot sayısı 6'ya kadar çıkar. Gelenek listesi aşağıda. Her biri: **Bonus / Bedel / Çatışır** (aynı anda seçilemeyen). Hepsi bedelli, hiçbiri bedava değil.
 
 ### Kutsal ve cemaat
 | Gelenek | Bonus | Bedel | Çatışır |
@@ -319,19 +319,19 @@ Etken = bir kişiye ya da aileye **bağlı, süreli ya da kalıcı** durum. Kayn
 | **Çocuk hasta** | `stres` +, yüksek tedavi masrafı |
 | **Kayıp çocuk / kaçırılma** | görev zinciri, fidye, savaş tetikleyici |
 | **Varis anlaşmazlığı** | birden fazla mirasçı adayı varken aile ikiye bölünür |
-| **Hanedan şöhreti** | kazanımlarla artar, miras devrinde taşınır |
+| **Aile şöhreti** | kazanımlarla artar, miras devrinde taşınır |
 
 ## 7. Kazanımlar (ailenin tarihi)
 Kazanım = bir hedefe ulaşınca açılan kalıcı unvan/anı. Sebep: oyuna *amaç* ve devire *miras* kazandırır. Üç türü var:
 
-### 7.1 Hanedan kazanımları (aile slotu/gelenek açar)
+### 7.1 Aile kazanımları (aile slotu/gelenek açar)
 | Kazanım | Koşul | Ödül |
 |---|---|---|
-| **İlk Kan** | ilk haraç/ilk çatışma | `Sokak Kavgacıları` açık, `Hanedan İtibarı` +1 |
+| **İlk Kan** | ilk haraç/ilk çatışma | `Sokak Kavgacıları` açık, `Aile Namı` +1 |
 | **Mahalle Sahibi** | tek bir mahallenin hakimi olmak | `Mahalle Kalkanı` açık, slot +1 |
-| **Karargâh** | bir karargâh/malikâne edinmek | `Köklü Soy` açık, `Hanedan İtibarı` +2 |
+| **Karargâh** | bir karargâh/malikâne edinmek | `Köklü Soy` açık, `Aile Namı` +2 |
 | **Altın Çocuk** | çocuk 18'de `Zeki`+`Doğuştan lider` | `Çocuk Okur`/`Büyükler Konseyi` açık |
-| **Üç Kuşak** | torun doğurmak | slot +1, `Hanedan İtibarı` +3 |
+| **Üç Kuşak** | torun doğurmak | slot +1, `Aile Namı` +3 |
 | **Sessiz Zafer** | `Dikkat` düşük, `Servet` yüksek | `Sessiz Para` açık |
 | **Halkın Dostu** | `Sevgi` çok yüksek | `Hayırsever Hane` açık, slot +1 |
 | **Şehrin Efendisi** | tüm rakip aileler yenilmiş | zafer yolu: Hakimiyet |
@@ -346,7 +346,7 @@ Kazanım = bir hedefe ulaşınca açılan kalıcı unvan/anı. Sebep: oyuna *ama
 | **Yeraltı Kralı** | tüm suç kollarında kontrol | `Hesap dehası`/`Doğuştan lider` benzeri özel bonus |
 
 ### 7.3 Son kazanım (hayat özeti)
-Bölüm 0'daki hayat özeti ekranı bu kazanımları listeler: **hangi unvanlarla anıldın**, **kaç çocuğun var**, **kaç nesil sürdü**, **hangi gelenekler** ve **kimler seni hatırlıyor** (dost/düşman/mahalle). Bu özet bir sonraki nesil için bir "hanedan günlüğü" olarak kalır.
+Bölüm 0'daki hayat özeti ekranı bu kazanımları listeler: **hangi unvanlarla anıldın**, **kaç çocuğun var**, **kaç nesil sürdü**, **hangi gelenekler** ve **kimler seni hatırlıyor** (dost/düşman/mahalle). Bu özet bir sonraki nesil için bir "aile günlüğü" olarak kalır.
 
 ## 8. Miras ve mirasçı seçimi
 Ölüm (yaşlılık, hastalık, öldürülme, hapis ömrü) gerçekleşince oyun durur:
@@ -357,20 +357,20 @@ Bölüm 0'daki hayat özeti ekranı bu kazanımları listeler: **hangi unvanlarl
    - Mirasçı seçilmeyenler **küser** (`sevgi`/`sadakat` ceza, bazen kavga ya da ayrılık).
    - Mirasçı aileden birden fazla kişi arasındaysa **"Varis anlaşmazlığı"** etkeni olabilir.
    - Mirasçı çok genç ise (18'den küçük) bir **vasi** gerekir; vasi başka bir aile üyesidir ve kısa süre aile başı gibi hareket eder.
-4. Aile kültürü (köken, inanç, değerler, gelenekler) **devam eder**; yeni aile başı bir gelenek değiştirebilir ama `Hanedan İtibarı` cezası ve geçiş süresi vardır.
+4. Aile kültürü (köken, inanç, değerler, gelenekler) **devam eder**; yeni aile başı bir gelenek değiştirebilir ama `Aile Namı` cezası ve geçiş süresi vardır.
 5. Hiç mirasçı yoksa: oyun biter (hayat özeti), ya da dışarıdan bir akraba/aday "uzaktan varis" olarak çıkar (düşük itibarla).
 
 ## 9. Uygulama notları (koda geçerken)
 - Gelenekler, özellikler, becerinin yeni dalları ve etkenler birer **JSON/dict tablo** olacak: `data/gelenek.json`, `data/ozellik.json`, `data/etken.json`. Her satır: `id`, `ad`, `etki: {anahtar: değer}`, `cakisir: [id]`, `aciklama`.
 - **Etki toplayıcı:** tek bir `etki("anahtar")` fonksiyonu kişi + aile + etken değerlerini toplar (şu an `yetenek.gd` bunu beceriler için yapıyor; genişler).
 - **Mevcut kodla bağlantı:** `profil.gd` (köken/geçmiş eski kodu duruyor), `yol.gd` (yol puanı → ün eksenine), `oyun.gd` (ay/gün tiki), `kartlar.gd` (olay kartları: hastalık, kayıp çocuk, skandal), `isletme.gd` ve `isler.gd` (maliyet çarpanları), `silahlik.gd` (silah fiyatı), `polis.gd` (dikkat/arama).
-- **UI:** "Aile" sekmesi: köken/inanç/değerler, gelenek slotları, aile üyeleri (kart), soyağacı, kazanımlar, hanedan günlüğü.
+- **UI:** "Aile" sekmesi: köken/inanç/değerler, gelenek slotları, aile üyeleri (kart), soyağacı, kazanımlar, aile günlüğü.
 - Sıra önerisi: (1) etki toplayıcı + tablolar, (2) gelenek seçimi ve etkileri (adam maliyeti, alkol, gizlilik gibi mevcut sistemlere bağlanır), (3) özellikler/etkenler (hasta/yaralı), (4) evlilik/çocuk/yaşlanma, (5) miras ve devam sorusu, (6) kazanımlar ve hayat özeti.
 
 ## 10. Kararlar ve açık sorular
-- **Karar:** takvim süresiz; 1920'de başlar, sabit bir bitiş yılı yok. Dönem olayları (Yasak'ın kalkması 1933, 1929 krizi) takvimde gerçek tarihinde olur ama oyunu bitirmez; oyun, hanedan sürdükçe devam eder.
+- **Karar:** takvim süresiz; 1920'de başlar, sabit bir bitiş yılı yok. Dönem olayları (Yasak'ın kalkması 1933, 1929 krizi) takvimde gerçek tarihinde olur ama oyunu bitirmez; oyun, aile sürdükçe devam eder.
 - Aile başlangıçta kaç gelenek slotu ile başlasın (öneri: 3)?
 - **Karar:** eş ve çocuklar konuşulabilir isimli kişiler olacak (sahneli); evde/sokakta yanlarına gidilip diyalog açılır, olaylar sahne olarak oynanır. Diyalog tonu özelliklere, sevgi/sadakat değerine ve etkenlere bağlı.
-- **Karar:** 3 gelenek slotuyla başlanır. Gelenek değiştirme bedeli: `Hanedan İtibarı` −1, yeni geleneğin ilk 3 ayında yarım etki (alışma süresi) ve aynı slot 1 yıl tekrar değiştirilemez. Aile başı değişince (miras) ilk değişiklik itibar kaybı olmadan yapılabilir.
+- **Karar:** 3 gelenek slotuyla başlanır. Gelenek değiştirme bedeli: `Aile Namı` −1, yeni geleneğin ilk 3 ayında yarım etki (alışma süresi) ve aynı slot 1 yıl tekrar değiştirilemez. Aile başı değişince (miras) ilk değişiklik itibar kaybı olmadan yapılabilir.
 - Çocuklar sahneli (konuşma/olay) mı olsun, yoksa yıllık özet kartlarıyla mı ilerlesin?
 - Etkenlerin görsel gösterimi: karakter portresinde mi, ayrı bir durum çubuğunda mı?
