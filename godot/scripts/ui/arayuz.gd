@@ -776,6 +776,13 @@ func ailem_ac() -> void:
 	_ailem_slot = -1
 	_yenile(true)
 
+func nufuz_ac() -> void:
+	if _mod == "nufuz":
+		kapat()
+		return
+	_mod = "nufuz"
+	_yenile(true)
+
 func defter_ac() -> void:
 	if _mod == "defter":
 		kapat()
@@ -876,6 +883,8 @@ func _imza() -> String:
 			return str([oyun.yet, _sonuc])
 		"ailem":
 			return str([oyun.aile, _sonuc, _ailem_slot, oyun.t / 1440])
+		"nufuz":
+			return str([oyun.nuf, _sonuc, oyun.temiz, oyun.kirli, oyun.adamlar])
 		"polis":
 			return str([oyun.pol, oyun.arama, oyun.temiz, oyun.kirli, _sonuc])
 		"meslek":
@@ -913,6 +922,7 @@ func _yenile(zorla: bool) -> void:
 		"silah": _silah_paneli()
 		"yetenek": _yetenek_paneli()
 		"ailem": _ailem_paneli()
+		"nufuz": _nufuz_paneli()
 	_kagit_mod = false
 	_arka.visible = _arka.ayarla(_gorsel_anahtarlari())
 
@@ -1882,6 +1892,7 @@ func _ben_paneli() -> void:
 	_btn(kisa, "Silahlar", silah_ac)
 	_btn(kisa, "Beceri ağacı", yetenek_ac)
 	_btn(kisa, "Ailem", ailem_ac)
+	_btn(kisa, "Nüfuz", nufuz_ac)
 	_un_bolumu()
 	_sonuc_satiri()
 
@@ -2229,6 +2240,33 @@ func _ailem_paneli() -> void:
 	for k in te:
 		var v2: float = te[k]
 		_lbl(_ic, "%s: %s%d%%" % [A.ETKI_AD[k], "+" if v2 > 0 else "−", int(round(absf(v2) * 100.0))], 14, RENK["good"] if v2 > 0 else RENK["bad"])
+	_sonuc_satiri()
+
+func _nufuz_paneli() -> void:
+	var N: RefCounted = oyun.nuf_k
+	_baslik(_ic, "Nüfuz", "Dokunulmazlık, federal baskı, sadakat ve malikâne.")
+	_bolum(_ic, "Dokunulmazlık (rüşvet kirli paradan, her ay −6)")
+	for k in N.KISI:
+		var v := _kutu(_ic, "%s — %d" % [N.KISI[k]["ad"], int(N.dokun(k))])
+		_bar(v, "", N.dokun(k), RENK["altin"], "%d" % int(N.dokun(k)))
+		_lbl(v, N.KISI[k]["ac"], 13, RENK["soluk"])
+		_btn(v, "Rüşvet ver (%s)" % oyun.para(N.ucret_k(k)), func(): _sonuc_goster(N.rusvet_ver(k)))
+	_bolum(_ic, "Federal ilgi")
+	_bar(_ic, "Federal", N.fed(), RENK["bad"], "%d" % int(N.fed()))
+	_lbl(_ic, "60 üstünde ajanlar kasaya el koyar, vergi keser. 100'de dava açılır.", 13, RENK["soluk"])
+	_btn(_ic, "Avukat tut (%s)" % oyun.para(N.AVUKAT_UCRET), func(): _sonuc_goster(N.avukat()))
+	_bolum(_ic, "Adamların sadakati")
+	if oyun.adamlar.is_empty():
+		_lbl(_ic, "Ekibinde adam yok.", 13, RENK["soluk"])
+	for a in oyun.adamlar:
+		var s: float = N.sadakat(a)
+		_bar(_ic, a["ad"], s, RENK["good"] if s >= 40.0 else RENK["bad"], "%d%s" % [int(s), " ⚠ darbe riski" if s < 30.0 else ""])
+	_bolum(_ic, "Malikâne")
+	if oyun.nuf["mal"]:
+		_lbl(_ic, "Malikânen var: sadakat +, saygı +.", 14, RENK["good"])
+		_btn(_ic, "Parti ver (%s)" % oyun.para(N.PARTI_UCRET), func(): _sonuc_goster(N.parti()))
+	else:
+		_btn(_ic, "Malikâne satın al (%s)" % oyun.para(N.MAL_FIYAT), func(): _sonuc_goster(N.mal_al()))
 	_sonuc_satiri()
 
 func _uyeler_bolumu() -> void:

@@ -74,8 +74,9 @@ func tespit_p() -> float:
 	return 1.0 - exp(-TESPIT_K * oyun.pol["iz"] * dikkat())
 
 # Kanıt dosyaya girer; aşama değişimi, dava ve baskın tetiklenir.
-func kanit(v: float, neden: String) -> void:
+func kanit(v0: float, neden: String) -> void:
 	var onceki := asama_idx()
+	var v: float = v0 * (1.0 - 0.4 * oyun.nuf_k.dokun("polis") / 100.0)
 	oyun.arama = clampf(oyun.arama + v, 0.0, 100.0)
 	oyun.kayit("Dosyana kanıt girdi: +%d (Dosya %d). %s" % [int(v), int(oyun.arama), neden], "bad")
 	_kontrol(onceki)
@@ -86,7 +87,7 @@ func _kontrol(onceki: int) -> void:
 	if st > onceki:
 		var msg: String = ["", "Gözetim altındasın. Bıraktığın iz artık 1,5 kat sayılıyor.", "Hakkında soruşturma açıldı. Polis dikkati +10.", "Savcılık arama emri hazırlıyor."][st]
 		oyun.kayit("Dosya aşaması: %s. %s" % [ASAMALAR[3 - st][1], msg], "bad")
-	if oyun.arama >= 100.0 and oyun.son.is_empty():
+	if oyun.arama >= 100.0 and oyun.son.is_empty() and not oyun.nuf_k.dava_dusur():
 		oyun.son = {"tur": "yenilgi", "metin": "Dosya 100'e ulaştı. Savcı iddianameyi yazdı; sabaha karşı kapın çalındı. Dava açıldı."}
 		return
 	if oyun.arama >= 75.0 and p["baskin"] == 0 and oyun.t >= p["baskin_ok"]:

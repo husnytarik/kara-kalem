@@ -940,6 +940,14 @@ func _ekran_cek(arg: String) -> void:
 			arayuz.silah_ac()
 		elif p[1] == "yetenek":
 			arayuz.yetenek_ac()
+		elif p[1] == "nufuz":
+			oyun.kirli += 5000.0
+			oyun.temiz += 15000.0
+			oyun.nuf["fed"] = 40.0
+			oyun.nuf_k.rusvet_ver("polis")
+			oyun.nuf_k.mal_al()
+			oyun.adamlar.append({"id": 99, "ad": "Test Adam", "yumruk": 5, "bicak": 5, "zeka": 5, "gorev": "", "sadakat": 20.0})
+			arayuz.nufuz_ac()
 		elif p[1] == "miras2":
 			oyun.kisi_k.test_hazirla()
 			oyun.ol("Test")
