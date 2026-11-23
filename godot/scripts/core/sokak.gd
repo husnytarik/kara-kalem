@@ -962,6 +962,12 @@ func _ekran_cek(arg: String) -> void:
 			oyun.ol("Test")
 			print(oyun.kisi_k.miras_al(int(oyun.kisi_k.cocuklar()[0]["id"])))
 			arayuz.ailem_ac()
+		elif p[1] == "ozet":
+			oyun.kisi_k.test_hazirla()
+			oyun.kisi_k.cocuklar().clear()
+			for k in oyun.aile["kisiler"]:
+				k["olu"] = true
+			oyun.ol("Test: uykunda gitti.")
 		elif p[1] == "miras":
 			oyun.kisi_k.test_hazirla()
 			oyun.ol("Test: yıllara yenik düştün.")

@@ -246,21 +246,37 @@ func adaylar() -> Array:
 func kayip_orani() -> float:
 	return clampf(KAYIP_TABAN * (1.0 + oyun.aile_k.etki("miras_kayip")), 0.0, 0.6)
 
+const ANI := {
+	"Baba": "Mahallede adı fısıltıyla anılır; kimi korkuyla, kimi saygıyla.",
+	"Saygın iş adamı": "Cenazesine yüzlerce kişi geldi; dükkânlar kepenk indirdi.",
+	"Rezil haraççı": "Esnaf onu hâlâ \"o beceriksiz\" diye anlatır, ama gülerek.",
+	"Sokak haraççısı": "Sokaklarda adı bilinirdi, ama kimse arkasından ağlamadı.",
+	"Mahalle esnafı": "Küçük ama dürüst bir hayat; komşuları iyilikle andı.",
+	"Yolunu arayan": "Kim olduğunu kimse tam bilemedi.",
+}
+
 func ozet_yazi() -> String:
 	var a := _a()
-	var tip: Dictionary = oyun.un_k.tip()
+	var U: RefCounted = oyun.un_k
+	var tip: Dictionary = U.tip()
 	var yil: int = oyun.tarih()["yil"]
 	var cocuk_say := 0
 	for k in a["kisiler"]:
 		if k["rol"] == "cocuk":
 			cocuk_say += 1
 	var l: PackedStringArray = []
+	l.append("— HAYAT ÖZETİ —")
 	l.append("%s, %d yaşında öldü." % [oyun.profil.get("ad", "Sen"), oyuncu_yas()])
 	l.append("Unvanı: %s. %d nesil, %d yıl sürdü." % [tip["ad"], int(a["nesil"]), yil])
-	l.append("Servet: %s · çocuk: %d" % [oyun.para(oyun.un_k.net_servet()), cocuk_say])
+	l.append("Servet %s · Korku %d · Sevgi %d · Saygı %d" % [oyun.para(U.net_servet()), int(U.deger("korku")), int(U.deger("sevgi")), int(U.deger("saygi"))])
+	l.append("Aile: %d çocuk · rezillik %d · hapis %d kez · tefeci borcu %s" % [cocuk_say, int(oyun.kotu["rezil"]), int(oyun.kotu["hapis_say"]), oyun.para(oyun.kotu["tef"])])
+	if oyun.nuf["mal"]:
+		l.append("Malikânede yaşadı.")
+	l.append(ANI.get(tip["ad"], ""))
 	for g in a["gecmis"]:
 		l.append("— %s (%s, %d yaşında)" % [g["ad"], g["tip"], g["yas"]])
-	return "\n".join(l)
+	return "
+".join(l)
 
 func miras_al(id: int) -> Dictionary:
 	var a := _a()
