@@ -884,7 +884,7 @@ func _imza() -> String:
 		"ailem":
 			return str([oyun.aile, _sonuc, _ailem_slot, oyun.t / 1440])
 		"nufuz":
-			return str([oyun.nuf, _sonuc, oyun.temiz, oyun.kirli, oyun.adamlar])
+			return str([oyun.nuf, oyun.kotu, _sonuc, oyun.temiz, oyun.kirli, oyun.adamlar])
 		"polis":
 			return str([oyun.pol, oyun.arama, oyun.temiz, oyun.kirli, _sonuc])
 		"meslek":
@@ -2261,6 +2261,18 @@ func _nufuz_paneli() -> void:
 	for a in oyun.adamlar:
 		var s: float = N.sadakat(a)
 		_bar(_ic, a["ad"], s, RENK["good"] if s >= 40.0 else RENK["bad"], "%d%s" % [int(s), " ⚠ darbe riski" if s < 30.0 else ""])
+	_bolum(_ic, "Kötü yol")
+	var K: RefCounted = oyun.kotu_k
+	_lbl(_ic, "Tefeci borcu: %s · rezillik %d · hapis %d kez" % [oyun.para(oyun.kotu["tef"]), int(oyun.kotu["rezil"]), int(oyun.kotu["hapis_say"])], 14, RENK["bad"] if oyun.kotu["tef"] > 0.0 else RENK["soluk"])
+	var kh := HBoxContainer.new()
+	_ic.add_child(kh)
+	_btn(kh, "Tefeciden $500", func(): _sonuc_goster(K.tefeci_al(500.0)))
+	_btn(kh, "Borç öde $500", func(): _sonuc_goster(K.tefeci_ode(500.0)))
+	var kh2 := HBoxContainer.new()
+	_ic.add_child(kh2)
+	_btn(kh2, "Kumar $50", func(): _sonuc_goster(K.kumar(50.0)))
+	_btn(kh2, "Kumar $200", func(): _sonuc_goster(K.kumar(200.0)))
+	_btn(_ic, "Küçük soygun yap (riskli)", func(): _sonuc_goster(K.soygun()))
 	_bolum(_ic, "Malikâne")
 	if oyun.nuf["mal"]:
 		_lbl(_ic, "Malikânen var: sadakat +, saygı +.", 14, RENK["good"])

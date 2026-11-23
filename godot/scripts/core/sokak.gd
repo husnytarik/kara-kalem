@@ -940,6 +940,15 @@ func _ekran_cek(arg: String) -> void:
 			arayuz.silah_ac()
 		elif p[1] == "yetenek":
 			arayuz.yetenek_ac()
+		elif p[1] == "kotu":
+			oyun.kirli += 800.0
+			oyun.kotu_k.tefeci_al(500.0)
+			for i in 4:
+				print(oyun.kotu_k.kumar(50.0))
+			print(oyun.kotu_k.soygun())
+			oyun.kotu_k.hapis(35, "Test")
+			print(oyun.kotu, oyun.nuf, oyun.t)
+			arayuz.nufuz_ac()
 		elif p[1] == "nufuz":
 			oyun.kirli += 5000.0
 			oyun.temiz += 15000.0

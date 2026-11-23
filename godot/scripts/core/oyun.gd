@@ -133,6 +133,8 @@ var un_k: RefCounted
 var kisi_k: RefCounted
 var nuf: Dictionary = {}
 var nuf_k: RefCounted
+var kotu: Dictionary = {}
+var kotu_k: RefCounted
 var uyeler: Array = []   # aile üyeleri: {uid, ad, fak, rutbe, durum: aktif|olu, iliski, ev}
 var _uid := 0
 var _pid := 0
@@ -232,6 +234,8 @@ func kur(h: Node3D) -> void:
 	kisi_k.hazirla()
 	nuf_k = load("res://scripts/core/nufuz.gd").new(self)
 	nuf = nuf_k.yeni()
+	kotu_k = load("res://scripts/core/kotu.gd").new(self)
+	kotu = kotu_k.yeni()
 	un_k = load("res://scripts/core/un.gd").new(self)
 	un = un_k.yeni()
 	sil_k = load("res://scripts/core/silahlik.gd").new(self)
@@ -1021,7 +1025,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler, "kara": kara, "sil": sil, "yet": yet, "aile": aile, "un": un, "nuf": nuf, "acilis": acilis}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler, "kara": kara, "sil": sil, "yet": yet, "aile": aile, "un": un, "nuf": nuf, "kotu": kotu, "acilis": acilis}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -1068,6 +1072,7 @@ func durum_yukle(d: Dictionary) -> void:
 	un = d.get("un", un_k.yeni())
 	kisi_k.hazirla()
 	nuf = d.get("nuf", nuf_k.yeni())
+	kotu = d.get("kotu", kotu_k.yeni())
 	acilis = d.get("acilis", {"daire": true, "calisti": true})
 	if d.has("sil"):
 		sil = d["sil"]
@@ -1158,6 +1163,7 @@ func _ay() -> void:
 	meslek.ay()
 	aklama_k.ay()
 	nuf_k.ay()
+	kotu_k.ay()
 	polis.ay()
 	borc_k.ay()
 	gerginlik.ay()
