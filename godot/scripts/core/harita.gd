@@ -9,7 +9,6 @@ var bolgeler := {}                     # id -> {ad, x0, z0, x1, z1}
 var yerler: Array[Dictionary] = []     # {ad, bolge, ozel, pos, aabb}
 var _arazi: Node3D
 var _iskeleler: Array[AABB] = []
-var _kaldirim: Node3D
 var dolgu: Array[AABB] = []            # süs binalar (işletme değil; yine de engel ve görüş kesici)
 var _dolgu_obb: Array = []             # {xf, yerel}: dönük süs binalar için tam kutu
 var _izgara: AStarGrid2D
@@ -37,11 +36,6 @@ func _ready() -> void:
 	for n in get_tree().get_nodes_in_group("iskele"):
 		var m := n as MeshInstance3D
 		_iskeleler.append(m.global_transform * m.mesh.get_aabb())
-	var kal := Node3D.new()
-	kal.set_script(load("res://scripts/core/kaldirim.gd"))
-	add_child(kal)
-	kal.kur(self, _arazi.x0, _arazi.z0, _arazi.genislik, _arazi.derinlik)
-	_kaldirim = kal
 	_izgara_kur()
 
 func _bolgeleri_oku() -> void:
@@ -57,8 +51,6 @@ func yuk(x: float, z: float, iskele: bool = true) -> float:
 		for a in _iskeleler:
 			if x >= a.position.x and x <= a.end.x and z >= a.position.z and z <= a.end.z:
 				return a.end.y
-	if _kaldirim != null:
-		return _arazi.yuk(x, z) + _kaldirim.ek(x, z)
 	return _arazi.yuk(x, z)
 
 func merkez(id: String) -> Vector3:
