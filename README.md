@@ -79,7 +79,7 @@ Windows SmartScreen "bilinmeyen yayıncı" uyarısı verebilir; exe imzasızdır
 **Ekonomi**
 - Binalar: satın alma, gelir, haraç toplama, işletme (fiyat, personel, itibar, olaylar)
 - Bodrum içki imalatı, gizli oda, stok; aklama (çamaşırhane gibi cepheler) ve vergi şüphesi
-- Borç ve tefeci: aylık taksit, faiz, kaçırırsan oyun biter
+- Borç ve tefeci: aylık taksit, faiz, kaçırırsan meyhaneyi kaybedersin
 - Arabalar (Ford Model T, Buick, Packard): yakıt, arıza, bakım, hız
 
 **Adamlar ve silahlar**

@@ -72,6 +72,8 @@ func kumar(bahis: float) -> Dictionary:
 	var p: float = clampf(0.42 + oyun.aile_k.etki("kumar_gelir") + 0.01 * (zeka - 5.0), 0.2, 0.6)
 	if rng.randf() < p:
 		oyun.kirli += bahis * 2.0
+		if bahis >= 200.0:
+			oyun.kaz_k.ver("kumar_zengin")
 		oyun.kayit("Kumarda kazandın: +%s." % oyun.para(bahis), "good")
 		oyun.degisti.emit()
 		return oyun.tamam("Kazandın! +%s" % oyun.para(bahis))
@@ -115,6 +117,7 @@ func _rezil_ekle(v: float) -> void:
 func hapis(gun: int, neden: String) -> void:
 	var k := _k()
 	k["hapis_say"] = int(k["hapis_say"]) + 1
+	oyun.kaz_k.ver("hapis")
 	var ceza: float = minf(oyun.temiz + oyun.kirli, 150.0 * gun)
 	oyun.harcama(ceza, "kirli")
 	_rezil_ekle(8.0)

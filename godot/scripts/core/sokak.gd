@@ -984,6 +984,19 @@ func _ekran_cek(arg: String) -> void:
 					oyun.isy[i]["haracli"] = true
 					n += 1
 			print("REZIL: ", U.tip()["ad"], " saygi=", int(U.deger("saygi")), " dikkat=", int(U.deger("dikkat")))
+		elif p[1] == "kaz":
+			oyun.arama = 99.0
+			oyun.polis.kanit(5.0, "t")
+			oyun.nuf["fed"] = 100.0
+			oyun.borc["taksit"] = 150.0
+			oyun.kirli = 1000.0
+			oyun.nuf_k.gun()
+			oyun.borc["ana"] = 100.0
+			oyun.temiz = 0.0
+			for i in 3:
+				oyun.borc_k.ay()
+			print("SON=", oyun.son, " KAZ=", oyun.kaz.keys())
+			arayuz.kazanim_ac()
 		elif p[1] == "ozet":
 			oyun.kisi_k.test_hazirla()
 			oyun.kisi_k.cocuklar().clear()

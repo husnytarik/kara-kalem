@@ -64,28 +64,25 @@ func kampanya_fon(miktar: int) -> Dictionary:
 	return oyun.tamam("Kampanya fonuna eklendi.")
 
 func _bitir(tur: String, metin: String) -> void:
-	oyun.son = {"tur": tur, "metin": metin}
-	oyun.kayit(metin, "good" if tur == "zafer" else "bad")
+	oyun.kayit(metin, "good")
 
 # Ay sonunda (oyun._ay içinden).
 func ay() -> void:
-	if not oyun.son.is_empty():
-		return
 	var z: Dictionary = oyun.zf
 	var d: Dictionary = oyun.tarih()
 	var D := durum()
 	z["durust_ay"] = z["durust_ay"] + 1 if D["durust"].all(func(x): return x["ok"]) else 0
 	z["hakim_ay"] = z["hakim_ay"] + 1 if D["hakim"].all(func(x): return x["ok"]) else 0
 	if z["durust_ay"] >= 2:
-		_bitir("zafer", "İki ay üst üste temiz kasa, temiz dosya, sıfır haraç ve küçük bir ekip. Dükkânları ve apartmanları olan saygın bir iş adamısın; polisin sana dosyası bile yok. DÜRÜST İŞ ZAFERİ.")
-		return
+		oyun.kaz_k.ver("durust")
 	if z["hakim_ay"] >= 2:
-		_bitir("zafer", "Şehrin mahallelerinin neredeyse hepsi senin. Rakip aileler çekildi ya da boyun eğdi; kimse senden izin almadan şehirde iş yapamaz. HÂKİMİYET ZAFERİ.")
-		return
+		oyun.kaz_k.ver("hakim")
 	if d["ay_yil"] == 12 and d["yil"] >= 2 and oyun.oyuncu_bolgeleri().size() >= 2:
 		var oy: float = oy_orani() + (oyun.rng.randf() - 0.5) * 10.0
 		if oy >= 50.0:
-			_bitir("zafer", "Seçim gecesi sayım bitti: oyların %%%d'ini aldın. Belediye başkanısın; belediye binasının merdivenlerinde alkışlanıyorsun. BAŞKANLIK ZAFERİ." % int(round(oy)))
+			oyun.kayit("Seçim gecesi sayım bitti: oyların %%%d'ini aldın." % int(round(oy)), "good")
+			oyun.kaz_k.ver("baskan")
+			z["kampanya"] = 0.0
 			return
 		oyun.kayit("Belediye seçimini kaybettin (%%%d). Kampanya fonu eridi." % int(round(oy)), "bad")
 		z["kampanya"] = 0.0

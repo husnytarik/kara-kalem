@@ -151,6 +151,7 @@ func evlen(i: int) -> Dictionary:
 	a["adaylar"] = []
 	oyun.un_k.ekle("saygi", 3.0)
 	oyun.un_k.ekle("sevgi", 3.0)
+	oyun.kaz_k.ver("evlilik")
 	oyun.kayit("%s ile evlendin. Düğün %s tuttu; mahalle konuşuyor." % [k["ad"], oyun.para(ucret)], "good")
 	oyun.degisti.emit()
 	return oyun.tamam()
@@ -236,6 +237,7 @@ func _dogum(e: Dictionary) -> void:
 			oz.append(id)
 	var c := _yeni_kisi("cocuk", cins, _isim(cins), 0, oz)
 	a["kisiler"].append(c)
+	oyun.kaz_k.ver("cocuk")
 	oyun.kayit("%s doğdu! Ailenin yeni üyesi: %s." % [c["ad"], oz_yazi(oz)], "good")
 	oyun.un_k.ekle("sevgi", 1.0)
 
@@ -332,6 +334,9 @@ func miras_al(id: int) -> Dictionary:
 	oyun.un["sevgi"] *= 0.7
 	oyun.un["saygi"] *= 0.7
 	oyun.aile_k.miras_devri()
+	oyun.kaz_k.ver("nesil")
+	if int(a["nesil"]) >= 3:
+		oyun.kaz_k.ver("nesil3")
 	oyun.son = {}
 	oyun.kayit("%s ailenin başına geçti (%d. nesil). Servetin %%%d'i kaybedildi." % [yeni_ad, int(a["nesil"]), int(round(kayip * 100.0))], "warn")
 	oyun.degisti.emit()

@@ -79,6 +79,7 @@ func mal_al() -> Dictionary:
 	if not oyun.harcama(MAL_FIYAT, "temiz"):
 		return oyun.hata("Malikâne için temiz para yetmiyor (%s)." % oyun.para(MAL_FIYAT))
 	_n()["mal"] = true
+	oyun.kaz_k.ver("malikane")
 	oyun.un_k.ekle("saygi", 8.0)
 	oyun.kayit("Malikâneyi satın aldın. Mahalle artık başka gözle bakıyor.", "good")
 	oyun.degisti.emit()
@@ -119,13 +120,21 @@ func gun() -> void:
 	if fed() >= FED_ESIK and oyun.t / oyun.DAY - int(n["fed_ay"]) >= 15:
 		n["fed_ay"] = oyun.t / oyun.DAY
 		_federal_olay()
-	if fed() >= 100.0 and oyun.son.is_empty():
+	if fed() >= 100.0:
 		if dokun("yargic") >= 60.0:
 			n["dokun"]["yargic"] = dokun("yargic") - 60.0
 			n["fed"] = 50.0
 			oyun.kayit("Federal dava açıldı ama yargıç sana sahip çıktı. Federal ilgi 50'ye indi.", "warn")
 		else:
-			oyun.son = {"tur": "yenilgi", "metin": "Federal ajanlar hesaplarını inceledi: vergi kaçakçılığı. Capone gibi, silahla değil kağıtla düştün.\n\n" + oyun.kisi_k.ozet_yazi()}
+			var el: float = oyun.kirli * 0.5
+			var vergi: float = oyun.temiz * 0.25
+			oyun.kirli -= el
+			oyun.temiz -= vergi
+			n["fed"] = 40.0
+			oyun.un["saygi"] = maxf(-50.0, oyun.un["saygi"] - 10.0)
+			oyun.kayit("Federal ajanlar hesaplarını inceledi: vergi kaçakçılığı. Kirli paranın yarısına (%s) el konuldu, %s ceza kesildi. Silahla değil kağıtla düştün." % [oyun.para(el), oyun.para(vergi)], "bad")
+			oyun.kaz_k.ver("federal")
+
 	# sadakat eğilimi
 	var hedef: float = clampf(55.0 + 100.0 * oyun.aile_k.etki("sadakat") + (oyun.un_k.deger("saygi") - 30.0) * 0.3 + (8.0 if n["mal"] else 0.0), 10.0, 95.0)
 	for a in oyun.adamlar:

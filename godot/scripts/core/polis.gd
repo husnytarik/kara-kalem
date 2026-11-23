@@ -87,8 +87,16 @@ func _kontrol(onceki: int) -> void:
 	if st > onceki:
 		var msg: String = ["", "Gözetim altındasın. Bıraktığın iz artık 1,5 kat sayılıyor.", "Hakkında soruşturma açıldı. Polis dikkati +10.", "Savcılık arama emri hazırlıyor."][st]
 		oyun.kayit("Dosya aşaması: %s. %s" % [ASAMALAR[3 - st][1], msg], "bad")
-	if oyun.arama >= 100.0 and oyun.son.is_empty() and not oyun.nuf_k.dava_dusur():
-		oyun.son = {"tur": "yenilgi", "metin": "Dosya 100'e ulaştı. Savcı iddianameyi yazdı; sabaha karşı kapın çalındı. Dava açıldı."}
+	if oyun.arama >= 100.0 and not oyun.nuf_k.dava_dusur():
+		var ceza: float = minf(oyun.temiz + oyun.kirli, 1500.0)
+		oyun.harcama(ceza, "kirli")
+		oyun.arama = 50.0
+		oyun.kotu["rezil"] = minf(100.0, float(oyun.kotu["rezil"]) + 20.0)
+		oyun.kotu["hapis_say"] = int(oyun.kotu["hapis_say"]) + 1
+		oyun.un["saygi"] = maxf(-50.0, oyun.un["saygi"] - 10.0)
+		oyun.kayit("Dosya 100'e ulaştı. Dava açıldı: %s ceza ödedin, birkaç gece nezarette kaldın. Dosya 50'ye indi." % oyun.para(ceza), "bad")
+		oyun.kaz_k.ver("dava")
+		oyun.kaz_k.ver("hapis")
 		return
 	if oyun.arama >= 75.0 and p["baskin"] == 0 and oyun.t >= p["baskin_ok"]:
 		p["baskin"] = oyun.t + (1 + rng.randi() % 3) * oyun.DAY

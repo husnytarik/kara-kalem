@@ -489,7 +489,7 @@ func _amac_guncelle() -> void:
 	elif bolgeler == 0:
 		yazi = "Nüfuzunu büyüt: haraç bağladıkça mahalle senin olur. Haraçlı iş: %d" % (haracli + sahip)
 	else:
-		yazi = "%d mahalle senin. Rakip ailelere karşı büyü: Hedefler panelinde zafer yollarına bak." % bolgeler
+		yazi = "%d mahalle senin. Rakip ailelere karşı büyü: Hedefler panelinde kazanım yollarına bak." % bolgeler
 	if oyun.arama >= 60.0:
 		baslik = "TEHLİKE"
 		yazi = "Polis dosyan kabarık (%d). Ortalıkta görünme, rüşvet ver ya da evine gir." % int(oyun.arama)
@@ -776,6 +776,13 @@ func ailem_ac() -> void:
 	_ailem_slot = -1
 	_yenile(true)
 
+func kazanim_ac() -> void:
+	if _mod == "kazanim":
+		kapat()
+		return
+	_mod = "kazanim"
+	_yenile(true)
+
 func nufuz_ac() -> void:
 	if _mod == "nufuz":
 		kapat()
@@ -883,6 +890,8 @@ func _imza() -> String:
 			return str([oyun.yet, _sonuc])
 		"ailem":
 			return str([oyun.aile, _sonuc, _ailem_slot, oyun.t / 1440])
+		"kazanim":
+			return str(oyun.kaz)
 		"nufuz":
 			return str([oyun.nuf, oyun.kotu, _sonuc, oyun.temiz, oyun.kirli, oyun.adamlar])
 		"polis":
@@ -923,6 +932,7 @@ func _yenile(zorla: bool) -> void:
 		"yetenek": _yetenek_paneli()
 		"ailem": _ailem_paneli()
 		"nufuz": _nufuz_paneli()
+		"kazanim": _kazanim_paneli()
 	_kagit_mod = false
 	_arka.visible = _arka.ayarla(_gorsel_anahtarlari())
 
@@ -1542,7 +1552,7 @@ func _garaj_paneli() -> void:
 # ---------- hedefler / zafer yolları ----------
 func _zafer_paneli() -> void:
 	_baslik(_ic, "Hedefler")
-	_lbl(_ic, "Üç zafer yolundan biri oyunu kazandırır. Koşullar ay sonunda kontrol edilir.", 14, RENK["soluk"])
+	_lbl(_ic, "Bu koşullar tutunca kazanım alırsın; oyun bitmez, istediğin kadar devam edersin. Koşullar ay sonunda kontrol edilir.", 14, RENK["soluk"])
 	var D: Dictionary = oyun.zafer.durum()
 	var yollar := [["durust", "Dürüst iş (2 ay üst üste)", oyun.zf["durust_ay"]], ["baskan", "Belediye başkanlığı (yıllık seçim, 12. ay)", -1], ["hakim", "Hâkimiyet (2 ay üst üste)", oyun.zf["hakim_ay"]]]
 	for y in yollar:
@@ -1591,10 +1601,8 @@ func _son_kontrol() -> void:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 10)
 	pc.add_child(v)
-	var zafer: bool = oyun.son["tur"] == "zafer"
 	var olum: bool = oyun.son["tur"] == "olum"
-	var bas := "ZAFER" if zafer else ("HAYATIN SONU" if olum else "OYUN BİTTİ")
-	var b := _lbl(v, bas, 28, RENK["good"] if zafer else RENK["bad"])
+	var b := _lbl(v, "HAYATIN SONU", 28, RENK["bad"])
 	b.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_lbl(v, oyun.son["metin"], 16)
 	if olum:
@@ -1608,8 +1616,6 @@ func _son_kontrol() -> void:
 			_son_ortu.queue_free()
 			_son_ortu = null
 			_son_kontrol())
-	if zafer:
-		_btn(v, "Oynamaya devam et", _son_kapat)
 	if not olum:
 		_btn(v, "Ana menü", _ana_menu)
 	add_child(_son_ortu)
@@ -1893,6 +1899,7 @@ func _ben_paneli() -> void:
 	_btn(kisa, "Beceri ağacı", yetenek_ac)
 	_btn(kisa, "Ailem", ailem_ac)
 	_btn(kisa, "Nüfuz", nufuz_ac)
+	_btn(kisa, "Kazanımlar (%d)" % oyun.kaz_k.sayi(), kazanim_ac)
 	_un_bolumu()
 	_sonuc_satiri()
 
@@ -2241,6 +2248,15 @@ func _ailem_paneli() -> void:
 		var v2: float = te[k]
 		_lbl(_ic, "%s: %s%d%%" % [A.ETKI_AD[k], "+" if v2 > 0 else "−", int(round(absf(v2) * 100.0))], 14, RENK["good"] if v2 > 0 else RENK["bad"])
 	_sonuc_satiri()
+
+func _kazanim_paneli() -> void:
+	var KZ: RefCounted = oyun.kaz_k
+	_baslik(_ic, "Kazanımlar", "%d / %d — oyun bitmez; her dönüm noktası bir kazanımdır." % [KZ.sayi(), KZ.LISTE.size()])
+	for id in KZ.LISTE:
+		var al: bool = KZ.var_mi(id)
+		var v := _kutu(_ic, ("★ " if al else "☆ ") + KZ.LISTE[id]["ad"])
+		var tl := _lbl(v, KZ.LISTE[id]["ac"], 13, RENK["good"] if al else RENK["soluk"])
+		tl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 func _nufuz_paneli() -> void:
 	var N: RefCounted = oyun.nuf_k

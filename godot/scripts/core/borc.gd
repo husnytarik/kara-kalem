@@ -1,6 +1,6 @@
 extends RefCounted
 # Babadan kalan tefeci borcu (web: debt). Aylık %1 faiz, aylık taksit; temiz parayla ödenir.
-# Üç taksit üst üste ödenmezse oyun biter. Sadece "yerli" (Murphy's Tavern) başlangıcında vardır.
+# Üç taksit üst üste ödenmezse meyhane gider (kazanım: Tapusuz kaldın). Sadece "yerli" (Murphy's Tavern) başlangıcında vardır.
 
 const FAIZ := 0.01
 const ANA := 2400.0
@@ -54,5 +54,10 @@ func ay() -> void:
 	else:
 		b["kacirilan"] += 1
 		oyun.kayit("Taksiti ödeyemedin (%d/3). Temiz paran %s, taksit %s; kirli parayla resmî taksit ödenmez." % [b["kacirilan"], oyun.para(oyun.temiz), oyun.para(pay)], "bad")
-		if b["kacirilan"] >= 3 and oyun.son.is_empty():
-			oyun.son = {"tur": "yenilgi", "metin": "Üç taksit üst üste ödenmedi. Sal'ın adamları bu sefer oturmadı. Meyhanenin tapusu el değiştirdi."}
+		if b["kacirilan"] >= 3:
+			b["ana"] = 0.0
+			b["kacirilan"] = 0
+			oyun.un["saygi"] = maxf(-50.0, oyun.un["saygi"] - 10.0)
+			oyun.kotu["rezil"] = minf(100.0, float(oyun.kotu["rezil"]) + 15.0)
+			oyun.kayit("Üç taksit ödenmedi. Sal'ın adamları meyhanenin tapusunu aldı; borç kapandı ama itibarın yara aldı.", "bad")
+			oyun.kaz_k.ver("tapu")
