@@ -106,7 +106,7 @@ const OLAY := {
 		["Hediyeyle git", "temiz>=500", 1.0, "temiz-500;dok.siyasi+14;saygi+4", "Vali bunu unutmayacak.", "", ""],
 		["Gitme", "", 1.0, "", "Başka işlerin var.", "", ""],
 	]},
-	"n09": {"b": "Dedikodu", "m": "Mahallede senin hakkında bir dedikodu dolaşıyor.", "ev": [1, 4], "w": 5, "cd": 18, "k": "saygi>=15", "tag": "mahalle", "s": [
+	"n09": {"b": "Dedikodu", "m": "Mahallede senin hakkında bir dedikodu dolaşıyor.", "ev": [1, 4], "w": 5, "cd": 60, "k": "saygi>=15", "tag": "mahalle", "s": [
 		["Yalanla", "karizma>=5", 0.6, "saygi+2", "Dedikodu söndü.", "saygi-2", "Yalanlama dedikoduyu büyüttü."],
 		["Yok say", "", 1.0, "saygi-1", "Zamanla geçer.", "", ""],
 		["Kaynağı bul", "zeka>=6", 0.55, "y.korku+3", "Kaynağı susturdun.", "stres+3", "Kimseyi bulamadın."],

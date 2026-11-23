@@ -997,6 +997,101 @@ func _ekran_cek(arg: String) -> void:
 				oyun.borc_k.ay()
 			print("SON=", oyun.son, " KAZ=", oyun.kaz.keys())
 			arayuz.kazanim_ac()
+		elif p[1] == "oynat":
+			var KK = oyun.kart_k
+			var say: Dictionary = {}
+			var sv_say: Dictionary = {}
+			var bn2 := 0
+			var yilmax := 12
+			var dip: bool = p.size() > 2 and p[2] == "dip"
+			var zinc: Dictionary = {}
+			if dip:
+				oyun.temiz = 100.0
+				oyun.kotu["rezil"] = 30.0
+				oyun.kotu["tef"] = 400.0
+				oyun.un["saygi"] = -10.0
+				yilmax = 6
+			for adm in 360 * yilmax:
+				oyun.ilerle(60.0)
+				var yil: int = oyun.t / 172800
+				if adm % 6 == 0:
+					oyun.kis["agir"] = 0.0
+					oyun.kis["hasta"] = 0
+					oyun.kis["aclik"] = 20.0
+					oyun.kis["yorgun"] = 20.0
+				if not oyun.son.is_empty():
+					print("OLUM yil=", yil, " ", str(oyun.son.get("metin", "")).substr(0, 60))
+					break
+				if not oyun.yol.get("zincir", []).is_empty() and adm % 360 == 0:
+					print("ZINCIR_BEKLEYEN ", oyun.yol["zincir"])
+				# kademeli ilerleme (elle oynayan oyuncu yerine)
+				if adm % 360 == 0:
+					if yil == 3:
+						oyun.temiz += 3000.0
+						for bid in oyun.bolge:
+							if bn2 < 1:
+								oyun.add_inf(oyun.bolge[bid], "oyuncu", 100.0)
+								bn2 += 1
+					if yil == 6:
+						oyun.temiz += 20000.0
+						for bid in oyun.bolge:
+							if bn2 < 3:
+								oyun.add_inf(oyun.bolge[bid], "oyuncu", 100.0)
+								bn2 += 1
+					if yil == 9:
+						oyun.temiz += 40000.0
+						for bid in oyun.bolge:
+							if bn2 < 5:
+								oyun.add_inf(oyun.bolge[bid], "oyuncu", 100.0)
+								bn2 += 1
+				var bk: String = oyun.yol["bekleyen"]
+				if bk != "" and oyun.t >= oyun.yol.get("acilis", 0):
+					KK.hazirla(bk)
+					var opts: Array = KK.secenekler(bk)
+					var ok_i: Array = []
+					for oi in opts.size():
+						if opts[oi]["can"]:
+							ok_i.append(oi)
+					var sec: int = ok_i[oyun.rng.randi() % ok_i.size()] if not ok_i.is_empty() else 0
+					KK.uygula(bk, sec)
+					say[bk] = say.get(bk, 0) + 1
+					if bk.begins_with("z"):
+						print("ZINCIR_GELDI ", bk, " yil=", yil)
+					var lvk := "L" + str(KK.seviye())
+					sv_say[lvk] = sv_say.get(lvk, 0) + 1
+					if not KK.OL.var_mi(bk) and false:
+						pass
+				if adm % 360 == 359:
+					print("YIL ", yil, " L", KK.seviye(), " temiz=", int(oyun.temiz), " arama=", int(oyun.arama), " olay_toplam=", say.size())
+			var yeni: Array = []
+			var eski: Array = []
+			for id in say:
+				if KK.OL.var_mi(id):
+					yeni.append(id + "x" + str(say[id]))
+				else:
+					eski.append(id + "x" + str(say[id]))
+			print("SEVIYE_DAGILIM ", sv_say)
+			print("YENI ", yeni)
+			print("ESKI ", eski)
+			print("OYNAT_BITTI")
+		elif p[1] == "olay2":
+			var OLY = oyun.kart_k.OL
+			var bn := 0
+			for bid in oyun.bolge:
+				if bn < 4:
+					oyun.add_inf(oyun.bolge[bid], "oyuncu", 100.0)
+					bn += 1
+			oyun.temiz = 40000.0
+			oyun.un["saygi"] = 60.0
+			oyun.yol["puan"]["korku"] = 60.0
+			print("DON seviye=", oyun.kart_k.seviye())
+			var sat2: Array = []
+			for id in OLY.liste:
+				var w2: float = OLY.agirlik(id)
+				if w2 > 0.0:
+					sat2.append(id + ":" + str(snappedf(w2, 0.1)))
+			print("DON uygun=", sat2.size(), " ", sat2)
+			arayuz.kart_ac("d04")
 		elif p[1] == "olay":
 			var OLX = oyun.kart_k.OL
 			print("OLAY_SAYI=", OLX.liste.size())

@@ -13,17 +13,17 @@ const OLAY := {
 		["Kâğıtları yok et", "", 0.55, "fed-15;arama+5", "Delil yok oldu.", "fed+15;arama+10", "Yok ederken yakalandın."],
 		["Yargıçla anlaş", "d_yargic>=40", 1.0, "dok.yargic-40;fed-30", "Yargıç dosyayı kapattı.", "", ""],
 	]},
-	"d04": {"b": "Büyük bankacı", "m": "Şehrin en büyük bankasının sahibi seni özel bir yemeğe çağırdı: «Birlikte çok kazanabiliriz.»", "ev": [4, 4], "w": 5, "cd": 40, "k": "servet_un>=55", "tag": "iş", "s": [
+	"d04": {"b": "Büyük bankacı", "m": "Şehrin en büyük bankasının sahibi seni özel bir yemeğe çağırdı: «Birlikte çok kazanabiliriz.»", "ev": [4, 4], "w": 5, "cd": 40, "k": "servet_un>=40", "tag": "iş", "s": [
 		["Ortaklığı kabul et", "temiz>=2000", 0.7, "temiz-2000;temiz+5000;fed+5;saygi+4", "Banka kârı bölüşüyor; sermayen büyüdü.", "temiz-2000;fed+10", "Banka sana dış gösterdi; sermaye gitti."],
 		["Reddet", "", 1.0, "", "Bankacı gülümsedi ve başka birine yöneldi.", "", ""],
 		["Soygunu planla", "adam>=4", 0.4, "kirli+4000;y.golge+5;arama+10", "Plan tuttu; devasa bir vurgun.", "arama+25;hapis:4", "Plan ortada bozuldu."],
 	]},
-	"d05": {"b": "Senatör yemeği", "m": "Bir senatör seninle yemek yemek istiyor; gözünde dünyanın en eski ittifakı var.", "ev": [4, 4], "w": 5, "cd": 40, "k": "d_siyasi>=20", "tag": "nüfuz", "s": [
+	"d05": {"b": "Senatör yemeği", "m": "Bir senatör seninle yemek yemek istiyor; gözünde dünyanın en eski ittifakı var.", "ev": [4, 4], "w": 5, "cd": 40, "k": "d_siyasi>=10", "tag": "nüfuz", "s": [
 		["Destek sözü ver", "temiz>=1000", 1.0, "temiz-1000;dok.siyasi+15;saygi+3", "Senatör sana borçlu.", "", ""],
 		["Şantajla", "zeka>=7", 0.5, "dok.siyasi+25;fed+8", "Bir sırrını öğrendin; senatör artık yönetilebilir.", "dok.siyasi-10;arama+10", "Senatör bunu fark etti."],
 		["Reddet", "", 1.0, "saygi+2", "Senatör şaşırdı.", "", ""],
 	]},
-	"d06": {"b": "Şehir yıldönümü", "m": "Aile namının doğuşunun yıldönümü yaklaşıyor. Herkes büyük bir parti bekliyor.", "ev": [4, 4], "w": 3, "cd": 120, "k": "nam>=1", "tag": "prestij", "s": [
+	"d06": {"b": "Şehir yıldönümü", "m": "Aile namının doğuşunun yıldönümü yaklaşıyor. Herkes büyük bir parti bekliyor.", "ev": [4, 4], "w": 3, "cd": 120, "tag": "prestij", "s": [
 		["Büyük parti ver", "temiz>=1500", 1.0, "temiz-1500;nam+1;sevgi+5;saygi+5", "Şehrin yarısı davetliydi.", "", ""],
 		["Sessiz geç", "", 1.0, "", "Kimse bir şey demedi.", "", ""],
 	]},
@@ -32,16 +32,16 @@ const OLAY := {
 		["Üye ol", "", 1.0, "y.kulis+4;ger-3", "Konseyde bir koltuğun var.", "", ""],
 		["Katılma", "", 1.0, "ger+2;saygi+1", "Bağımsız kaldın.", "", ""],
 	]},
-	"d08": {"b": "Kıtalararası kaçakçılık", "m": "Liman müdürü, büyük bir sevkiyat için seni arıyor.", "ev": [4, 4], "w": 5, "cd": 30, "yol": "golge", "k": "y_golge>=10", "tag": "iş", "s": [
+	"d08": {"b": "Kıtalararası kaçakçılık", "m": "Liman müdürü, büyük bir sevkiyat için seni arıyor.", "ev": [4, 4], "w": 5, "cd": 30, "yol": "golge", "k": "y_golge>=5", "tag": "iş", "s": [
 		["Büyük sevkiyat yap", "adam>=3", 0.55, "kirli+3500;y.golge+4;fed+4", "Mal sorunsuz geldi.", "kirli-1500;arama+12;adam-1", "Mal el konuldu."],
 		["Liman memurunu satın al", "kirli>=1000", 1.0, "kirli-1000;dok.polis+10", "Memur artık senin.", "", ""],
 		["Geç", "", 1.0, "", "Riske girmedin.", "", ""],
 	]},
-	"d09": {"b": "Bakan ziyareti", "m": "Bakan, şehre geldi ve seninle özel görüşmek istiyor.", "ev": [4, 4], "w": 3, "cd": 60, "k": "d_siyasi>=30", "tag": "nüfuz", "s": [
+	"d09": {"b": "Bakan ziyareti", "m": "Bakan, şehre geldi ve seninle özel görüşmek istiyor.", "ev": [4, 4], "w": 3, "cd": 60, "k": "d_siyasi>=15", "tag": "nüfuz", "s": [
 		["Karşıla", "", 0.7, "dok.siyasi+10;saygi+4", "Bakan seni dinledi.", "arama+6", "Bakan gazetecilerle geldi."],
 		["Sessiz geç", "", 1.0, "", "Görüşme yapılmadı.", "", ""],
 	]},
-	"d10": {"b": "İtibar suikastı", "m": "Gazeteler senin hakkında yalan bir haber yaymaya başladı.", "ev": [4, 4], "w": 4, "cd": 30, "k": "saygi>=40", "tag": "kriz", "s": [
+	"d10": {"b": "İtibar suikastı", "m": "Gazeteler senin hakkında yalan bir haber yaymaya başladı.", "ev": [4, 4], "w": 4, "cd": 30, "k": "saygi>=30", "tag": "kriz", "s": [
 		["Yalanla", "", 0.6, "saygi+3", "Yalanlama etki etti.", "saygi-6", "Yalanlama yeni haberlere yol açtı."],
 		["Yayıncıyı bul", "adam>=3", 0.5, "y.korku+5;ger+3", "Yayıncıyı susturdun.", "arama+8;saygi-3", "Girişim fark edildi."],
 		["Sessiz kal", "", 1.0, "saygi-3", "Fırtına dinene kadar bekledin.", "", ""],
@@ -51,16 +51,16 @@ const OLAY := {
 		["İsyana yardım et", "", 0.4, "y.korku+6;sad+6", "İsyan başarılı oldu.", "arama+20;hapis:3", "İsyan bastırıldı ve seni yakaladılar."],
 		["Aldırma", "", 1.0, "", "Önemsemedin.", "", ""],
 	]},
-	"d12": {"b": "Kuraklık ve kıtlık", "m": "Bu yıl hasat zayıf; şehirde ekmek pahalandı, aç insanlar var.", "ev": [3, 4], "w": 4, "cd": 60, "k": "sevgi>=25", "tag": "felaket", "s": [
+	"d12": {"b": "Kuraklık ve kıtlık", "m": "Bu yıl hasat zayıf; şehirde ekmek pahalandı, aç insanlar var.", "ev": [3, 4], "w": 4, "cd": 60, "k": "sevgi>=10", "tag": "felaket", "s": [
 		["Gıda dağıt", "temiz>=1000", 1.0, "temiz-1000;sevgi+10;saygi+5;nam+1", "Şehir seni anıyor.", "", ""],
 		["Stokla ve sat", "", 0.55, "temiz+1200;sevgi-8", "Fiyatı kat kat yükselttin.", "sevgi-12;arama+8", "Halk öfkelendi."],
 		["Rakibe sat", "", 1.0, "kirli+500", "Elindeki erzakı rakibe sattın.", "", ""],
 	]},
-	"d13": {"b": "Üniversite bursu", "m": "Şehrin üniversitesi sana bir burs fonu kurmanı öneriyor.", "ev": [4, 4], "w": 3, "cd": 90, "k": "servet_un>=60", "tag": "prestij", "s": [
+	"d13": {"b": "Üniversite bursu", "m": "Şehrin üniversitesi sana bir burs fonu kurmanı öneriyor.", "ev": [4, 4], "w": 3, "cd": 90, "k": "servet_un>=45", "tag": "prestij", "s": [
 		["Burs fonu kur", "temiz>=2000", 1.0, "temiz-2000;nam+1;sevgi+6;saygi+6", "Fonun adı senin adınla anılıyor.", "", ""],
 		["Reddet", "", 1.0, "", "Başka yatırımlar var.", "", ""],
 	]},
-	"d14": {"b": "Şehir festivali", "m": "Şehir festivalinin ana sponsorluğu boş kaldı.", "ev": [4, 4], "w": 5, "cd": 30, "k": "sevgi>=30", "tag": "prestij", "s": [
+	"d14": {"b": "Şehir festivali", "m": "Şehir festivalinin ana sponsorluğu boş kaldı.", "ev": [4, 4], "w": 5, "cd": 30, "k": "sevgi>=15", "tag": "prestij", "s": [
 		["Ana sponsor ol", "temiz>=1200", 1.0, "temiz-1200;sevgi+7;saygi+5", "Şehir bir hafta boyunca seninle yaşadı.", "", ""],
 		["Rakibin sponsorluğunu engelle", "adam>=3", 0.5, "y.korku+5;ger+3", "Rakip sponsorluktan çekildi.", "arama+8;sevgi-3", "Şehir olayı not etti."],
 		["Seyirci kal", "", 1.0, "", "Sokaktan izledin.", "", ""],
@@ -136,12 +136,12 @@ const OLAY := {
 		["Davet kabul et", "", 1.0, "saygi+2;y.kulis+2", "Konuk olarak katıldın.", "", ""],
 		["Katılma", "", 1.0, "", "Başka işlerin var.", "", ""],
 	]},
-	"i07": {"b": "Gazete satın alma", "m": "Yerel bir gazete iflasın eşiğinde; yeni sahip arıyor.", "ev": [3, 4], "w": 3, "cd": 90, "tip": ["Saygın iş adamı"], "k": "servet_un>=55", "tag": "medya", "s": [
+	"i07": {"b": "Gazete satın alma", "m": "Yerel bir gazete iflasın eşiğinde; yeni sahip arıyor.", "ev": [3, 4], "w": 3, "cd": 90, "tip": ["Saygın iş adamı"], "k": "servet_un>=40", "tag": "medya", "s": [
 		["Gazeteyi satın al", "temiz>=2000", 1.0, "temiz-2000;saygi+5;dok.siyasi+8", "Gazete artık senin sesin.", "", ""],
 		["Reklam ver", "temiz>=200", 1.0, "temiz-200;saygi+2", "Gazetede adın geçti.", "", ""],
 		["Geç", "", 1.0, "", "Başka işler.", "", ""],
 	]},
-	"i08": {"b": "Kabine görevi", "m": "Vali, seni şehir meclisinde bir göreve çağırdı.", "ev": [4, 4], "w": 3, "cd": 90, "tip": ["Saygın iş adamı"], "k": "d_siyasi>=30", "tag": "siyaset", "s": [
+	"i08": {"b": "Kabine görevi", "m": "Vali, seni şehir meclisinde bir göreve çağırdı.", "ev": [4, 4], "w": 3, "cd": 90, "tip": ["Saygın iş adamı"], "k": "d_siyasi>=15", "tag": "siyaset", "s": [
 		["Kabul et", "", 1.0, "dok.siyasi+10;saygi+5;sevgi+3", "Meclisin bir parçası oldun.", "", ""],
 		["Bağımsız kal", "", 1.0, "saygi+1", "Özgürlüğünü seçtin.", "", ""],
 	]},
