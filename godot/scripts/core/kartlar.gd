@@ -59,11 +59,16 @@ const OZ_SEC := {
 var _bolge := ""      # kartın ilgili mahallesi
 var _aile := ""       # kartın ilgili ailesi
 
+var OL: RefCounted
+
 func _init(o: Node) -> void:
 	oyun = o
 	Y = o.yol_k
+	OL = load("res://scripts/core/olaylar.gd").new(o, self)
 
 func baslik(id: String) -> String:
+	if OL.var_mi(id):
+		return OL.baslik(id)
 	return KARTLAR[id][0]
 
 # Oyuncunun statüsü: mahalle sayısı, ekip ve servetle belirlenir.
@@ -125,25 +130,39 @@ func uygun(id: String) -> bool:
 
 # Ağırlıklı seçim; yola uygun kartlar biraz öne çıkar.
 func cek() -> String:
+	var z: String = OL.zincir_cek()
+	if z != "":
+		return z
 	if oyun.rng.randf() > 0.75:
 		return ""
 	var adaylar: Array = []
-	var top := 0
+	var agr: Array = []
+	var top := 0.0
 	for id in KARTLAR:
 		if uygun(id):
 			adaylar.append(id)
-			top += KARTLAR[id][1]
+			agr.append(float(KARTLAR[id][1]))
+			top += float(KARTLAR[id][1])
+	for id in OL.liste:
+		var w: float = OL.agirlik(id)
+		if w > 0.0:
+			adaylar.append(id)
+			agr.append(w)
+			top += w
 	if adaylar.is_empty():
 		return ""
-	var r: int = oyun.rng.randi() % top
-	for id in adaylar:
-		r -= KARTLAR[id][1]
-		if r < 0:
-			return id
+	var r: float = oyun.rng.randf() * top
+	for i in adaylar.size():
+		r -= agr[i]
+		if r < 0.0:
+			return adaylar[i]
 	return adaylar[0]
 
 # Kart açılırken ilgili mahalle/aile belirlenir.
 func hazirla(id: String) -> void:
+	if OL.var_mi(id):
+		OL.hazirla(id)
+		return
 	_bolge = ""
 	_aile = ""
 	var idler: Array = oyun.harita.bolgeler.keys()
@@ -160,6 +179,8 @@ func _fad() -> String:
 	return oyun.FAK[_aile]["ad"]
 
 func metin(id: String) -> String:
+	if OL.var_mi(id):
+		return OL.metin(id)
 	match id:
 		"yol_sec":
 			return "Babanın borcu, boş bir cep, bir şehir. Büyümek için bir yol seçmelisin. Hepsi ayrı bir kapı; hiçbiri sonsuza kadar açık değil. Seçtiğin yolun puanı artar, bırakırsan solar."
@@ -201,6 +222,8 @@ func metin(id: String) -> String:
 
 # Seçenek: {ad, ipucu, can:bool}
 func secenekler(id: String) -> Array:
+	if OL.var_mi(id):
+		return OL.secenekler(id)
 	var tm: float = oyun.temiz
 	var kt: float = oyun.temiz + oyun.kirli
 	match id:
@@ -333,6 +356,8 @@ func secenekler(id: String) -> Array:
 
 # Seçimi uygular -> {metin, tur}
 func uygula(id: String, n: int) -> Dictionary:
+	if OL.var_mi(id):
+		return OL.uygula(id, n)
 	var y: Dictionary = oyun.yol
 	var r: Dictionary = _coz(id, n)
 	var K: RefCounted = oyun.kis_k

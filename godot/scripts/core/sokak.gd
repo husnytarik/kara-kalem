@@ -997,6 +997,20 @@ func _ekran_cek(arg: String) -> void:
 				oyun.borc_k.ay()
 			print("SON=", oyun.son, " KAZ=", oyun.kaz.keys())
 			arayuz.kazanim_ac()
+		elif p[1] == "olay":
+			var OLX = oyun.kart_k.OL
+			print("OLAY_SAYI=", OLX.liste.size())
+			for sen in ["cocuk", "don"]:
+				if sen == "don":
+					oyun.kisi_k.test_hazirla()
+					oyun.temiz = 30000.0
+					oyun.un["saygi"] = 60.0
+				var sat: Array = []
+				for id in OLX.liste:
+					var w: float = OLX.agirlik(id)
+					if w > 0.0:
+						sat.append(id + ":" + str(snappedf(w, 0.1)))
+				print("SEN ", sen, " uygun=", sat.size(), " ", sat)
 		elif p[1] == "ozet2":
 			oyun.kisi_k.test_hazirla()
 			oyun.aile["gecmis"] = [{"ad": "Vito", "tip": "Sokak haraççısı", "yas": 58}, {"ad": "Enzo", "tip": "Baba", "yas": 66}]
