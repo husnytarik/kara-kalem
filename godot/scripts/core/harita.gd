@@ -193,15 +193,50 @@ func _acik(c: Vector2i) -> Vector2i:
 # Verilen noktaya en yakın yürünebilir nokta (başlangıç/ışınlama için).
 func serbest_nokta(p: Vector3) -> Vector3:
 	var c := _acik(_hucre(p))
+	c = _ana_hucre(c)
 	var x := _gx0 + c.x + 0.5
 	var z := _gz0 + c.y + 0.5
 	return Vector3(x, yuk(x, z), z)
+
+# Hücre kapalı bir cep içindeyse (binalar arasında sıkışık), en yakın ana (en büyük) bileşen hücresine kaydır.
+var _ana_no := 0
+func _ana_hucre(c: Vector2i) -> Vector2i:
+	if _bilesen.is_empty():
+		_bilesen_kur()
+	if _ana_no == 0:
+		var say := {}
+		for v in _bilesen:
+			if v != 0:
+				say[v] = int(say.get(v, 0)) + 1
+		var en := -1
+		for k in say:
+			if int(say[k]) > en:
+				en = int(say[k])
+				_ana_no = int(k)
+	var w: int = _izgara.region.size.x
+	if _bilesen[c.y * w + c.x] == _ana_no:
+		return c
+	for r in range(1, 80):
+		var bu := Vector2i(-1, -1)
+		var bd := 1e9
+		for dx in range(-r, r + 1):
+			for dz in range(-r, r + 1):
+				if maxi(absi(dx), absi(dz)) != r:
+					continue
+				var q := c + Vector2i(dx, dz)
+				if _izgara.is_in_boundsv(q) and _bilesen[q.y * w + q.x] == _ana_no and float(dx * dx + dz * dz) < bd:
+					bu = q
+					bd = float(dx * dx + dz * dz)
+		if bu.x >= 0:
+			return bu
+	return c
 
 # Yürünebilir hücreleri bağlı bileşenlere ayır (bir kez; ulaşılamayan hedefte pahalı A* taramasını önler).
 var _bilesen := PackedInt32Array()
 func _bilesen_kur() -> void:
 	var w: int = _izgara.region.size.x
 	var hh: int = _izgara.region.size.y
+	_ana_no = 0
 	_bilesen.resize(w * hh)
 	_bilesen.fill(0)
 	var no := 0

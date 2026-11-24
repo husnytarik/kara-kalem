@@ -36,8 +36,11 @@ void fragment() {
 		float harc = step(f.x, 0.07) + step(f.y, 0.1);
 		float ton = hash(tuglaId + (xduvar ? 17.0 : 0.0));
 		float aa = clamp(1.0 - fwidth(v / 0.22) * 2.0, 0.0, 1.0);
-		vec3 tugla = c * (0.88 + 0.24 * ton);
-		tugla = mix(tugla, c * 1.25, clamp(harc, 0.0, 1.0) * 0.5 * aa);
+		vec3 tugla = mix(c, vec3(0.55, 0.26, 0.2), 0.45) * (0.8 + 0.4 * ton);
+		// harç: açık gri; tuğla başına belirgin ton farkı + yüzey lekesi
+		float leke = hash(floor(vec2(u, v) * 9.0) + tuglaId);
+		tugla *= 0.9 + 0.2 * leke;
+		tugla = mix(tugla, tugla * 0.45 + vec3(0.1), clamp(harc, 0.0, 1.0) * 0.9 * aa);
 		c = mix(c, tugla, aa);
 		float katno = floor(v / kat);
 		float kf = fract(v / kat);
