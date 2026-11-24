@@ -39,7 +39,7 @@ const EYLEM := {
 	"icki": {"ad": "İçki iç", "ucret": 10.0, "dk": 60, "d": {"stres": -25.0, "sikinti": -35.0, "yorgun": 4.0}, "oz": {"alkolik": 1.2}},
 	"sohbet": {"ad": "Çevre edin (sohbet et)", "ucret": 8.0, "dk": 90, "d": {"sikinti": -25.0, "stres": -5.0, "yorgun": 5.0}, "oz": {"cilveli": 2.0, "gece_kusu": 0.0}},
 	"bilardo": {"ad": "Bilardo oyna", "ucret": 6.0, "dk": 90, "d": {"sikinti": -35.0, "stres": -10.0, "yorgun": 5.0}, "oz": {"cilveli": 1.0}},
-	"kumar": {"ad": "Zar at (kumar)", "ucret": 15.0, "dk": 60, "d": {"sikinti": -50.0, "stres": 6.0}, "oz": {"kumarbaz": 2.5}},
+	"kumar": {"ad": "Kumar masası (zar, poker, rulet)", "ucret": 0.0, "dk": 60, "d": {"sikinti": -50.0, "stres": 6.0}, "oz": {"kumarbaz": 2.5}},
 	"hamam": {"ad": "Hamama gir", "ucret": 15.0, "dk": 90, "d": {"stres": -40.0, "yorgun": -20.0, "sikinti": -10.0}, "oz": {"saglikli": 0.6}},
 	"sinema": {"ad": "Bir film izle", "ucret": 8.0, "dk": 120, "d": {"sikinti": -45.0, "stres": -10.0}, "oz": {}},
 	"dua": {"ad": "Sessizce otur / dua et", "ucret": 0.0, "dk": 45, "d": {"stres": -22.0}, "oz": {"vicdanli": 1.0}},
@@ -146,12 +146,102 @@ func stres_ekle(d: float) -> void:
 func yara_ekle(x: float) -> void:
 	oyun.kis["yara"] = clampf(oyun.kis.get("yara", 0.0) + x, 0.0, 100.0)
 	oyun.kayit("Yaralandın; dinlenmezsen hastalığa açık olursun.", "bad")
+	if x >= 15.0:
+		bulas_dene("ates", 0.15, "yara enfeksiyon kaptı")
 
 # 0..1.5: ihtiyaçların ve yaranın bedene bindirdiği yük
 func yuk() -> float:
 	var k: Dictionary = oyun.kis
 	var p: float = maxf(0.0, k["aclik"] - 55.0) + maxf(0.0, k["yorgun"] - 55.0) + maxf(0.0, k["stres"] - 65.0) * 0.7 + k.get("yara", 0.0) * 0.5
 	return clampf(p / 100.0, 0.0, 1.5)
+
+# Hastalıklar: sure [min,max] gün, agir başlangıç ağırlığı, hiz ağırlaşma çarpanı, ilac ilacın etkisi, m: mevsim ağırlıkları [ilkbahar, yaz, sonbahar, kış]
+const HASTALIK := {
+	"grip": {"ad": "Grip", "sure": [2, 4], "agir": 15.0, "hiz": 1.0, "ilac": 1.0, "m": [1.0, 0.3, 1.0, 2.0]},
+	"zaturre": {"ad": "Zatürre", "sure": [4, 7], "agir": 30.0, "hiz": 1.4, "ilac": 0.8, "m": [0.5, 0.1, 0.6, 2.0]},
+	"ates": {"ad": "Ateş", "sure": [2, 4], "agir": 15.0, "hiz": 1.0, "ilac": 1.0, "m": [1.0, 1.2, 1.0, 1.0]},
+	"mide": {"ad": "Mide hastalığı", "sure": [2, 3], "agir": 12.0, "hiz": 0.8, "ilac": 1.0, "m": [0.8, 1.6, 1.0, 0.5]},
+	"tifus": {"ad": "Tifüs", "sure": [5, 9], "agir": 30.0, "hiz": 1.3, "ilac": 0.7, "m": [0.5, 1.2, 0.8, 0.6]},
+	"verem": {"ad": "Verem", "sure": [10, 18], "agir": 25.0, "hiz": 0.7, "ilac": 0.4, "m": [0.3, 0.2, 0.5, 1.0]},
+	"difteri": {"ad": "Difteri", "sure": [5, 8], "agir": 35.0, "hiz": 1.4, "ilac": 0.7, "m": [0.4, 0.1, 0.8, 1.0]},
+	"kolera": {"ad": "Kolera", "sure": [4, 7], "agir": 45.0, "hiz": 1.8, "ilac": 0.6, "m": [0.1, 1.0, 0.3, 0.0]},
+	"ispanyol": {"ad": "İspanyol gribi", "sure": [5, 9], "agir": 40.0, "hiz": 1.6, "ilac": 0.6, "m": [0.1, 0.1, 0.3, 1.0]},
+	"veba": {"ad": "Veba", "sure": [7, 12], "agir": 60.0, "hiz": 2.2, "ilac": 0.35, "m": [0.1, 0.5, 0.2, 0.0]},
+}
+# Salgın olabilecek hastalıklar [id, ağırlık]
+const SALGINLAR := [["ispanyol", 3.0], ["tifus", 2.0], ["kolera", 2.0], ["difteri", 2.0], ["grip", 2.0], ["veba", 0.6]]
+
+func salgin() -> Dictionary:
+	var s: Variant = oyun.kis.get("salgin", {})
+	if typeof(s) != TYPE_DICTIONARY or (s as Dictionary).is_empty():
+		return {}
+	return s if oyun.t < int((s as Dictionary)["bitis"]) else {}
+
+func _hast_agir(id: String, sg_var: bool) -> float:
+	var ms: int = (int(oyun.tarih()["ay"]) % 12) / 3
+	var w: float = float(HASTALIK[id]["m"][ms])
+	if id in ["veba", "kolera", "ispanyol"] and not sg_var:
+		w *= 0.15
+	return w
+
+func _hast_sec() -> String:
+	var sg: Dictionary = salgin()
+	if not sg.is_empty() and oyun.rng.randf() < 0.65:
+		return sg["id"]
+	var top := 0.0
+	for id in HASTALIK:
+		top += _hast_agir(id, not sg.is_empty())
+	var r: float = oyun.rng.randf() * top
+	for id in HASTALIK:
+		r -= _hast_agir(id, not sg.is_empty())
+		if r <= 0.0:
+			return id
+	return "grip"
+
+# Hastalık başlat (id boşsa mevsime/salgına göre seçilir).
+func hastalan(id: String = "", neden: String = "") -> void:
+	if hasta_mi():
+		return
+	if id == "" or not HASTALIK.has(id):
+		id = _hast_sec()
+	var h: Dictionary = HASTALIK[id]
+	var k: Dictionary = oyun.kis
+	k["hasta_id"] = id
+	k["hasta"] = oyun.t + int((float(h["sure"][0]) + oyun.rng.randf() * float(h["sure"][1] - h["sure"][0])) * oyun.DAY)
+	k["hasta_ad"] = h["ad"]
+	k["agir"] = float(h["agir"]) + yuk() * 25.0
+	k["uyari"]["agir"] = false
+	oyun.kayit("%s oldun.%s Evde yat, karnını doyur ya da ilaç al; kendine bakmazsan ağırlaşır." % [h["ad"], (" (" + neden + ")") if neden != "" else ""], "bad")
+
+# Görev/olay kaynaklı bulaşma
+func bulas_dene(id: String, sans: float, neden: String) -> void:
+	if not hasta_mi() and oyun.rng.randf() < sans * clampf(1.0 - 0.8 * oz("saglik"), 0.3, 2.0):
+		hastalan(id, neden)
+
+func salgin_ay() -> void:
+	var k: Dictionary = oyun.kis
+	var sg: Dictionary = k.get("salgin", {})
+	if not sg.is_empty():
+		if oyun.t >= int(sg["bitis"]):
+			oyun.kayit("%s salgını sönmeye başladı; şehir toparlanıyor." % HASTALIK[sg["id"]]["ad"], "good")
+			k["salgin"] = {}
+		return
+	var kis_mi: bool = oyun.mevsim() == "Kış"
+	if oyun.rng.randf() < (0.14 if kis_mi else 0.05):
+		var top := 0.0
+		for s in SALGINLAR:
+			top += float(s[1])
+		var r: float = oyun.rng.randf() * top
+		var sec: String = "grip"
+		for s in SALGINLAR:
+			r -= float(s[1])
+			if r <= 0.0:
+				sec = s[0]
+				break
+		k["salgin"] = {"id": sec, "bitis": oyun.t + int((10 + oyun.rng.randi() % 15) * oyun.DAY)}
+		for b in oyun.bolge:
+			oyun.bolge[b]["huzur"] = maxf(0.0, float(oyun.bolge[b]["huzur"]) - 8.0)
+		oyun.kayit("ŞEHİRDE %s SALGINI! Revirler dolu, mahalleler tedirgin. Kalabalıktan ve soğuktan kaçın, ilaç stokla." % String(HASTALIK[sec]["ad"]).to_upper(), "bad")
 
 func hasta_mi() -> bool:
 	return oyun.t < oyun.kis["hasta"]
@@ -246,6 +336,8 @@ func saat() -> void:
 		k["hasta"] -= int(dk * hiz)
 		# hastalığın ağırlığı: yük bindikçe ve dinlenilmedikçe artar, rahat ortamda azalır
 		var da: float = (0.1 + yuk_d * 0.55) * (0.2 if dinlen and yuk_d < 0.5 else 1.0) - (1.0 if dinlen and yuk_d < 0.4 else 0.0)
+		if da > 0.0:
+			da *= float(HASTALIK.get(k.get("hasta_id", "grip"), HASTALIK["grip"])["hiz"])
 		k["agir"] = clampf(k["agir"] + da * sa, 0.0, 100.0)
 		if k["agir"] >= 60.0 and not k["uyari"].get("agir", false):
 			k["uyari"]["agir"] = true
@@ -263,14 +355,19 @@ func saat() -> void:
 		# risk ihtiyaçlarla sürekli artar (eşik altında da küçük)
 		var risk: float = (maxf(0.0, k["yorgun"] - 50.0) * 0.00055 + maxf(0.0, k["aclik"] - 55.0) * 0.0006 + maxf(0.0, k["stres"] - 55.0) * 0.0005 + k.get("yara", 0.0) * 0.0004)
 		if oyun.mevsim() == "Kış":
-			risk += 0.003
+			risk += 0.006
+		# dışarıda yağmur/kar: üşütme
+		if not dis_ic:
+			var hv: String = oyun.hava()["tur"]
+			if hv == "yagmur":
+				risk += 0.002
+			elif hv == "kar":
+				risk += 0.004
+		if not salgin().is_empty():
+			risk += 0.003 if not dis_ic else 0.0015
 		risk *= clampf(1.0 - 0.8 * oz("saglik"), 0.3, 2.0) * sa
 		if risk > 0.0 and oyun.rng.randf() < risk:
-			var ad: String = ["Grip", "Zatürre", "Ateş", "Mide hastalığı"][oyun.rng.randi() % 4]
-			k["hasta"] = oyun.t + int((2.0 + oyun.rng.randf() * 3.0) * oyun.DAY)
-			k["hasta_ad"] = ad
-			k["agir"] = 15.0 + yuk_d * 25.0
-			oyun.kayit("%s oldun. Evde yat, karnını doyur ya da ilaç al; kendine bakmazsan ağırlaşır." % ad, "bad")
+			hastalan("", "yağmur/soğuk" if (oyun.hava()["tur"] in ["yagmur", "kar"] and not dis_ic) else "")
 	# uyarılar
 	_uyar("aclik", 70.0, "Karnın zil çalıyor. Bir lokantaya ya da eve git.", "bad")
 	_uyar("yorgun", 75.0, "Gözlerin kapanıyor. Eve dönüp uyu.", "bad")
@@ -354,8 +451,9 @@ func yap(id: String) -> Dictionary:
 		oyun.harcama(ucret, "kirli")
 	if id == "ilac":
 		if hasta_mi():
-			oyun.kis["agir"] = maxf(0.0, oyun.kis["agir"] - 55.0)
-			oyun.kis["hasta"] -= int(1.5 * oyun.DAY)
+			var ie: float = float(HASTALIK.get(oyun.kis.get("hasta_id", "grip"), HASTALIK["grip"])["ilac"])
+			oyun.kis["agir"] = maxf(0.0, oyun.kis["agir"] - 55.0 * ie)
+			oyun.kis["hasta"] -= int(1.5 * ie * oyun.DAY)
 			oyun.kis["yara"] = maxf(0.0, oyun.kis.get("yara", 0.0) - 15.0)
 			oyun.kayit("İlaç aldın; hastalık geriliyor (dinlenmeyi ihmal etme).", "good")
 		else:
@@ -378,6 +476,19 @@ func yap(id: String) -> Dictionary:
 		if sa >= 20 or sa < 4:
 			oz_ekle("gece_kusu", 1.5)
 			oz_ekle("cilveli", 1.0)
+		# çevre: bulunduğun mahallede sevgi, bazen bir tanıdık/ipucu
+		var cb: String = oyun.oyuncu_bolge
+		if cb != "" and oyun.bolge.has(cb):
+			var bb: Dictionary = oyun.bolge[cb]
+			var kaz: float = 1.0 + oz("cevre")
+			bb["sev"] = minf(100.0, bb["sev"] + kaz)
+			if oyun.t >= float(oyun.kis.get("cevre_t", 0)) and oyun.rng.randf() < 0.25 + 0.3 * oz("cevre"):
+				oyun.kis["cevre_t"] = oyun.t + 1440
+				var pr: int = 10 + oyun.rng.randi() % 20
+				oyun.temiz += pr
+				oyun.kayit("Sohbette tanıştığın biri küçük bir iş çevirdi: $%d temiz." % pr, "good")
+			else:
+				oyun.kayit("%s'da yeni yüzlerle tanıştın: mahallede sevgin arttı." % oyun.harita.bolgeler[cb]["ad"], "info")
 		if oz("bilgi") > 0.1 and oyun.rng.randf() < 0.5 + oz("bilgi"):
 			oyun.arama = maxf(0.0, oyun.arama - 3.0)
 			oyun.kayit("Sohbette polisin ne düşündüğünü öğrendin: bir iki şeyi toparladın (dosya −3).", "good")

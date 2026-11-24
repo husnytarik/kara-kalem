@@ -121,6 +121,7 @@ func hapis(gun: int, neden: String) -> void:
 	var ceza: float = minf(oyun.temiz + oyun.kirli, 150.0 * gun)
 	oyun.harcama(ceza, "kirli")
 	_rezil_ekle(8.0)
+	oyun.kis_k.bulas_dene("verem" if oyun.rng.randf() < 0.5 else "tifus", 0.3 + 0.02 * gun, "hücrenin nemi ve kalabalığı")
 	oyun.kis_k.uyku_baslat()
 	oyun.kayit("%s %d gün hapis yattın; para cezası %s." % [neden, gun, oyun.para(ceza)], "bad")
 	oyun.bekle(gun * oyun.DAY)

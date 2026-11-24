@@ -81,7 +81,8 @@ func secenekler(g: Dictionary) -> Array:
 			s.append({"id": "dedikodu", "ad": "Dedikodu dinle", "ipucu": "Mahalle havası hakkında bilgi."})
 			s.append({"id": "haber", "ad": "Polis ve çeteleri sor", "ipucu": "Gruplar şu an nerede, öğrenirsin."})
 			s.append({"id": "bahsis", "ad": "Bahşiş ver ($5)", "ipucu": "Mahallede sevgin artar."})
-			s.append({"id": "gozdagi", "ad": "Gözdağı ver", "ipucu": "Biraz kirli para, ama korku artar, sevgi düşer, arama yükselir."})
+			if oyun.t >= float(oyun.bolge[_bolge_id(g)].get("goz_t", 0)):
+				s.append({"id": "gozdagi", "ad": "Gözdağı ver", "ipucu": "Biraz kirli para, ama korku artar, sevgi düşer, arama yükselir."})
 			s.append({"id": "ayril", "ad": "Ayrıl", "ipucu": ""})
 	return s
 
@@ -190,12 +191,13 @@ func uygula(g: Dictionary, id: String) -> Dictionary:
 			return _r("Teşekkür ettiler: \"Sağ ol evlat, Allah razı olsun.\" Mahallede sevgin biraz arttı.", "good")
 		"gozdagi":
 			var b2: Dictionary = oyun.bolge[_bolge_id(g)]
-			var al2 := 10 + rng.randi() % 21
+			var al2 := int((10 + rng.randi() % 21) * clampf(1.0 - float(b2["kor"]) / 120.0, 0.15, 1.0))
+			b2["goz_t"] = oyun.t + 720
 			oyun.kirli += al2
 			b2["kor"] = minf(100.0, b2["kor"] + 1.5)
 			b2["sev"] = maxf(0.0, b2["sev"] - 2.0)
 			oyun.arama += 4.0
-			gruplar.serbest_birak(g, 120)
+			gruplar.dagit(g)
 			oyun.kayit("%s gözdağı verip $%d aldın." % [g["ad"], al2], "warn")
 			return _r("Göz korkuttun, $%d kirli para bıraktılar. Sevgi düştü, korku arttı." % al2, "warn")
 		"saldir":

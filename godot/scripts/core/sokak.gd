@@ -631,12 +631,18 @@ func _harita_modu_hover() -> void:
 	_bolge_ipucu.visible = true
 	_bolge_ipucu.position = fp + Vector2(22, 18)
 
+const UYKU_HIZ := 24.0
+var _uyku_acik := false
 var _bina_dur := false   # binadayken oyun duraklatılır (mesai sürerken hariç)
 
 func _process(delta: float) -> void:
 	_oto_kayit()
 	# Binadayken oyun saati ve dünya (gruplar, trafik, yayalar) durur; arayüz/fare/kamera canlı kalır.
-	var bd: bool = oyuncu.iceride >= 0 and oyun.vardiya.is_empty() and not savas_aktif
+	var uy: bool = oyun.uyku_hedef >= 0
+	if uy != _uyku_acik:
+		_uyku_acik = uy
+		Engine.time_scale = UYKU_HIZ if uy else _hiz
+	var bd: bool = oyuncu.iceride >= 0 and oyun.vardiya.is_empty() and not savas_aktif and not uy
 	if bd != _bina_dur:
 		_bina_dur = bd
 		for n in [gruplar, gorus, get_node_or_null("Yayalar"), get_node("Yayalar").trafik]:
@@ -655,6 +661,8 @@ func _process(delta: float) -> void:
 		return
 	if not _bina_dur:
 		oyun.ilerle(delta)
+	if oyun.uyku_hedef >= 0 and oyun.t >= oyun.uyku_hedef:
+		oyun.uyku_bitir()
 	if takip_id != 0:
 		_takip_sure -= delta
 		if _takip_sure <= 0.0:
@@ -670,6 +678,7 @@ func _process(delta: float) -> void:
 	_adamlari_guncelle()
 	var id: String = harita.bolge_at(oyuncu.global_position)
 	_etiket.text = harita.bolgeler[id]["ad"] if id != "" else "Yollar"
+	oyun.oyuncu_bolge = id
 	# kalite: uzaktan bakarken SSAO ve gölge gereksiz (ve pahalı)
 	_hava_guncelle(delta)
 	_atmosfer()

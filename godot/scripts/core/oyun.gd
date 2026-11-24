@@ -186,6 +186,7 @@ var isler: Dictionary = {}     # kirli işler: günlük teklif tahtası ve saya�
 var isler_k: RefCounted
 var kara_k: RefCounted
 var kara: Dictionary = {"liste": [], "seq": 1}
+var oyuncu_bolge := ""          # oyuncunun bulundugu mahalle (sokak.gd gunceller)
 var ic_mekan := -1              # oyuncunun içinde olduğu bina (sokak.gd günceller)
 var pol: Dictionary = {}        # polis/bodrum durumu (polis.gd)
 var polis: RefCounted
@@ -1140,16 +1141,38 @@ func ilerle(delta: float) -> void:
 func bekle(dakika: int) -> void:
 	ilerle(float(dakika) / DK_SN)
 
+# Hizli bekleme/uyku: dunya gercekten akar (grup, trafik, yayalar), sadece hizlanir. sokak.gd surer.
+var uyku_hedef := -1
+var _uyku_gercek := false
+var _uyku_yer := -1
+
+func bekle_hizli(dk: int) -> void:
+	if uyku_hedef >= 0:
+		return
+	uyku_hedef = t + dk
+	_uyku_gercek = false
+	degisti.emit()
+
 func uyu() -> void:
+	if uyku_hedef >= 0:
+		return
 	var gun_dk := t % DAY
 	var hedef := 7 * 60
 	var dk := hedef - gun_dk if gun_dk < hedef else DAY - gun_dk + hedef
-	var yer := ic_mekan
+	_uyku_yer = ic_mekan
 	kis_k.uyku_baslat()
-	bekle(dk)
-	kis_k.uyku_bitti()
-	kayit("Sabaha kadar uyudun.", "info")
-	_gece_baskini(yer)
+	uyku_hedef = t + dk
+	_uyku_gercek = true
+	degisti.emit()
+
+func uyku_bitir() -> void:
+	uyku_hedef = -1
+	if _uyku_gercek:
+		kis_k.uyku_bitti()
+		kayit("Sabaha kadar uyudun.", "info")
+		_gece_baskini(_uyku_yer)
+	_uyku_gercek = false
+	degisti.emit()
 
 # Aranıyorsan evin bilinen adrestir: gece baskını riski. Otelde (rastgele oda) çok daha güvendesin.
 func _gece_baskini(yer: int) -> void:
@@ -1353,6 +1376,7 @@ func _ay() -> void:
 	aklama_k.ay()
 	nuf_k.ay()
 	kotu_k.ay()
+	kis_k.salgin_ay()
 	polis.ay()
 	borc_k.ay()
 	gerginlik.ay()

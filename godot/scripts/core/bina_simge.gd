@@ -91,9 +91,10 @@ func _bina_ikonu(ad: String, kat: String) -> Texture2D:
 	return _gri("res://assets/ui/icons/%s.png" % IKON[kat])
 
 # Siyah-beyaz baskı rozeti: krem kâğıt daire, alt yarıda yarım ton noktalar, kalın siyah halka.
-func _rozet(_renk: Color) -> ImageTexture:
-	if _tex.has("bw"):
-		return _tex["bw"]
+func _rozet(_renk: Color, ince: bool = true) -> ImageTexture:
+	var anahtar := "bw_ince" if ince else "bw"
+	if _tex.has(anahtar):
+		return _tex[anahtar]
 	var N := 96
 	var im := Image.create(N, N, false, Image.FORMAT_RGBA8)
 	var c := Vector2(N / 2.0 - 0.5, N / 2.0 - 0.5)
@@ -112,13 +113,16 @@ func _rozet(_renk: Color) -> ImageTexture:
 					var gy := fposmod(y, 4.0) - 2.0
 					if sqrt(gx * gx + gy * gy) < t * 1.9:
 						col = Color("8c8372")
-			if d >= 41.5 and d < 45.0:
+			if ince:
+				if d >= 45.0 and d < 46.8:
+					col = murekkep
+			elif d >= 41.5 and d < 45.0:
 				col = murekkep
 			elif d >= 45.0 and d < 47.0:
 				col = Color(0, 0, 0, 0.0) if d >= 46.5 else murekkep
 			im.set_pixel(x, y, col)
 	var t2 := ImageTexture.create_from_image(im)
-	_tex["bw"] = t2
+	_tex[anahtar] = t2
 	return t2
 
 func _gri(yol: String) -> Texture2D:
@@ -190,7 +194,7 @@ func _guncelle() -> void:
 			continue
 		o["kat"] = kat
 		var d: Array = KAT[kat]
-		(o["sp"] as Sprite3D).texture = _rozet(d[1])
+		(o["sp"] as Sprite3D).texture = _rozet(d[1], kat != "ilan")
 		var gl: Label3D = o["gl"]
 		gl.text = d[0]
 		gl.modulate = d[1].lerp(Color.WHITE, 0.35)

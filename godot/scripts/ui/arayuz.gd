@@ -818,6 +818,8 @@ func bolgede_mi(id: String) -> bool:
 	return oyun.harita.bolge_at(sokak.oyuncu.global_position) == id
 
 func kapat() -> void:
+	if oyun.uyku_hedef >= 0:
+		return
 	if _mod == "bina" and sokak.oyuncu.iceride >= 0:
 		sokak.oyuncu.cik()   # paneli kapatmak = binadan çıkmak
 	_mod = ""
@@ -1025,15 +1027,18 @@ func _gorsel_anahtarlari() -> Array:
 # İçerideyken: haritada görünmezsin, kimse sana bulaşamaz. Ev ise dinlenip zaman geçirebilirsin.
 func _ic_bolumu(i: int) -> void:
 	_ayrac(_ic)
+	if oyun.uyku_hedef >= 0:
+		_lbl(_ic, "Zaman akıyor… (dünya hızlı işliyor)", 16, RENK["warn"])
+		return
 	_lbl(_ic, "İçeridesin — haritada görünmüyorsun.", 16, RENK["good"])
 	if i == oyun._ev:
 		_lbl(_ic, "Evin güvenli: kimse bulaşamaz. Dinlenirken zaman akar, ama borç ve kira beklemez.", 14, RENK["soluk"])
-		_btn(_ic, "1 saat bekle", func(): oyun.bekle(60); _yenile(true))
+		_btn(_ic, "1 saat bekle", func(): oyun.bekle_hizli(60); _yenile(true))
 		_btn(_ic, "Sabaha kadar uyu (07:00)", func(): oyun.uyu(); _yenile(true))
 	elif oyun.pazar_k.konak_mi(i):
 		var ucret := 20.0
 		_lbl(_ic, "Oda tuttun: odan kapalı, kimse bulaşamaz. Ev bilinen adrestir; aranıyorsan burada yatmak daha güvenli. Gecelik $%d." % int(ucret), 14, RENK["soluk"])
-		_btn(_ic, "1 saat bekle", func(): oyun.bekle(60); _yenile(true))
+		_btn(_ic, "1 saat bekle", func(): oyun.bekle_hizli(60); _yenile(true))
 		_btn(_ic, "Sabaha kadar kal (07:00) — $%d" % int(ucret), func():
 			if oyun.harcama(ucret, "kirli"):
 				oyun.uyu()
@@ -1772,6 +1777,23 @@ func _diyalog_kur() -> void:
 	_dlg.add_child(_dlg_ic)
 	_kars = load("res://scripts/core/karsilasma.gd").new(oyun, sokak.gruplar)
 
+var _kumar: Control
+
+func kumar_ac() -> void:
+	if modal:
+		return
+	modal = true
+	sokak.modal_duraklat(true)
+	_kumar = load("res://scripts/ui/kumar_pencere.gd").new()
+	add_child(_kumar)
+	_kumar.kur(oyun, self)
+
+func kumar_kapandi() -> void:
+	modal = false
+	sokak.modal_duraklat(false)
+	_kumar = null
+	_yenile(true)
+
 func karsilasma_ac(g: Dictionary) -> void:
 	if modal:
 		return
@@ -1925,6 +1947,9 @@ func _ben_paneli() -> void:
 	ust.add_child(kim)
 	_lbl(kim, ad, 26, Tema.VURGU)
 	_lbl(kim, "Ünün: %d · Form: %%%d" % [int(K.taninma()), int(K.form() * 100.0)], 16, Tema.YAZI)
+	var sg: Dictionary = K.salgin()
+	if not sg.is_empty():
+		_lbl(kim, "⚠ Şehirde %s salgını var" % K.HASTALIK[sg["id"]]["ad"], 15, RENK["bad"])
 	if K.hasta_mi():
 		_lbl(kim, "%s: güçsüzsün. Evde yat ya da ilaç al." % k["hasta_ad"], 15, RENK["bad"])
 	var st: Dictionary = oyun.ozet["stat"]
@@ -1998,7 +2023,7 @@ func _kisisel_bolumu(i: int) -> void:
 			b.add_theme_stylebox_override("normal", _gaz_dugme_stil(Color(0.11, 0.08, 0.055), Color(0.62, 0.48, 0.26), 10))
 			b.add_theme_stylebox_override("hover", _gaz_dugme_stil(Color(0.22, 0.15, 0.08), Tema.VURGU, 10))
 			b.add_theme_stylebox_override("pressed", _gaz_dugme_stil(Color(0.34, 0.23, 0.10), Color("f0d890"), 10))
-			b.pressed.connect(func(): _sonuc_goster(K.yap(id)))
+			b.pressed.connect(func(): kumar_ac() if id == "kumar" else _sonuc_goster(K.yap(id)))
 			var hb := HBoxContainer.new()
 			hb.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 			hb.offset_left = 12.0
@@ -2385,8 +2410,7 @@ func _nufuz_paneli() -> void:
 	_btn(kh, "Borç öde $500", func(): _sonuc_goster(K.tefeci_ode(500.0)))
 	var kh2 := HBoxContainer.new()
 	_ic.add_child(kh2)
-	_btn(kh2, "Kumar $50", func(): _sonuc_goster(K.kumar(50.0)))
-	_btn(kh2, "Kumar $200", func(): _sonuc_goster(K.kumar(200.0)))
+	_btn(kh2, "Kumar masası (zar · poker · rulet)", func(): kumar_ac())
 	_btn(_ic, "Küçük soygun yap (riskli)", func(): _sonuc_goster(K.soygun()))
 	_bolum(_ic, "Malikâne")
 	if oyun.nuf["mal"]:

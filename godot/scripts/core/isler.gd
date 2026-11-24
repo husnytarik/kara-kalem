@@ -189,6 +189,9 @@ func coz(g: Dictionary) -> void:
 	var ad: String = T["ad"]
 	var arama_c: float = oyun.yol_k.arama_carpan()
 	var yazi := ""
+	var bulas: Dictionary = {"borc": ["tifus", 0.05], "dovdur": ["ates", 0.08], "yangin": ["zaturre", 0.15], "baskin": ["tifus", 0.1], "catisma": ["ates", 0.12], "soygun": ["grip", 0.05], "kurye": ["grip", 0.03]}
+	if bulas.has(j["id"]):
+		oyun.kis_k.bulas_dene(bulas[j["id"]][0], bulas[j["id"]][1], "iş sırasında: " + T["ad"])
 	for a in ekip:
 		a["gorev"] = ""
 	if ok:

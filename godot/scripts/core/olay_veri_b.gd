@@ -111,7 +111,7 @@ const OLAY := {
 		["Okulu yıktırıp arsayı al", "", 0.5, "kirli+500;sevgi-8", "Arsa senin; mahalle öfkeli.", "sevgi-10;arama+6", "Mahalle direndi; olay büyüdü."],
 		["Karışma", "", 1.0, "", "Müdür boynunu büktü.", "", ""],
 	]},
-	"u12": {"b": "Meyhane kavgası büyüdü", "m": "Meyhanede biri bıçaklandı; kavga dışarı taşıyor.", "ev": [3, 4], "w": 6, "cd": 12, "tag": "kriz", "s": [
+	"u12": {"b": "Meyhane kavgası büyüdü", "m": "Meyhanede biri bıçaklandı; kavga dışarı taşıyor.", "ev": [3, 4], "k": "meyhane", "w": 6, "cd": 12, "tag": "kriz", "s": [
 		["Araya gir", "", 0.65, "saygi+4;sevgi+2", "Kavgayı bitirdin.", "yara+15;saygi-1", "Aralarında kaldın; yara aldın."],
 		["Kenarda bekle", "", 1.0, "", "Kimsenin yüzüne bakmadın.", "", ""],
 		["Kışkırt", "", 0.5, "y.korku+3;ger+3", "Rakibin adamları zayıfladı.", "arama+6;sevgi-3", "Olay senin üstüne kaldı."],

@@ -12,7 +12,7 @@ const OLAY := {
 		["Reddet", "", 1.0, "saygi-1", "Omuz silkip çıktın. Kimse bir şey demedi ama gördüler.", "", ""],
 		["Hakem ol", "karizma>=6", 0.7, "sevgi+3;saygi+2", "İkisini de oturtup barıştırdın. Mahalle seni sevdi.", "saygi-1", "Seni dinleyen çıkmadı; kavga yine çıktı."],
 	]},
-	"s07": {"b": "Meyhane dedikodusu", "m": "Meyhanede yan masadakiler alçak sesle konuşuyor. Bir sevkiyat, bir yer, bir saat.", "ev": [0, 1], "w": 8, "cd": 50, "tag": "bilgi", "s": [
+	"s07": {"b": "Meyhane dedikodusu", "m": "Meyhanede yan masadakiler alçak sesle konuşuyor. Bir sevkiyat, bir yer, bir saat.", "ev": [0, 1], "k": "meyhane", "w": 8, "cd": 50, "tag": "bilgi", "s": [
 		["Kulak ver", "", 0.65, "y.golge+3;kirli+40", "Duyduğun bilgiyi doğru kişiye sattın.", "arama+3", "Fark ettiler. Ters ters baktılar."],
 		["Kâğıt oyununa katıl", "temiz>=20", 0.45, "kirli+60", "Eli sen topladın.", "temiz-20;stres+3", "Elini kaybettin. Cebin hafifledi."],
 		["Uzak dur", "", 1.0, "", "Masandan kalkmadın.", "", ""],

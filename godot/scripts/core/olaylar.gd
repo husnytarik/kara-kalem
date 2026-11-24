@@ -97,6 +97,9 @@ func _v(n: String) -> float:
 				m2 = maxf(m2, oyun.gerginlik.gerginlik("oyuncu", f))
 			return m2
 		"avukat": return 1.0 if oyun.nuf.get("avukat", false) else 0.0
+		"meyhane":
+			var im: int = oyun.ic_mekan
+			return 1.0 if im >= 0 and oyun.isy.has(im) and oyun.isy[im]["tur"] == "eglence" else 0.0
 		"mal": return 1.0 if oyun.nuf.get("mal", false) else 0.0
 		"bodrum": return 1.0 if oyun.pol.get("kurulu", false) else 0.0
 		"muhbir": return float(oyun.muhbir.size()) if typeof(oyun.muhbir) in [TYPE_ARRAY, TYPE_DICTIONARY] else 0.0
