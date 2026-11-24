@@ -353,3 +353,24 @@ func haracci(i: int) -> Dictionary:
 			en = x
 	r["hc"] = en["uid"]
 	return en
+
+# Haraççı binada kalıcı durmaz: haftada bir kendi günü, 10:00-12:00 arası uğrar.
+const TUR_GUN := 7
+const TUR_SAAT := [10.0, 12.0]
+
+func _tur_gunu(i: int) -> int:
+	return absi(hash(i * 31 + 7)) % TUR_GUN
+
+func ziyarette(i: int) -> bool:
+	var saat: float = (oyun.t % oyun.DAY) / 60.0
+	return int(oyun.t / oyun.DAY) % TUR_GUN == _tur_gunu(i) and saat >= TUR_SAAT[0] and saat < TUR_SAAT[1]
+
+# Sonraki uğrama kaç gün sonra (0 = bugün)
+func sonraki_gun(i: int) -> int:
+	var saat: float = (oyun.t % oyun.DAY) / 60.0
+	var d: int = (_tur_gunu(i) - int(oyun.t / oyun.DAY)) % TUR_GUN
+	if d < 0:
+		d += TUR_GUN
+	if d == 0 and saat >= TUR_SAAT[1]:
+		d = TUR_GUN
+	return d

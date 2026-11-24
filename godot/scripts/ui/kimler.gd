@@ -79,6 +79,7 @@ static func kur(ui: Node, oyun: Node, sokak: Node, i: int) -> void:
 	var r: Dictionary = oyun.isy.get(i, {})
 	var ozel: Array = []   # [ad, alt, renk]
 	var sivil: Array = []
+	var harac_not := ""
 	# koruyucu: görevli adamın veya satın alınan koruma
 	for g in oyun.gorevler:
 		if g["hedef"] == i and g["gorev"] == "koru":
@@ -91,8 +92,11 @@ static func kur(ui: Node, oyun: Node, sokak: Node, i: int) -> void:
 	var k: String = oyun.kontrol(i)
 	if k != "" and k != "sahip" and k != "haraci" and oyun.FAK.has(k) and k != "oyuncu" and not r.is_empty():
 		var hc: Dictionary = oyun.rakip_k.haracci(i)
-		var ad: String = oyun.uye_ad(hc) if not hc.is_empty() else "Haraççı"
-		ozel.append([ad, "%s için koruma parası alıyor" % oyun.FAK[k]["ad"], oyun.FAK[k]["renk"]])
+		if not hc.is_empty() and oyun.rakip_k.ziyarette(i):
+			ozel.append([oyun.uye_ad(hc), "%s için koruma parası topluyor (şu an burada)" % oyun.FAK[k]["ad"], oyun.FAK[k]["renk"]])
+		elif not hc.is_empty():
+			var sg: int = oyun.rakip_k.sonraki_gun(i)
+			harac_not = "Haraççısı %s · %s uğruyor." % [oyun.uye_ad(hc), "bugün" if sg == 0 else "%d gün sonra" % sg]
 	# haritadaki gruplar
 	var ab: AABB = (oyun.harita.yerler[i]["aabb"] as AABB).grow(sokak.gorus.IN_MESAFE)
 	for g in sokak.gruplar.liste:
@@ -119,6 +123,8 @@ static func kur(ui: Node, oyun: Node, sokak: Node, i: int) -> void:
 		sivil.append(["Müşteri", "ziyaretçi"])
 	ui._ayrac(ic)
 	ui._bolum(ic, "Kimler var")
+	if harac_not != "":
+		ui._lbl(ic, harac_not, 13, Tema.SOLUK)
 	for o in ozel:
 		_kart(ic, o[0], o[1], o[2], o[2], true, ui)
 	if sivil.is_empty():
