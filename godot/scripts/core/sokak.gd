@@ -1129,6 +1129,15 @@ func _ekran_cek(arg: String) -> void:
 					print("=== ", ay / 12 + 1, ". yil")
 					for f in oyun.NPC:
 						print(f, ": ", oyun.rakip_k.ozet(f), " | ", oyun.aile_uyeleri(f).map(func(u): return oyun.uye_ad(u)))
+		elif p[1] == "ilan":
+			var bi2 := -1
+			for k in oyun.isy:
+				if oyun.isy[k].get("bos", false):
+					bi2 = k
+					break
+			print("ILAN ", bi2)
+			if bi2 >= 0:
+				arayuz.bina_ac(bi2)
 		elif p[1] == "kadro":
 			for u in oyun.uyeler:
 				print("KADRO ", oyun.uye_ad(u))

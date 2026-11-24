@@ -210,6 +210,8 @@ func kur(h: Node3D) -> void:
 		var tur := _tur(y["ad"])
 		if tur != "resmi":
 			isy[i] = {"tur": tur, "sahip": false, "haracli": false, "birikim": 0.0, "korumaBitis": 0}
+			if tur in ["esnaf", "eglence", "atolye", "konut"] and rng.randf() < 0.09:
+				isy[i]["bos"] = true   # boş dükkân ilanı
 	isl = load("res://scripts/core/isletme.gd").new(self)
 	zafer = load("res://scripts/core/zafer.gd").new(self)
 	arac_k = load("res://scripts/core/arac.gd").new(self)
@@ -684,6 +686,8 @@ func _adam_sec(gorev: String, id: int) -> Dictionary:
 
 # ---------- iş yeri ----------
 func haftalik(i: int) -> int:
+	if isy[i].get("bos", false):
+		return 0
 	var y: Dictionary = harita.yerler[i]
 	var tt: Dictionary = TURLER[isy[i]["tur"]]
 	var b: Dictionary = bolge[y["bolge"]]
@@ -693,6 +697,8 @@ func kontrol(i: int) -> String:
 	if not isy.has(i):
 		return ""
 	var r: Dictionary = isy[i]
+	if r.get("bos", false):
+		return ""
 	if r["sahip"]:
 		return "sahip"
 	if r["haracli"]:
@@ -711,6 +717,8 @@ func tezgah(i: int) -> bool:
 	return false
 
 func fiyat(i: int) -> int:
+	if isy[i].get("bos", false):
+		return int(round(TURLER[isy[i]["tur"]]["fiyat"] * (0.3 if tezgah(i) else 0.6)))
 	if tezgah(i):
 		return 300
 	return TURLER[isy[i]["tur"]]["fiyat"]
@@ -748,6 +756,8 @@ func gorev_ver(i: int, gorev: String, adam_id: int = 0) -> Dictionary:
 	var r: Dictionary = isy[i]
 	var y: Dictionary = harita.yerler[i]
 	var G: Dictionary = GOREVLER[gorev]
+	if r.get("bos", false):
+		return hata("Boş dükkân: haraç alınacak kimse yok.")
 	if not erisim(y["bolge"]):
 		return hata("%s'da henüz ayağın yok: önce komşu bir mahalleye hakim ol." % harita.bolgeler[y["bolge"]]["ad"])
 	var k := kontrol(i)
@@ -816,6 +826,7 @@ func satin_al(i: int) -> Dictionary:
 	if not harcama(f, "temiz"):
 		return hata("Temiz para yetmiyor (%s)." % para(f))
 	r["sahip"] = true
+	r["bos"] = false
 	r["haracli"] = false
 	r["birikim"] = 0.0
 	isl.baslat(i)
@@ -1179,6 +1190,22 @@ func _gun() -> void:
 			r["birikim"] = 0.0
 			kayit("%s: %s adamları esnafı geri aldı; haracı artık onlara ödüyor." % [harita.yerler[i]["ad"], hakim_ad(hk)], "bad")
 
+# Esnaf kapanır -> ilan çıkar; ilanlar zamanla başka birine kiralanır.
+func _ilan_ay() -> void:
+	for i in isy:
+		var r: Dictionary = isy[i]
+		if r["sahip"] or r["tur"] in ["luks", "resmi", "depo"]:
+			continue
+		if r.get("bos", false):
+			if rng.randf() < 0.12:
+				r["bos"] = false
+				kayit("%s yeni bir kiracıya verildi, ilan kalktı." % harita.yerler[i]["ad"], "info")
+		elif rng.randf() < 0.012:
+			r["bos"] = true
+			r["haracli"] = false
+			r["birikim"] = 0.0
+			kayit("%s kapandı: dükkân kiralık/satılık ilanına çıktı." % harita.yerler[i]["ad"], "info")
+
 func _ay() -> void:
 	isl.ay()
 	kara_k.ay()
@@ -1190,6 +1217,7 @@ func _ay() -> void:
 	borc_k.ay()
 	gerginlik.ay()
 	rakip_k.ay()
+	_ilan_ay()
 	var kira: float = ozet.get("kira", 0)
 	if kira > 0.0:
 		var borc := kira + kira_borc

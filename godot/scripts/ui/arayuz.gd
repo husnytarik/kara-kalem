@@ -1004,6 +1004,8 @@ func _gorsel_anahtarlari() -> Array:
 			for kv in [["church", "kilise"], ["chapel", "kilise"], ["cathedral", "kilise"], ["precinct", "polis"], ["airport", "havaalani"], ["airfield", "havaalani"], ["butcher", "butcher"], ["boxing", "boks_salonu"], ["gym", "boks_salonu"]]:
 				if ad_k.contains(kv[0]):
 					ozel.append(kv[1])
+			if oyun.isy.has(i) and oyun.isy[i].get("bos", false):
+				ozel.push_front("bos_dukkan")
 			return ozel + [tur, "bina"]
 		"bolge":
 			return ["bolge_" + str(_hedef), "bolge"]
@@ -1063,6 +1065,9 @@ func _bina_paneli() -> void:
 			_lbl(_ic, "Resmî kurum: haraç bağlanamaz, satın alınamaz.", 15, RENK["soluk"])
 		return
 	var r: Dictionary = oyun.isy[i]
+	if r.get("bos", false):
+		_bos_ilan_paneli(i, r)
+		return
 	var k: String = oyun.kontrol(i)
 	var kontrol_yazi := "Sahipsiz (kimse koruma parası almıyor)"
 	var kontrol_renk := RENK["info"]
@@ -1129,6 +1134,23 @@ func _bina_paneli() -> void:
 	_hareket_bolumu(i)
 	if r["sahip"] and r.has("itibar"):
 		_isletme_bolumu(i, r)
+	_btn(_ic, "Buraya git", func(): sokak.oyuncu.git(y["pos"]))
+	_sonuc_satiri()
+
+# Boş dükkân ilanı: kiralık/satılık yazısı, ilan metni, ucuz satın alma.
+func _bos_ilan_paneli(i: int, r: Dictionary) -> void:
+	var y: Dictionary = oyun.harita.yerler[i]
+	_damga(_ic, "KİRALIK / SATILIK", RENK["warn"])
+	_lbl(_ic, "Eski iş yeri kapanmış. Camda soluk bir ilan asılı: \"Dükkân devren satılıktır. Görüşmek için içeri sorunuz.\"", 15, RENK["soluk"])
+	_satir(_ic, "Eski iş", oyun.tur_ad(i))
+	_satir(_ic, "İlan fiyatı", oyun.para(oyun.fiyat(i)))
+	_satir(_ic, "Normal fiyatı", oyun.para(oyun.TURLER[r["tur"]]["fiyat"]), RENK["soluk"])
+	_lbl(_ic, "Boşken kimse haraç ödemez. Satın alırsan işletmeyi sen yürütürsün; kiracıya kalırsa ilan kalkar.", 14, RENK["soluk"])
+	var yakin := yakin_bina(i)
+	if not yakin:
+		_lbl(_ic, "Uzaktasın: işlem yapmak için binaya yaklaş.", 15, RENK["warn"])
+	_bolum(_ic, "Eylemler")
+	_btn(_ic, "İlandaki fiyata satın al  (%s temiz)" % oyun.para(oyun.fiyat(i)), func(): _sonuc_goster(oyun.satin_al(i), "Dükkânı aldın."), not yakin)
 	_btn(_ic, "Buraya git", func(): sokak.oyuncu.git(y["pos"]))
 	_sonuc_satiri()
 
