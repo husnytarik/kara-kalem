@@ -1138,6 +1138,29 @@ func _ekran_cek(arg: String) -> void:
 			print("ILAN ", bi2)
 			if bi2 >= 0:
 				arayuz.bina_ac(bi2)
+		elif p[1] == "ilan2":
+			var bi3 := -1
+			for k in oyun.isy:
+				if oyun.isy[k].get("bos", false):
+					bi3 = k
+					break
+			oyun.temiz = 5000.0
+			for id in oyun.bolge:
+				oyun.add_inf(oyun.bolge[id], "oyuncu", 100.0)
+			print("ILAN2 fiyat=", oyun.ilan_fiyat(bi3), " kira=", oyun.ilan_kira(bi3), " tur=", oyun.isy[bi3]["tur"])
+			print("kirala ", oyun.bos_edin(bi3, "kira"))
+			print("don ", oyun.donustur(bi3, "esnaf"))
+			arayuz.bina_ac(bi3)
+			for d in 6:
+				oyun.t += oyun.DAY
+				oyun._gun()
+			print("sonra sahip=", oyun.isy[bi3]["sahip"], " tur=", oyun.isy[bi3]["tur"], " bos=", oyun.isy[bi3]["bos"], " kira_mi=", oyun.isy[bi3].get("kira_mi"))
+			oyun.temiz = 0.0
+			oyun.kirli = 0.0
+			for d in 20:
+				oyun.t += oyun.DAY
+				oyun._gun()
+			print("kirasiz sahip=", oyun.isy[bi3]["sahip"], " bos=", oyun.isy[bi3]["bos"])
 		elif p[1] == "kadro":
 			for u in oyun.uyeler:
 				print("KADRO ", oyun.uye_ad(u))

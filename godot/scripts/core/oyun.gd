@@ -210,7 +210,7 @@ func kur(h: Node3D) -> void:
 		var tur := _tur(y["ad"])
 		if tur != "resmi":
 			isy[i] = {"tur": tur, "sahip": false, "haracli": false, "birikim": 0.0, "korumaBitis": 0}
-			if tur in ["esnaf", "eglence", "atolye", "konut"] and rng.randf() < 0.09:
+			if tur in ["esnaf", "eglence", "atolye", "konut"] and rng.randf() < (0.35 if tur == "konut" else 0.2):
 				isy[i]["bos"] = true   # boş dükkân ilanı
 	isl = load("res://scripts/core/isletme.gd").new(self)
 	zafer = load("res://scripts/core/zafer.gd").new(self)
@@ -716,9 +716,116 @@ func tezgah(i: int) -> bool:
 			return true
 	return false
 
+# Ilan fiyati: bolge servetine (ve binaya ozgu +-15%) gore; ev ayri taban fiyat.
+func ilan_fiyat(i: int) -> int:
+	var r: Dictionary = isy[i]
+	var taban: float = 900.0 if r["tur"] == "konut" else float(TURLER[r["tur"]]["fiyat"])
+	var sv: float = bolge[harita.yerler[i]["bolge"]]["servet"]
+	var oynak: float = 0.85 + float((i * 37) % 31) / 100.0
+	return int(round(taban * (0.5 + 0.25 * sv) * 0.6 * oynak * (0.5 if tezgah(i) else 1.0)))
+
+func ilan_kira(i: int) -> int:
+	return maxi(3, int(round(ilan_fiyat(i) * 0.012)))
+
+# Donusum: tur -> [taban maliyet, gun]
+const KURULUM := {
+	"esnaf": [250, 4], "eglence": [600, 8], "atolye": [450, 6],
+	"depo": [700, 9], "luks": [1200, 14], "konut": [200, 3],
+}
+
+func kurulum_maliyet(i: int, tur: String) -> int:
+	var sv: float = bolge[harita.yerler[i]["bolge"]]["servet"]
+	return int(round(KURULUM[tur][0] * (0.7 + 0.15 * sv)))
+
+func bos_edin(i: int, mod: String) -> Dictionary:
+	var r: Dictionary = isy.get(i, {})
+	if r.is_empty() or not r.get("bos", false):
+		return hata("Bu yer ilanda değil.")
+	if r.get("elde", "") != "":
+		return hata("Burası zaten senin elinde.")
+	if not erisim(harita.yerler[i]["bolge"]):
+		return hata("Bu mahallede henüz ayağın yok.")
+	var f: int = ilan_fiyat(i) if mod == "mulk" else ilan_kira(i) * 2
+	if not harcama(f, "temiz"):
+		return hata("Temiz para yetmiyor (%s)." % para(f))
+	r["elde"] = mod
+	r["kira_son"] = t / DAY
+	r["kira_gecik"] = 0
+	_nufuz(harita.yerler[i]["bolge"], 2.0)
+	kayit("%s: %s (%s)." % [harita.yerler[i]["ad"], "mülkü satın aldın" if mod == "mulk" else "dükkânı kiraladın (ilk 2 hafta peşin)", para(f)], "good")
+	degisti.emit()
+	return tamam()
+
+func birak(i: int) -> Dictionary:
+	var r: Dictionary = isy.get(i, {})
+	if r.get("elde", "") != "kira" or not r.get("kurulum", {}).is_empty():
+		return hata("Bırakılamaz.")
+	r["elde"] = ""
+	kayit("%s kirasını bıraktın." % harita.yerler[i]["ad"], "info")
+	degisti.emit()
+	return tamam()
+
+func donustur(i: int, tur: String) -> Dictionary:
+	var r: Dictionary = isy.get(i, {})
+	if r.is_empty() or not r.get("bos", false) or r.get("elde", "") == "":
+		return hata("Önce yeri kirala ya da satın al.")
+	if not r.get("kurulum", {}).is_empty():
+		return hata("Kurulum zaten sürüyor.")
+	if not KURULUM.has(tur):
+		return hata("Bu işe çevrilemez.")
+	if tur == "luks" and yol_k.sicil_kirli() and yol_k.puan("kanun") < 20.0:
+		return hata("Ruhsat çıkmıyor: sicilin kirli. Önce yasal yolda itibar kazan.")
+	var f := kurulum_maliyet(i, tur)
+	if not harcama(f, "temiz"):
+		return hata("Temiz para yetmiyor (%s)." % para(f))
+	r["kurulum"] = {"tur": tur, "bitis": t + KURULUM[tur][1] * DAY}
+	kayit("%s: %s kurulumu başladı (%d gün, %s)." % [harita.yerler[i]["ad"], TURLER[tur]["ad"], KURULUM[tur][1], para(f)], "info")
+	degisti.emit()
+	return tamam()
+
+func _kira_gun(i: int, r: Dictionary) -> void:
+	var g: int = t / DAY
+	if g - int(r.get("kira_son", g)) < 7:
+		return
+	r["kira_son"] = g
+	var k := ilan_kira(i)
+	if harcama(k, "temiz"):
+		r["kira_gecik"] = 0
+		return
+	r["kira_gecik"] = int(r.get("kira_gecik", 0)) + 1
+	if r["kira_gecik"] >= 2:
+		r["sahip"] = false
+		r["bos"] = true
+		r["elde"] = ""
+		r["kira_mi"] = false
+		r["kurulum"] = {}
+		r["haracli"] = false
+		kayit("%s: kira iki hafta ödenmedi, ev sahibi seni çıkardı." % harita.yerler[i]["ad"], "bad")
+	else:
+		kayit("%s: kira ödenemedi (%s). Bir hafta daha tolerans var." % [harita.yerler[i]["ad"], para(k)], "warn")
+
+func _bos_gun(i: int, r: Dictionary) -> void:
+	if r.get("elde", "") == "kira":
+		_kira_gun(i, r)
+		if not r.get("bos", false) or r.get("elde", "") == "":
+			return
+	var ku: Dictionary = r.get("kurulum", {})
+	if ku.is_empty() or t < ku["bitis"]:
+		return
+	r["tur"] = ku["tur"]
+	r["bos"] = false
+	r["sahip"] = true
+	r["haracli"] = false
+	r["birikim"] = 0.0
+	r["kira_mi"] = r["elde"] == "kira"
+	r["elde"] = ""
+	r["kurulum"] = {}
+	isl.baslat(i)
+	kayit("%s hazır: %s olarak açıldı." % [harita.yerler[i]["ad"], TURLER[r["tur"]]["ad"]], "good")
+
 func fiyat(i: int) -> int:
 	if isy[i].get("bos", false):
-		return int(round(TURLER[isy[i]["tur"]]["fiyat"] * (0.3 if tezgah(i) else 0.6)))
+		return ilan_fiyat(i)
 	if tezgah(i):
 		return 300
 	return TURLER[isy[i]["tur"]]["fiyat"]
@@ -820,6 +927,8 @@ func satin_al(i: int) -> Dictionary:
 		return hata("Bu mahallede henüz ayağın yok.")
 	if r["sahip"]:
 		return hata("Zaten senin.")
+	if r.get("bos", false):
+		return hata("İlandaki yeri ilan panelinden kirala ya da satın al.")
 	if r["tur"] in ["luks", "resmi"] and yol_k.sicil_kirli() and yol_k.puan("kanun") < 20.0:
 		return hata("Ruhsat çıkmıyor: sicilin kirli, kimse bu işe imza atmaz. Önce yasal yolda itibar kazan.")
 	var f := fiyat(i)
@@ -1176,8 +1285,13 @@ func _gun() -> void:
 	sil_k.gun()
 	for i in isy:
 		var r: Dictionary = isy[i]
+		if r.get("bos", false):
+			_bos_gun(i, r)
+			continue
 		var w := haftalik(i)
 		if r["sahip"]:
+			if r.get("kira_mi", false):
+				_kira_gun(i, r)
 			yasal(w * 1.5 / 7.0 * isl.carpan(i) * yol_k.yasal_carpan() * maxf(0.3, 1.0 + aile_k.etki("gelir_mesru")))
 			continue
 		if not r["haracli"]:
@@ -1197,10 +1311,10 @@ func _ilan_ay() -> void:
 		if r["sahip"] or r["tur"] in ["luks", "resmi", "depo"]:
 			continue
 		if r.get("bos", false):
-			if rng.randf() < 0.12:
+			if r.get("elde", "") == "" and rng.randf() < 0.07:
 				r["bos"] = false
 				kayit("%s yeni bir kiracıya verildi, ilan kalktı." % harita.yerler[i]["ad"], "info")
-		elif rng.randf() < 0.012:
+		elif rng.randf() < 0.03:
 			r["bos"] = true
 			r["haracli"] = false
 			r["birikim"] = 0.0

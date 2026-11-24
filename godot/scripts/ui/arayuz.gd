@@ -1147,17 +1147,41 @@ func _bina_paneli() -> void:
 # Boş dükkân ilanı: kiralık/satılık yazısı, ilan metni, ucuz satın alma.
 func _bos_ilan_paneli(i: int, r: Dictionary) -> void:
 	var y: Dictionary = oyun.harita.yerler[i]
-	_damga(_ic, "KİRALIK / SATILIK", RENK["warn"])
-	_lbl(_ic, "Eski iş yeri kapanmış. Camda soluk bir ilan asılı: \"Dükkân devren satılıktır. Görüşmek için içeri sorunuz.\"", 15, RENK["soluk"])
-	_satir(_ic, "Eski iş", oyun.tur_ad(i))
-	_satir(_ic, "İlan fiyatı", oyun.para(oyun.fiyat(i)))
-	_satir(_ic, "Normal fiyatı", oyun.para(oyun.TURLER[r["tur"]]["fiyat"]), RENK["soluk"])
-	_lbl(_ic, "Boşken kimse haraç ödemez. Satın alırsan işletmeyi sen yürütürsün; kiracıya kalırsa ilan kalkar.", 14, RENK["soluk"])
+	var ev: bool = r["tur"] == "konut"
+	var elde: String = r.get("elde", "")
+	var ku: Dictionary = r.get("kurulum", {})
+	var baslik := "SATILIK EV" if ev else "KİRALIK / SATILIK"
+	if elde == "kira":
+		baslik = "KİRADA — SENDE"
+	elif elde == "mulk":
+		baslik = "MÜLKÜN"
+	_damga(_ic, baslik, RENK["warn"] if elde == "" else RENK["good"])
+	if elde == "":
+		_lbl(_ic, "Boş ev, camda ilan: \"Satılıktır, görüşmek için kapıyı çalın.\"" if ev else "Eski iş yeri kapanmış. Camda soluk bir ilan: \"Dükkân kiralık ya da satılıktır.\"", 15, RENK["soluk"])
+		_satir(_ic, "Mahalle zenginliği", "★".repeat(oyun.bolge[y["bolge"]]["servet"]))
+		_satir(_ic, "Satın alma", oyun.para(oyun.ilan_fiyat(i)))
+		_satir(_ic, "Kira (haftalık)", oyun.para(oyun.ilan_kira(i)))
+		_lbl(_ic, "Kirada ilk iki hafta peşin alınır. Kira iki hafta ödenmezse yer elinden gider. Aldıktan sonra istediğin işe çevirebilirsin.", 14, RENK["soluk"])
+	else:
+		_satir(_ic, "Durum", ("Kiracısın · haftalık " + oyun.para(oyun.ilan_kira(i))) if elde == "kira" else "Tapu senin")
 	var yakin := yakin_bina(i)
 	if not yakin:
 		_lbl(_ic, "Uzaktasın: işlem yapmak için binaya yaklaş.", 15, RENK["warn"])
-	_bolum(_ic, "Eylemler")
-	_btn(_ic, "İlandaki fiyata satın al  (%s temiz)" % oyun.para(oyun.fiyat(i)), func(): _sonuc_goster(oyun.satin_al(i), "Dükkânı aldın."), not yakin)
+	if elde == "":
+		_bolum(_ic, "Edin")
+		_btn(_ic, "Satın al  (%s temiz)" % oyun.para(oyun.ilan_fiyat(i)), func(): _sonuc_goster(oyun.bos_edin(i, "mulk"), "Mülkü aldın."), not yakin)
+		_btn(_ic, "Kirala  (%s peşin)" % oyun.para(oyun.ilan_kira(i) * 2), func(): _sonuc_goster(oyun.bos_edin(i, "kira"), "Kiraladın."), not yakin)
+	elif not ku.is_empty():
+		_bolum(_ic, "Kurulum")
+		var kalan: float = float(ku["bitis"] - oyun.t) / float(oyun.DAY)
+		_satir(_ic, oyun.TURLER[ku["tur"]]["ad"], "%.1f gün kaldı" % maxf(kalan, 0.0), RENK["warn"])
+	else:
+		_bolum(_ic, "İşe çevir")
+		for tur in ["esnaf", "eglence", "atolye", "depo", "luks", "konut"]:
+			var kt: String = tur
+			_btn(_ic, "%s  ·  %s · %d gün" % [oyun.TURLER[kt]["ad"], oyun.para(oyun.kurulum_maliyet(i, kt)), oyun.KURULUM[kt][1]], func(): _sonuc_goster(oyun.donustur(i, kt), "Kurulum başladı."), not yakin)
+		if elde == "kira":
+			_btn(_ic, "Kirayı bırak", func(): _sonuc_goster(oyun.birak(i), "Bıraktın."), not yakin)
 	_btn(_ic, "Buraya git", func(): sokak.oyuncu.git(y["pos"]))
 	_sonuc_satiri()
 
