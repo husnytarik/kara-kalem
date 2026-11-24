@@ -197,28 +197,60 @@ func serbest_nokta(p: Vector3) -> Vector3:
 	var z := _gz0 + c.y + 0.5
 	return Vector3(x, yuk(x, z), z)
 
-# Hedef hücreye yol yoksa (kapalı cep), hedefe en yakın ulaşılabilir açık hücreye yol ara.
+# Yürünebilir hücreleri bağlı bileşenlere ayır (bir kez; ulaşılamayan hedefte pahalı A* taramasını önler).
+var _bilesen := PackedInt32Array()
+func _bilesen_kur() -> void:
+	var w: int = _izgara.region.size.x
+	var hh: int = _izgara.region.size.y
+	_bilesen.resize(w * hh)
+	_bilesen.fill(0)
+	var no := 0
+	for bas in w * hh:
+		if _bilesen[bas] != 0 or _izgara.is_point_solid(Vector2i(bas % w, bas / w)):
+			continue
+		no += 1
+		var yig := PackedInt32Array([bas])
+		_bilesen[bas] = no
+		while not yig.is_empty():
+			var c: int = yig[yig.size() - 1]
+			yig.resize(yig.size() - 1)
+			var cx := c % w
+			var cz := c / w
+			for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var nx: int = cx + d.x
+				var nz: int = cz + d.y
+				if nx < 0 or nz < 0 or nx >= w or nz >= hh:
+					continue
+				var k: int = nz * w + nx
+				if _bilesen[k] == 0 and not _izgara.is_point_solid(Vector2i(nx, nz)):
+					_bilesen[k] = no
+					yig.append(k)
+
+# Hedef hücreye yol yoksa (kapalı cep), başlangıçla aynı bölgedeki en yakın açık hücreye yol ara.
 func _yakin_ulasilabilir(ga: Vector2i, gb: Vector2i) -> Array[Vector2i]:
-	for r in range(1, 40):
-		var en: Array[Vector2i] = []
+	if _bilesen.is_empty():
+		_bilesen_kur()
+	var w: int = _izgara.region.size.x
+	var no: int = _bilesen[ga.y * w + ga.x]
+	var bos: Array[Vector2i] = []
+	if no == 0:
+		return bos
+	for r in range(1, 80):
+		var en := Vector2i(-1, -1)
 		var en_d := 1e9
 		for dx in range(-r, r + 1):
 			for dz in range(-r, r + 1):
 				if maxi(absi(dx), absi(dz)) != r:
 					continue
 				var q := gb + Vector2i(dx, dz)
-				if not _izgara.is_in_boundsv(q) or _izgara.is_point_solid(q):
+				if not _izgara.is_in_boundsv(q) or _bilesen[q.y * w + q.x] != no:
 					continue
 				var d := float(dx * dx + dz * dz)
-				if d >= en_d:
-					continue
-				var yol := _izgara.get_id_path(ga, q)
-				if not yol.is_empty():
-					en = yol
+				if d < en_d:
+					en = q
 					en_d = d
-		if not en.is_empty():
-			return en
-	var bos: Array[Vector2i] = []
+		if en.x >= 0:
+			return _izgara.get_id_path(ga, en)
 	return bos
 
 # Dünya koordinatından dünya koordinatına yol (köşe noktaları). Boşsa ulaşılamaz.
@@ -226,7 +258,12 @@ func yol_bul(a: Vector3, b: Vector3) -> PackedVector3Array:
 	var cikti := PackedVector3Array()
 	var ga := _acik(_hucre(a))
 	var gb := _acik(_hucre(b))
-	var ham := _izgara.get_id_path(ga, gb)
+	if _bilesen.is_empty():
+		_bilesen_kur()
+	var w: int = _izgara.region.size.x
+	var ham: Array[Vector2i] = []
+	if _bilesen[ga.y * w + ga.x] == _bilesen[gb.y * w + gb.x]:
+		ham = _izgara.get_id_path(ga, gb)   # farklı bölgedeyse A* boşuna tüm haritayı tarar
 	if ham.is_empty() and ga != gb:
 		ham = _yakin_ulasilabilir(ga, gb)
 	for i in ham.size():

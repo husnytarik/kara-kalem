@@ -14,7 +14,7 @@ const KAT := {
 	"is": ["⚒", Color("c9b08a"), "İş yeri"],
 	"resmi": ["⚖", Color("9aa0aa"), "Resmî kurum"],
 	"ozel": ["★", Color("e6c45a"), "Özel mekân"],
-	"ilan": ["⌂", Color("e0643c"), "Kiralık / Satılık"],
+	"ilan": ["⌂", Color("8c8c8c"), "Kiralık / Satılık"],
 }
 const IKON := {"ev": "bina_ev", "gelir": "bina_gelir", "yemek": "bina_yemek", "konak": "bina_ev", "adam": "bina_adam", "is": "is", "resmi": "polis", "ozel": "bina_ozel", "ilan": "bina_gelir"}
 const YEMEK := ["diner", "soda", "cafe", "restaurant", "bakery", "deli", "grill", "oyster", "kitchen", "tavern"]
@@ -195,6 +195,8 @@ func _guncelle() -> void:
 		gl.text = d[0]
 		gl.modulate = d[1].lerp(Color.WHITE, 0.35)
 		(o["ik"] as Sprite3D).texture = _bina_ikonu(o["ad"], kat)
+		(o["ik"] as Sprite3D).modulate = Color(0.55, 0.55, 0.58, 0.85) if kat == "ilan" else Color.WHITE
+		(o["sp"] as Sprite3D).modulate = Color(0.7, 0.7, 0.72, 0.9) if kat == "ilan" else Color.WHITE
 		(o["ik"] as Sprite3D).visibility_range_end = 0.0 if hep else 420.0
 		var uz: float = 0.0 if hep else 420.0
 		(o["sp"] as Sprite3D).visibility_range_end = uz
