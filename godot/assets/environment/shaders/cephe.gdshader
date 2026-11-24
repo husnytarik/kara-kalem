@@ -28,19 +28,23 @@ void fragment() {
 		float u = xduvar ? wp.z : wp.x;
 		float v = wp.y - taban;
 		// kaba kaplama: tuğla dizileri
-		float sat = floor(v / 0.22);
+		float sat = floor(v / 0.45);
 		float ofs = mod(sat, 2.0) * 0.5;
-		float tx = u / 0.65 + ofs;
+		float tx = u / 1.2 + ofs;
 		vec2 tuglaId = vec2(floor(tx), sat);
-		vec2 f = vec2(fract(tx), fract(v / 0.22));
-		float harc = step(f.x, 0.07) + step(f.y, 0.1);
+		vec2 f = vec2(fract(tx), fract(v / 0.45));
+		float harc = step(f.x, 0.05) + step(f.y, 0.09);
 		float ton = hash(tuglaId + (xduvar ? 17.0 : 0.0));
-		float aa = clamp(1.0 - fwidth(v / 0.22) * 2.0, 0.0, 1.0);
-		vec3 tugla = mix(c, vec3(0.55, 0.26, 0.2), 0.45) * (0.8 + 0.4 * ton);
+		float aa = clamp(1.0 - fwidth(v / 0.45) * 1.2, 0.0, 1.0);
+		vec3 kirmizi = vec3(0.62, 0.22, 0.14);
+		vec3 turuncu = vec3(0.78, 0.4, 0.22);
+		vec3 koyu = vec3(0.36, 0.16, 0.12);
+		vec3 bt = ton < 0.33 ? kirmizi : (ton < 0.66 ? turuncu : koyu);
+		vec3 tugla = mix(bt, c, 0.3) * (0.85 + 0.3 * fract(ton * 7.0));
 		// harç: açık gri; tuğla başına belirgin ton farkı + yüzey lekesi
 		float leke = hash(floor(vec2(u, v) * 9.0) + tuglaId);
-		tugla *= 0.9 + 0.2 * leke;
-		tugla = mix(tugla, tugla * 0.45 + vec3(0.1), clamp(harc, 0.0, 1.0) * 0.9 * aa);
+		tugla *= 0.85 + 0.3 * leke;
+		tugla = mix(tugla, vec3(0.72, 0.68, 0.6), clamp(harc, 0.0, 1.0) * 0.95 * aa);
 		c = mix(c, tugla, aa);
 		float katno = floor(v / kat);
 		float kf = fract(v / kat);
