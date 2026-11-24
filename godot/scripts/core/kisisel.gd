@@ -493,7 +493,10 @@ func yap(id: String) -> Dictionary:
 			oyun.arama = maxf(0.0, oyun.arama - 3.0)
 			oyun.kayit("Sohbette polisin ne düşündüğünü öğrendin: bir iki şeyi toparladın (dosya −3).", "good")
 	oyun.yet_k.eylem(id)
-	oyun.bekle(int(e["dk"]))
+	if oyun.uyku_hedef < 0 and int(e["dk"]) >= 15:
+		oyun.bekle_hizli(int(e["dk"]))   # dünya gerçekten akar (hamam, yemek vb. sırasında her şey sürer)
+	else:
+		oyun.bekle(int(e["dk"]))
 	return oyun.tamam("%s (%d dk)." % [e["ad"], e["dk"]])
 
 func uyku_baslat() -> void:
