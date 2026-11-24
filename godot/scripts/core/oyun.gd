@@ -64,6 +64,15 @@ const TURLER := {
 	"konut": {"ad": "Apartman / pansiyon", "gelir": 11, "direnc": 2, "fiyat": 500},
 	"resmi": {"ad": "Resmî kurum", "gelir": 0, "direnc": 99, "fiyat": 0},
 }
+# Haraç vermeyen, kendini koruyan güçlü sahipler (mafya değil, ama arkası sağlam).
+const BAGIMSIZ := [
+	["Kıdemli Çavuş Dunne", "savaştan dönmüş, silahlı eski askerlerle çalışıyor"],
+	["Kasap Brannigan ailesi", "kalabalık, kavgacı bir aile; herkes birbirini korur"],
+	["Liman sendikası", "yüzlerce işçi aynı anda grev ya da kavgaya girer"],
+	["Dul Bayan Whitcombe", "belediye meclisinde eşi dostu var, kapısında polis eksik olmaz"],
+	["Boksör Cuddy", "eski şampiyon; iki adamıyla birlikte kapıda nöbet tutuyor"],
+	["Rahip Moriarty'nin cemaati", "mahalle onların arkasında, kimse kapısına el uzatmaz"],
+]
 const KURAL := [
 	["resmi", ["bank", "courier", "post office", "hospital", "church", "synagogue", "school", "courthouse", "station", "exchange", "customs", "harbor master", "chamber", "stevedore", "precinct", "hiring", "city hall", "social hall"]],
 	["luks", ["hotel", "jeweler", "club", "gallery", "mansion", "perfumery", "department", "theater", "cinema", "attorney", "library", "chauffeur", "watchmaker"]],
@@ -213,6 +222,9 @@ func kur(h: Node3D) -> void:
 			isy[i] = {"tur": tur, "sahip": false, "haracli": false, "birikim": 0.0, "korumaBitis": 0}
 			if tur in ["esnaf", "eglence", "atolye", "konut"] and rng.randf() < (0.5 if tur == "konut" else 0.3):
 				isy[i]["bos"] = true   # boş dükkân ilanı
+			elif tur != "konut" and rng.randf() < 0.1:
+				var kim: Array = BAGIMSIZ[rng.randi() % BAGIMSIZ.size()]
+				isy[i]["bagimsiz"] = {"ad": kim[0], "neden": kim[1], "guc": 55 + rng.randi() % 30, "dost": false}
 	isl = load("res://scripts/core/isletme.gd").new(self)
 	zafer = load("res://scripts/core/zafer.gd").new(self)
 	arac_k = load("res://scripts/core/arac.gd").new(self)
@@ -648,6 +660,22 @@ func guc() -> float:
 		p += 1.0 + beceri(a) / 60.0
 	return p * kis_k.form()
 
+# Bağımsız güçlü sahiple dostluk: haraç yok, ama mahalle seni sever ve nüfuz artar.
+func dostluk_kur(i: int) -> Dictionary:
+	var r: Dictionary = isy.get(i, {})
+	if not r.has("bagimsiz") or r["bagimsiz"].get("dost", false):
+		return hata("Burada dostluk kurulacak biri yok.")
+	var f: int = int(r["bagimsiz"]["guc"]) * 8
+	if not harcama(f, "temiz"):
+		return hata("Temiz para yetmiyor (%s)." % para(f))
+	r["bagimsiz"]["dost"] = true
+	var b: Dictionary = bolge[harita.yerler[i]["bolge"]]
+	b["sev"] = clampf(b["sev"] + 4.0, 0, 100)
+	_nufuz(harita.yerler[i]["bolge"], 2.0)
+	kayit("%s ile el sıkıştın: haraç yok, ama sana dokunmayacak, mahallede sözün geçiyor (%s)." % [r["bagimsiz"]["ad"], para(f)], "good")
+	degisti.emit()
+	return tamam()
+
 func yarala(a: Dictionary, gun: int) -> void:
 	a["gorev"] = "tutuklu"
 	gorevler.append({"adam": a["id"], "hedef": -1, "gorev": "tutuklu", "yarali": true, "basla": t, "yol": 0, "bitis": t + gun * DAY, "yolu": PackedVector3Array()})
@@ -895,6 +923,10 @@ func gorev_ver(i: int, gorev: String, adam_id: int = 0) -> Dictionary:
 	if not erisim(y["bolge"]):
 		return hata("%s'da henüz ayağın yok: önce komşu bir mahalleye hakim ol." % harita.bolgeler[y["bolge"]]["ad"])
 	var k := kontrol(i)
+	if gorev == "haraclan" and r.has("bagimsiz") and not r["bagimsiz"].get("dost", false):
+		pass   # denenebilir ama çok riskli (bkz. _coz)
+	if gorev == "haraclan" and r.get("bagimsiz", {}).get("dost", false):
+		return hata("%s seninle dost; haraç vermez ama sana dokunmaz." % r["bagimsiz"]["ad"])
 	if gorev == "haraclan" and (k == "haraci" or k == "sahip"):
 		return hata("Bu yer zaten senin.")
 	if gorev == "topla" and k != "haraci":
@@ -989,9 +1021,24 @@ func _coz(g: Dictionary) -> void:
 		var hk := hakim_of(bid)
 		var rakip := hk if hk != "" and hk != "oyuncu" else ""
 		var need: int = T["direnc"] * 10
+		var bag: Dictionary = r.get("bagimsiz", {})
+		if not bag.is_empty():
+			need = int(bag["guc"])
 		var e := etki(b, bid)
 		var pw: float = clampf(0.38 + (beceri(adam) - need) / 60.0 + 0.15 * e["k"] + 0.1 * e["s"] - (0.05 if b["huzur"] > 80 else 0.0) + yol_k.harac_sans(), 0.08, 0.95) * kis_k.form()
-		if rng.randf() < pw:
+		if not bag.is_empty():
+			pw = minf(pw, 0.2)
+		if not bag.is_empty() and rng.randf() >= pw:
+			# bağımsız sahibe saldırı: adam dayak yer, arama artar, mahalle seni ayıplar
+			yarala(adam, 2 + rng.randi() % 3)
+			arama = minf(100.0, arama + 3.0)
+			b["sev"] = clampf(b["sev"] - 3.0, 0, 100)
+			kayit("%s: %s, %s. %s ağır dayak yedi, birkaç gün yatacak." % [ad, bag["ad"], bag["neden"], adam["ad"]], "bad")
+		elif not bag.is_empty() or rng.randf() < pw:
+			if not bag.is_empty():
+				r.erase("bagimsiz")
+				kayit("%s direnişi kırıldı: artık haraç ödüyor ama mahalle bunu unutmayacak." % ad, "warn")
+				b["sev"] = clampf(b["sev"] - 6.0, 0, 100)
 			r["haracli"] = true
 			r["birikim"] = 0.0
 			b["kor"] = clampf(b["kor"] + 1.5, 0, 100)

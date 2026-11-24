@@ -1126,6 +1126,14 @@ func _bina_paneli() -> void:
 	var yakin := yakin_bina(i)
 	if not yakin:
 		_lbl(_ic, "Uzaktasın: işlem yapmak için binaya yaklaş.", 15, RENK["warn"])
+	var bag: Dictionary = r.get("bagimsiz", {})
+	if not bag.is_empty():
+		_bolum(_ic, "Bağımsız sahip")
+		_lbl(_ic, "%s: %s. Haraç vermez; zorlarsan adamların dayak yer." % [bag["ad"], bag["neden"]], 14, RENK["warn"])
+		if bag.get("dost", false):
+			_lbl(_ic, "Seninle dost.", 14, RENK["good"])
+		else:
+			_btn(_ic, "Dostluk kur  (%s temiz)" % oyun.para(int(bag["guc"]) * 8), func(): _sonuc_goster(oyun.dostluk_kur(i), "Dost oldunuz."), not yakin)
 	_bolum(_ic, "Eylemler")
 	for gk in ["haraclan", "topla", "koru"]:
 		_btn(_ic, "%s  (%d dk iş)" % [oyun.GOREVLER[gk]["ad"], oyun.GOREVLER[gk]["is"]], func(): _sonuc_goster(oyun.gorev_ver(i, gk, secili), "Adam yola çıktı."), not yakin)
