@@ -197,12 +197,38 @@ func serbest_nokta(p: Vector3) -> Vector3:
 	var z := _gz0 + c.y + 0.5
 	return Vector3(x, yuk(x, z), z)
 
+# Hedef hücreye yol yoksa (kapalı cep), hedefe en yakın ulaşılabilir açık hücreye yol ara.
+func _yakin_ulasilabilir(ga: Vector2i, gb: Vector2i) -> Array[Vector2i]:
+	for r in range(1, 40):
+		var en: Array[Vector2i] = []
+		var en_d := 1e9
+		for dx in range(-r, r + 1):
+			for dz in range(-r, r + 1):
+				if maxi(absi(dx), absi(dz)) != r:
+					continue
+				var q := gb + Vector2i(dx, dz)
+				if not _izgara.is_in_boundsv(q) or _izgara.is_point_solid(q):
+					continue
+				var d := float(dx * dx + dz * dz)
+				if d >= en_d:
+					continue
+				var yol := _izgara.get_id_path(ga, q)
+				if not yol.is_empty():
+					en = yol
+					en_d = d
+		if not en.is_empty():
+			return en
+	var bos: Array[Vector2i] = []
+	return bos
+
 # Dünya koordinatından dünya koordinatına yol (köşe noktaları). Boşsa ulaşılamaz.
 func yol_bul(a: Vector3, b: Vector3) -> PackedVector3Array:
 	var cikti := PackedVector3Array()
 	var ga := _acik(_hucre(a))
 	var gb := _acik(_hucre(b))
 	var ham := _izgara.get_id_path(ga, gb)
+	if ham.is_empty() and ga != gb:
+		ham = _yakin_ulasilabilir(ga, gb)
 	for i in ham.size():
 		var p: Vector2i = ham[i]
 		if i > 0 and i < ham.size() - 1:

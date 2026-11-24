@@ -14,8 +14,9 @@ const KAT := {
 	"is": ["⚒", Color("c9b08a"), "İş yeri"],
 	"resmi": ["⚖", Color("9aa0aa"), "Resmî kurum"],
 	"ozel": ["★", Color("e6c45a"), "Özel mekân"],
+	"ilan": ["⌂", Color("e0643c"), "Kiralık / Satılık"],
 }
-const IKON := {"ev": "bina_ev", "gelir": "bina_gelir", "yemek": "bina_yemek", "konak": "bina_ev", "adam": "bina_adam", "is": "is", "resmi": "polis", "ozel": "bina_ozel"}
+const IKON := {"ev": "bina_ev", "gelir": "bina_gelir", "yemek": "bina_yemek", "konak": "bina_ev", "adam": "bina_adam", "is": "is", "resmi": "polis", "ozel": "bina_ozel", "ilan": "bina_gelir"}
 const YEMEK := ["diner", "soda", "cafe", "restaurant", "bakery", "deli", "grill", "oyster", "kitchen", "tavern"]
 const KONAK := ["hotel", "boarding", "tenement", "mansion", "inn", "pension", "lodging"]
 
@@ -54,6 +55,8 @@ func kategori(i: int) -> String:
 	var ad := String(harita.yerler[i]["ad"]).to_lower()
 	if i == oyun._ev:
 		return "ev"
+	if oyun.isy.has(i) and oyun.isy[i].get("bos", false) and oyun.isy[i].get("elde", "") == "":
+		return "ilan"
 	if oyun.isy.has(i) and oyun.isy[i]["sahip"]:
 		return "gelir"
 	if _pazar.site_mi(i):
@@ -78,7 +81,7 @@ func _bina_ikonu(ad: String, kat: String) -> Texture2D:
 	while s.contains("__"):
 		s = s.replace("__", "_")
 	s = s.trim_prefix("_").trim_suffix("_")
-	var adaylar := [s, s.trim_suffix("_iii").trim_suffix("_ii")]
+	var adaylar := [s, s.trim_suffix("_iii").trim_suffix("_ii")] if kat != "ilan" else []
 	if s.begins_with("tool_"):
 		adaylar.append("tool_die")
 	for a in adaylar:
@@ -179,7 +182,7 @@ func _guncelle() -> void:
 	var gr: Node = get_parent().get("gorus")
 	for o in _ogeler:
 		var kat := kategori(o["i"])
-		var hep: bool = kat == "ev" or kat == "gelir"
+		var hep: bool = kat == "ev" or kat == "gelir" or kat == "ilan"
 		var gor: bool = hep or gr == null or gr.kesfedildi(harita.yerler[o["i"]]["pos"])
 		(o["kok"] as Node3D).visible = gor
 		o["gor"] = gor

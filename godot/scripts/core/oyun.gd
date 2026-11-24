@@ -210,7 +210,7 @@ func kur(h: Node3D) -> void:
 		var tur := _tur(y["ad"])
 		if tur != "resmi":
 			isy[i] = {"tur": tur, "sahip": false, "haracli": false, "birikim": 0.0, "korumaBitis": 0}
-			if tur in ["esnaf", "eglence", "atolye", "konut"] and rng.randf() < (0.35 if tur == "konut" else 0.2):
+			if tur in ["esnaf", "eglence", "atolye", "konut"] and rng.randf() < (0.5 if tur == "konut" else 0.3):
 				isy[i]["bos"] = true   # boş dükkân ilanı
 	isl = load("res://scripts/core/isletme.gd").new(self)
 	zafer = load("res://scripts/core/zafer.gd").new(self)

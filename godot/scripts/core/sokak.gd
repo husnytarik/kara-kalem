@@ -532,8 +532,17 @@ func _unhandled_input(e: InputEvent) -> void:
 var _gir_bina := -1
 var _sag_basla := Vector2.ZERO
 
+var _bina_dur := false   # binadayken oyun duraklatılır (mesai sürerken hariç)
+
 func _process(delta: float) -> void:
 	_oto_kayit()
+	# Binadayken oyun saati ve dünya (gruplar, trafik, yayalar) durur; arayüz/fare/kamera canlı kalır.
+	var bd: bool = oyuncu.iceride >= 0 and oyun.vardiya.is_empty() and not savas_aktif
+	if bd != _bina_dur:
+		_bina_dur = bd
+		for n in [gruplar, gorus, get_node_or_null("Yayalar"), get_node("Yayalar").trafik]:
+			if n != null:
+				n.set_process(not bd)
 	if _gir_bina >= 0 and oyuncu.iceride < 0 and arayuz.yakin_bina(_gir_bina):
 		oyuncu.gir(_gir_bina)
 		arayuz.bina_ac(_gir_bina)
@@ -545,7 +554,8 @@ func _process(delta: float) -> void:
 		Engine.physics_ticks_per_second = tps
 	if savas_aktif:
 		return
-	oyun.ilerle(delta)
+	if not _bina_dur:
+		oyun.ilerle(delta)
 	if takip_id != 0:
 		_takip_sure -= delta
 		if _takip_sure <= 0.0:
@@ -600,6 +610,8 @@ func _process(delta: float) -> void:
 	elif i >= 0:
 		var y: Dictionary = harita.yerler[i]
 		_ipucu.text = "%s  (%s)" % [y["ad"], harita.bolgeler[y["bolge"]]["ad"]]
+		if oyun.isy.has(i) and oyun.isy[i].get("bos", false):
+			_ipucu.text += "  — " + ("SATILIK EV" if oyun.isy[i]["tur"] == "konut" else "KİRALIK / SATILIK")
 	else:
 		_ipucu.text = ""
 
@@ -1135,7 +1147,11 @@ func _ekran_cek(arg: String) -> void:
 				if oyun.isy[k].get("bos", false):
 					bi2 = k
 					break
-			print("ILAN ", bi2)
+			var nb := 0
+			for k in oyun.isy:
+				if oyun.isy[k].get("bos", false):
+					nb += 1
+			print("ILAN ", bi2, " toplam=", nb)
 			if bi2 >= 0:
 				arayuz.bina_ac(bi2)
 		elif p[1] == "ilan2":
@@ -1161,6 +1177,24 @@ func _ekran_cek(arg: String) -> void:
 				oyun.t += oyun.DAY
 				oyun._gun()
 			print("kirasiz sahip=", oyun.isy[bi3]["sahip"], " bos=", oyun.isy[bi3]["bos"])
+		elif p[1] == "yolsay2":
+			var bo2 := 0
+			for k in harita.yerler.size():
+				var ga: Vector2i = harita._acik(harita._hucre(oyuncu.global_position))
+				var gb: Vector2i = harita._acik(harita._hucre(harita.yerler[k]["pos"]))
+				if ga != gb and harita._izgara.get_id_path(ga, gb).is_empty():
+					bo2 += 1
+					print("ESKI_YOLYOK ", harita.yerler[k]["ad"])
+			print("ESKI yolsuz=", bo2)
+		elif p[1] == "yolsay":
+			var kt := 0
+			var bo := 0
+			for k in harita.yerler.size():
+				kt += 1
+				if harita.yol_bul(oyuncu.global_position, harita.yerler[k]["pos"]).size() < 2 and not arayuz.yakin_bina(k):
+					bo += 1
+					print("YOLYOK ", harita.yerler[k]["ad"])
+			print("YOLSAY ", kt, " yolsuz=", bo)
 		elif p[1] == "kadro":
 			for u in oyun.uyeler:
 				print("KADRO ", oyun.uye_ad(u))
