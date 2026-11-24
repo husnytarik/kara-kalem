@@ -174,7 +174,7 @@ func _esitle() -> void:
 			g["kisi"] += 1
 			g["rejen"] = oyun.t + 360
 	for g in liste.duplicate():   # lideri ölmüş ekibe yeni lider
-		if g["tur"] == "rakip" and g.has("lider") and oyun.uye(g["lider"]).get("durum", "olu") != "aktif":
+		if g["tur"] == "rakip" and g.has("lider") and (oyun.uye(g["lider"]).get("durum", "olu") != "aktif" or oyun.uye(g["lider"]).get("fak", "") != g["fak"]):
 			if g.has("don"):
 				_sil(g)
 			else:
@@ -193,9 +193,12 @@ func _esitle() -> void:
 			ekipler = liste.filter(func(g): return g["fak"] == f and not g.has("don") and not g.has("nobet"))
 		while ekipler.size() > bolgeleri.size() and ekipler.size() > 1:
 			_sil(ekipler.pop_back())
+		var ask: int = oyun.aile_uyeleri(f).filter(func(u): return u["rutbe"] == "asker").size()
 		for k in ekipler.size():
 			if bolgeleri.size() > 0:
 				ekipler[k]["ev"] = bolgeleri[k % bolgeleri.size()]
+			ekipler[k]["kisi_max"] = clampi(2 + ask / maxi(1, ekipler.size()), 2, 8)
+			ekipler[k]["kisi"] = mini(ekipler[k]["kisi"], ekipler[k]["kisi_max"])
 	# polis her mahallede bir devriye; sivil sayısı sabit
 
 func _sil(g: Dictionary) -> void:

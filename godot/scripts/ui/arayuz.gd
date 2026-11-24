@@ -1327,6 +1327,11 @@ func _aile_paneli() -> void:
 		var fd: Dictionary = oyun.FAK[f]
 		_ayrac(_ic)
 		_lbl(_ic, "%s  ·  öfke %d" % [fd["ad"], int(oyun.ofke[f])], 18, fd["renk"])
+		_lbl(_ic, oyun.rakip_k.ozet(f), 13, RENK["soluk"])
+		if oyun.gerginlik.savasta("oyuncu", f):
+			_btn(_ic, "Barış teklif et ($%d kirli)" % int(oyun.rakip_k.BARIS_BEDEL), func():
+				var rs: Dictionary = oyun.rakip_k.baris_teklif(f)
+				_sonuc_goster({"ok": rs["ok"], "msg": rs["m"]}))
 		var ms: int = oyun.muhbir[f]
 		var mh := HBoxContainer.new()
 		_ic.add_child(mh)

@@ -36,6 +36,12 @@ func ekle(a: String, b: String, p: float, neden: String = "") -> void:
 			m += " (%s)" % neden
 		oyun.kayit(m, "bad" if a == "oyuncu" or b == "oyuncu" else "warn")
 
+func baris(a: String, b: String) -> void:
+	var g := _kayit(a, b)
+	g["savas"] = 0
+	g["puan"] = 2.0
+	oyun.kayit("Barış: %s ile %s anlaştı." % [ad(a), ad(b)], "info")
+
 func savasta(a: String, b: String) -> bool:
 	if a == b or a == "" or b == "":
 		return false

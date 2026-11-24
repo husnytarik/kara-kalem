@@ -173,6 +173,8 @@ var akl: Dictionary = {}        # aklama durumu (aklama.gd)
 var aklama_k: RefCounted
 var gerg: Dictionary = {}       # aileler arası gerginlik/savaş (gerginlik.gd)
 var gerginlik: RefCounted
+var rakip_k: RefCounted
+var fk: Dictionary = {}          # rakip ailelerin kasa/moral durumu (rakip.gd)
 var yol: Dictionary = {}        # yükseliş yolları + dönem (yol.gd)
 var yol_k: RefCounted
 var kart_k: RefCounted
@@ -218,6 +220,7 @@ func kur(h: Node3D) -> void:
 	aklama_k = load("res://scripts/core/aklama.gd").new(self)
 	akl = aklama_k.yeni()
 	gerginlik = load("res://scripts/core/gerginlik.gd").new(self)
+	rakip_k = load("res://scripts/core/rakip.gd").new(self)
 	polis = load("res://scripts/core/polis.gd").new(self)
 	pol = polis.yeni()
 	yol_k = load("res://scripts/core/yol.gd").new(self)
@@ -319,6 +322,7 @@ func baslangic_noktasi() -> Vector3:
 # ---------- aile hiyerarşisi ----------
 func _aileleri_kur() -> void:
 	uyeler.clear()
+	fk.clear()
 	for f in NPC:
 		uye_yarat(f, "don")
 		uye_yarat(f, "ikinci")
@@ -372,13 +376,13 @@ func lider_bul(f: String, kullanilan: Array) -> Dictionary:
 			return u
 	return uye_yarat(f, "asker")
 
-func uye_oldu(uid: int) -> String:
+func uye_oldu(uid: int, neden: String = "öldürüldü", sessiz: bool = false) -> String:
 	var u := uye(uid)
 	if u.is_empty() or u["durum"] != "aktif":
 		return ""
 	u["durum"] = "olu"
 	var f: String = u["fak"]
-	var yazi := "%s öldürüldü." % uye_ad(u)
+	var yazi := "%s %s." % [uye_ad(u), neden]
 	if u["rutbe"] == "don":
 		var ik: Array = aile_uyeleri(f).filter(func(x): return x["rutbe"] == "ikinci")
 		if not ik.is_empty():
@@ -401,7 +405,8 @@ func uye_oldu(uid: int) -> String:
 		ofke[f] = minf(100.0, ofke[f] + 12.0)
 	else:
 		ofke[f] = minf(100.0, ofke[f] + 4.0)
-	kayit(yazi, "warn")
+	if not sessiz:
+		kayit(yazi, "warn")
 	degisti.emit()
 	return yazi
 
@@ -1039,7 +1044,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler, "kara": kara, "sil": sil, "yet": yet, "aile": aile, "un": un, "nuf": nuf, "kotu": kotu, "kaz": kaz, "acilis": acilis}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "fk": fk, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler, "kara": kara, "sil": sil, "yet": yet, "aile": aile, "un": un, "nuf": nuf, "kotu": kotu, "kaz": kaz, "acilis": acilis}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -1076,6 +1081,7 @@ func durum_yukle(d: Dictionary) -> void:
 	akl = d.get("akl", aklama_k.yeni())
 	pol = d.get("pol", polis.yeni())
 	gerg = d.get("gerg", {})
+	fk = d.get("fk", {})
 	yol = d.get("yol", yol_k.yeni())
 	kis = d.get("kis", kis_k.yeni())
 	pazar = d.get("pazar", {})
@@ -1183,6 +1189,7 @@ func _ay() -> void:
 	polis.ay()
 	borc_k.ay()
 	gerginlik.ay()
+	rakip_k.ay()
 	var kira: float = ozet.get("kira", 0)
 	if kira > 0.0:
 		var borc := kira + kira_borc
