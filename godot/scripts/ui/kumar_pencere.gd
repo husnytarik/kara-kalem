@@ -81,7 +81,8 @@ func _l(ebeveyn: Node, t: String, boy: int = 15, renk: Color = Tema.YAZI) -> Lab
 	l.text = t
 	l.add_theme_font_size_override("font_size", boy)
 	l.add_theme_color_override("font_color", renk)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	if not ebeveyn is HBoxContainer:   # yatay kutuda sarma etiketi sıfır genişliğe çöker
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	ebeveyn.add_child(l)
 	return l
 

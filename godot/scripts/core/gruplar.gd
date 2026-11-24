@@ -41,6 +41,8 @@ func kur(h: Node3D, o: Node, p: Node3D) -> void:
 	rng.seed = 777
 	for id in harita.bolgeler:
 		_polis_ekle(id)
+		for _b in 2:
+			_bekci_ekle(id)
 	for f in KARARGAH:
 		for i in harita.yerler.size():
 			if harita.yerler[i]["ad"] == KARARGAH[f]:
@@ -77,6 +79,34 @@ func _nobet_ekle(f: String, ev: String, k: int) -> void:
 	g["nobet"] = f
 	var a := TAU * k / 3.0
 	g["pos"] = (_hq[f] as Vector3) + Vector3(cos(a), 0, sin(a)) * 22.0
+
+# Gece bekçisi: tek polis, yalnızca geceleri sokaklarda gezer (gündüz görünmez).
+func _bekci_ekle(ev: String) -> void:
+	var g := _yeni("polis", "polis", "Bekçi", 1, ev)
+	g["bekci"] = true
+	g["evde"] = true
+	(g["dugum"] as Node3D).visible = false
+
+func gece_mi() -> bool:
+	var saat: float = fmod(float(oyun.t), float(oyun.DAY)) / 60.0
+	return saat >= 21.0 or saat < 5.5
+
+func _bekci_plan(g: Dictionary) -> void:
+	var dn: Node3D = g["dugum"]
+	if not gece_mi():
+		if not g["evde"]:
+			g["evde"] = true
+			g["yol"] = PackedVector3Array()
+			g["mod"] = ""
+			dn.visible = false
+		return
+	if g["evde"]:
+		g["evde"] = false
+		var yerler: Array = _bolge_yerleri(g["ev"])
+		g["pos"] = harita.yerler[yerler[rng.randi() % yerler.size()]]["pos"]
+		g["bekle"] = rng.randf_range(0.0, 3.0)
+		dn.visible = true
+		g["durum"] = "Gece devriyesi"
 
 func _sivil_ekle(ev: String) -> void:
 	_yeni("sivil", "sivil", SIVIL_AD[rng.randi() % SIVIL_AD.size()], 1 + rng.randi() % 3, ev)
@@ -366,6 +396,8 @@ func _npc_etkilesim() -> void:
 			if rng.randf() < p:
 				_npc_catisma(a, b)
 	for pl in pol:
+		if pl.get("evde", false):
+			continue
 		for r in rak:
 			if (pl["pos"] as Vector3).distance_to(r["pos"]) > 26.0:
 				continue
@@ -422,7 +454,7 @@ func guvenli_mi() -> bool:
 	return Vector2(e.x, e.z).distance_to(Vector2(oyuncu.global_position.x, oyuncu.global_position.z)) < GUVENLI
 
 func _ai(g: Dictionary, delta: float) -> void:
-	if g["tur"] == "sivil":
+	if g["tur"] == "sivil" or g.get("evde", false):
 		return
 	g["ai"] -= delta
 	if g["ai"] > 0.0:
@@ -494,6 +526,10 @@ func _git(g: Dictionary, hedef: Vector3) -> void:
 		g["yol"] = yol
 
 func _yuru(g: Dictionary, delta: float) -> void:
+	if g.has("bekci"):
+		_bekci_plan(g)
+		if g["evde"]:
+			return
 	_ai(g, delta)
 	if g.has("sakin") and g["mod"] == "" and takip_id != g["id"]:
 		_sakin_plan(g)
@@ -555,6 +591,18 @@ func _hedef_sec(g: Dictionary) -> void:
 	var ev: String = g["ev"]
 	var bolge := ev
 	var sans := rng.randf()
+	if g["tur"] == "rakip" and gece_mi() and not g.has("don"):
+		# gece: kendi mahallesinin köşesinde durur, bölgesini kollar
+		if not g.has("kose") or g.get("kose_ev", "") != ev:
+			var ky: Array = _bolge_yerleri(ev)
+			g["kose"] = harita.yerler[ky[rng.randi() % ky.size()]]["pos"]
+			g["kose_ev"] = ev
+		g["durum"] = "Köşeyi tutuyor"
+		if (g["pos"] as Vector3).distance_to(g["kose"]) > 8.0:
+			_git(g, g["kose"])
+		if (g["yol"] as PackedVector3Array).size() == 0:
+			g["bekle"] = 8.0
+		return
 	match g["tur"]:
 		"polis":
 			if sans < 0.3:   # komşu mahalleye de uğra

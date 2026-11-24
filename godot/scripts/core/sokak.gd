@@ -1396,6 +1396,8 @@ func _ekran_cek(arg: String) -> void:
 			oyun.aile_k.gelenek_sec(0, "kan_bagi")
 			oyun.aile_k.gelenek_sec(1, "omerta")
 			arayuz.ailem_ac()
+		elif p[1] == "kumar":
+			arayuz.kumar_ac()
 		elif p[1] == "defter":
 			arayuz.defter_ac()
 		elif p[1] == "zafer":
