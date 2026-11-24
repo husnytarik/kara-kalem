@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d3qvt1cxl4slo"
-path="res://.godot/imported/adamlar.png-dffea5bee0d1147276c9b599b16a4489.ctex"
+uid="uid://bcnorhwvbgl35"
+path="res://.godot/imported/aile.png-f4969b0c6528e44c2451c43dc301a029.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/defter/adamlar.png"
-dest_files=["res://.godot/imported/adamlar.png-dffea5bee0d1147276c9b599b16a4489.ctex"]
+source_file="res://assets/ui/panel/aile.png"
+dest_files=["res://.godot/imported/aile.png-f4969b0c6528e44c2451c43dc301a029.ctex"]
 
 [params]
 

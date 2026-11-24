@@ -285,25 +285,6 @@ func _portre(ebeveyn: Node, ad: String, boy: Vector2 = Vector2(56, 64)) -> Contr
 	return p
 
 # Panel başlığı: altın serif başlık + altında ince çizgi.
-# Panel başlığının altına geniş afiş (assets/ui/defter/<ad>.png, dikey çizimden yatay kırpım).
-func _afis(ebeveyn: Node, ad: String) -> void:
-	var yol := "res://assets/ui/defter/%s.png" % ad
-	if not ResourceLoader.exists(yol):
-		return
-	var tex: Texture2D = load(yol)
-	var at := AtlasTexture.new()
-	at.atlas = tex
-	var w: float = tex.get_width()
-	var h: float = tex.get_height()
-	var kh: float = w * 0.42
-	at.region = Rect2(0, h * 0.22, w, kh)
-	var tr := TextureRect.new()
-	tr.texture = at
-	tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	tr.custom_minimum_size = Vector2(0, 150)
-	ebeveyn.add_child(tr)
-
 func _baslik(ebeveyn: Node, metin: String, alt: String = "") -> void:
 	if _kagit_mod:
 		_gazete_baslik(ebeveyn, metin, alt)
@@ -1294,7 +1275,6 @@ func _bolge_paneli() -> void:
 	var b: Dictionary = oyun.bolge[id]
 	var hk: String = oyun.hakim_of(id)
 	_baslik(_ic, oyun.harita.bolgeler[id]["ad"])
-	_afis(_ic, "bolgeler")
 	for ml in [_lbl(_ic, oyun.ACIKLAMA[id], 15, RENK["soluk"]), _lbl(_ic, oyun.KARAKTER[id]["ac"], 15, RENK["soluk"])]:
 		ml.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_ayrac(_ic)
@@ -1339,7 +1319,6 @@ func _bolge_paneli() -> void:
 # ---------- adam paneli ----------
 func _adam_paneli() -> void:
 	_baslik(_ic, "Adamlar", "%d / %d adam · ayda $%d kişi başı" % [oyun.adamlar.size(), oyun.EKIP_MAX, oyun.EKIP_MAAS])
-	_afis(_ic, "adamlar")
 	var ipucu := _lbl(_ic, "Adamlarını barlarda, bilardo salonlarında, boks salonlarında ve derneklerde bulabilirsin. Geceleri daha çok kişi çıkar.", 14, RENK["warn"])
 	ipucu.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if oyun.adamlar.is_empty():
@@ -1384,7 +1363,6 @@ func _adam_paneli() -> void:
 # ---------- aileler (hiyerarşi) ----------
 func _aile_paneli() -> void:
 	_baslik(_ic, "Aileler")
-	_afis(_ic, "aileler")
 	var kartlar := HBoxContainer.new()
 	kartlar.add_theme_constant_override("separation", 6)
 	_ic.add_child(kartlar)

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://wcxr01lepwpd"
-path="res://.godot/imported/bolgeler.png-dd1a6e3fc179d82edfb8b789c0149ec4.ctex"
+uid="uid://bj71dfhnqkj6d"
+path="res://.godot/imported/bolge.png-b11a2347d072ba07172555ce107f0f37.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/defter/bolgeler.png"
-dest_files=["res://.godot/imported/bolgeler.png-dd1a6e3fc179d82edfb8b789c0149ec4.ctex"]
+source_file="res://assets/ui/panel/bolge.png"
+dest_files=["res://.godot/imported/bolge.png-b11a2347d072ba07172555ce107f0f37.ctex"]
 
 [params]
 
