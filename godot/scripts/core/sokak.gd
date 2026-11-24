@@ -1400,6 +1400,17 @@ func _ekran_cek(arg: String) -> void:
 			arayuz.ailem_ac()
 		elif p[1] == "kumar":
 			arayuz.kumar_ac()
+			if p.size() > 2 and p[2] == "at":   # test: zarı at ve animasyonun bitmesini bekle
+				oyun.kirli = 500.0
+				arayuz._kumar._zar_at()
+			elif p.size() > 2 and (p[2] == "poker" or p[2] == "rulet"):
+				oyun.kirli = 500.0
+				arayuz._kumar._oyun_ad = p[2]
+				arayuz._kumar._ciz()
+				if p[2] == "poker":
+					arayuz._kumar._poker_dagit()
+				else:
+					arayuz._kumar._rulet_cevir()
 		elif p[1] == "gazete":
 			for gi in 8:
 				oyun.t += oyun.DAY

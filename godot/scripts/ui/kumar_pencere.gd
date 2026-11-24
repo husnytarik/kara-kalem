@@ -168,20 +168,71 @@ func _zar_ciz() -> void:
 	_l(_alan, "Kazanırsan bahsin 2 katını alırsın.", 13, Tema.SOLUK)
 	_zar_alani = HBoxContainer.new()
 	_zar_alani.alignment = BoxContainer.ALIGNMENT_CENTER
-	_zar_alani.add_theme_constant_override("separation", 22)
+	_zar_alani.add_theme_constant_override("separation", 40)
 	_alan.add_child(_zar_alani)
 	_b(_alan, "Zarları at", _zar_at)
 
 var _zar_alani: HBoxContainer
 
+const ZAR_NOKTA := {
+	1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8],
+}
+
+# Gerçek zar yüzü: yuvarlak köşeli kemik rengi kare + noktalar (yazı tipine bağlı değil).
+func _zar_yuz(n: int) -> Control:
+	var c := Control.new()
+	c.custom_minimum_size = Vector2(68, 68)
+	c.set_meta("n", n)
+	c.draw.connect(func():
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color("e8e0cc")
+		sb.border_color = Color("2b1b0c")
+		sb.set_border_width_all(3)
+		sb.set_corner_radius_all(11)
+		sb.shadow_color = Color(0, 0, 0, 0.45)
+		sb.shadow_size = 4
+		sb.shadow_offset = Vector2(2, 3)
+		c.draw_style_box(sb, Rect2(3, 3, 62, 62))
+		for k in ZAR_NOKTA[int(c.get_meta("n"))]:
+			var kk: int = k
+			var cx: float = 18.0 + (kk % 3) * 16.0
+			var cy: float = 18.0 + (kk / 3) * 16.0
+			c.draw_circle(Vector2(cx, cy), 5.2, Color("1a120a")))
+	return c
+
 func _zar_kutu(ad: String, a: int, b: int) -> Control:
 	var v := VBoxContainer.new()
-	var t := _l(v, ad, 14, Tema.SOLUK)
+	v.custom_minimum_size = Vector2(190, 0)
+	v.add_theme_constant_override("separation", 8)
+	var t := _l(v, ad, 15, Tema.SOLUK)
+	t.autowrap_mode = TextServer.AUTOWRAP_OFF
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var s := _l(v, "⚀⚁⚂⚃⚄⚅"[a - 1] + " " + "⚀⚁⚂⚃⚄⚅"[b - 1], 64, Tema.YAZI)
-	s.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var top := _l(v, "Toplam: %d" % (a + b), 16, Tema.VURGU)
+	var h := HBoxContainer.new()
+	h.alignment = BoxContainer.ALIGNMENT_CENTER
+	h.add_theme_constant_override("separation", 14)
+	v.add_child(h)
+	var z1 := _zar_yuz(a)
+	var z2 := _zar_yuz(b)
+	h.add_child(z1)
+	h.add_child(z2)
+	var top := _l(v, "Toplam: ?", 18, Tema.VURGU)
+	top.autowrap_mode = TextServer.AUTOWRAP_OFF
 	top.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# atış animasyonu: yüzler hızlıca değişir, sonra gerçek değere oturur
+	var tw := v.create_tween().set_ignore_time_scale(true)
+	for _k in 8:
+		tw.tween_callback(func():
+			z1.set_meta("n", rng.randi_range(1, 6))
+			z2.set_meta("n", rng.randi_range(1, 6))
+			z1.queue_redraw()
+			z2.queue_redraw())
+		tw.tween_interval(0.06)
+	tw.tween_callback(func():
+		z1.set_meta("n", a)
+		z2.set_meta("n", b)
+		z1.queue_redraw()
+		z2.queue_redraw()
+		top.text = "Toplam: %d" % (a + b))
 	return v
 
 func _zar_at() -> void:
