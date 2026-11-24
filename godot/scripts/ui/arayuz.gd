@@ -1035,6 +1035,8 @@ func _ic_bolumu(i: int) -> void:
 		_lbl(_ic, "Evin güvenli: kimse bulaşamaz. Dinlenirken zaman akar, ama borç ve kira beklemez.", 14, RENK["soluk"])
 		_btn(_ic, "1 saat bekle", func(): oyun.bekle_hizli(60); _yenile(true))
 		_btn(_ic, "Sabaha kadar uyu (07:00)", func(): oyun.uyu(); _yenile(true))
+		var gy: int = oyun.gaz_k.okunmamis()
+		_btn(_ic, "Gazeteyi oku" + ((" (%d yeni)" % gy) if gy > 0 else ""), func(): gazete_ac())
 	elif oyun.pazar_k.konak_mi(i):
 		var ucret := 20.0
 		_lbl(_ic, "Oda tuttun: odan kapalı, kimse bulaşamaz. Ev bilinen adrestir; aranıyorsan burada yatmak daha güvenli. Gecelik $%d." % int(ucret), 14, RENK["soluk"])
@@ -1554,7 +1556,7 @@ func _meslek_paneli() -> void:
 	_ayrac(_ic)
 	var th: String = K.tatil_adi()
 	_bolum(_ic, "GAZETE · İş İlanları — %s%s" % [oyun.tarih_yazi(), (" · " + th) if th != "" else ""])
-	_lbl(_ic, "%s. İlanlar her gün değişir; işe girince ilandaki iş yerine gidip mesai yapmalısın." % K.donem_yazi(), 13, RENK["soluk"])
+	_lbl(_ic, "%s. İlanlar yalnızca gazeteyi okuyunca güncellenir (evde); son basım: %s. İşe girince ilandaki iş yerine gidip mesai yapmalısın." % [K.donem_yazi(), oyun.gaz_k.tarih_yazi(int(oyun.gaz["ilan_gun"]))], 13, RENK["soluk"])
 	for ad in K.ilanlar():
 		var aj: String = ad["j"]
 		var k2: Dictionary = K.kabul(aj, ad["bolge"])
@@ -1800,6 +1802,23 @@ func kumar_kapandi() -> void:
 	modal = false
 	sokak.modal_duraklat(false)
 	_kumar = null
+	_yenile(true)
+
+var _gazete: Control
+
+func gazete_ac() -> void:
+	if modal:
+		return
+	modal = true
+	sokak.modal_duraklat(true)
+	_gazete = load("res://scripts/ui/gazete_pencere.gd").new()
+	add_child(_gazete)
+	_gazete.kur(oyun, self)
+
+func gazete_kapandi() -> void:
+	modal = false
+	sokak.modal_duraklat(false)
+	_gazete = null
 	_yenile(true)
 
 func karsilasma_ac(g: Dictionary) -> void:

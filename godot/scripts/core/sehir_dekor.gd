@@ -9,6 +9,8 @@ func _ready() -> void:
 	if f == null:
 		return
 	var d: Dictionary = JSON.parse_string(f.get_as_text())
+	for k in ["lamba", "agac"]:
+		d[k] = (d.get(k, []) as Array).filter(func(p): return Vector2(p[0], p[1]).distance_to(Vector2(74.0, 46.0)) > 19.0)
 	_su_kur()
 	for g in d.get("iskele", []):
 		var mi := MeshInstance3D.new()

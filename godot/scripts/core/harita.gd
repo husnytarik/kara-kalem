@@ -8,6 +8,7 @@ extends Node3D
 var bolgeler := {}                     # id -> {ad, x0, z0, x1, z1}
 var yerler: Array[Dictionary] = []     # {ad, bolge, ozel, pos, aabb}
 var _arazi: Node3D
+var meydan: Node3D
 var _iskeleler: Array[AABB] = []
 var dolgu: Array[AABB] = []            # süs binalar (işletme değil; yine de engel ve görüş kesici)
 var _dolgu_obb: Array = []             # {xf, yerel}: dönük süs binalar için tam kutu
@@ -23,6 +24,10 @@ func _ready() -> void:
 	dekor.set_script(load("res://scripts/core/sehir_dekor.gd"))
 	dekor.harita = self
 	add_child(dekor)
+	meydan = Node3D.new()
+	meydan.set_script(load("res://scripts/core/meydan.gd"))
+	meydan.harita = self
+	add_child(meydan)
 	for n in get_tree().get_nodes_in_group("bina"):
 		var a: AABB = n.dunya_aabb()
 		var yerel := AABB(Vector3(-n.boyut.x / 2.0, 0, -n.boyut.z / 2.0), n.boyut)

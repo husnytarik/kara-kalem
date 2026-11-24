@@ -189,6 +189,8 @@ var yol_k: RefCounted
 var kart_k: RefCounted
 var kis: Dictionary = {}        # kişisel durum: açlık/yorgunluk/stres/sıkıntı/özellikler (kisisel.gd)
 var kis_k: RefCounted
+var gaz_k: RefCounted
+var gaz: Dictionary = {}
 var pazar: Dictionary = {}      # adam bulma mekânlarının günlük adayları (pazar.gd)
 var pazar_k: RefCounted
 var isler: Dictionary = {}     # kirli işler: günlük teklif tahtası ve sayaçlar (isler.gd)
@@ -267,6 +269,9 @@ func kur(h: Node3D) -> void:
 	un = un_k.yeni()
 	sil_k = load("res://scripts/core/silahlik.gd").new(self)
 	sil_k.baslat()
+	gaz_k = load("res://scripts/core/gazete.gd").new(self)
+	gaz = gaz_k.yeni()
+	gaz_k.baslat()
 
 # Karakter seçimini oyun durumuna işler: para, ev, tanınırlık, aile bağı.
 func _profil_uygula() -> void:
@@ -422,6 +427,8 @@ func uye_oldu(uid: int, neden: String = "öldürüldü", sessiz: bool = false) -
 		ofke[f] = minf(100.0, ofke[f] + 4.0)
 	if not sessiz:
 		kayit(yazi, "warn")
+	if gaz_k != null:
+		gaz_k.uye_haberi(u, neden)
 	degisti.emit()
 	return yazi
 
@@ -445,6 +452,8 @@ func kayit(metin: String, tur: String = "info") -> void:
 	if defter.size() > 300:
 		defter.pop_front()
 	mesaj.emit(metin, tur)
+	if gaz_k != null:
+		gaz_k.kayittan(metin, tur)
 
 func para(x: float) -> String:
 	return "$" + str(int(round(x)))
@@ -751,7 +760,7 @@ func ilan_fiyat(i: int) -> int:
 	var taban: float = 900.0 if r["tur"] == "konut" else float(TURLER[r["tur"]]["fiyat"])
 	var sv: float = bolge[harita.yerler[i]["bolge"]]["servet"]
 	var oynak: float = 0.85 + float((i * 37) % 31) / 100.0
-	return int(round(taban * (0.5 + 0.25 * sv) * 0.6 * oynak * (0.5 if tezgah(i) else 1.0)))
+	return int(round(taban * (0.5 + 0.25 * sv) * 0.6 * oynak * (0.5 if tezgah(i) else 1.0) * gaz_k.fiyat_k(i, harita.yerler[i]["bolge"])))
 
 # Mahalle özeti (hover bilgisi): kimin kaç işyeri var.
 func bolge_ozet(id: String) -> Dictionary:
@@ -1260,7 +1269,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "fk": fk, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler, "kara": kara, "sil": sil, "yet": yet, "aile": aile, "un": un, "nuf": nuf, "kotu": kotu, "kaz": kaz, "acilis": acilis}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "fk": fk, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler, "kara": kara, "sil": sil, "yet": yet, "aile": aile, "un": un, "nuf": nuf, "kotu": kotu, "kaz": kaz, "acilis": acilis, "gaz": gaz}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -1311,6 +1320,10 @@ func durum_yukle(d: Dictionary) -> void:
 	kotu = d.get("kotu", kotu_k.yeni())
 	kaz = d.get("kaz", {})
 	acilis = d.get("acilis", {"daire": true, "calisti": true})
+	gaz = d.get("gaz", {})
+	if gaz.is_empty():
+		gaz = gaz_k.yeni()
+		gaz_k.baslat()
 	if d.has("sil"):
 		sil = d["sil"]
 	else:
@@ -1368,6 +1381,7 @@ func yasal(x: float) -> void:
 
 func _gun() -> void:
 	_olay()
+	gaz_k.gun()
 	meslek.gun()
 	polis.gun()
 	yol_k.gun()

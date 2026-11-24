@@ -36,6 +36,7 @@ func _ready() -> void:
 	oyun.name = "Oyun"
 	add_child(oyun)
 	oyun.kur(harita)
+	harita.meydan.oyun = oyun
 	oyuncu = Node3D.new()
 	oyuncu.set_script(load("res://scripts/characters/harita_oyuncu.gd"))
 	oyuncu.harita = harita
@@ -431,6 +432,7 @@ func savas_baslat(g: Dictionary, ceza: float, geri: Callable, tur_zorla: String 
 		onceki_kam.make_current()
 		Engine.time_scale = 0.0 if arayuz.modal else _hiz
 		print("savas sonucu: ", sonuc)
+		oyun.gaz_k.catisma_haber(sonuc)
 		geri.call(sonuc))
 
 var _dur: Node
@@ -1398,6 +1400,22 @@ func _ekran_cek(arg: String) -> void:
 			arayuz.ailem_ac()
 		elif p[1] == "kumar":
 			arayuz.kumar_ac()
+		elif p[1] == "gazete":
+			for gi in 8:
+				oyun.t += oyun.DAY
+				oyun._gun()
+			arayuz.gazete_ac()
+		elif p[1].begins_with("meydan"):
+			var mt: String = p[1].substr(7) if p[1].length() > 6 else "idam"
+			oyun.gaz["etk"] = {}
+			oyun.gaz_k._etk_kur(mt, oyun.tarih()["gun"], {"bas": "Test", "metin": "Test", "tarih": true})
+			oyun.gaz["etk"]["bas_t"] = oyun.t
+			oyun.gaz["etk"]["bit_t"] = oyun.t + 600
+			oyun.gaz["etk"]["ad"] = "Test gösterisi"
+			oyuncu.global_position = harita.meydan.global_position + Vector3(0, 0, 22)
+			kamera.mesafe = 40.0
+			kamera._pitch = -0.7
+			await get_tree().create_timer(2.5).timeout
 		elif p[1] == "defter":
 			arayuz.defter_ac()
 		elif p[1] == "zafer":

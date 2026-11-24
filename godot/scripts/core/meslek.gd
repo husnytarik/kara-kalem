@@ -109,15 +109,13 @@ func donem_yazi() -> String:
 	return "%s · %s" % [oyun.mevsim(), "ekonomi canlı" if e > 1.06 else "ekonomi durgun" if e < 0.94 else "ekonomi normal"]
 
 # --- gazete ilanları: her gün değişir ---
-var _ilan_gun := -1
-var _ilan: Array = []
-
+# Kayıtlı ilan panosu: yalnızca gazete okunduğunda (gazete.gd ilan_yenile) güncellenir.
 func ilanlar() -> Array:
+	return oyun.gaz.get("ilan", [])
+
+func ilan_uret() -> Array:
 	var g: int = oyun.tarih()["gun"]
-	if g == _ilan_gun:
-		return _ilan
-	_ilan_gun = g
-	_ilan = []
+	var _ilan: Array = []
 	var rng := RandomNumberGenerator.new()
 	rng.seed = g * 7919 + 13
 	var adaylar: Array = []

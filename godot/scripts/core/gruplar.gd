@@ -50,6 +50,8 @@ func kur(h: Node3D, o: Node, p: Node3D) -> void:
 				for k in 3:
 					_nobet_ekle(f, harita.yerler[i]["bolge"], k)
 				break
+	for k in 5:
+		_meydan_ekle(k)
 	for sk in Sakinler.LISTE + Sakinler.GIZLI:   # isimli, rutinli şehir sakinleri (+ gizli olanlar)
 		_sakin_ekle(sk)
 	_esitle()
@@ -107,6 +109,31 @@ func _bekci_plan(g: Dictionary) -> void:
 		g["bekle"] = rng.randf_range(0.0, 3.0)
 		dn.visible = true
 		g["durum"] = "Gece devriyesi"
+
+# Meydan kalabalığı: etkinlik saatlerinde meydanda toplanan sivil gruplar (diğer zamanlarda evinde).
+func _meydan_ekle(k: int) -> void:
+	var g := _yeni("sivil", "sivil", "Meydandaki halk", 4 + rng.randi() % 4, "eastside")
+	g["meydan"] = k
+	g["evde"] = true
+	(g["dugum"] as Node3D).visible = false
+
+func _meydan_plan(g: Dictionary) -> void:
+	var dn: Node3D = g["dugum"]
+	if not oyun.gaz_k.kalabalik_var():
+		if not g["evde"]:
+			g["evde"] = true
+			g["yol"] = PackedVector3Array()
+			g["mod"] = ""
+			dn.visible = false
+		return
+	if g["evde"]:
+		g["evde"] = false
+		var mp: Vector3 = harita.meydan.global_position
+		var a := rng.randf_range(0.0, TAU)
+		g["pos"] = harita.serbest_nokta(mp + Vector3(cos(a), 0, sin(a)) * rng.randf_range(7.0, 14.0))
+		g["bekle"] = rng.randf_range(0.0, 3.0)
+		dn.visible = true
+		g["durum"] = "Meydandaki kalabalık"
 
 func _sivil_ekle(ev: String) -> void:
 	_yeni("sivil", "sivil", SIVIL_AD[rng.randi() % SIVIL_AD.size()], 1 + rng.randi() % 3, ev)
@@ -420,16 +447,22 @@ func _npc_catisma(a: Dictionary, b: Dictionary) -> void:
 		g["yol"] = PackedVector3Array()
 		g["durum"] = "Çatışıyor"
 	oyun.gerginlik.ekle(a["fak"], b["fak"], 1.2, "sokak çatışması")
+	var cm := "%s ve %s adamları çatıştı: %s üstün geldi." % [oyun.hakim_ad(a["fak"]), oyun.hakim_ad(b["fak"]), oyun.hakim_ad(kazan["fak"])]
 	if _yakin_mi(a):
-		oyun.kayit("%s ve %s adamları çatıştı: %s üstün geldi." % [oyun.hakim_ad(a["fak"]), oyun.hakim_ad(b["fak"]), oyun.hakim_ad(kazan["fak"])], "warn")
+		oyun.kayit(cm, "warn")
+	elif rng.randf() < 0.3:
+		oyun.gaz_k.kayittan(cm, "warn")
 
 func _polis_baskin(pl: Dictionary, r: Dictionary) -> void:
 	r["kisi"] = maxi(1, r["kisi"] - 1)
 	r["bekle"] = 3.0
 	r["yol"] = PackedVector3Array()
 	r["durum"] = "Polisle çatışıyor"
+	var pm := "%s, %s adamlarından birini yakaladı." % [pl["ad"], oyun.hakim_ad(r["fak"])]
 	if _yakin_mi(r):
-		oyun.kayit("%s, %s adamlarından birini yakaladı." % [pl["ad"], oyun.hakim_ad(r["fak"])], "info")
+		oyun.kayit(pm, "info")
+	elif rng.randf() < 0.3:
+		oyun.gaz_k.kayittan(pm, "info")
 
 func serbest_birak(g: Dictionary, dakika: int) -> void:
 	g["serbest"] = oyun.t + dakika
@@ -530,6 +563,10 @@ func _yuru(g: Dictionary, delta: float) -> void:
 		_bekci_plan(g)
 		if g["evde"]:
 			return
+	if g.has("meydan"):
+		_meydan_plan(g)
+		if g["evde"]:
+			return
 	_ai(g, delta)
 	if g.has("sakin") and g["mod"] == "" and takip_id != g["id"]:
 		_sakin_plan(g)
@@ -574,6 +611,14 @@ func _bolge_yerleri(id: String) -> Array:
 	return r
 
 func _hedef_sec(g: Dictionary) -> void:
+	if g.has("meydan"):
+		var mp: Vector3 = harita.meydan.global_position
+		var a := rng.randf_range(0.0, TAU)
+		g["durum"] = "Meydandaki kalabalık"
+		_git(g, harita.serbest_nokta(mp + Vector3(cos(a), 0, sin(a)) * rng.randf_range(5.0, 14.0)))
+		if (g["yol"] as PackedVector3Array).size() == 0:
+			g["bekle"] = 3.0
+		return
 	if g.has("nobet"):
 		var hq: Vector3 = _hq[g["nobet"]]
 		var yakin: Array = []
