@@ -328,3 +328,28 @@ func _geri_donus() -> void:
 		fk(f)["moral"] = minf(100.0, fk(f)["moral"] + 8.0)
 		oyun.kayit("%s toparlanıyor: %s'daki adamlarını yeniden örgütledi." % [_ad(f), oyun.harita.bolgeler[id]["ad"]], "info")
 		oyun.gerginlik.ekle(f, en, 3.0, "geri dönüş")
+
+# Binanın kalıcı haraççısı: o mahalleye hâkim ailenin bir kaptanı/askeri. Ölür/ayrılırsa en az yüklü adam atanır.
+func haracci(i: int) -> Dictionary:
+	var r: Dictionary = oyun.isy.get(i, {})
+	var f: String = oyun.kontrol(i)
+	if r.is_empty() or f == "" or not oyun.FAK.has(f) or f == "oyuncu" or f == "sahip" or f == "haraci":
+		return {}
+	var u: Dictionary = oyun.uye(r.get("hc", -1))
+	if not u.is_empty() and u["durum"] == "aktif" and u["fak"] == f and u["rutbe"] in ["kaptan", "asker"]:
+		return u
+	var aday: Array = uyeler(f, "kaptan")
+	if aday.is_empty():
+		aday = uyeler(f, "asker")
+	if aday.is_empty():
+		return {}
+	var yuk := {}
+	for k in oyun.isy:
+		var hc: int = oyun.isy[k].get("hc", -1)
+		yuk[hc] = yuk.get(hc, 0) + 1
+	var en: Dictionary = aday[0]
+	for x in aday:
+		if yuk.get(x["uid"], 0) < yuk.get(en["uid"], 0):
+			en = x
+	r["hc"] = en["uid"]
+	return en

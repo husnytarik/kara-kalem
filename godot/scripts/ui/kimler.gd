@@ -90,8 +90,8 @@ static func kur(ui: Node, oyun: Node, sokak: Node, i: int) -> void:
 	# başka mafyanın haraççısı
 	var k: String = oyun.kontrol(i)
 	if k != "" and k != "sahip" and k != "haraci" and oyun.FAK.has(k) and k != "oyuncu" and not r.is_empty():
-		var u: Array = oyun.aile_uyeleri(k)
-		var ad: String = String(u[u.size() - 1]["ad"]) if not u.is_empty() else "Haraççı"
+		var hc: Dictionary = oyun.rakip_k.haracci(i)
+		var ad: String = oyun.uye_ad(hc) if not hc.is_empty() else "Haraççı"
 		ozel.append([ad, "%s için koruma parası alıyor" % oyun.FAK[k]["ad"], oyun.FAK[k]["renk"]])
 	# haritadaki gruplar
 	var ab: AABB = (oyun.harita.yerler[i]["aabb"] as AABB).grow(sokak.gorus.IN_MESAFE)
