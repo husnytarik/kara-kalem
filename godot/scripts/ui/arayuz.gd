@@ -1005,7 +1005,14 @@ func _gorsel_anahtarlari() -> Array:
 				if ad_k.contains(kv[0]):
 					ozel.append(kv[1])
 			if oyun.isy.has(i) and oyun.isy[i].get("bos", false):
-				ozel.push_front("bos_dukkan")
+				if oyun.isy[i]["tur"] == "konut":
+					var sv: int = oyun.bolge[oyun.harita.yerler[i]["bolge"]]["servet"]
+					var s_ev: Array = ["satilik_ev_luks", "satilik_ev"] if sv >= 4 else (["satilik_daire", "satilik_ev"] if sv <= 2 else ["satilik_ev", "satilik_daire"])
+					s_ev.reverse()
+					for e in s_ev:
+						ozel.push_front(e)
+				else:
+					ozel.push_front("bos_dukkan")
 			return ozel + [tur, "bina"]
 		"bolge":
 			return ["bolge_" + str(_hedef), "bolge"]
