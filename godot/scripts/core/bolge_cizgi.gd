@@ -179,9 +179,14 @@ func _goster(a: bool) -> void:
 	for m in _meshler:
 		(m as MeshInstance3D).visible = a
 var _secili := ""
+var hover := ""
+var _hover_onc := ""
 
 func _process(d: float) -> void:
 	_sure += d
+	if hover != _hover_onc:
+		_hover_onc = hover
+		_sure = 2.0
 	var ar: Node = sokak.arayuz
 	var ac: bool = ar != null and ar._mod == "bolge" and ar._sag.visible
 	var sec: String = str(ar._hedef) if ac else ""
@@ -209,6 +214,8 @@ func _renk_guncelle() -> void:
 			a = minf(1.0, a + 0.3)
 		if id == _secili:
 			a = 1.0
+		if id == hover:
+			a = maxf(a, 0.85)
 		for mt in _cizgi[id]:
 			(mt as ShaderMaterial).set_shader_parameter("renk", Color(r.r, r.g, r.b, 1.0))
 			(mt as ShaderMaterial).set_shader_parameter("guc", a * 2.4)

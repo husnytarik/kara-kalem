@@ -118,17 +118,17 @@ static func kur(ui: Node, oyun: Node, sokak: Node, i: int) -> void:
 				sivil.append([g["ad"], g["sakin"]["is"]])
 	# müşteri/ziyaretçi sayısı kadar adsız yüz
 	var n: Dictionary = sokak.gorus.nufus(i)
-	var adsiz: int = mini(int(n["musteri"]), 8)
-	for j in adsiz:
-		sivil.append(["Müşteri", "ziyaretçi"])
+	var musteri: int = int(n["musteri"])
 	ui._ayrac(ic)
 	ui._bolum(ic, "Kimler var")
 	if harac_not != "":
 		ui._lbl(ic, harac_not, 13, Tema.SOLUK)
+	if musteri > 0:
+		ui._lbl(ic, "Müşteri / ziyaretçi: %d kişi" % musteri, 15, Tema.YAZI)
 	for o in ozel:
 		_kart(ic, o[0], o[1], o[2], o[2], true, ui)
 	if sivil.is_empty():
-		if ozel.is_empty():
+		if ozel.is_empty() and musteri == 0:
 			ui._lbl(ic, "Şu an kimse görünmüyor.", 14, Tema.SOLUK)
 		return
 	var sc := ScrollContainer.new()

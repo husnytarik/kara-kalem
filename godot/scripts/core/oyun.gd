@@ -724,6 +724,32 @@ func ilan_fiyat(i: int) -> int:
 	var oynak: float = 0.85 + float((i * 37) % 31) / 100.0
 	return int(round(taban * (0.5 + 0.25 * sv) * 0.6 * oynak * (0.5 if tezgah(i) else 1.0)))
 
+# Mahalle özeti (hover bilgisi): kimin kaç işyeri var.
+func bolge_ozet(id: String) -> Dictionary:
+	var d := {"toplam": 0, "sen": 0, "haraci": 0, "esnaf": 0, "konut": 0, "ilan": 0, "diger": {}, "sahipsiz": 0}
+	for i in isy:
+		if harita.yerler[i]["bolge"] != id:
+			continue
+		var r: Dictionary = isy[i]
+		d["toplam"] += 1
+		if r["tur"] == "esnaf":
+			d["esnaf"] += 1
+		if r["tur"] == "konut":
+			d["konut"] += 1
+		if r.get("bos", false) and r.get("elde", "") == "":
+			d["ilan"] += 1
+			continue
+		var k: String = kontrol(i)
+		if k == "sahip":
+			d["sen"] += 1
+		elif k == "haraci":
+			d["haraci"] += 1
+		elif k != "" and FAK.has(k):
+			d["diger"][k] = int(d["diger"].get(k, 0)) + 1
+		else:
+			d["sahipsiz"] += 1
+	return d
+
 func ilan_kira(i: int) -> int:
 	return maxi(3, int(round(ilan_fiyat(i) * 0.012)))
 

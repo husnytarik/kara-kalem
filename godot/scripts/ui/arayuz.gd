@@ -822,6 +822,7 @@ func kapat() -> void:
 		sokak.oyuncu.cik()   # paneli kapatmak = binadan çıkmak
 	_mod = ""
 	_sag.visible = false
+	sokak.harita_modu_ayarla(false)
 
 func _sonuc_goster(r: Dictionary, tamam_yazi: String = "Tamam.") -> void:
 	_sonuc = r["msg"] if r["msg"] != "" else tamam_yazi
@@ -907,6 +908,7 @@ func _imza() -> String:
 	return ""
 
 func _yenile(zorla: bool) -> void:
+	sokak.harita_modu_ayarla(_mod == "bolge")
 	var imza := _imza()
 	if not zorla and imza == _son_imza:
 		return

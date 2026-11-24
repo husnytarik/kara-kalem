@@ -11,6 +11,7 @@ const MUREKKEP := Color(0.22, 0.14, 0.07) # sepya toner
 const YOGUNLUK := 0.92
 
 static var _onb := {}
+static var _kilit := Mutex.new()
 var _tex: ImageTexture
 
 func _init() -> void:
@@ -42,8 +43,12 @@ func ayarla(anahtarlar: Array) -> bool:
 static func _yukle(k: String) -> ImageTexture:
 	if k == "":
 		return null
-	if _onb.has(k):
-		return _onb[k]
+	_kilit.lock()
+	var var_mi: bool = _onb.has(k)
+	var hazir: ImageTexture = _onb[k] if var_mi else null
+	_kilit.unlock()
+	if var_mi:
+		return hazir
 	var sonuc: ImageTexture = null
 	for u in UZANTILAR:
 		var yol: String = KLASOR + k + "." + u
@@ -52,8 +57,21 @@ static func _yukle(k: String) -> ImageTexture:
 			if kaynak is Texture2D:
 				sonuc = _fotokopi((kaynak as Texture2D).get_image())
 			break
+	_kilit.lock()
 	_onb[k] = sonuc
+	_kilit.unlock()
 	return sonuc
+
+# Tüm panel görsellerini arka plan iş parçacığında önceden işler (ilk açılışta takılmayı önler).
+static func onisit() -> void:
+	var adlar: Array = []
+	for f in DirAccess.get_files_at(KLASOR):
+		var ad: String = f.trim_suffix(".import").trim_suffix(".remap")
+		if ad.get_extension() in UZANTILAR and not adlar.has(ad.get_basename()):
+			adlar.append(ad.get_basename())
+	WorkerThreadPool.add_task(func():
+		for a in adlar:
+			_yukle(a))
 
 # Kaynak görseli kırp (yatay, üstten ~%30) -> gri -> kontrast aç -> hafif toner dokusu; sepya + alfa döndürür.
 static func _fotokopi(kaynak: Image) -> ImageTexture:

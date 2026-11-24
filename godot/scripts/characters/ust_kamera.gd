@@ -15,6 +15,23 @@ var _son := 0
 var _poz := Vector3.ZERO      # yumuşatılmış kamera odağı
 var _poz_hazir := false
 var _mes := 110.0             # yumuşatılmış mesafe
+var harita_modu := false      # mahalle görünümü: yüksek, dik, açı kilitli
+var _onc_pitch := -1.0
+var _onc_mesafe := 110.0
+var _geri := false
+const HARITA_PITCH := -1.45   # ~83 derece
+const HARITA_MESAFE := 300.0
+
+func harita_modu_ayarla(a: bool) -> void:
+	if a == harita_modu:
+		return
+	harita_modu = a
+	if a:
+		_onc_pitch = _pitch
+		_onc_mesafe = mesafe
+		mesafe = HARITA_MESAFE
+	else:
+		mesafe = _onc_mesafe
 
 func _ready() -> void:
 	top_level = true
@@ -29,12 +46,14 @@ func kamera() -> Camera3D:
 	return _kam
 
 func _unhandled_input(e: InputEvent) -> void:
+	if harita_modu and e is InputEventMouseMotion and (e.button_mask & MOUSE_BUTTON_MASK_RIGHT):
+		return   # açı değişmesin
 	if e is InputEventMouseMotion and (e.button_mask & MOUSE_BUTTON_MASK_RIGHT):
 		rotation.y -= e.relative.x * 0.005
 		_pitch = clampf(_pitch - e.relative.y * 0.004, -1.5, -0.35)
 	elif e is InputEventMouseButton and e.pressed:
 		if e.button_index == MOUSE_BUTTON_WHEEL_UP:
-			mesafe = maxf(25.0, mesafe * 0.9)
+			mesafe = maxf(160.0 if harita_modu else 25.0, mesafe * 0.9)
 		elif e.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			mesafe = minf(MAKS_MESAFE, mesafe * 1.1)
 	elif e is InputEventKey and e.pressed and e.keycode == KEY_C:
@@ -45,6 +64,14 @@ func _process(_d: float) -> void:
 	var simdi := Time.get_ticks_usec()
 	var dt := float(simdi - _son) / 1000000.0   # gerçek süre: oyun duraklasa da kamera çalışır
 	_son = simdi
+	if harita_modu:
+		_pitch = lerpf(_pitch, HARITA_PITCH, 1.0 - exp(-4.0 * dt))
+		_geri = true
+	elif _geri:
+		_pitch = lerpf(_pitch, _onc_pitch, 1.0 - exp(-4.0 * dt))
+		if absf(_pitch - _onc_pitch) < 0.01:
+			_pitch = _onc_pitch
+			_geri = false
 	var g := Vector3.ZERO
 	if Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP): g.z -= 1
 	if Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN): g.z += 1

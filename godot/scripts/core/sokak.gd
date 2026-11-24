@@ -42,6 +42,8 @@ func _ready() -> void:
 	oyuncu.oyun = oyun
 	add_child(oyuncu)
 	oyuncu.global_position = oyun.baslangic_noktasi()   # köken ve eve göre
+	harita._bilesen_kur()   # yol bulma ön hazırlığı (ilk tıkta takılmasın)
+	load("res://scripts/ui/kagit_gorsel.gd").onisit()   # panel görsellerini arka planda işle
 	kamera = Node3D.new()
 	kamera.set_script(load("res://scripts/characters/ust_kamera.gd"))
 	add_child(kamera)
@@ -458,6 +460,11 @@ func hiz_ayarla(v: float) -> void:
 func _unhandled_input(e: InputEvent) -> void:
 	if arayuz.modal or savas_aktif:
 		return
+	if _harita_modu and e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+		var bid := _bolge_altinda(e.position)
+		if bid != "":
+			arayuz.bolge_ac(bid)
+		return
 	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 		var k: Camera3D = kamera.kamera()
 		var o := k.project_ray_origin(e.position)
@@ -532,6 +539,98 @@ func _unhandled_input(e: InputEvent) -> void:
 var _gir_bina := -1
 var _sag_basla := Vector2.ZERO
 
+var _harita_modu := false
+var _bulut: Node3D
+var _bolge_ipucu: PanelContainer
+var _bolge_yazi: Label
+var _bolge_hover := ""
+var _bolge_yazi_t := 0.0
+
+func harita_modu_ayarla(a: bool) -> void:
+	if a == _harita_modu:
+		return
+	_harita_modu = a
+	kamera.harita_modu_ayarla(a)
+	if _bulut == null:
+		_bulut = load("res://scripts/core/bulut.gd").new()
+		_bulut.name = "Bulut"
+		add_child(_bulut)
+		var x0 := 1e9
+		var x1 := -1e9
+		var z0 := 1e9
+		var z1 := -1e9
+		for id in harita.bolgeler:
+			var b: Dictionary = harita.bolgeler[id]
+			x0 = minf(x0, b["x0"])
+			x1 = maxf(x1, b["x1"])
+			z0 = minf(z0, b["z0"])
+			z1 = maxf(z1, b["z1"])
+		_bulut.harita_siniri(x0, x1, z0, z1)
+	_bulut.goster(a)
+	if not a:
+		_bolge_hover = ""
+		if _bolge_ipucu != null:
+			_bolge_ipucu.visible = false
+
+func _bolge_altinda(fp: Vector2) -> String:
+	var k: Camera3D = kamera.kamera()
+	var nokta = harita.arazi_isinla(k.project_ray_origin(fp), k.project_ray_normal(fp))
+	if nokta == null:
+		return ""
+	return harita.bolge_at(nokta)
+
+func _bolge_ipucu_yaz(id: String) -> String:
+	var b: Dictionary = oyun.bolge[id]
+	var hk: String = oyun.hakim_of(id)
+	var oz: Dictionary = oyun.bolge_ozet(id)
+	var s: String = "%s\nHakim: %s\n" % [harita.bolgeler[id]["ad"].to_upper(), oyun.hakim_ad(hk)]
+	s += "Yer: %d  (dükkân %d · konut %d · boş ilan %d)\n" % [oz["toplam"], oz["esnaf"], oz["konut"], oz["ilan"]]
+	var p: Array = []
+	if oz["sen"] > 0:
+		p.append("Senin %d" % oz["sen"])
+	if oz["haraci"] > 0:
+		p.append("Haraç %d" % oz["haraci"])
+	for f in oz["diger"]:
+		p.append("%s %d" % [oyun.FAK[f]["ad"], oz["diger"][f]])
+	if oz["sahipsiz"] > 0:
+		p.append("Sahipsiz %d" % oz["sahipsiz"])
+	s += " · ".join(p) + "\n"
+	s += "Servet %s  Huzur %d" % ["★".repeat(b["servet"]), int(b["huzur"])]
+	return s
+
+func _harita_modu_hover() -> void:
+	if _bolge_ipucu == null:
+		_bolge_ipucu = PanelContainer.new()
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.07, 0.05, 0.035, 0.94)
+		sb.border_color = Color(0.78, 0.6, 0.28)
+		sb.set_border_width_all(2)
+		sb.set_corner_radius_all(4)
+		sb.set_content_margin_all(10)
+		_bolge_ipucu.add_theme_stylebox_override("panel", sb)
+		_bolge_ipucu.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_bolge_yazi = Label.new()
+		_bolge_yazi.add_theme_font_size_override("font_size", 15)
+		_bolge_yazi.add_theme_color_override("font_color", Color("e6d7b0"))
+		_bolge_yazi.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_bolge_ipucu.add_child(_bolge_yazi)
+		_hud_kok.add_child(_bolge_ipucu)
+	var fp := get_viewport().get_mouse_position()
+	var id := _bolge_altinda(fp)
+	var bc: Node = get_node_or_null("BolgeCizgi")
+	if bc != null:
+		bc.hover = id
+	if id == "" or fp.x > get_viewport().get_visible_rect().size.x - 520.0 and arayuz._sag.visible:
+		_bolge_ipucu.visible = false
+		_bolge_hover = id
+		return
+	if id != _bolge_hover or _bolge_yazi_t > 1.0:
+		_bolge_hover = id
+		_bolge_yazi_t = 0.0
+		_bolge_yazi.text = _bolge_ipucu_yaz(id)
+	_bolge_ipucu.visible = true
+	_bolge_ipucu.position = fp + Vector2(22, 18)
+
 var _bina_dur := false   # binadayken oyun duraklatılır (mesai sürerken hariç)
 
 func _process(delta: float) -> void:
@@ -591,6 +690,13 @@ func _process(delta: float) -> void:
 	if _bs.hover_i >= 0:
 		i = _bs.hover_i   # fare bir simgenin üstündeyse o bina
 		gh = {}
+	if _harita_modu:
+		_bolge_yazi_t += delta
+		_harita_modu_hover()
+		_hi = -1
+		_gh = {}
+		gh = {}
+		i = -1
 	# tıklanabilir şeyin üstünde: bina hattı + el imleci
 	var tikla_i: int = -1 if (arayuz.modal or savas_aktif) else (i if gh.is_empty() else -1)
 	_bs.vurgula(tikla_i)
@@ -1186,6 +1292,24 @@ func _ekran_cek(arg: String) -> void:
 					bo2 += 1
 					print("ESKI_YOLYOK ", harita.yerler[k]["ad"])
 			print("ESKI yolsuz=", bo2)
+		elif p[1] == "mahalle":
+			arayuz.bolge_ac("eastside")
+		elif p[1] == "zaman":
+			var t0 := Time.get_ticks_msec()
+			harita._bilesen_kur()
+			print("ZAMAN bilesen ms=", Time.get_ticks_msec() - t0, " boyut=", harita._izgara.region.size)
+			var mx := 0
+			var toplam := 0
+			for k in harita.yerler.size():
+				var t1 := Time.get_ticks_msec()
+				harita.yol_bul(harita.yerler[oyun._ev]["pos"], harita.yerler[k]["pos"])
+				var dt := Time.get_ticks_msec() - t1
+				toplam += dt
+				mx = maxi(mx, dt)
+			print("ZAMAN yol max=", mx, " ort=", toplam / harita.yerler.size())
+			var t2 := Time.get_ticks_msec()
+			arayuz.bina_ac(oyun._ev)
+			print("ZAMAN panel ms=", Time.get_ticks_msec() - t2)
 		elif p[1] == "yolsay":
 			var kt := 0
 			var bo := 0
