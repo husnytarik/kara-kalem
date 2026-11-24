@@ -114,7 +114,7 @@ func _rozet(_renk: Color, ince: bool = true) -> ImageTexture:
 					if sqrt(gx * gx + gy * gy) < t * 1.9:
 						col = Color("8c8372")
 			if ince:
-				if d >= 45.0 and d < 46.8:
+				if d >= 43.6 and d < 46.8:
 					col = murekkep
 			elif d >= 41.5 and d < 45.0:
 				col = murekkep
