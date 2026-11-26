@@ -259,7 +259,8 @@ func _ready() -> void:
 			oyun.t += 25 * 1440
 			oyun.yol_k.gun()
 			print("donem: ", oyun.yol["donem"], " bekleyen: ", oyun.yol["bekleyen"])
-			get_tree().quit()
+			print("KAPAN")
+			OS.kill(OS.get_process_id())
 		elif a == "--kisisel-testi":
 			var K: RefCounted = oyun.kis_k
 			print("baslangic taninma ", K.taninma(), " fark ", K.fark_edildi(), " oz ", K.oz_liste())
@@ -321,7 +322,8 @@ func _ready() -> void:
 			_isletme_testi(a.ends_with("ss"))
 		elif a.begins_with("--denge="):
 			var dd := a.substr(8).split(",")
-			load("res://scripts/core/denge_testi.gd").calistir(oyun, dd[0], int(dd[1]))
+			load("res://scripts/core/denge_testi.gd").calistir(oyun, dd[0], int(dd[1]), self)
+			get_tree().quit()
 		elif a.begins_with("--savas="):
 			_savas_testi(a.substr(8))
 		elif a == "--test":
@@ -526,6 +528,7 @@ func _unhandled_input(e: InputEvent) -> void:
 				gorus.guncelle()
 				gorus._gorunurluk()
 			KEY_K: arayuz.aile_ac()
+			KEY_P: arayuz.durum_ac()
 			KEY_ESCAPE:
 				if oyuncu.iceride >= 0:
 					oyuncu.cik()
@@ -1267,6 +1270,28 @@ func _ekran_cek(arg: String) -> void:
 			arayuz.adamlar_ac()
 		elif p[1] == "aile":
 			arayuz.aile_ac()
+		elif p[1] == "adamlar":
+			oyun.kirli = 3000.0
+			for i in 4:
+				oyun.adam_tut()
+			oyun.adamlar[0]["sabika"] = 3
+			oyun.adamlar[0]["gecmis"] = ["Cinayet şüphesi", "Kavga ve yaralama"]
+			oyun.adamlar[1]["bag"] = "obrien"
+			oyun.adamlar[1]["sabika"] = 1
+			oyun.adamlar[1]["gecmis"] = ["Ufak hırsızlık"]
+			oyun.adamlar[2]["muhbir"] = "polis"
+			oyun.adamlar[2]["sizinti"] = 2
+			oyun.adamlar[2]["ifsa"] = true
+			oyun.adamlar[3]["sizinti"] = 1
+			arayuz.adamlar_ac()
+		elif p[1] == "durum":
+			oyun.temiz = 4200.0
+			oyun.kirli = 650.0
+			oyun.arama = 35.0
+			oyun.kis["aclik"] = 62.0
+			oyun.kis["yorgun"] = 48.0
+			oyun.kis["stres"] = 41.0
+			arayuz.durum_ac()
 		elif p[1] == "ev":
 			oyuncu.gir(oyun._ev)
 			arayuz.bina_ac(oyun._ev)

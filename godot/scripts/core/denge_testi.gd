@@ -18,17 +18,18 @@ static func ozet(o: Node) -> String:
 	return "gun %d | temiz %d kirli %d | adam %d | arama %d | haracli %d sahip %d | %s | ofke m%d o%d" % [
 		o.t / 1440, o.temiz, o.kirli, o.adamlar.size(), o.arama, haracli, sahip, " ".join(s), o.ofke["marchetti"], o.ofke["obrien"]]
 
-static func calistir(o: Node, mod: String, gun: int) -> void:
+static func calistir(o: Node, mod: String, gun: int, sk: Node = null) -> void:
 	var bina_bolge := {}
 	for i in o.isy:
 		var b: String = o.harita.yerler[i]["bolge"]
 		if not bina_bolge.has(b):
 			bina_bolge[b] = []
 		bina_bolge[b].append(i)
+	var t0 := Time.get_ticks_msec()
 	print("BASLA ", mod, " | ", ozet(o))
 	for d in gun:
 		if mod != "bos":
-			_bakim(o)
+			_bakim(o)   # "bakim": yalnızca yemek/uyku/ilaç, başka hiçbir şey
 		if mod == "bot":
 			_bot(o, bina_bolge)
 		elif mod == "iyi":
@@ -54,6 +55,7 @@ static func calistir(o: Node, mod: String, gun: int) -> void:
 		o.ilerle(1440.0 / o.DK_SN)
 		if d % 60 == 59:
 			print(ozet(o))
+	print("SURE_MS ", Time.get_ticks_msec() - t0)
 	print("BITIS ", ozet(o))
 	print("borc ", o.borc, " kira_borc ", o.kira_borc, " meslek ", o.mes["is"], " beceri ", o.mes["beceri"], " isletme ", o.mes["isletme"].keys())
 	print("kisisel ", o.kis, " un ", o.kis_k.taninma(), " ekip ", o.adamlar.size(), " zafer ", o.zf)
@@ -62,7 +64,10 @@ static func calistir(o: Node, mod: String, gun: int) -> void:
 		if sayac.has(e["tur"]):
 			sayac[e["tur"]] += 1
 	print("defter olay sayilari: ", sayac)
-	son_kayitlar(o, 30)
+	if sk != null:
+		print("RENK_RUHU ", sk.ruh_gercek())
+	print("YAS ", int(o.profil.get("yas", 30)) + o.tarih()["yil"] - 1, " TARIH ", o.tarih_yazi(), " son=", o.son)
+	son_kayitlar(o, 12)
 
 # Basit bakım: günde bir yemek, gerekirse uyku, hastaysa ilaç.
 static func _bakim(o: Node) -> void:

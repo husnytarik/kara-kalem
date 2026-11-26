@@ -724,6 +724,13 @@ func aile_ac() -> void:
 	_mod = "aile"
 	_yenile(true)
 
+func durum_ac() -> void:
+	if _mod == "durum":
+		kapat()
+		return
+	_mod = "durum"
+	_yenile(true)
+
 func zafer_ac() -> void:
 	if _mod == "zafer":
 		kapat()
@@ -895,6 +902,8 @@ func _imza() -> String:
 			return str([oyun.aile, _sonuc, _ailem_slot, oyun.t / 1440])
 		"kazanim":
 			return str(oyun.kaz)
+		"durum":
+			return str([oyun.t / 60, oyun.kis, oyun.temiz, oyun.kirli, oyun.arama, oyun.adamlar.size(), oyun.borc])
 		"nufuz":
 			return str([oyun.nuf, oyun.kotu, _sonuc, oyun.temiz, oyun.kirli, oyun.adamlar])
 		"polis":
@@ -937,6 +946,7 @@ func _yenile(zorla: bool) -> void:
 		"ailem": _ailem_paneli()
 		"nufuz": _nufuz_paneli()
 		"kazanim": _kazanim_paneli()
+		"durum": _durum_paneli()
 	_kagit_mod = false
 	_arka.visible = _arka.ayarla(_gorsel_anahtarlari())
 
@@ -1360,6 +1370,17 @@ func _adam_paneli() -> void:
 		_bar(v, "Bıçak", a["bicak"], Color("a67070"))
 		_bar(v, "Zekâ", a["zeka"], Color("7f95ab"))
 		_bar(v, "Sadakat", a.get("sadakat", 60), Tema.VURGU)
+		var sb: int = a.get("sabika", 0)
+		var sk: RefCounted = oyun.sabika_k
+		_lbl(v, "Sicil: %s" % sk.rozet(a), 14, [Color(0.15, 0.4, 0.15), Color(0.5, 0.32, 0.04), Color(0.62, 0.25, 0.05), Color(0.65, 0.1, 0.1)][sb])
+		if sb > 0:
+			_lbl(v, "Sabıka: " + sk.gecmis_yazi(a), 13, Color(0.3, 0.25, 0.2))
+		if sk.bag_yazi(a) != "":
+			_lbl(v, sk.bag_yazi(a), 13, Color(0.3, 0.25, 0.2))
+		if a.get("ifsa", false):
+			_lbl(v, "MUHBİR: bilgi sızdırdığı anlaşıldı. Ekipten at!", 14, Color(0.65, 0.1, 0.1))
+		elif int(a.get("sizinti", 0)) > 0:
+			_lbl(v, "Şüpheli: ekipten bilgi sızıyor, ondan olabilir.", 13, Color(0.5, 0.32, 0.04))
 		var durum := "Boşta"
 		if a["gorev"] == "tutuklu":
 			durum = "Karakolda"
@@ -2384,6 +2405,59 @@ func _kazanim_paneli() -> void:
 		var v := _kutu(_ic, ("★ " if al else "☆ ") + KZ.LISTE[id]["ad"])
 		var tl := _lbl(v, KZ.LISTE[id]["ac"], 13, RENK["good"] if al else RENK["soluk"])
 		tl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+# Mevcut durum paneli (P): ölüm ekranındaki hayat özetinin oyun içi, canlı hali.
+func _durum_paneli() -> void:
+	var K: RefCounted = oyun.kisi_k
+	var U: RefCounted = oyun.un_k
+	var tip: Dictionary = U.tip()
+	var k: Dictionary = oyun.kis
+	_baslik(_ic, "Mevcut Durum", "%s · %s · %02d:%02d" % [oyun.tarih_yazi(), oyun.mevsim(), oyun.tarih()["saat"], oyun.tarih()["dk"]])
+	_lbl(_ic, "%s — %s" % [oyun.profil.get("ad", "Sen"), tip["ad"]], 24, RENK["warn"])
+	var aile_n: int = int(oyun.aile["nesil"])
+	_lbl(_ic, "%d yaşında · %d. nesil · %d. yıl" % [K.oyuncu_yas(), aile_n, oyun.tarih()["yil"]], 14, RENK["soluk"])
+	var an := _lbl(_ic, K.ozet_anisi(), 14, RENK["soluk"])
+	an.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_bolum(_ic, "Cüzdan")
+	_satir(_ic, "Temiz para", oyun.para(oyun.temiz), RENK["good"])
+	_satir(_ic, "Kirli para", oyun.para(oyun.kirli), RENK["warn"])
+	_satir(_ic, "Net servet", oyun.para(U.net_servet()))
+	_satir(_ic, "Tefeci borcu", oyun.para(oyun.kotu["tef"]), RENK["bad"] if oyun.kotu["tef"] > 0 else Color.WHITE)
+	var sahip := 0
+	var haracli := 0
+	for i in oyun.isy:
+		if oyun.isy[i]["sahip"]:
+			sahip += 1
+		elif oyun.isy[i]["haracli"]:
+			haracli += 1
+	_satir(_ic, "İş yeri / haraçlı", "%d / %d" % [sahip, haracli])
+	_satir(_ic, "Ekip (adam)", str(oyun.adamlar.size()))
+	_satir(_ic, "Polis dosyası", "%d / 100" % int(oyun.arama), RENK["bad"] if oyun.arama >= 50.0 else Color.WHITE)
+	_bolum(_ic, "Beden")
+	_bar(_ic, "Açlık", float(k["aclik"]), RENK["bad"] if k["aclik"] > 70.0 else RENK["good"])
+	_bar(_ic, "Yorgunluk", float(k["yorgun"]), RENK["bad"] if k["yorgun"] > 70.0 else RENK["good"])
+	_bar(_ic, "Stres", float(k["stres"]), RENK["bad"] if k["stres"] > 70.0 else RENK["warn"])
+	if oyun.kis_k.hasta_mi():
+		_lbl(_ic, "Hasta: %s (ağırlık %d)" % [k["hasta_ad"], int(k["agir"])], 14, RENK["bad"])
+	if k.get("yara", 0.0) > 0.0:
+		_lbl(_ic, "Yara: %d" % int(k["yara"]), 14, RENK["bad"])
+	_bolum(_ic, "Ün eksenleri")
+	for e in U.EKSENLER:
+		_bar(_ic, U.AD[e], U.deger(e), U.RENK[e])
+	if not oyun.aile["gecmis"].is_empty():
+		_bolum(_ic, "Kuşaklar")
+		for g in oyun.aile["gecmis"]:
+			_lbl(_ic, "%s — %s, %d yaş" % [g["ad"], g["tip"], g["yas"]], 13, RENK["soluk"])
+	_bolum(_ic, "Kazanımlar (%d/%d)" % [oyun.kaz_k.sayi(), oyun.kaz_k.LISTE.size()])
+	var ad: PackedStringArray = []
+	for id in oyun.kaz_k.LISTE:
+		if oyun.kaz_k.var_mi(id):
+			ad.append("★ " + oyun.kaz_k.LISTE[id]["ad"])
+	var kl := _lbl(_ic, "  ".join(ad) if not ad.is_empty() else "Henüz kazanım yok.", 13, RENK["good"])
+	kl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_bolum(_ic, "Şu anki gidişat")
+	var sy := _lbl(_ic, K.sonuc_yazi(), 14)
+	sy.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 # Hayat özeti: ün eksenleri çubuk grafiği, kuşak zaman çizgisi, kazanımlar ve sonuç.
 func _ozet_paneli(v: VBoxContainer) -> void:

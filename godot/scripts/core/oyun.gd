@@ -201,6 +201,7 @@ var oyuncu_bolge := ""          # oyuncunun bulundugu mahalle (sokak.gd guncelle
 var ic_mekan := -1              # oyuncunun içinde olduğu bina (sokak.gd günceller)
 var pol: Dictionary = {}        # polis/bodrum durumu (polis.gd)
 var polis: RefCounted
+var sabika_k: RefCounted
 var _kesir := 0.0
 
 func kur(h: Node3D) -> void:
@@ -240,6 +241,7 @@ func kur(h: Node3D) -> void:
 	gerginlik = load("res://scripts/core/gerginlik.gd").new(self)
 	rakip_k = load("res://scripts/core/rakip.gd").new(self)
 	polis = load("res://scripts/core/polis.gd").new(self)
+	sabika_k = load("res://scripts/core/sabika.gd").new(self)
 	pol = polis.yeni()
 	yol_k = load("res://scripts/core/yol.gd").new(self)
 	yol = yol_k.yeni()
@@ -634,7 +636,9 @@ func _yeni_adam() -> Dictionary:
 			break
 		ad = ISIMLER[(ISIMLER.find(ad) + 1) % ISIMLER.size()]
 	_sayac += 1
-	return {"id": _sayac, "ad": ad, "yumruk": 20 + rng.randi() % 55, "bicak": 20 + rng.randi() % 55, "zeka": 20 + rng.randi() % 55, "gorev": "", "silah": ["bicak", "bicak", "tabanca"][rng.randi() % 3]}
+	var yeni := {"id": _sayac, "ad": ad, "yumruk": 20 + rng.randi() % 55, "bicak": 20 + rng.randi() % 55, "zeka": 20 + rng.randi() % 55, "gorev": "", "silah": ["bicak", "bicak", "tabanca"][rng.randi() % 3]}
+	sabika_k.uret(yeni)
+	return yeni
 
 func beceri(a: Dictionary) -> int:
 	return int(round(0.5 * a["yumruk"] + 0.3 * a["bicak"] + 0.2 * a["zeka"]))
@@ -647,7 +651,7 @@ func adam_tut() -> Dictionary:
 		return hata("Para yetmiyor ($%d)." % fiyat)
 	var a := _yeni_adam()
 	adamlar.append(a)
-	kayit("Ekibe %s katıldı (%d adam). Ayda $%d." % [a["ad"], adamlar.size(), EKIP_MAAS], "info")
+	kayit("Ekibe %s katıldı (%d adam). Ayda $%d.%s" % [a["ad"], adamlar.size(), EKIP_MAAS, sabika_k.katilma_notu(a)], "info" if a.get("sabika", 0) < 2 else "warn")
 	degisti.emit()
 	return tamam()
 
@@ -1414,6 +1418,7 @@ func _gun() -> void:
 	gaz_k.gun()
 	meslek.gun()
 	polis.gun()
+	sabika_k.gun()
 	yol_k.gun()
 	isl.gunluk()
 	kara_k.gun()

@@ -28,6 +28,8 @@ func _draw() -> void:
 	var p := kam.unproject_position(dunya)
 	var arkada := kam.is_position_behind(dunya)
 	var alan := Rect2(KENAR, UST, boy.x - 2.0 * KENAR - 360.0, boy.y - UST - KENAR - 40.0)   # sağ panelin soluna kadar
+	if alan.size.x <= 0.0 or alan.size.y <= 0.0:
+		return
 	var renk := Color("e0b24a")
 	var font := ThemeDB.fallback_font
 	if sokak.oyuncu.iceride >= 0:
