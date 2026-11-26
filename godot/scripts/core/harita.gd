@@ -20,6 +20,10 @@ func _ready() -> void:
 	_arazi = get_node("Arazi")
 	_bolgeleri_oku()
 	# Sokak donanımı (köprü/iskele güverteleri, su, lamba, ağaç) yol bulmadan ÖNCE kurulur.
+	var yollar := Node3D.new()
+	yollar.set_script(load("res://scripts/core/yol_seritleri.gd"))
+	yollar.harita = self
+	add_child(yollar)
 	var dekor := Node3D.new()
 	dekor.set_script(load("res://scripts/core/sehir_dekor.gd"))
 	dekor.harita = self

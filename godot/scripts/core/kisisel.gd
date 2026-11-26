@@ -277,7 +277,7 @@ func saat() -> void:
 	var dayan: float = clampf(1.0 - 0.45 * oz("dayan"), 0.55, 1.5)
 	var uyuyor: bool = k["uyuyor"]
 	# açlık
-	degis("aclik", sa * (1.6 if uyuyor else 3.2) * dayan)
+	degis("aclik", sa * (1.6 if uyuyor else 3.2) * dayan * 0.667)
 	# yorgunluk
 	if uyuyor:
 		degis("yorgun", -sa * 9.0 * (1.0 + 0.3 * oz("saglik")))
@@ -285,7 +285,7 @@ func saat() -> void:
 		var y := 2.6 * dayan
 		if gece:
 			y *= 1.0 + 0.35 * (1.0 - clampf(oz("gece"), 0.0, 1.0))
-		degis("yorgun", sa * y)
+		degis("yorgun", sa * y * 0.667)
 	# sıkıntı: boş gezmek ve rutin
 	if not uyuyor:
 		degis("sikinti", sa * 1.6 * (1.0 + oz("sikinti")) * (0.6 if dis_ic else 1.0))
@@ -353,9 +353,12 @@ func saat() -> void:
 		oyun.kayit("Hastalığın geçti.", "good")
 	else:
 		# risk ihtiyaçlarla sürekli artar (eşik altında da küçük)
-		var risk: float = (maxf(0.0, k["yorgun"] - 50.0) * 0.00055 + maxf(0.0, k["aclik"] - 55.0) * 0.0006 + maxf(0.0, k["stres"] - 55.0) * 0.0005 + k.get("yara", 0.0) * 0.0004)
+		# yalnızca ciddi yoksunlukta küçük bir taban risk; asıl risk kış, salgın, yağmur/kar gibi dönemlerde
+		var risk: float = (maxf(0.0, k["yorgun"] - 75.0) * 0.0002 + maxf(0.0, k["aclik"] - 80.0) * 0.0002 + maxf(0.0, k["stres"] - 70.0) * 0.0002 + k.get("yara", 0.0) * 0.0002)
 		if oyun.mevsim() == "Kış":
-			risk += 0.006
+			risk += 0.004
+			# kışın zayıf düşmüş beden daha kolay hasta olur
+			risk += (maxf(0.0, k["aclik"] - 60.0) + maxf(0.0, k["yorgun"] - 60.0)) * 0.0001
 		# dışarıda yağmur/kar: üşütme
 		if not dis_ic:
 			var hv: String = oyun.hava()["tur"]

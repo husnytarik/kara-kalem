@@ -102,19 +102,7 @@ func _ciz() -> void:
 	# sayı seçici
 	var sh := HFlowContainer.new()
 	_ic.add_child(sh)
-	_l(sh, "Sayılar:", 13, SOLUK)
-	var sayilar: Array = oyun.gaz["sayilar"]
-	var bas_i: int = maxi(0, sayilar.size() - 9)
-	for i in range(sayilar.size() - 1, bas_i - 1, -1):
-		var s2: Dictionary = sayilar[i]
-		var idx := i
-		var gun_ad: String = G.GUN_AD[int(s2["gun"]) % 7].substr(0, 3)
-		var bt := _b(sh, "%s%s" % [gun_ad, " ★" if s2["tip"] == "haftalik" else ""], func():
-			_sec = idx
-			if _sekme == "hafta" and sayilar[idx]["tip"] != "haftalik":
-				_sekme = "haber"
-			_ciz())
-		bt.disabled = i == _sec
+	sh.visible = false
 	# sekmeler
 	var sk := HBoxContainer.new()
 	_ic.add_child(sk)
@@ -247,7 +235,7 @@ func _emlak(sy: Dictionary) -> void:
 		var r: Dictionary = oyun.isy[i]
 		if r.get("bos", false) and not r["sahip"] and n < 10:
 			n += 1
-			_l(_icerik, "• %s (%s) — %s" % [oyun.harita.yerler[i]["ad"], oyun.harita.bolgeler[oyun.harita.yerler[i]["bolge"]]["ad"], oyun.para(oyun.ilan_fiyat(i))], 14)
+			_l(_icerik, "• %s%s (%s) — %s" % [oyun.harita.yerler[i]["ad"], " [DEVREN SATILIK]" if r.get("devren", false) else "", oyun.harita.bolgeler[oyun.harita.yerler[i]["bolge"]]["ad"], oyun.para(oyun.devren_fiyat(i) if r.get("devren", false) else oyun.ilan_fiyat(i))], 14)
 	if n == 0:
 		_l(_icerik, "Şu an boş ilan yok.", 14)
 

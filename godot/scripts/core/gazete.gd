@@ -162,7 +162,7 @@ func baslat() -> void:
 # ---------- tarih/format ----------
 func tarih_yazi(gun: int) -> String:
 	var d: Dictionary = oyun.tarih(gun * oyun.DAY)
-	return "%s · %s %d · %d. gün" % [GUN_AD[gun % 7], AY_AD[int(d["ay_yil"]) - 1], 1919 + int(d["yil"]), int(d["ay_gun"])]
+	return "%s · %d %s %d" % [GUN_AD[gun % 7], oyun.takvim_gun(gun * oyun.DAY), AY_AD[int(d["ay_yil"]) - 1], 1919 + int(d["yil"])]
 
 func _gercek_ay_gun(gercek_gun: int) -> int:
 	return clampi((gercek_gun - 1) / 3 + 1, 1, 10)
@@ -627,9 +627,7 @@ func _sayi_bas(g: int) -> void:
 	if haftalik:
 		sayi["hafta"] = _hafta_ozeti(g)
 		sayi["emlak"] = (G["emlak"] as Dictionary).duplicate(true)
-	G["sayilar"].append(sayi)
-	if G["sayilar"].size() > 28:
-		G["sayilar"].pop_front()
+	G["sayilar"] = [sayi]   # yalnızca bugünün gazetesi tutulur
 	oyun.kayit("%s sabah gazetesi kapının önüne bırakıldı: «%s»" % ["Haftalık" if haftalik else "Günlük", man.get("bas", "Harbor Herald")], "info")
 
 func _kopya(h: Dictionary) -> Dictionary:

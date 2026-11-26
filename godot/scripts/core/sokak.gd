@@ -49,6 +49,7 @@ func _ready() -> void:
 	kamera.set_script(load("res://scripts/characters/ust_kamera.gd"))
 	add_child(kamera)
 	kamera.hedef = oyuncu
+	efekt_uygula()
 	_hava_kur()
 	_oy_etiket = Label3D.new()
 	_oy_etiket.font_size = 40
@@ -432,6 +433,7 @@ func savas_baslat(g: Dictionary, ceza: float, geri: Callable, tur_zorla: String 
 		onceki_kam.make_current()
 		Engine.time_scale = 0.0 if arayuz.modal else _hiz
 		print("savas sonucu: ", sonuc)
+		ruh_olay(str(sonuc.get("sonuc", "")))
 		oyun.gaz_k.catisma_haber(sonuc)
 		geri.call(sonuc))
 
@@ -537,6 +539,8 @@ func _unhandled_input(e: InputEvent) -> void:
 				DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if tam else DisplayServer.WINDOW_MODE_FULLSCREEN)
 			KEY_F6: kaydet()
 			KEY_F9: yukle()
+			KEY_F10:
+				_efekt_panel_ac()
 
 var _gir_bina := -1
 var _sag_basla := Vector2.ZERO
@@ -639,6 +643,7 @@ var _bina_dur := false   # binadayken oyun duraklatılır (mesai sürerken hari�
 
 func _process(delta: float) -> void:
 	_oto_kayit()
+	_ruh_guncelle(delta)
 	# Binadayken oyun saati ve dünya (gruplar, trafik, yayalar) durur; arayüz/fare/kamera canlı kalır.
 	var uy: bool = oyun.uyku_hedef >= 0
 	if uy != _uyku_acik:
@@ -728,7 +733,7 @@ func _process(delta: float) -> void:
 		var y: Dictionary = harita.yerler[i]
 		_ipucu.text = "%s  (%s)" % [y["ad"], harita.bolgeler[y["bolge"]]["ad"]]
 		if oyun.isy.has(i) and oyun.isy[i].get("bos", false):
-			_ipucu.text += "  — " + ("SATILIK EV" if oyun.isy[i]["tur"] == "konut" else "KİRALIK / SATILIK")
+			_ipucu.text += "  — " + ("SATILIK EV" if oyun.isy[i]["tur"] == "konut" else ("DEVREN SATILIK İŞ YERİ" if oyun.isy[i].get("devren", false) else "KİRALIK / SATILIK"))
 	else:
 		_ipucu.text = ""
 
@@ -952,6 +957,7 @@ func _cevre() -> void:
 	env.adjustment_saturation = 0.86   # 1.15 idi; ~%25 düşük
 	env.adjustment_contrast = 1.08
 	_env = env
+	_efekt_yukle()
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
@@ -975,6 +981,179 @@ const _ANAHTAR := [
 	[24.0, Color("0b1226"), Color("1b2440"), Color("6f86c8"), 0.25, Color("141c33"), 0.55],
 ]
 var _atm_sure := 0.0
+var _palet := 0
+# F10 ile değişen renk paletleri: ad, ton, doygunluk, kontrast, güneş tonu, [gölge→ışık degrade], etki gücü
+const _PALETLER := [
+	["Varsayılan", Color(1, 1, 1), 0.86, 1.08, Color(1, 1, 1), [], 0.0],
+	["A · Duman ve Pirinç (viski barı)", Color(1.0, 0.9, 0.75), 0.9, 1.12, Color(1.0, 0.9, 0.7),
+		[Color("140c08"), Color("3b2418"), Color("8a5a30"), Color("d9b26f"), Color("f3e4be")], 0.72],
+	["B · Yasak Yeşili (şişe yeşili, kan kırmızısı)", Color(0.85, 1.0, 0.9), 0.95, 1.12, Color(1.0, 0.93, 0.78),
+		[Color("07140f"), Color("173a2c"), Color("3d6b4f"), Color("c9b98a"), Color("efe3c4")], 0.65],
+	["C · Art Deco (petrol mavisi ve altın)", Color(0.9, 0.97, 1.0), 0.95, 1.18, Color(1.0, 0.86, 0.55),
+		[Color("06090d"), Color("1b2c36"), Color("2f5d62"), Color("c8a455"), Color("f6ecd0")], 0.7],
+	["D · Soluk Sepya (eski fotoğraf)", Color(1.0, 0.94, 0.84), 1.0, 1.04, Color(1.0, 0.93, 0.82),
+		[Color("231a14"), Color("4d4034"), Color("8b7a66"), Color("c9baa0"), Color("eadfc6")], 0.92],
+]
+var _kroki: MeshInstance3D
+var _efekt_panel: Node
+
+# F10 efekt ayarları (kalıcı: user://efekt.cfg). Panel: efekt_ayar.gd
+const EFEKT_VARSAYILAN := {
+	"palet": 0, "palet_guc": 0.7, "doygunluk": 0.86, "kontrast": 1.08, "parlaklik": 1.0,
+	"parilti": 0.8, "bloom": 0.12, "sis": 1.0, "ton": 1.0,
+	"cizgi": false, "kalinlik": 1.5, "d_esik": 0.012, "r_esik": 0.18, "koyuluk": 0.92, "tane": 0.22,
+	"ruh_acik": true, "ruh_elle": false,
+	"r_servet": 1.0, "r_yas": 1.0, "r_stres": 1.0, "r_yenilgi": 1.0,
+	"o_servet": 0.5, "o_yas": 0.2, "o_stres": 0.1, "o_yenilgi": 0.0,
+}
+var efekt := EFEKT_VARSAYILAN.duplicate()
+
+func _efekt_yukle() -> void:
+	var cf := ConfigFile.new()
+	if cf.load("user://efekt.cfg") == OK:
+		for k in efekt:
+			efekt[k] = cf.get_value("efekt", k, efekt[k])
+	_palet = int(efekt["palet"])
+
+func efekt_kaydet() -> void:
+	var cf := ConfigFile.new()
+	for k in efekt:
+		cf.set_value("efekt", k, efekt[k])
+	cf.save("user://efekt.cfg")
+
+# Paleti seç: o paletin varsayılan doygunluk/kontrast/etki değerlerini kaydırıcılara yükler.
+func _palet_sec(i: int) -> void:
+	var pl: Array = _PALETLER[i]
+	efekt["palet"] = i
+	efekt["doygunluk"] = pl[2]
+	efekt["kontrast"] = pl[3]
+	efekt["palet_guc"] = pl[6]
+	efekt_uygula()
+
+func _palet_uygula(i: int) -> void:   # eski test kancası uyumu
+	_palet_sec(i)
+
+# --- Renk ruhu: kariyerin gidişatı renkleri kaydırır (servet→parlaklık, yaş→doygunluk, stres→kasvet, yenilgi→kırmızı) ---
+var _ruh := {"servet": 0.5, "yas": 0.0, "stres": 0.0, "yenilgi": 0.0}   # yumuşatılmış anlık değerler
+var _yenilgi_g := 0.0
+var _ruh_t := -1
+var _vinyet: ColorRect
+
+func ruh_gercek() -> Dictionary:
+	var net: float = oyun.un_k.net_servet()
+	var servet := clampf(log(maxf(net, 1.0) / 1000.0) / log(10.0) / 3.0, 0.0, 1.0)   # 1.000$ → 0, 1.000.000$ → 1
+	var yas: float = float(oyun.profil.get("yas", 30)) + float(oyun.tarih()["yil"] - 1)
+	return {"servet": servet, "yas": clampf((yas - 20.0) / 60.0, 0.0, 1.0),
+		"stres": clampf(float(oyun.kis.get("stres", 0.0)) / 100.0, 0.0, 1.0), "yenilgi": _yenilgi_g}
+
+func ruh_olay(sonuc: String) -> void:
+	if sonuc == "yenilgi":
+		_yenilgi_g = 1.0
+	elif sonuc == "zafer":
+		_yenilgi_g = maxf(0.0, _yenilgi_g - 0.35)
+
+func _ruh_guncelle(delta: float) -> void:
+	if oyun == null or _env == null:
+		return
+	if _ruh_t >= 0 and oyun.t > _ruh_t:
+		_yenilgi_g = maxf(0.0, _yenilgi_g - float(oyun.t - _ruh_t) / (14.0 * 1440.0))   # ~14 günde silinir
+	_ruh_t = oyun.t
+	if not bool(efekt["ruh_acik"]):
+		return
+	var h: Dictionary = {"servet": efekt["o_servet"], "yas": efekt["o_yas"], "stres": efekt["o_stres"],
+		"yenilgi": efekt["o_yenilgi"]} if bool(efekt["ruh_elle"]) else ruh_gercek()
+	var k := 1.0 - exp(-maxf(delta, 0.016) * 3.0)
+	for a in _ruh:
+		_ruh[a] = lerpf(float(_ruh[a]), float(h[a]), k)
+	_ruh_env()
+
+func _ruh_kirmizi() -> float:
+	return float(_ruh["yenilgi"]) * float(efekt["r_yenilgi"]) if bool(efekt["ruh_acik"]) else 0.0
+
+func _ruh_env() -> void:
+	var sat: float = efekt["doygunluk"]
+	var par: float = efekt["parlaklik"]
+	var kon: float = efekt["kontrast"]
+	if bool(efekt["ruh_acik"]):
+		var se: float = float(_ruh["servet"]) * float(efekt["r_servet"])
+		var ya: float = float(_ruh["yas"]) * float(efekt["r_yas"])
+		var st: float = float(_ruh["stres"]) * float(efekt["r_stres"])
+		var ye: float = float(_ruh["yenilgi"]) * float(efekt["r_yenilgi"])
+		sat = clampf(sat * (1.0 - 0.65 * ya - 0.3 * st + 0.15 * (se - 0.5)), 0.12, 1.5)
+		par = clampf(par * (1.0 + (float(_ruh["servet"]) - 0.5) * 0.5 * float(efekt["r_servet"]) - 0.18 * st - 0.1 * ye), 0.55, 1.6)
+		kon = kon + 0.15 * st
+	_env.adjustment_saturation = sat
+	_env.adjustment_brightness = par
+	_env.adjustment_contrast = kon
+	var kr := _ruh_kirmizi()
+	if kr > 0.01 and _vinyet == null:
+		var cl := CanvasLayer.new()
+		cl.layer = 0
+		add_child(cl)
+		_vinyet = ColorRect.new()
+		_vinyet.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_vinyet.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var sh := Shader.new()
+		sh.code = "shader_type canvas_item;
+uniform float guc = 0.0;
+void fragment(){ vec2 d = UV - 0.5; float v = smoothstep(0.15, 0.75, length(d) * 1.35); COLOR = vec4(0.55, 0.02, 0.02, v * guc * 0.5 + guc * 0.03); }"
+		var m := ShaderMaterial.new()
+		m.shader = sh
+		_vinyet.material = m
+		cl.add_child(_vinyet)
+	if _vinyet != null:
+		(_vinyet.material as ShaderMaterial).set_shader_parameter("guc", clampf(kr, 0.0, 1.0))
+
+func efekt_sifirla() -> void:
+	efekt = EFEKT_VARSAYILAN.duplicate()
+	efekt_uygula()
+
+func efekt_uygula() -> void:
+	if _env == null:
+		return
+	_palet = int(efekt["palet"])
+	var pl: Array = _PALETLER[_palet]
+	_ruh_env()
+	_env.glow_intensity = efekt["parilti"]
+	_env.glow_bloom = efekt["bloom"]
+	var guc: float = efekt["palet_guc"]
+	_env.adjustment_color_correction = _lut_yap(_palet, guc) if (guc > 0.0 and (pl[5] as Array).size() > 1) else null
+	if kamera != null:
+		if _kroki == null:
+			_kroki = MeshInstance3D.new()
+			_kroki.set_script(load("res://scripts/core/kroki_stil.gd"))
+			kamera.add_child(_kroki)
+			_kroki.kur()
+		_kroki.visible = bool(efekt["cizgi"])
+		_kroki.ayarla(efekt)
+	_atmosfer()
+
+# Bölünmüş tonlama LUT'u: parlaklık → palet degradesi, orijinal renkle karıştırılır (kırmızı/mavi vurgular tamamen kaybolmaz).
+func _lut_yap(i: int, guc: float) -> Texture3D:
+	var dg: Array = _PALETLER[i][5]
+	var n := 16
+	var katlar: Array[Image] = []
+	for bz in n:
+		var im := Image.create(n, n, false, Image.FORMAT_RGB8)
+		for gy in n:
+			for rx in n:
+				var c := Color(rx / float(n - 1), gy / float(n - 1), bz / float(n - 1))
+				var l: float = c.r * 0.299 + c.g * 0.587 + c.b * 0.114
+				var f: float = clampf(l, 0.0, 1.0) * (dg.size() - 1)
+				var k0: int = mini(int(f), dg.size() - 2)
+				var m: Color = (dg[k0] as Color).lerp(dg[k0 + 1], f - k0)
+				im.set_pixel(rx, gy, c.lerp(m, guc))
+		katlar.append(im)
+	var t := ImageTexture3D.new()
+	t.create(Image.FORMAT_RGB8, n, n, n, false, katlar)
+	return t
+
+func _efekt_panel_ac() -> void:
+	if _efekt_panel == null:
+		_efekt_panel = load("res://scripts/ui/efekt_ayar.gd").new()
+		_efekt_panel.sokak = self
+		add_child(_efekt_panel)
+	_efekt_panel.degistir()
 
 func _atmosfer() -> void:
 	if oyun == null:
@@ -993,16 +1172,21 @@ func _atmosfer() -> void:
 	var ufuk: Color = (a[2] as Color).lerp(b[2], k)
 	var kapali: float = clampf((_orttu_g - 0.4) / 0.5, 0.0, 1.0)   # bulutlu/yağışlı: gök gri, güneş zayıf
 	var gri: Color = Color(0.5, 0.54, 0.6) * clampf(float(a[4]) * 0.6 + 0.15, 0.2, 0.9)
+	var ton: Color = Color(1, 1, 1).lerp(_PALETLER[_palet][1], float(efekt["ton"]))
+	var krm := _ruh_kirmizi()
+	ton *= Color(1.0, 1.0 - 0.35 * clampf(krm, 0.0, 1.0), 1.0 - 0.45 * clampf(krm, 0.0, 1.0))
+	ust *= ton
+	ufuk *= ton
 	ust = ust.lerp(gri.lerp(ust, 0.25), kapali * 0.75)
 	ufuk = ufuk.lerp(gri.lerp(ufuk, 0.3), kapali * 0.75)
 	sky.set_shader_parameter("ust", ust)
 	sky.set_shader_parameter("ufuk", ufuk)
 	var gunes_g: float = lerpf(float(a[4]), float(b[4]), k)
 	sky.set_shader_parameter("bulut", Color(0.25, 0.27, 0.32).lerp(Color(1.0, 0.97, 0.94), clampf(gunes_g / 1.1, 0.0, 1.0)).lerp(ufuk, 0.25))
-	_gunes.light_color = (a[3] as Color).lerp(b[3], k)
+	_gunes.light_color = ((a[3] as Color).lerp(b[3], k)) * (_PALETLER[_palet][4] as Color)
 	_gunes.light_energy = gunes_g * (1.0 - 0.6 * kapali)
-	_env.fog_light_color = ((a[5] as Color).lerp(b[5], k)).lerp(ufuk, kapali * 0.5)
-	_env.fog_density = 0.0004 + 0.0009 * _yog_g
+	_env.fog_light_color = (((a[5] as Color).lerp(b[5], k)) * ton).lerp(ufuk, kapali * 0.5)
+	_env.fog_density = (0.0004 + 0.0009 * _yog_g) * float(efekt["sis"])
 	_env.ambient_light_color = ust.lerp(ufuk, 0.5)
 	_env.ambient_light_energy = lerpf(float(a[6]), float(b[6]), k)
 	# gece lamba havuzları: güneş zayıfladıkça belirir
@@ -1061,7 +1245,22 @@ func _ekran_cek(arg: String) -> void:
 	var p := arg.split(",")
 	await get_tree().create_timer(7.0, true, false, true).timeout
 	if p.size() > 1:
-		if p[1] == "ben":
+		if p[1] == "ruh":
+			efekt["ruh_acik"] = true
+			efekt["ruh_elle"] = true
+			for q in ["servet", "yas", "stres", "yenilgi"].size():
+				var an: String = ["servet", "yas", "stres", "yenilgi"][q]
+				efekt["o_" + an] = float(p[2 + q])
+				_ruh[an] = float(p[2 + q])
+			efekt_uygula()
+		elif p[1] == "efekt":
+			_palet_sec(int(p[2]))
+			efekt["cizgi"] = true
+			efekt_uygula()
+			_efekt_panel_ac()
+		elif p[1] == "palet":
+			_palet_uygula(int(p[2]))
+		elif p[1] == "ben":
 			arayuz.ben_ac()
 		elif p[1] == "adam":
 			oyun.adamlar.append({"id": 91, "ad": "Joe Moretti", "yumruk": 70, "bicak": 55, "zeka": 60, "gorev": "", "silah": "bicak", "sadakat": 75})

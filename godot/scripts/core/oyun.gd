@@ -224,6 +224,7 @@ func kur(h: Node3D) -> void:
 			isy[i] = {"tur": tur, "sahip": false, "haracli": false, "birikim": 0.0, "korumaBitis": 0}
 			if tur in ["esnaf", "eglence", "atolye", "konut"] and rng.randf() < (0.5 if tur == "konut" else 0.3):
 				isy[i]["bos"] = true   # boş dükkân ilanı
+				isy[i]["devren"] = tur != "konut" and rng.randf() < 0.5   # çalışan iş yeri devren satılık
 			elif tur != "konut" and rng.randf() < 0.1:
 				var kim: Array = BAGIMSIZ[rng.randi() % BAGIMSIZ.size()]
 				isy[i]["bagimsiz"] = {"ad": kim[0], "neden": kim[1], "guc": 55 + rng.randi() % 30, "dost": false}
@@ -497,9 +498,14 @@ func saat_yazi(zaman: int = -1) -> String:
 	var d := tarih(zaman)
 	return "%02d:%02d" % [d["saat"], d["dk"]]
 
-func tarih_yazi() -> String:
-	var d := tarih()
-	return "%d. yıl · %d. ay · %d. gün" % [d["yil"], d["ay_yil"], d["ay_gun"]]
+# Oyun ayı 10 gün; takvimde her oyun günü 3 gerçek güne denk gelir (gün sayısı saatle akar).
+func takvim_gun(zaman: int = -1) -> int:
+	var d := tarih(zaman)
+	return (int(d["ay_gun"]) - 1) * 3 + 1 + int(d["saat"]) / 8
+
+func tarih_yazi(zaman: int = -1) -> String:
+	var d := tarih(zaman)
+	return "%d %s %d" % [takvim_gun(zaman), gaz_k.AY_AD[int(d["ay_yil"]) - 1], 1919 + int(d["yil"])]
 
 func mevsim() -> String:
 	return ["İlkbahar", "Yaz", "Sonbahar", "Kış"][(tarih()["ay"] % 12) / 3]
@@ -801,6 +807,10 @@ func kurulum_maliyet(i: int, tur: String) -> int:
 	var sv: float = bolge[harita.yerler[i]["bolge"]]["servet"]
 	return int(round(KURULUM[tur][0] * (0.7 + 0.15 * sv)))
 
+# Çalışan iş yerinin devir bedeli: boş dükkândan pahalı (müşteri, mal ve ad hakkı dahil).
+func devren_fiyat(i: int) -> int:
+	return int(round(ilan_fiyat(i) * 1.6))
+
 func bos_edin(i: int, mod: String) -> Dictionary:
 	var r: Dictionary = isy.get(i, {})
 	if r.is_empty() or not r.get("bos", false):
@@ -809,9 +819,29 @@ func bos_edin(i: int, mod: String) -> Dictionary:
 		return hata("Burası zaten senin elinde.")
 	if not erisim(harita.yerler[i]["bolge"]):
 		return hata("Bu mahallede henüz ayağın yok.")
+	var devren: bool = r.get("devren", false)
+	if devren and mod != "mulk":
+		return hata("Devren satılık iş yeri kiralanmaz; devralınır.")
 	var f: int = ilan_fiyat(i) if mod == "mulk" else ilan_kira(i) * 2
+	if devren:
+		f = devren_fiyat(i)
 	if not harcama(f, "temiz"):
 		return hata("Temiz para yetmiyor (%s)." % para(f))
+	if devren:
+		# çalışan iş yeri: kurulum beklemeden olduğu gibi devralınır
+		r["bos"] = false
+		r["devren"] = false
+		r["sahip"] = true
+		r["haracli"] = false
+		r["birikim"] = 0.0
+		r["kira_mi"] = false
+		r["elde"] = ""
+		r["kurulum"] = {}
+		isl.baslat(i)
+		_nufuz(harita.yerler[i]["bolge"], 2.0)
+		kayit("%s: işyerini devraldın (%s). %s olarak çalışıyor." % [harita.yerler[i]["ad"], para(f), TURLER[r["tur"]]["ad"]], "good")
+		degisti.emit()
+		return tamam()
 	r["elde"] = mod
 	r["kira_son"] = t / DAY
 	r["kira_gecik"] = 0
@@ -1428,6 +1458,7 @@ func _ilan_ay() -> void:
 			r["bos"] = true
 			r["haracli"] = false
 			r["birikim"] = 0.0
+			r["devren"] = r["tur"] != "konut" and rng.randf() < 0.5
 			kayit("%s kapandı: dükkân kiralık/satılık ilanına çıktı." % harita.yerler[i]["ad"], "info")
 
 func _ay() -> void:
