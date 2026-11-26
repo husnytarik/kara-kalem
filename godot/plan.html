@@ -16,19 +16,20 @@ svg{width:100vw;height:100vh;display:block}
 </style></head><body>
 <svg id="s" viewBox="-640 -400 1280 800"></svg>
 <script>
-// Durum: 'done' bitti, 'proto' JS prototipte var, '' yapılmadı. Kaynak: PLAN.md
+// Durum: 'done' çalışıyor, '' planlı/yapılmadı. Kaynak: godot/scripts (güncel mimari)
 const DATA = [
-  ['HARİTA (KÜP ŞEHİR)','harita.gd','proto'],['YÜRÜME','oyuncu.gd',''],['KAMERA','kamera.gd',''],['KARAKTER','karakter.gd',''],
-  ['ANİMASYON','animasyon.gd',''],['GÜN DÖNGÜSÜ','gun_dongusu.gd',''],['HAVA','hava.gd',''],
-  ['SİLAH','silah.gd',''],['SİPER','siper.gd',''],['YAPAY ZEKÂ','yapay_zeka.gd',''],['EMİRLER','emirler.gd',''],
-  ['SAVAŞ','savas.gd',''],['OTOMATİK ÇÖZ','savas_sim.gd',''],['ARABA SÜRÜŞÜ','arac_surus.gd',''],
-  ['SİM ÇEKİRDEĞİ','sim.gd','proto'],['BÖLGELER','bolge.gd','proto'],['İŞYERLERİ','isyeri.gd','proto'],
-  ['MESLEKLER','meslek.gd','proto'],['OLAYLAR','sehir.gd','proto'],['ZAFER YOLLARI','zafer.gd','proto'],
-  ['HARİTA GEÇİŞİ','harita_gecisi.gd',''],['ARAYÜZ','arayuz.gd',''],['SES','ses.gd',''],['KAYIT','kayit.gd',''],['DOĞRULAMA','dogrula.gd','']
+  ['SOKAK (SAHNE)','sokak.gd','done'],['OYUN ÇEKİRDEĞİ','oyun.gd','done'],['HARİTA / ARAZİ','harita.gd','done'],['YOL ŞERİTLERİ','yol_seritleri.gd','done'],
+  ['KROKİ (OUTLINE)','kroki_stil.gd','done'],['EFEKT PANELİ (F10)','efekt_ayar.gd','done'],['OYUNCU','oyuncu.gd','done'],['KAMERA','kamera.gd','done'],
+  ['KİŞİSEL İHTİYAÇ','kisisel.gd','done'],['AİLE','aile.gd','done'],['PROFİL / YETENEK','profil.gd','done'],['KAZANIMLAR','kazanim.gd','done'],
+  ['İŞ YERLERİ','isletme.gd','done'],['İŞLER / MESLEK','isler.gd','done'],['PAZAR','pazar.gd','done'],['BORÇ','borc.gd','done'],
+  ['NÜFUZ','nufuz.gd','done'],['POLİS','polis.gd','done'],['KARA PARA','kara.gd','done'],['YOL (ÜN/İTİBAR)','yol.gd','done'],
+  ['OLAYLAR','olaylar.gd','done'],['GAZETE','gazete.gd','done'],['MEYDAN','meydan.gd','done'],['SAKİNLER','sakinler.gd','done'],
+  ['YAYA / TRAFİK','yayalar.gd','done'],['SAVAŞ','savas.gd','done'],['KARŞILAŞMA','karsilasma.gd','done'],['SİLAHLIK','silahlik.gd','done'],
+  ['KUMAR','kumar_pencere.gd','done'],['ARAYÜZ','arayuz.gd','done'],['MİNİMAP','minimap.gd','done'],['KAYIT','kayitlar.gd','done']
 ];
 const svg = document.getElementById('s'), NS = 'http://www.w3.org/2000/svg';
 const mk = (n, a = {}, p = svg) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
-const rings = [[0, 12, 250, 190], [12, DATA.length, 460, 330]];
+const rings = [[0, 10, 230, 175], [10, DATA.length, 470, 335]];
 rings.forEach(([a, b, rx, ry]) => {
   const n = b - a;
   for (let i = 0; i < n; i++) {
@@ -44,6 +45,6 @@ rings.forEach(([a, b, rx, ry]) => {
 });
 const h = mk('g', { class: 'hub' });
 mk('rect', { x: -70, y: -22, width: 140, height: 44 }, h);
-mk('text', { y: 6 }, h).textContent = 'PLAN.md';
-mk('text', { class: 'leg', x: -620, y: 385 }).textContent = 'Altın çerçeve + ✓: bitti · Mavi çerçeve: JS prototipte var, taşınacak · Gri: yapılmadı';
+mk('text', { y: 6 }, h).textContent = 'KARA KALEM';
+mk('text', { class: 'leg', x: -620, y: 385 }).textContent = 'Altın çerçeve + ✓: çalışıyor · Gri: planlı · Güncel mimari (godot/scripts)';
 </script></body></html>
