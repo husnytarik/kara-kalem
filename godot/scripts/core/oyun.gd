@@ -636,12 +636,31 @@ func _yeni_adam() -> Dictionary:
 			break
 		ad = ISIMLER[(ISIMLER.find(ad) + 1) % ISIMLER.size()]
 	_sayac += 1
-	var yeni := {"id": _sayac, "ad": ad, "yumruk": 20 + rng.randi() % 55, "bicak": 20 + rng.randi() % 55, "zeka": 20 + rng.randi() % 55, "gorev": "", "silah": ["bicak", "bicak", "tabanca"][rng.randi() % 3]}
+	var yeni := {"id": _sayac, "ad": ad, "yumruk": 20 + rng.randi() % 55, "bicak": 20 + rng.randi() % 55, "zeka": 20 + rng.randi() % 55, "acimasiz": 15 + rng.randi() % 70, "gorev": "", "silah": ["bicak", "bicak", "tabanca"][rng.randi() % 3]}
 	sabika_k.uret(yeni)
 	return yeni
 
 func beceri(a: Dictionary) -> int:
 	return int(round(0.5 * a["yumruk"] + 0.3 * a["bicak"] + 0.2 * a["zeka"]))
+
+# Korkutuculuk: yumruk, bıçak ve merhametsizlik. Haraç toplarken alınan pay buna bağlı (x0.7 .. x1.4).
+func korku_gucu(a: Dictionary) -> int:
+	return int(round(0.4 * a["yumruk"] + 0.3 * a["bicak"] + 0.3 * a.get("acimasiz", 50)))
+
+# Haraç tahsilatında adamın her özelliğinin ayrı etkisi var:
+#  korkutuculuk (yumruk+bıçak+merhametsizlik) -> alınan pay; zekâ -> defteri okur, pay artar, iz bırakmaz;
+#  yumruk/bıçak -> direnişi kırar; sadakat düşükse cebe atar; merhametsiz mahalleyi soğutur; aranan adam polisi çeker.
+func tahsil_carpani(a: Dictionary) -> float:
+	return 1.0 + (korku_gucu(a) - 50) / 100.0 * 0.6 + (a["zeka"] - 50) / 100.0 * 0.4
+
+func zimmet_orani(a: Dictionary) -> float:
+	return clampf((50.0 - a.get("sadakat", 60)) / 100.0 * 0.5, 0.0, 0.25)
+
+func direnis_sansi(a: Dictionary, bid: String, b: Dictionary) -> float:
+	return clampf(0.25 - 0.3 * etki(b, bid)["k"] - 0.002 * a["yumruk"] - 0.001 * a["bicak"], 0.02, 0.4)
+
+func a_sad(a: Dictionary) -> float:
+	return float(a.get("sadakat", 60))
 
 func adam_tut() -> Dictionary:
 	if adamlar.size() >= EKIP_MAX:
@@ -726,7 +745,7 @@ func _adam_sec(gorev: String, id: int) -> Dictionary:
 	var en := {}
 	var en_p := -1e9
 	for a in bos_adamlar():
-		var p: float = beceri(a) - maxf(0.0, a["bicak"] - a["yumruk"] - 20.0) if gorev == "haraclan" else (a["yumruk"] if gorev == "koru" else a["zeka"])
+		var p: float = beceri(a) - maxf(0.0, a["bicak"] - a["yumruk"] - 20.0) if gorev == "haraclan" else (a["yumruk"] if gorev == "koru" else int(korku_gucu(a) * tahsil_carpani(a)))
 		if p > en_p:
 			en_p = p
 			en = a
@@ -1084,6 +1103,8 @@ func _coz(g: Dictionary) -> void:
 				b["sev"] = clampf(b["sev"] - 6.0, 0, 100)
 			r["haracli"] = true
 			r["birikim"] = 0.0
+			r["tahsildar"] = adam["id"]
+			r["tahsil_t"] = t
 			b["kor"] = clampf(b["kor"] + 1.5, 0, 100)
 			b["sev"] = clampf(b["sev"] - 1.5, 0, 100)
 			b["tan"] = clampf(b["tan"] + 1.5, 0, 100)
@@ -1108,11 +1129,21 @@ func _coz(g: Dictionary) -> void:
 		if not r["haracli"]:
 			kayit("%s: haraç artık sende değil." % ad, "warn")
 			return
-		var direnir := rng.randf() < clampf(0.25 - 0.3 * etki(b, bid)["k"] - 0.001 * adam["yumruk"], 0.02, 0.4)
-		var al := int(round(r["birikim"] * (0.5 if direnir else 1.0)))
+		var direnir := rng.randf() < direnis_sansi(adam, bid, b)
+		var brut := int(round(r["birikim"] * tahsil_carpani(adam) * (0.5 if direnir else 1.0)))
+		var zim := int(round(brut * zimmet_orani(adam)))
+		var al := brut - zim
 		r["birikim"] = 0.0
 		kirli += al
 		kayit("%s: %s %s topladı%s." % [ad, adam["ad"], para(al), " (sahibi yarısını ödedi)" if direnir else ""], "warn" if direnir else "good")
+		if zim >= 5:
+			kayit("%s paranın %s kadarını cebe indirmiş gibi (sadakati düşük)." % [adam["ad"], para(zim)], "warn")
+			adam["sadakat"] = maxf(0.0, a_sad(adam) - 1.0)
+		if adam.get("acimasiz", 50) > 65:
+			b["sev"] = clampf(b["sev"] - 1.0, 0, 100)   # merhametsiz tahsildar mahalleyi soğutur
+		var iz: float = 0.05 + (0.10 if adam.get("sabika", 0) >= 3 else 0.0) + (0.05 if adam.get("acimasiz", 50) > 65 else 0.0) - adam["zeka"] / 1000.0
+		if rng.randf() < iz:
+			polis.kanit(2.0, "%s toplarken dikkat çekti." % adam["ad"])
 	elif g["gorev"] == "koru":
 		r["korumaBitis"] = t + 7 * DAY
 		b["sev"] = clampf(b["sev"] + 1, 0, 100)
@@ -1442,12 +1473,28 @@ func _gun() -> void:
 		if not r["haracli"]:
 			continue
 		r["birikim"] = minf(w * 3.0, r["birikim"] + w / 7.0 * yol_k.harac_carpan())
+		_tahsil_et(i, r)
 		var bid: String = harita.yerler[i]["bolge"]
 		var hk := hakim_of(bid)
 		if hk != "" and hk != "oyuncu" and t >= r["korumaBitis"] and rng.randf() < 0.012:
 			r["haracli"] = false
 			r["birikim"] = 0.0
 			kayit("%s: %s adamları esnafı geri aldı; haracı artık onlara ödüyor." % [harita.yerler[i]["ad"], hakim_ad(hk)], "bad")
+
+# Haraç bağlayan adam o yerin tahsildarıdır: haftada bir boştaysa kendiliğinden gidip toplar.
+func _tahsil_et(i: int, r: Dictionary) -> void:
+	if t < int(r.get("tahsil_t", t)) + 7 * DAY or r["birikim"] < 1.0:
+		return
+	var id: int = int(r.get("tahsildar", 0))
+	var a := adam_bul(id)
+	if a.is_empty():
+		id = 0
+		r.erase("tahsildar")
+	elif a["gorev"] != "":
+		return   # meşgul; yarın tekrar dener
+	var s := gorev_ver(i, "topla", id)
+	if s.get("ok", false):
+		r["tahsil_t"] = t
 
 # Esnaf kapanır -> ilan çıkar; ilanlar zamanla başka birine kiralanır.
 func _ilan_ay() -> void:

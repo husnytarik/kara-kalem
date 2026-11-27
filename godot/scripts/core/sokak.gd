@@ -1077,18 +1077,27 @@ func _ruh_env() -> void:
 	var sat: float = efekt["doygunluk"]
 	var par: float = efekt["parlaklik"]
 	var kon: float = efekt["kontrast"]
-	if bool(efekt["ruh_acik"]):
-		var se: float = float(_ruh["servet"]) * float(efekt["r_servet"])
-		var ya: float = float(_ruh["yas"]) * float(efekt["r_yas"])
-		var st: float = float(_ruh["stres"]) * float(efekt["r_stres"])
-		var ye: float = float(_ruh["yenilgi"]) * float(efekt["r_yenilgi"])
-		sat = clampf(sat * (1.0 - 0.65 * ya - 0.3 * st + 0.15 * (se - 0.5)), 0.12, 1.5)
-		par = clampf(par * (1.0 + (float(_ruh["servet"]) - 0.5) * 0.5 * float(efekt["r_servet"]) - 0.18 * st - 0.1 * ye), 0.55, 1.6)
-		kon = kon + 0.15 * st
 	_env.adjustment_saturation = sat
 	_env.adjustment_brightness = par
 	_env.adjustment_contrast = kon
-	var kr := _ruh_kirmizi()
+	# Renk ruhu yalnızca ekranın kenarlarında bir vinyet: sahnenin kendisi değişmez.
+	var vr := Color(0, 0, 0, 0)
+	if bool(efekt["ruh_acik"]):
+		var se: float = maxf(0.0, (float(_ruh["servet"]) - 0.5) * 2.0) * float(efekt["r_servet"])
+		var ya: float = float(_ruh["yas"]) * float(efekt["r_yas"])
+		var st: float = float(_ruh["stres"]) * float(efekt["r_stres"])
+		var ye: float = float(_ruh["yenilgi"]) * float(efekt["r_yenilgi"])
+		var kat: Array = [[Color(0.95, 0.74, 0.3), 0.22 * se], [Color(0.5, 0.46, 0.4), 0.3 * ya], [Color(0.03, 0.03, 0.05), 0.5 * st], [Color(0.55, 0.03, 0.03), 0.55 * ye]]
+		var top := 0.0
+		var rgb := Vector3.ZERO
+		for q in kat:
+			var c: Color = q[0]
+			rgb += Vector3(c.r, c.g, c.b) * float(q[1])
+			top += float(q[1])
+		if top > 0.001:
+			rgb /= top
+			vr = Color(rgb.x, rgb.y, rgb.z, minf(0.7, top))
+	var kr := vr.a
 	if kr > 0.01 and _vinyet == null:
 		var cl := CanvasLayer.new()
 		cl.layer = 0
@@ -1098,14 +1107,14 @@ func _ruh_env() -> void:
 		_vinyet.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var sh := Shader.new()
 		sh.code = "shader_type canvas_item;
-uniform float guc = 0.0;
-void fragment(){ vec2 d = UV - 0.5; float v = smoothstep(0.15, 0.75, length(d) * 1.35); COLOR = vec4(0.55, 0.02, 0.02, v * guc * 0.5 + guc * 0.03); }"
+uniform vec4 renk : source_color = vec4(0.0);
+void fragment(){ vec2 d = UV - 0.5; float v = smoothstep(0.55, 0.95, length(d) * 1.3); COLOR = vec4(renk.rgb, v * renk.a); }"
 		var m := ShaderMaterial.new()
 		m.shader = sh
 		_vinyet.material = m
 		cl.add_child(_vinyet)
 	if _vinyet != null:
-		(_vinyet.material as ShaderMaterial).set_shader_parameter("guc", clampf(kr, 0.0, 1.0))
+		(_vinyet.material as ShaderMaterial).set_shader_parameter("renk", vr)
 
 func efekt_sifirla() -> void:
 	efekt = EFEKT_VARSAYILAN.duplicate()
@@ -1176,7 +1185,7 @@ func _atmosfer() -> void:
 	var kapali: float = clampf((_orttu_g - 0.4) / 0.5, 0.0, 1.0)   # bulutlu/yağışlı: gök gri, güneş zayıf
 	var gri: Color = Color(0.5, 0.54, 0.6) * clampf(float(a[4]) * 0.6 + 0.15, 0.2, 0.9)
 	var ton: Color = Color(1, 1, 1).lerp(_PALETLER[_palet][1], float(efekt["ton"]))
-	var krm := _ruh_kirmizi()
+	var krm := 0.0   # renk ruhu artık gökyüzünü boyamaz
 	ton *= Color(1.0, 1.0 - 0.35 * clampf(krm, 0.0, 1.0), 1.0 - 0.45 * clampf(krm, 0.0, 1.0))
 	ust *= ton
 	ufuk *= ton
@@ -1303,6 +1312,16 @@ func _ekran_cek(arg: String) -> void:
 			for c in arayuz.get_children():
 				if c.has_method("hepsini_ac"):
 					c.hepsini_ac()
+		elif p[1] == "harac":
+			var hb := -1
+			for ii in oyun.isy:
+				if not oyun.isy[ii].get("bos", false) and not oyun.isy[ii]["sahip"] and oyun.TURLER[oyun.isy[ii]["tur"]]["gelir"] > 0 and oyun.erisim(oyun.harita.yerler[ii]["bolge"]):
+					hb = ii
+					break
+			if hb >= 0:
+				oyun.isy[hb]["haracli"] = true
+				oyun.isy[hb]["birikim"] = 137.0
+				arayuz.bina_ac(hb)
 		elif p[1] == "bina":
 			oyun.temiz = 500.0
 			arayuz.bina_ac(97)

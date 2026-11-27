@@ -1146,9 +1146,16 @@ func _bina_paneli() -> void:
 			_lbl(_ic, "Seninle dost.", 14, RENK["good"])
 		else:
 			_btn(_ic, "Dostluk kur  (%s temiz)" % oyun.para(int(bag["guc"]) * 8), func(): _sonuc_goster(oyun.dostluk_kur(i), "Dost oldunuz."), not yakin)
+	_bolum(_ic, "Haraç")
+	if r["haracli"]:
+		var th: Dictionary = oyun.adam_bul(int(r.get("tahsildar", 0)))
+		_lbl(_ic, "Tahsildar: %s. Haftada bir boştaysa kendisi gidip toplar (alınan pay adamın korkutuculuğuna bağlı); istersen \"Haracı topla\" ile hemen de aldırabilirsin." % ("%s (korkutuculuk %d)" % [th["ad"], oyun.korku_gucu(th)] if not th.is_empty() else "boştaki bir adam"), 14, RENK["soluk"])
+	else:
+		_lbl(_ic, "Haraç bağlı değil. \"Haraç bağla\" yalnızca bağlar, para getirmez; bağlayan adam yerin tahsildarı olur, para birikir ve o haftada bir kendisi toplar.", 14, RENK["soluk"])
 	_bolum(_ic, "Eylemler")
+	var gorev_msg := {"haraclan": "Adam haraç bağlamaya çıktı. Bağlarsa o yerin tahsildarı olur: para birikir ve haftada bir kendisi gidip toplar.", "topla": "Adam haracı toplamaya çıktı; dönünce para kirli kasana geçer.", "koru": "Adam korumaya çıktı."}
 	for gk in ["haraclan", "topla", "koru"]:
-		_btn(_ic, "%s  (%d dk iş)" % [oyun.GOREVLER[gk]["ad"], oyun.GOREVLER[gk]["is"]], func(): _sonuc_goster(oyun.gorev_ver(i, gk, secili), "Adam yola çıktı."), not yakin)
+		_btn(_ic, "%s  (%d dk iş)" % [oyun.GOREVLER[gk]["ad"], oyun.GOREVLER[gk]["is"]], func(): _sonuc_goster(oyun.gorev_ver(i, gk, secili), gorev_msg[gk]), not yakin)
 	_btn(_ic, "Satın al  (%s temiz)" % oyun.para(oyun.fiyat(i)), func(): _sonuc_goster(oyun.satin_al(i), "Satın aldın."), r["sahip"] or not yakin)
 	var Mi: Dictionary = oyun.mes["is"]
 	if not Mi.is_empty() and Mi.get("bina", -1) == i and oyun.vardiya.is_empty():
@@ -1365,11 +1372,14 @@ func _adam_paneli() -> void:
 		var v := VBoxContainer.new()
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		h.add_child(v)
-		_lbl(v, "%s  ·  beceri %d" % [a["ad"], oyun.beceri(a)], 18)
+		_lbl(v, "%s  ·  beceri %d  ·  korkutuculuk %d" % [a["ad"], oyun.beceri(a), oyun.korku_gucu(a)], 18)
 		_bar(v, "Yumruk", a["yumruk"], Color("b08f6c"))
 		_bar(v, "Bıçak", a["bicak"], Color("a67070"))
 		_bar(v, "Zekâ", a["zeka"], Color("7f95ab"))
+		_bar(v, "Merhametsizlik", a.get("acimasiz", 50), Color("8a4a4a"))
 		_bar(v, "Sadakat", a.get("sadakat", 60), Tema.VURGU)
+		var zo: float = oyun.zimmet_orani(a)
+		_lbl(v, "Haraçta: pay x%.2f · direniş kırma %d%s" % [oyun.tahsil_carpani(a), int(a["yumruk"] * 0.6 + a["bicak"] * 0.4), (" · cebe atar (%%%d)" % int(zo * 100)) if zo > 0.02 else ""], 13, Color(0.3, 0.25, 0.2))
 		var sb: int = a.get("sabika", 0)
 		var sk: RefCounted = oyun.sabika_k
 		_lbl(v, "Sicil: %s" % sk.rozet(a), 14, [Color(0.15, 0.4, 0.15), Color(0.5, 0.32, 0.04), Color(0.62, 0.25, 0.05), Color(0.65, 0.1, 0.1)][sb])
