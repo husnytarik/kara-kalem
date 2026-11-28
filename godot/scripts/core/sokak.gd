@@ -723,7 +723,7 @@ func _process(delta: float) -> void:
 	Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND if (tikla_i >= 0 or (not gh.is_empty() and not arayuz.modal)) else Input.CURSOR_ARROW)
 	_oy_etiket.visible = oyuncu.iceride < 0
 	oyun.ic_mekan = oyuncu.iceride
-	var yz := "%s · %d kişi" % [oyun.profil.get("ad", "Sen"), 1 + oyun.adamlar.size()]
+	var yz := "%s · %d kişi" % [oyun.profil.get("ad", "Sen"), 1 + oyun.bos_adamlar().size()]
 	if yz != _oy_yz:
 		_oy_yz = yz
 		_oy_etiket.text = yz
@@ -1293,6 +1293,16 @@ func _ekran_cek(arg: String) -> void:
 			oyun.adamlar[2]["sizinti"] = 2
 			oyun.adamlar[2]["ifsa"] = true
 			oyun.adamlar[3]["sizinti"] = 1
+			var hb := -1
+			for k in oyun.isy:
+				hb = k
+				break
+			if hb < 0:
+				hb = 0
+			oyun.adamlar[0]["gorev"] = "tutuklu"
+			oyun.gorevler.append({"adam": oyun.adamlar[0]["id"], "hedef": -1, "gorev": "tutuklu", "basla": oyun.t, "yol": 0, "bitis": oyun.t + 3 * 1440, "yolu": PackedVector3Array()})
+			oyun.adamlar[1]["gorev"] = "koru"
+			oyun.gorevler.append({"adam": oyun.adamlar[1]["id"], "hedef": hb, "gorev": "koru", "basla": oyun.t, "yol": 30, "bitis": oyun.t + 70, "yolu": PackedVector3Array()})
 			arayuz.adamlar_ac()
 		elif p[1] == "durum":
 			oyun.temiz = 4200.0

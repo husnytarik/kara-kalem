@@ -739,6 +739,28 @@ func silah_ver(adam_id: int, silah: String) -> Dictionary:
 	degisti.emit()
 	return tamam()
 
+# Adamın şu anki durumunu insan diliyle anlatır (Adamlar paneli için).
+func gorev_durum(a: Dictionary) -> String:
+	if a["gorev"] == "":
+		return "Yanında, emrine hazır"
+	for g in gorevler:
+		if g["adam"] != a["id"] and not (g["gorev"] == "sozlesme" and a["id"] in g.get("adamlar", [])):
+			continue
+		var kalan: int = maxi(1, int(ceil((g["bitis"] - t) / 60.0)))
+		if g["gorev"] == "tutuklu":
+			if g.get("yarali", false):
+				return "Yaralı, iyileşiyor (~%d saat) — savaşa katılamaz" % kalan
+			return "Karakolda tutuklu (~%d gün) — dosyan kabardığı için polis yakaladı" % maxi(1, int(ceil(kalan / 24.0)))
+		if g["gorev"] == "sozlesme":
+			return "Kirli işte (~%d saat sonra döner)" % kalan
+		var yer: String = harita.yerler[g["hedef"]]["ad"] if g["hedef"] >= 0 and g["hedef"] < harita.yerler.size() else "?"
+		var yolda: bool = t < g["basla"] + g["yol"]
+		var is_ad: String = {"haraclan": "haraç bağlıyor", "topla": "haracı topluyor", "koru": "orayı koruyor"}.get(g["gorev"], "çalışıyor")
+		if yolda:
+			return "Yolda → %s (%s) · ~%d saat sonra işi biter" % [yer, is_ad, kalan]
+		return "%s: %s · ~%d saat sonra döner" % [yer, is_ad, kalan]
+	return "Görevde"
+
 func bos_adamlar() -> Array:
 	return adamlar.filter(func(a): return a["gorev"] == "")
 

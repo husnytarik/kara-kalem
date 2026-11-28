@@ -600,7 +600,7 @@ func _ust_cubuk() -> void:
 	p2.add_child(r)
 	_temiz = _hap(r, "$", Tema.VURGU, "Temiz para", "temiz")
 	_kirli = _hap(r, "▮", Tema.KOTU, "Kirli para", "kirli")
-	_ekip = _hap(r, "♟", Tema.YAZI, "Ekip: adam sayısı / üst sınır", "ekip")
+	_ekip = _hap(r, "♟", Tema.YAZI, "Yanındaki adam / toplam adam", "ekip")
 	_arama = _hap(r, "⚠", Tema.UYARI, "Polis seni arıyor: 30 ve üstünde devriyeler kovalar.", "arama")
 	_un = _hap(r, "★", Tema.VURGU, "Ünün", "un")
 	# ihtiyaçlar
@@ -848,7 +848,8 @@ func _process(_d: float) -> void:
 	_temiz.text = oyun.para(oyun.temiz)
 	_kirli.text = oyun.para(oyun.kirli)
 	_un.text = "%d" % int(oyun.kis_k.taninma())
-	_ekip.text = "%d/%d" % [oyun.adamlar.size(), oyun.EKIP_MAX]
+	_ekip.text = "%d/%d" % [oyun.bos_adamlar().size(), oyun.adamlar.size()]
+	_ekip.tooltip_text = "Yanındaki adam / toplam adam (üst sınır %d). Görevdeki ya da karakoldaki adamlar savaşa katılamaz." % oyun.EKIP_MAX
 	_arama.text = "%d" % int(oyun.arama)
 	_arama.add_theme_color_override("font_color", Tema.KOTU if oyun.arama >= 30.0 else (Tema.UYARI if oyun.arama >= 10.0 else Tema.YAZI))
 	for hd in _hiz_dugmeleri:
@@ -1345,7 +1346,7 @@ func _bolge_paneli() -> void:
 
 # ---------- adam paneli ----------
 func _adam_paneli() -> void:
-	_baslik(_ic, "Adamlar", "%d / %d adam · ayda $%d kişi başı" % [oyun.adamlar.size(), oyun.EKIP_MAX, oyun.EKIP_MAAS])
+	_baslik(_ic, "Adamlar", "%d yanında / %d adam (en çok %d) · ayda $%d kişi başı" % [oyun.bos_adamlar().size(), oyun.adamlar.size(), oyun.EKIP_MAX, oyun.EKIP_MAAS])
 	var ipucu := _lbl(_ic, "Adamlarını barlarda, bilardo salonlarında, boks salonlarında ve derneklerde bulabilirsin. Geceleri daha çok kişi çıkar.", 14, RENK["warn"])
 	ipucu.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	if oyun.adamlar.is_empty():
@@ -1391,12 +1392,9 @@ func _adam_paneli() -> void:
 			_lbl(v, "MUHBİR: bilgi sızdırdığı anlaşıldı. Ekipten at!", 14, Color(0.65, 0.1, 0.1))
 		elif int(a.get("sizinti", 0)) > 0:
 			_lbl(v, "Şüpheli: ekipten bilgi sızıyor, ondan olabilir.", 13, Color(0.5, 0.32, 0.04))
-		var durum := "Boşta"
-		if a["gorev"] == "tutuklu":
-			durum = "Karakolda"
-		elif a["gorev"] != "":
-			durum = "Görevde: " + oyun.GOREVLER[a["gorev"]]["ad"]
-		_lbl(v, "Görev: " + durum, 15, Color(0.55, 0.3, 0.05) if a["gorev"] != "" else Color(0.15, 0.4, 0.15))
+		var durum: String = oyun.gorev_durum(a)
+		var gl := _lbl(v, "Durum: " + durum, 14, Color(0.55, 0.3, 0.05) if a["gorev"] != "" else Color(0.15, 0.4, 0.15))
+		gl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		var id: int = a["id"]
 		_btn(v, "Çıkar", func(): _sonuc_goster(oyun.adam_cikar(id)), a["gorev"] != "")
 	_sonuc_satiri()
