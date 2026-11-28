@@ -53,6 +53,51 @@ const OLAY := {
 		["Affet", "", 1.0, "saygi+2;sevgi+1", "Cömertliğin takdir edildi.", "", ""],
 		["Görmezden gel", "", 1.0, "saygi-1", "İş büyümedi.", "", ""],
 	]},
+	# ---------- PİZZİNİ (küçük kâğıt notlar: telefon dinlemesinden kaçmanın eski yolu) ----------
+	"p01": {"b": "Katlanmış kâğıt", "m": "Barda biri avucuna minik, sıkı katlanmış bir kâğıt bıraktı ve kayboldu. İçinde rakamlar ve kısa satırlar var: pizzini. Sicilya'da yaşlı donların emirlerini telefon yerine bu kâğıt parçalarıyla ilettiği söylenir; okunur, yakılır.", "ev": [0, 2], "w": 5, "cd": 60, "tag": "gizem", "s": [
+		["Şifreyi çöz", "zeka>=6", 0.7, "y.golge+3;saygi+2;sonra:z10:20", "Rakamlar harflere döndü: bir mesajı çözdün. Gönderen seni tanıyor.", "stres+2", "Anlamsız bir rakam yığını; gece kaldın."],
+		["Okuyup yak", "", 1.0, "y.golge+2", "Kâğıt kül oldu; kimse bilmeyecek.", "", ""],
+		["Polise götür", "", 1.0, "dok.polis+3;saygi-2;sevgi-2", "Karakolda teşekkür ettiler. Mahallede ise 'ispiyoncu' denmeye başlandı.", "", ""],
+	]},
+	"p02": {"b": "Pizzini kuryesi", "m": "Telefon hatlarının dinlendiği söyleniyor. Ekibin birbirine emirleri kâğıt notlarla yollamasını önerdi biri: küçük kâğıt, güvenilir bir kurye, okuyan yakar.", "ev": [2, 4], "w": 5, "cd": 40, "k": "adam>=2", "tag": "polis", "s": [
+		["Haberleşmeyi pizziniye kaydır", "", 0.75, "arama-6;sad+2;y.golge+3", "Hat sessiz, notlar elden ele gidiyor. Polis boşuna dinliyor.", "arama+8;adam-1", "Kuryen yakalandı; cebinde not bulundu."],
+		["Telefonla devam et", "", 1.0, "arama+3", "Hat dinleniyor olabilir. İhtiyatlı olmak gerek.", "", ""],
+		["Çocuk kurye tut", "kirli>=60", 0.85, "kirli-60;y.golge+2;arama-3", "Mahalle çocuğu notları taşıyor; kimse çocuktan şüphelenmiyor.", "kirli-60;arama+4", "Çocuk korkup notları attı."],
+	]},
+	"p03": {"b": "Üstünde bulunan not", "m": "Polis, adamlarından birini üstünü arayarak durdurdu ve cebinden katlanmış bir kâğıt çıkardı. Üzerindeki rakamların ne anlama geldiğini soruyorlar.", "ev": [2, 4], "w": 5, "cd": 40, "k": "arama>=25;adam>=2", "tag": "polis", "s": [
+		["Şifresi çözülemez, diye diren", "zeka>=7", 0.6, "arama-4;saygi+2", "Rakamları çözemediler; kâğıt delil sayılmadı.", "arama+10;stres+2", "Şifreyi çözdüler; ifadeler uyuşmadı."],
+		["Avukat tut", "temiz>=300", 1.0, "temiz-300;arama-5", "Avukat kâğıdın delil olmadığını kanıtladı.", "", ""],
+		["Rüşvetle kapat", "kirli>=400", 1.0, "kirli-400;dok.polis+3", "Kâğıt bir ocakta yandı. Dosya kapandı.", "", ""],
+	]},
+	"p04": {"b": "Tek satırlık not", "m": "{F}'dan bir adam elime kâğıt tutuşturup uzaklaştı: «Salı, rıhtım, yalnız gel.» Başka açıklama yok.", "ev": [2, 4], "w": 5, "cd": 40, "f": "rakip", "tag": "dünya", "s": [
+		["Yalnız git", "", 0.55, "ger-5;inf+6;y.kulis+3", "Görüşme iyi geçti; ikiniz de sınırı biliyorsunuz artık.", "yara+25;ger+4", "Tuzakmış; pusuya düştün."],
+		["Adamlarınla git", "adam>=2", 0.8, "ger-3;saygi+2", "Gelişin ciddiye alındı; konuşma temkinli ama olumlu bitti.", "adam-1;ger+3", "Anlaşma çıkmadı; bir adamın yaralı."],
+		["Yok say", "", 1.0, "ger+2", "Mesaj ulaştı: çağrıya gelmedin.", "", ""],
+	]},
+	# ---------- DEDENİN MİRASI ----------
+	"m01": {"b": "Dedenin evi", "m": "Mahalleli, dedenin eski evinin önünden geçerken yavaşlıyor, fısıldaşıyor. Bir yaşlı kapıda durup sana uzun uzun baktı: «Sen onun torunusun.»", "ev": [0, 4], "w": 6, "cd": 9999, "k": "tanin>=5", "tag": "miras", "s": [
+		["Yaşlıyla konuş", "", 0.7, "mir.tanin+6;saygi+1", "Dedenin sandığın gibi bir kasabın değil, şehrin yarısına söz geçiren biri olduğunu öğrendin.", "stres+2", "Yaşlı ağzını açmadı, ama bakışları her şeyi söyledi."],
+		["Görmezden gel", "", 1.0, "mir.tanin+2", "Evine girdin. Ama ev artık eskisi gibi sessiz değil.", "", ""],
+	]},
+	"m02": {"b": "Gece gelen zarf", "m": "Kapının altından bir zarf atılmış: «Dedenin adamlarından biri hâlâ sizi hatırlıyor. Rıhtımda biri sizi soruyor.» Altında imza yok.", "ev": [1, 4], "w": 6, "cd": 9999, "k": "tanin>=12", "tag": "miras", "s": [
+		["Rıhtıma git", "", 0.6, "mir.tanin+6;y.kulis+3;saygi+2", "Eski Muhafızlardan biri seni bekliyordu; dedenin işlerinin nasıl dağıldığını anlattı.", "yara+15;stres+3", "Rıhtımda seni tartan gözler vardı; ürkütücüydü."],
+		["Polise göster", "", 0.5, "mir.tanin+1;dok.polis+2", "Zarf bir dosyaya girdi; kimse seni aramadı.", "arama+5", "Kimse ciddiye almadı."],
+		["Yak", "", 1.0, "", "Zarf küle döndü; sır senin kaldı.", "", ""],
+	]},
+	"m03": {"b": "Dedenin eski adamı", "m": "Yaşlı bir adam yolunu kesti: «Ben Tonio. Dedeni ölene kadar korudum. Bugün gençler ayrıldı, herkes kendi payını aldı. Ama sen... sende onun gözleri var.»", "ev": [1, 4], "w": 6, "cd": 9999, "k": "tanin>=25", "tag": "miras", "s": [
+		["Onu yanına al", "", 0.8, "adam+1;mir.tanin+5;sad+3", "Amca Tonio sana sadık bir silah arkadaşı oldu.", "mir.tanin+1", "Kabul etmedi; «henüz zamanı değil.»"],
+		["Dedenin anılarını sor", "", 1.0, "mir.tanin+3;y.kulis+3", "Kimin kime ne kadar borçlu olduğunu öğrendin.", "", ""],
+		["Geç git", "", 1.0, "mir.tanin-1", "Tonio başını eğdi, sessizce uzaklaştı.", "", ""],
+	]},
+	"m04": {"b": "Kırıntıların dedikodusu", "m": "Kasabadan aldığın duyum net: «Rıhtımdakiler senden çekiniyor; Ferro ise 'torunu yakında gelir' diye silah biliyor.»", "ev": [1, 4], "w": 6, "cd": 9999, "k": "tanin>=40", "tag": "miras", "s": [
+		["Dedikodunun peşine düş", "", 0.65, "mir.tanin+6;y.kulis+4", "Kimin kimden korktuğunu, kimin kime sadık olduğunu öğrendin.", "stres+3;ger+2", "Seni gören oldu; ortalık karıştı."],
+		["Ekibi topla", "adam>=2", 1.0, "sad+4;mir.tanin+3", "Adamların sana güveni arttı; birlik ruhu doğdu.", "", ""],
+		["Aldırma", "", 1.0, "mir.tanin+1", "Söylentiler söylenti olarak kaldı.", "", ""],
+	]},
+	"m05": {"b": "Artık kimse değilsin", "m": "Bir akşam üzeri, hiçbir şey söylemeden birkaç eski usta kapına geliyor: şapkaları elde, gözler yerde. «Dedene gösterdiğimiz saygıyı sana da göstermek istiyoruz.» Şehir seni artık tanıyor.", "ev": [1, 4], "w": 6, "cd": 9999, "k": "tanin>=60", "tag": "miras", "s": [
+		["Sözlerini kabul et", "", 1.0, "saygi+4;y.korku+2;mir.tanin+4", "Mirasın yükü artık gerçek: herkes senin kararını bekliyor.", "", ""],
+		["Mesafeni koru", "", 1.0, "mir.tanin+2;sad+2", "Hâlâ dikkatli; ama ses çıkarmayan herkes seni izliyor.", "", ""],
+	]},
 	# ---------- ZİNCİR (yalniz zincir_cek ile gelir) ----------
 	"z01": {"b": "Gölgede bir isim", "m": "Geçmişten gelen bir isim, senin hakkında bir şey fısıldıyor.", "ev": [0, 4], "w": 1, "cd": 9999, "k": "yil>=9999", "tag": "zincir", "s": [
 		["Dinle", "", 0.6, "y.kulis+3", "Faydalı bir bilgi edindin.", "stres+2", "Söylentiydi."],
@@ -67,6 +112,11 @@ const OLAY := {
 		["Yüzleş", "adam>=2", 0.55, "y.korku+5;saygi+3", "Sorun bir kez ve herkesin gözü önünde çözüldü.", "yara+25;adam-1", "Adamların ağır yaralandı."],
 		["Para ver", "kirli>=200", 0.9, "kirli-200;ger-2", "Sessizlik satın aldın.", "", ""],
 		["Kaçın", "", 0.5, "stres-1", "İzini kaybettirdin.", "saygi-3;stres+3", "Seni buldular."],
+	]},
+	"z10": {"b": "Notun sahibi", "m": "Çözdüğün pizzininin sahibi seni buldu: yaşlı, sessiz biri. «Sen okumayı bilen birisin. Böylelerine ihtiyacımız var.» Ellerini cebinde tutuyor.", "ev": [0, 4], "w": 1, "cd": 9999, "k": "yil>=9999", "tag": "zincir", "s": [
+		["Ortak ol", "", 1.0, "adam+1;y.golge+4;kirli+300;saygi+2", "Küçük kâğıtlarla çalışan sessiz bir ağın parçası oldun.", "", ""],
+		["Not yazan elden pay iste", "zeka>=6", 0.55, "kirli+600;y.korku+2", "Susmanın bedelini ödedi.", "arama+8;stres+3", "Adamı ürküttün; polise gitti."],
+		["Reddet", "", 1.0, "saygi+1", "Başını salladı ve kalabalığa karıştı.", "", ""],
 	]},
 	"z04": {"b": "Eski borç geri dönüyor", "m": "Yıllar önce yardım ettiğin biri, minnetini göstermek için kapına geldi.", "ev": [0, 4], "w": 1, "cd": 9999, "k": "yil>=9999", "tag": "zincir", "s": [
 		["Kabul et", "", 1.0, "saygi+3;sevgi+3;kirli+250", "Eski dostluk işe yaradı.", "", ""],

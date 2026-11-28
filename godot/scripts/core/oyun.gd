@@ -202,6 +202,8 @@ var ic_mekan := -1              # oyuncunun içinde olduğu bina (sokak.gd günc
 var pol: Dictionary = {}        # polis/bodrum durumu (polis.gd)
 var polis: RefCounted
 var sabika_k: RefCounted
+var miras_k: RefCounted
+var mir: Dictionary = {}          # Dedenin Mirası durumu (miras.gd)
 var _kesir := 0.0
 
 func kur(h: Node3D) -> void:
@@ -242,6 +244,7 @@ func kur(h: Node3D) -> void:
 	rakip_k = load("res://scripts/core/rakip.gd").new(self)
 	polis = load("res://scripts/core/polis.gd").new(self)
 	sabika_k = load("res://scripts/core/sabika.gd").new(self)
+	miras_k = load("res://scripts/core/miras.gd").new(self)
 	pol = polis.yeni()
 	yol_k = load("res://scripts/core/yol.gd").new(self)
 	yol = yol_k.yeni()
@@ -346,6 +349,7 @@ func baslangic_noktasi() -> Vector3:
 func _aileleri_kur() -> void:
 	uyeler.clear()
 	fk.clear()
+	mir = miras_k.yeni()
 	for f in NPC:
 		uye_yarat(f, "don")
 		uye_yarat(f, "ikinci")
@@ -1334,7 +1338,7 @@ func _saat() -> void:
 # ---------- kayıt / yükleme ----------
 func durum_al() -> Dictionary:
 	return {"t": t, "temiz": temiz, "kirli": kirli, "bolge": bolge, "ofke": ofke, "adamlar": adamlar, "gorevler": gorevler,
-		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "fk": fk, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler, "kara": kara, "sil": sil, "yet": yet, "aile": aile, "un": un, "nuf": nuf, "kotu": kotu, "kaz": kaz, "acilis": acilis, "gaz": gaz}
+		"isy": isy, "arama": arama, "oyuncu_silah": oyuncu_silah, "defter": defter, "sayac": _sayac, "uyeler": uyeler, "uid": _uid, "pid": _pid, "ziyaret": ziyaret, "gozlem": gozlem, "muhbir": muhbir, "ajan_sogutma": ajan_sogutma, "profil": profil, "vardiya": vardiya, "kira_borc": kira_borc, "ev": _ev, "zf": zf, "son": son, "arac": arac, "mes": mes, "borc": borc, "akl": akl, "pol": pol, "gerg": gerg, "fk": fk, "yol": yol, "kis": kis, "pazar": pazar, "isler": isler, "kara": kara, "sil": sil, "yet": yet, "aile": aile, "un": un, "nuf": nuf, "kotu": kotu, "kaz": kaz, "mir": mir, "acilis": acilis, "gaz": gaz}
 
 func durum_yukle(d: Dictionary) -> void:
 	t = d["t"]
@@ -1372,6 +1376,7 @@ func durum_yukle(d: Dictionary) -> void:
 	pol = d.get("pol", polis.yeni())
 	gerg = d.get("gerg", {})
 	fk = d.get("fk", {})
+	mir = d.get("mir", miras_k.yeni())
 	yol = d.get("yol", yol_k.yeni())
 	kis = d.get("kis", kis_k.yeni())
 	pazar = d.get("pazar", {})
@@ -1525,6 +1530,7 @@ func _ay() -> void:
 	borc_k.ay()
 	gerginlik.ay()
 	rakip_k.ay()
+	miras_k.ay()
 	_ilan_ay()
 	var kira: float = ozet.get("kira", 0)
 	if kira > 0.0:

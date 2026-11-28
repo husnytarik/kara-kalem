@@ -10,6 +10,8 @@ const LISTE := {
 	"dava": {"ad": "Mahkemelik", "ac": "Dosyan 100'e çıktı ve dava açıldı."},
 	"federal": {"ad": "Kâğıtla düşen", "ac": "Federal ajanlar vergi kaçakçılığından seni yakaladı."},
 	"hapis": {"ad": "Demir parmaklıklar", "ac": "İlk kez hapse girdin."},
+	"miras_birlik": {"ad": "Dedenin Tahtı", "ac": "Dedenin dağılan adamlarının hepsini yeniden tek çatı altında topladın."},
+	"miras_intikam": {"ad": "Kan Borcu", "ac": "Dedenin mirasını bölenleri yıktın; geriye kalan sana bağlandı."},
 	"evlilik": {"ad": "Yuva", "ac": "Evlendin."},
 	"cocuk": {"ad": "Baba/Anne oldun", "ac": "İlk çocuğun doğdu."},
 	"malikane": {"ad": "Malikâne sahibi", "ac": "Kendi malikânene kavuştun."},

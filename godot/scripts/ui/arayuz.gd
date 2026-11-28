@@ -1402,8 +1402,46 @@ func _adam_paneli() -> void:
 	_sonuc_satiri()
 
 # ---------- aileler (hiyerarşi) ----------
+func _miras_bolumu() -> void:
+	var M: RefCounted = oyun.miras_k
+	_lbl(_ic, "Dedenin Mirası", 18, RENK["altin"])
+	_lbl(_ic, M.ozet(), 13, RENK["soluk"])
+	var tp := ProgressBar.new()
+	tp.max_value = 100
+	tp.value = M.tanin()
+	tp.show_percentage = false
+	tp.custom_minimum_size = Vector2(0, 10)
+	_ic.add_child(tp)
+	if not M.gorunur():
+		var l := _lbl(_ic, "Dedenden kalan eski bir ev... Şehir seni henüz tanımıyor; kimse senden bir şey beklemiyor. Ama kapının önünden geçenler yavaşlıyor.", 13, RENK["soluk"])
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_ayrac(_ic)
+		return
+	for id in M.KIR:
+		var K: Dictionary = M.KIR[id]
+		var d: Dictionary = M.grup(id)
+		_lbl(_ic, "%s — %s  [%s]" % [K["ad"], K["lider"], M.DURUM_AD[d["durum"]]], 14, Color.WHITE)
+		var n := _lbl(_ic, "%s  Güç %d · hoşnutluk %+d%s" % [K["not"], int(d["guc"]), int(d["hos"]), ("" if K["patron"] == "" else " · patron: " + oyun.FAK[K["patron"]]["ad"])], 12, RENK["soluk"])
+		n.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		if d["durum"] == "yikik" or d["durum"] == "bagli":
+			continue
+		var h := HBoxContainer.new()
+		_ic.add_child(h)
+		for kr in [["himaye", "Himaye"], ["lagvet", "Lağvet"], ["yik", "İntikam"]]:
+			var ned: String = M.uygun(id, kr[0])
+			var b := Button.new()
+			b.text = "%s %%%d" % [kr[1], int(M.sans(id, kr[0]) * 100.0)]
+			b.focus_mode = Control.FOCUS_NONE
+			b.disabled = ned != ""
+			b.tooltip_text = ned if ned != "" else "Oran: %.2f (etkin güç / karşı güç)" % M.oran(id)
+			var kk: String = kr[0]
+			b.pressed.connect(func(): _sonuc_goster(M.karar_ver(id, kk), ""))
+			h.add_child(b)
+	_ayrac(_ic)
+
 func _aile_paneli() -> void:
 	_baslik(_ic, "Aileler")
+	_miras_bolumu()
 	var kartlar := HBoxContainer.new()
 	kartlar.add_theme_constant_override("separation", 6)
 	_ic.add_child(kartlar)

@@ -14,7 +14,7 @@ const V5 := preload("res://scripts/core/olay_veri_e.gd")
 const AD_ETIKET := {
 	"arama": "Dosya", "y.kanun": "Yasal", "y.golge": "Gölge", "y.korku": "Korku", "y.kulis": "Kulis",
 	"sevgi": "Sevgi", "saygi": "Saygı", "fed": "Federal ilgi", "dok.polis": "Polis nüfuzu", "dok.yargic": "Yargıç nüfuzu",
-	"dok.siyasi": "Siyasi nüfuz", "sad": "Adam sadakati", "stres": "Stres", "yara": "Yara", "rezil": "Rezillik", "nam": "Aile Namı",
+	"dok.siyasi": "Siyasi nüfuz", "sad": "Adam sadakati", "stres": "Stres", "yara": "Yara", "rezil": "Rezillik", "nam": "Aile Namı", "mir.tanin": "Tanınırlık",
 }
 
 var oyun: Node
@@ -50,6 +50,8 @@ func _v(n: String) -> float:
 		"para": return oyun.temiz + oyun.kirli
 		"servet": return oyun.un_k.net_servet()
 		"adam": return float(oyun.adamlar.size())
+		"tanin": return oyun.miras_k.tanin()
+		"mguc": return oyun.miras_k.guc_oyuncu()
 		"bolge": return float(oyun.oyuncu_bolgeleri().size())
 		"sev": return float(kart.seviye())
 		"korku", "sevgi", "saygi", "aile_un": return oyun.un_k.deger("aile" if n == "aile_un" else n)
@@ -325,6 +327,7 @@ func _uygula_etki(fx: String) -> void:
 			"sad":
 				for a in oyun.adamlar:
 					a["sadakat"] = clampf(oyun.nuf_k.sadakat(a) + v, 0.0, 100.0)
+			"mir.tanin": oyun.miras_k.tanin_ekle(v)
 			"stres": K.stres_ekle(v)
 			"yara": oyun.kis["yara"] = clampf(float(oyun.kis.get("yara", 0.0)) + v, 0.0, 100.0)
 			"rezil": oyun.kotu_k._rezil_ekle(v)
